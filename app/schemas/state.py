@@ -40,6 +40,18 @@ class ProjectInput(BaseModel):
         return self.model_dump()
 
 
+class ReviseInput(BaseModel):
+    """Human-in-the-Loop 수동 수정요청 (최종 화면에서 사용)."""
+
+    project_name: str = Field("", description="프로젝트명")
+    draft: str = Field(..., description="현재 기획서(수정 대상)")
+    revision_request: str = Field(..., description="사용자 수정 요청")
+    revision_instructions: list[str] = Field(
+        default_factory=list, description="(선택) Reviewer의 기존 개선지시"
+    )
+    model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값)")
+
+
 class RunResult(BaseModel):
     """워크플로 실행 결과 (Agent별 결과 확인용)."""
 

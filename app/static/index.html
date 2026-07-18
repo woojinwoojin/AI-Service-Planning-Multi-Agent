@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 서비스 기획 보조 Multi-Agent</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --ink:#1f2430; --muted:#6b7280; --brand:#3b5bdb; --brand-weak:#eef1fe; --ok:#2b8a3e; --warn:#e8590c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.6 -apple-system,"Segoe UI",Roboto,"Malgun Gothic",sans-serif; }
+  header { background:var(--brand); color:#fff; padding:18px 20px; }
+  header h1 { margin:0; font-size:18px; }
+  header p { margin:4px 0 0; opacity:.85; font-size:13px; }
+  main { max-width:900px; margin:0 auto; padding:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:18px; }
+  .card h2 { margin:0 0 14px; font-size:15px; color:var(--brand); border-bottom:1px solid var(--line); padding-bottom:8px; }
+  .step { color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; }
+  label { display:block; font-size:13px; font-weight:600; margin:10px 0 4px; }
+  input, textarea, select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font:inherit; background:#fff; }
+  textarea { resize:vertical; min-height:64px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1 1 220px; }
+  button { background:var(--brand); color:#fff; border:0; border-radius:7px; padding:10px 16px; font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.ghost { background:#fff; color:var(--brand); border:1px solid var(--brand); }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .hidden { display:none; }
+  .muted { color:var(--muted); font-size:13px; }
+  .logs { background:#0f1420; color:#cdd6e4; border-radius:8px; padding:12px 14px; font:12px/1.7 "Consolas",monospace; white-space:pre-wrap; }
+  .scores { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:var(--brand-weak); color:var(--brand); border-radius:20px; padding:4px 12px; font-size:13px; font-weight:600; }
+  .total { font-size:22px; font-weight:800; }
+  .doc { border:1px solid var(--line); border-radius:8px; padding:18px 20px; background:#fff; overflow-x:auto; }
+  .doc h1 { font-size:22px; margin:.2em 0 .6em; }
+  .doc h2 { font-size:17px; margin:1.2em 0 .4em; color:var(--brand); border:0; padding:0; }
+  .doc h3 { font-size:15px; margin:1em 0 .3em; }
+  .doc table { border-collapse:collapse; width:100%; margin:.6em 0; font-size:13px; }
+  .doc th, .doc td { border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:top; }
+  .doc th { background:var(--brand-weak); }
+  .doc ul { margin:.3em 0 .6em 1.2em; }
+  .list li { margin:2px 0; }
+  .spin { display:inline-block; width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:sp .8s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .err { color:var(--warn); font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
+  <p>Research → PESTEL → Draft Writer → Reviewer · 아이디어를 넣으면 4개 AI Agent가 기획서를 만듭니다</p>
+</header>
+<main>
+
+  <!-- 1) 입력 -->
+  <section class="card" id="inputCard">
+    <div class="step">STEP 1 · 입력</div>
+    <h2>사업 아이디어</h2>
+    <label>프로젝트명 *</label>
+    <input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" />
+    <div class="row">
+      <div><label>목표 사용자</label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
+      <div><label>모델</label><select id="model"></select></div>
+    </div>
+    <label>아이디어 설명</label>
+    <textarea id="description" placeholder="어떤 서비스인지 한두 문장으로"></textarea>
+    <label>해결하려는 문제</label>
+    <textarea id="problem" placeholder="사용자가 겪는 문제"></textarea>
+    <label>키워드 (쉼표로 구분)</label>
+    <input id="keywords" placeholder="진로, 대학생, 취업" />
+    <div class="btns">
+      <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
+      <span class="muted" id="runHint">4개 Agent가 순차 실행됩니다 (약 15~30초)</span>
+    </div>
+  </section>
+
+  <!-- 진행 로그 -->
+  <section class="card hidden" id="logCard">
+    <h2>진행 상태</h2>
+    <div class="logs" id="logs"></div>
+  </section>
+
+  <!-- 2) 결과 -->
+  <section class="card hidden" id="resultCard">
+    <div class="step">STEP 2 · 결과 (Agent별)</div>
+    <h2>시장조사 · PESTEL · 평가</h2>
+    <div id="results"></div>
+  </section>
+
+  <!-- 3) 최종 -->
+  <section class="card hidden" id="finalCard">
+    <div class="step">STEP 3 · 최종 기획서</div>
+    <h2>기획서</h2>
+    <div class="doc" id="finalDoc"></div>
+    <div class="btns">
+      <button class="ghost" onclick="downloadMd()">.md 다운로드</button>
+      <button class="ghost" onclick="downloadJson()">.json 다운로드</button>
+    </div>
+    <label style="margin-top:18px">수정 요청 (Human-in-the-Loop)</label>
+    <textarea id="revreq" placeholder="예: 차별성 섹션을 경쟁 서비스와 비교해 더 구체적으로"></textarea>
+    <div class="btns">
+      <button id="revBtn" onclick="reviseDraft()">수정 반영</button>
+      <span class="muted">현재 기획서에 요청을 1회 반영해 다시 씁니다</span>
+    </div>
+  </section>
+
+</main>
+<script>
+let lastRun = null;
+
+async function loadModels() {
+  const sel = document.getElementById("model");
+  try {
+    const r = await fetch("/models"); const d = await r.json();
+    if (!d.models || !d.models.length) { sel.innerHTML = '<option value="">기본값</option>'; return; }
+    sel.innerHTML = d.models.map(m =>
+      `<option value="${m.id}"${m.id===d.default_model?" selected":""}>${m.label}</option>`).join("");
+  } catch (e) { sel.innerHTML = '<option value="">기본값</option>'; }
+}
+
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function inline(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>"); }
+
+// 간단 마크다운 렌더러 (제목/표/목록/굵게/문단)
+function renderMarkdown(md) {
+  const lines = (md||"").split("\n");
+  let html = "", i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^\s*\|.*\|\s*$/.test(line) && i+1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])) {
+      const head = line.split("|").slice(1,-1).map(c=>c.trim());
+      i += 2; const rows = [];
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) {
+        rows.push(lines[i].split("|").slice(1,-1).map(c=>c.trim())); i++;
+      }
+      html += "<table><thead><tr>" + head.map(h=>`<th>${inline(h)}</th>`).join("") + "</tr></thead><tbody>"
+           + rows.map(r=>"<tr>"+r.map(c=>`<td>${inline(c)}</td>`).join("")+"</tr>").join("") + "</tbody></table>";
+      continue;
+    }
+    if (/^\s*-\s+/.test(line)) {
+      let items = "";
+      while (i < lines.length && /^\s*-\s+/.test(lines[i])) { items += `<li>${inline(lines[i].replace(/^\s*-\s+/,""))}</li>`; i++; }
+      html += `<ul>${items}</ul>`; continue;
+    }
+    let m;
+    if ((m = line.match(/^\s*###\s+(.*)/))) html += `<h3>${inline(m[1])}</h3>`;
+    else if ((m = line.match(/^\s*##\s+(.*)/))) html += `<h2>${inline(m[1])}</h2>`;
+    else if ((m = line.match(/^\s*#\s+(.*)/))) html += `<h1>${inline(m[1])}</h1>`;
+    else if (line.trim()) html += `<p>${inline(line)}</p>`;
+    i++;
+  }
+  return html;
+}
+
+function showLogs(logs) {
+  document.getElementById("logCard").classList.remove("hidden");
+  document.getElementById("logs").textContent = (logs||[]).join("\n");
+}
+
+function renderResults(d) {
+  const r = d.research_result || {}, p = d.pestel_result || {}, rv = d.review_result || {};
+  const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
+  const factors = ["Political","Economic","Social","Technological","Environmental","Legal"];
+  const pestelTable = "<table><thead><tr><th>요인</th><th>주요 내용</th><th>기회</th><th>위협</th><th>대응</th></tr></thead><tbody>"
+    + factors.map(f=>{ const v=p[f]||{}; return `<tr><td><strong>${f}</strong></td><td>${esc(v.content)}</td><td>${esc(v.opportunity)}</td><td>${esc(v.threat)}</td><td>${esc(v.response)}</td></tr>`; }).join("")
+    + "</tbody></table>";
+  const ss = rv.section_scores || {};
+  const scoreChips = Object.entries(ss).map(([k,v])=>`<span class="chip">${k} ${v}</span>`).join("");
+  document.getElementById("results").innerHTML = `
+    <h3>시장 개요</h3><p>${esc(r.market_overview)||'<span class="muted">-</span>'}</p>
+    <div class="row">
+      <div><h3>산업 트렌드</h3>${listOf(r.industry_trends)}</div>
+      <div><h3>고객 니즈</h3>${listOf(r.customer_needs)}</div>
+    </div>
+    <div class="row">
+      <div><h3>경쟁</h3>${listOf(r.competitors)}</div>
+      <div><h3>기회 / 위험</h3>${listOf((r.opportunities||[]).concat(r.risks||[]))}</div>
+    </div>
+    <h3 style="margin-top:16px">PESTEL 분석</h3>${pestelTable}
+    <h3 style="margin-top:16px">Reviewer 평가 · 총점 <span class="total">${rv.total_score ?? "-"}</span>/100 (재작성 ${d.revision_count ?? 0}회)</h3>
+    <div class="scores">${scoreChips}</div>
+    <h3 style="margin-top:12px">개선 지시</h3>${listOf(rv.revision_instructions)}
+  `;
+  document.getElementById("resultCard").classList.remove("hidden");
+}
+
+function renderFinal(md) {
+  document.getElementById("finalDoc").innerHTML = renderMarkdown(md);
+  document.getElementById("finalCard").classList.remove("hidden");
+}
+
+async function runWorkflow() {
+  const name = document.getElementById("project_name").value.trim();
+  if (!name) { alert("프로젝트명을 입력하세요."); return; }
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>생성 중…';
+  showLogs(["실행 요청을 보냈습니다. 4개 Agent 순차 실행 중…"]);
+  const payload = {
+    project_name: name,
+    description: document.getElementById("description").value,
+    target_user: document.getElementById("target_user").value,
+    problem: document.getElementById("problem").value,
+    keywords: document.getElementById("keywords").value.split(",").map(s=>s.trim()).filter(Boolean),
+    model: document.getElementById("model").value,
+  };
+  try {
+    const r = await fetch("/run", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const d = await r.json();
+    lastRun = d;
+    showLogs(d.logs);
+    renderResults(d);
+    renderFinal(d.final_draft);
+    document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
+  } catch (e) {
+    showLogs(["❌ 실행 실패: " + e.message]);
+    document.getElementById("logs").classList.add("err");
+  } finally {
+    btn.disabled = false; btn.textContent = "기획서 생성";
+  }
+}
+
+async function reviseDraft() {
+  if (!lastRun) return;
+  const req = document.getElementById("revreq").value.trim();
+  if (!req) { alert("수정 요청을 입력하세요."); return; }
+  const btn = document.getElementById("revBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>반영 중…';
+  try {
+    const body = {
+      project_name: lastRun.structured_input?.project_name || "",
+      draft: lastRun.final_draft,
+      revision_request: req,
+      revision_instructions: (lastRun.review_result||{}).revision_instructions || [],
+      model: document.getElementById("model").value,
+    };
+    const r = await fetch("/revise", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const d = await r.json();
+    lastRun.final_draft = d.final_draft;
+    renderFinal(d.final_draft);
+    showLogs((lastRun.logs||[]).concat(d.logs||[]));
+    document.getElementById("revreq").value = "";
+  } catch (e) {
+    alert("수정 실패: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "수정 반영";
+  }
+}
+
+function download(filename, text, type) {
+  const blob = new Blob([text], {type});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function slug(s){ return (s||"plan").replace(/[^0-9A-Za-z가-힣]+/g,"-").replace(/^-|-$/g,"") || "plan"; }
+function downloadMd() {
+  if (!lastRun) return;
+  download(slug(lastRun.structured_input?.project_name)+".md", lastRun.final_draft, "text/markdown");
+}
+function downloadJson() {
+  if (!lastRun) return;
+  download(slug(lastRun.structured_input?.project_name)+".json", JSON.stringify(lastRun, null, 2), "application/json");
+}
+
+loadModels();
+</script>
+</body>
+</html>

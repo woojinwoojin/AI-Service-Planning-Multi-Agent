@@ -5,9 +5,14 @@
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from app.api.routes import router
+
+STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(
     title="AI 서비스 기획 보조 Multi-Agent",
@@ -19,9 +24,16 @@ app.include_router(router)
 
 
 @app.get("/")
-def root() -> dict:
+def root() -> FileResponse:
+    """최소 UI(입력/결과/최종 3화면)를 제공한다."""
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/info")
+def info() -> dict:
     return {
         "service": "AI 서비스 기획 보조 Multi-Agent",
+        "ui": "/",
         "docs": "/docs",
         "run": "POST /run",
     }
