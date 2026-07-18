@@ -28,6 +28,7 @@ CRITERIA = {
     "evidence": "근거와 출처",
 }
 _MAX = 20
+JUDGE_SAMPLES = 3  # 심판 노이즈 완화: 플랜당 여러 번 채점해 평균
 
 
 def _clamp(value) -> int:
@@ -38,18 +39,28 @@ def _clamp(value) -> int:
     return max(0, min(_MAX, n))
 
 
-def judge(plan_text: str, model: str = "") -> dict:
-    """기획서 하나를 5개 기준으로 채점. total은 세부합으로 재계산."""
+def judge(plan_text: str, model: str = "", samples: int = JUDGE_SAMPLES) -> dict:
+    """기획서 하나를 5개 기준으로 채점. 심판을 samples회 반복해 기준별 평균을 낸다.
+
+    total 은 (평균낸) 세부 점수의 합. 여러 번 채점해 LLM 심판의 변동을 줄인다.
+    """
     fallback = {"comment": "(더미) 평가 생략", "scores": {k: 10 for k in CRITERIA}}
-    raw = llm.complete_json(
-        COMPARE_JUDGE, f"아래 기획서를 평가하세요.\n\n{plan_text}",
-        fallback=fallback, model=model,
-    )
-    raw = raw if isinstance(raw, dict) else fallback
-    raw_scores = raw.get("scores") if isinstance(raw.get("scores"), dict) else {}
-    scores = {k: _clamp(raw_scores.get(k)) for k in CRITERIA}
-    comment = raw.get("comment") if isinstance(raw.get("comment"), str) else ""
-    return {"scores": scores, "total": sum(scores.values()), "comment": comment}
+    per_run = []
+    comment = ""
+    for _ in range(max(1, samples)):
+        raw = llm.complete_json(
+            COMPARE_JUDGE, f"아래 기획서를 평가하세요.\n\n{plan_text}",
+            fallback=fallback, model=model,
+        )
+        raw = raw if isinstance(raw, dict) else fallback
+        raw_scores = raw.get("scores") if isinstance(raw.get("scores"), dict) else {}
+        per_run.append({k: _clamp(raw_scores.get(k)) for k in CRITERIA})
+        if isinstance(raw.get("comment"), str) and raw.get("comment"):
+            comment = raw["comment"]
+    n = len(per_run)
+    scores = {k: round(sum(r[k] for r in per_run) / n, 1) for k in CRITERIA}
+    return {"scores": scores, "total": round(sum(scores.values()), 1),
+            "comment": comment, "samples": n}
 
 
 def run_topic(topic: dict, model: str = "") -> dict:
