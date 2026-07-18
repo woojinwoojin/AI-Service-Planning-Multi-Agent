@@ -16,6 +16,7 @@ class ProjectState(TypedDict, total=False):
     model: str  # 이번 실행에 사용할 LLM 모델 id(빈 값이면 env 기본값)
     structured_input: dict
     research_result: dict
+    competitor_result: dict
     pestel_result: dict
     draft: str
     review_result: dict
@@ -57,6 +58,7 @@ class RunResult(BaseModel):
 
     structured_input: dict
     research_result: dict
+    competitor_result: dict
     pestel_result: dict
     draft: str
     review_result: dict

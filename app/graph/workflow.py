@@ -1,7 +1,7 @@
 """LangGraph 워크플로 정의.
 
 흐름:
-  START → preprocess → research → pestel → draft → reviewer
+  START → preprocess → research → competitor → pestel → draft → reviewer
         → (needs_revision?) → revise → END
                             → finalize → END
 
@@ -13,7 +13,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agents import draft_writer, pestel, preprocess, research, reviewer
+from app.agents import competitor, draft_writer, pestel, preprocess, research, reviewer
 from app.schemas.state import ProjectState
 
 # 이 점수 이상이면 재작성 생략
@@ -56,6 +56,7 @@ def build_graph():
 
     g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
     g.add_node("research", _safe("research", research.research))
+    g.add_node("competitor", _safe("competitor", competitor.competitor))
     g.add_node("pestel", _safe("pestel", pestel.pestel))
     g.add_node("draft", _safe("draft", draft_writer.draft))
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
@@ -64,7 +65,8 @@ def build_graph():
 
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
-    g.add_edge("research", "pestel")
+    g.add_edge("research", "competitor")
+    g.add_edge("competitor", "pestel")
     g.add_edge("pestel", "draft")
     g.add_edge("draft", "reviewer")
     g.add_conditional_edges(

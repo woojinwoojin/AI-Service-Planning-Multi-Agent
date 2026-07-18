@@ -108,12 +108,15 @@ def draft(state: ProjectState) -> dict:
     si = state.get("structured_input", {})
     research = state.get("research_result", {})
     pestel = state.get("pestel_result", {})
+    comp = state.get("competitor_result", {})
     fallback = _dummy_draft(si, research, pestel)
 
     user = (
         "아래 정보를 바탕으로 고정 서식 기획서를 Markdown으로 작성하세요.\n"
+        "특히 '차별성' 섹션은 경쟁사 분석 결과를 근거로 구체적으로 작성하세요.\n"
         f"[입력]\n{json.dumps(si, ensure_ascii=False)}\n"
         f"[시장조사]\n{json.dumps(research, ensure_ascii=False)}\n"
+        f"[경쟁사 분석]\n{json.dumps(comp, ensure_ascii=False)}\n"
         f"[PESTEL]\n{json.dumps(pestel, ensure_ascii=False)}"
     )
     status: dict = {}

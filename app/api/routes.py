@@ -39,6 +39,7 @@ def run(payload: ProjectInput) -> RunResult:
     return RunResult(
         structured_input=state.get("structured_input", {}),
         research_result=state.get("research_result", {}),
+        competitor_result=state.get("competitor_result", {}),
         pestel_result=state.get("pestel_result", {}),
         draft=state.get("draft", ""),
         review_result=state.get("review_result", {}),
