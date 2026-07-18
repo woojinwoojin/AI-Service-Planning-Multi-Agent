@@ -63,8 +63,13 @@ def judge(plan_text: str, model: str = "", samples: int = JUDGE_SAMPLES) -> dict
             "comment": comment, "samples": n}
 
 
-def run_topic(topic: dict, model: str = "") -> dict:
-    """한 주제에 대해 단일/멀티 실행 + 채점."""
+def run_topic(topic: dict, model: str = "", judge_model: str | None = None) -> dict:
+    """한 주제에 대해 단일/멀티 실행 + 채점.
+
+    model: 생성(단일·멀티 공통)에 쓸 모델.
+    judge_model: 채점 모델. 다중 모델 비교 시 심판을 '고정'하려면 지정(기본은 model).
+    """
+    jm = judge_model if judge_model is not None else model
     # Multi-Agent
     multi_state = run_workflow({**topic, "model": model})
     multi_plan = multi_state.get("final_draft", "")
@@ -73,9 +78,9 @@ def run_topic(topic: dict, model: str = "") -> dict:
     single_plan = single_agent.generate(si, model=model)
     return {
         "topic": topic.get("project_name", ""),
-        "single": {"plan": single_plan, "judge": judge(single_plan, model=model),
+        "single": {"plan": single_plan, "judge": judge(single_plan, model=jm),
                    "citations": count_citations(single_plan)},
-        "multi": {"plan": multi_plan, "judge": judge(multi_plan, model=model),
+        "multi": {"plan": multi_plan, "judge": judge(multi_plan, model=jm),
                   "citations": count_citations(multi_plan)},
     }
 
