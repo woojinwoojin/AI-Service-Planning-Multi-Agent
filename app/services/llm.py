@@ -21,6 +21,56 @@ def _env(key: str, default: str = "") -> str:
     return os.getenv(key, default).strip()
 
 
+# provider별 선택 가능한 모델 목록.
+# label: 화면 표시용, cost: 상대적 비용 감(대략적 참고치, 프론트/문서용).
+# 새 모델은 여기에 추가하면 /models 응답과 검증에 함께 반영된다.
+AVAILABLE_MODELS: dict[str, list[dict]] = {
+    "openai": [
+        {"id": "gpt-4o-mini", "label": "GPT-4o mini (저렴·기본)", "cost": "low"},
+        {"id": "gpt-4.1-mini", "label": "GPT-4.1 mini (중간)", "cost": "medium"},
+        {"id": "gpt-4o", "label": "GPT-4o (고품질)", "cost": "high"},
+        {"id": "gpt-4.1", "label": "GPT-4.1 (고품질)", "cost": "high"},
+    ],
+    "anthropic": [
+        {"id": "claude-haiku-4-5", "label": "Claude Haiku 4.5 (저렴)", "cost": "low"},
+        {"id": "claude-sonnet-5", "label": "Claude Sonnet 5 (기본)", "cost": "medium"},
+        {"id": "claude-opus-4-8", "label": "Claude Opus 4.8 (고품질)", "cost": "high"},
+    ],
+}
+
+
+def current_provider() -> str:
+    return _env("LLM_PROVIDER", "dummy").lower()
+
+
+def default_model() -> str:
+    """env에 설정된 provider 기본 모델 id."""
+    provider = current_provider()
+    if provider == "anthropic":
+        return _env("ANTHROPIC_MODEL", "claude-sonnet-5")
+    if provider == "openai":
+        return _env("OPENAI_MODEL", "gpt-4o-mini")
+    return "dummy"
+
+
+def list_models() -> list[dict]:
+    """현재 provider에서 선택 가능한 모델 목록."""
+    return AVAILABLE_MODELS.get(current_provider(), [])
+
+
+def resolve_model(requested: str = "") -> str:
+    """요청 모델이 현재 provider의 허용목록에 있으면 그대로, 아니면 env 기본값.
+
+    사용자가 잘못된/타 provider 모델을 넘겨도 실행 도중 API 오류로 죽지 않게 한다.
+    """
+    requested = (requested or "").strip()
+    if requested:
+        allowed = {m["id"] for m in AVAILABLE_MODELS.get(current_provider(), [])}
+        if requested in allowed:
+            return requested
+    return default_model()
+
+
 def is_dummy() -> bool:
     """더미 모드 여부. USE_DUMMY=1 이거나 사용 가능한 키가 없으면 True."""
     if _env("USE_DUMMY", "0") == "1":
@@ -33,14 +83,18 @@ def is_dummy() -> bool:
     return True
 
 
-def _get_model():
-    """설정된 provider에 맞는 LangChain chat model 반환."""
-    provider = _env("LLM_PROVIDER", "dummy").lower()
+def _get_model(model: str = ""):
+    """설정된 provider에 맞는 LangChain chat model 반환.
+
+    model 이 주어지면(그리고 허용목록에 있으면) 그 모델을, 아니면 env 기본값을 쓴다.
+    """
+    provider = current_provider()
+    chosen = resolve_model(model)
     if provider == "anthropic":
         from langchain_anthropic import ChatAnthropic
 
         return ChatAnthropic(
-            model=_env("ANTHROPIC_MODEL", "claude-sonnet-5"),
+            model=chosen,
             api_key=_env("ANTHROPIC_API_KEY"),
             temperature=0.3,
         )
@@ -48,7 +102,7 @@ def _get_model():
         from langchain_openai import ChatOpenAI
 
         return ChatOpenAI(
-            model=_env("OPENAI_MODEL", "gpt-4o-mini"),
+            model=chosen,
             api_key=_env("OPENAI_API_KEY"),
             temperature=0.3,
         )
@@ -69,22 +123,22 @@ def _extract_json(text: str) -> dict:
     return json.loads(text)
 
 
-def complete_text(system: str, user: str, *, fallback: str = "") -> str:
-    """텍스트 응답. 더미 모드면 fallback 반환."""
+def complete_text(system: str, user: str, *, fallback: str = "", model: str = "") -> str:
+    """텍스트 응답. 더미 모드면 fallback 반환. model로 사용 모델 지정 가능."""
     if is_dummy():
         return fallback
-    model = _get_model()
-    resp = model.invoke([("system", system), ("human", user)])
+    chat = _get_model(model)
+    resp = chat.invoke([("system", system), ("human", user)])
     return resp.content if isinstance(resp.content, str) else str(resp.content)
 
 
-def complete_json(system: str, user: str, *, fallback: dict) -> dict:
+def complete_json(system: str, user: str, *, fallback: dict, model: str = "") -> dict:
     """JSON 응답. 더미 모드면 fallback 반환. 파싱 실패 시 1회 재시도 후 fallback."""
     if is_dummy():
         return fallback
-    model = _get_model()
+    chat = _get_model(model)
     for attempt in range(2):  # 11일 차 요구사항: LLM 재호출 1회
-        resp = model.invoke([("system", system), ("human", user)])
+        resp = chat.invoke([("system", system), ("human", user)])
         content = resp.content if isinstance(resp.content, str) else str(resp.content)
         try:
             return _extract_json(content)

@@ -30,7 +30,7 @@ def pestel(state: ProjectState) -> dict:
         "아래 시장조사 결과만을 근거로 PESTEL 분석을 수행하세요.\n"
         f"{json.dumps(research, ensure_ascii=False, indent=2)}"
     )
-    result = llm.complete_json(PESTEL_SYSTEM, user, fallback=fallback)
+    result = llm.complete_json(PESTEL_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
 
     logs = state.get("logs", []) + ["[pestel] PESTEL 분석 완료"]
     return {"pestel_result": result, "logs": logs}

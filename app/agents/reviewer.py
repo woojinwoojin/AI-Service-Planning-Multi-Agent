@@ -31,7 +31,7 @@ def reviewer(state: ProjectState) -> dict:
     fallback = _dummy(draft)
 
     user = f"아래 기획서 초안을 평가 기준에 따라 심사하세요.\n\n{draft}"
-    result = llm.complete_json(REVIEWER_SYSTEM, user, fallback=fallback)
+    result = llm.complete_json(REVIEWER_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
 
     score = result.get("total_score", "?")
     logs = state.get("logs", []) + [f"[reviewer] 평가 완료 (총점={score})"]
