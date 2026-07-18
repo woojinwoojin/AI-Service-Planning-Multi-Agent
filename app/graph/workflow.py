@@ -63,5 +63,9 @@ GRAPH = build_graph()
 
 
 def run_workflow(user_input: dict) -> ProjectState:
-    initial: ProjectState = {"user_input": user_input, "logs": []}
+    initial: ProjectState = {
+        "user_input": user_input,
+        "model": (user_input.get("model") or "").strip(),
+        "logs": [],
+    }
     return GRAPH.invoke(initial)

@@ -13,7 +13,22 @@ router = APIRouter()
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok", "dummy_mode": llm.is_dummy()}
+    return {
+        "status": "ok",
+        "dummy_mode": llm.is_dummy(),
+        "provider": llm.current_provider(),
+        "default_model": llm.default_model(),
+    }
+
+
+@router.get("/models")
+def models() -> dict:
+    """현재 provider에서 선택 가능한 모델 목록. /run 의 model 필드에 id를 넣어 사용."""
+    return {
+        "provider": llm.current_provider(),
+        "default_model": llm.default_model(),
+        "models": llm.list_models(),
+    }
 
 
 @router.post("/run", response_model=RunResult)
