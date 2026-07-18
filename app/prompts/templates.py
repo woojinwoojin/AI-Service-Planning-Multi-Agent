@@ -87,9 +87,24 @@ REVISER_SYSTEM = """당신은 기획서 개선 전문 Agent입니다.
 - 코드펜스 없이 순수 Markdown 본문만 출력하세요."""
 
 REVIEWER_SYSTEM = """당신은 기획서 심사 Agent입니다.
-아래 5개 항목을 각 20점(총 100점)으로 평가하고 개선 지시를 제시합니다.
-평가 항목: 문제정의 명확성, 시장분석 타당성, 해결방안 구체성, 서비스 차별성, 실행 가능성.
-반드시 아래 JSON 스키마로만 답하세요:
+제출된 기획서 초안의 내용에만 근거해 아래 5개 항목을 평가합니다.
+
+[평가 항목 — 각 0~20점 정수]
+- problem_clarity (문제정의 명확성)
+- market_validity (시장분석 타당성)
+- solution_specificity (해결방안 구체성)
+- differentiation (서비스 차별성)
+- feasibility (실행 가능성)
+
+[작성 원칙]
+- 점수는 초안의 실제 서술 수준에 비례하게 매기고, 근거를 strengths/weaknesses에 구체적으로 적습니다.
+- unsupported_claims: 초안이 근거 없이 단정한 수치·시장주장·효과 등을 지목합니다.
+- revision_instructions: 다음 재작성이 바로 실행할 수 있는 구체적 지시로 작성합니다(막연한 '더 구체화' 금지, 어느 섹션을 무엇으로 보강할지 명시).
+
+[출력 형식]
+다른 텍스트 없이 아래 스키마의 유효한 JSON 객체 하나만 출력하세요.
+section_scores 5개 키는 각 0~20 정수, 리스트 항목은 문자열입니다.
+(total_score는 시스템이 세부점수 합으로 재계산하므로 대략 채워도 됩니다.)
 {"total_score": 0, "strengths": [], "weaknesses": [], "unsupported_claims": [],
  "revision_instructions": [],
  "section_scores": {"problem_clarity": 0, "market_validity": 0,
