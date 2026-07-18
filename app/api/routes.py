@@ -1,12 +1,14 @@
 """FastAPI 라우트 — 입력 API + 워크플로 실행."""
 from __future__ import annotations
 
-from fastapi import APIRouter
+from urllib.parse import quote
+
+from fastapi import APIRouter, Response
 
 from app.agents import draft_writer
 from app.graph.workflow import run_workflow
-from app.schemas.state import ProjectInput, ReviseInput, RunResult
-from app.services import llm
+from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult
+from app.services import docx_export, llm
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -67,14 +69,31 @@ def revise(payload: ReviseInput) -> dict:
     }
 
 
+@router.post("/export/docx")
+def export_docx(payload: ExportInput) -> Response:
+    """기획서 Markdown을 Word(.docx)로 변환해 다운로드 응답으로 반환."""
+    data = docx_export.docx_bytes(payload.markdown)
+    fname = f"{docx_export._slugify(payload.project_name)}.docx"
+    # RFC 5987: 한글 등 비-ASCII 파일명을 헤더(latin-1)에 안전하게 싣는다
+    disposition = f"attachment; filename=\"plan.docx\"; filename*=UTF-8''{quote(fname)}"
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": disposition},
+    )
+
+
 @router.post("/run/save")
 def run_and_save(payload: ProjectInput) -> dict:
-    """워크플로 실행 후 최종 기획서(.md)와 전체 실행 결과(.json)를 저장."""
+    """워크플로 실행 후 최종 기획서(.md/.docx)와 전체 실행 결과(.json)를 저장."""
     state = run_workflow(payload.to_state_input())
-    saved_md = save_markdown(payload.project_name, state.get("final_draft", ""))
+    final = state.get("final_draft", "")
+    saved_md = save_markdown(payload.project_name, final)
     saved_json = save_run_json(payload.project_name, state)
+    saved_docx = docx_export.save_docx(payload.project_name, final)
     return {
         "saved_md": saved_md,
         "saved_json": saved_json,
+        "saved_docx": saved_docx,
         "revision_count": state.get("revision_count", 0),
     }
