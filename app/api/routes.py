@@ -70,6 +70,7 @@ def run(payload: ProjectInput) -> RunResult:
         revision_count=state.get("revision_count", 0),
         verification_result=state.get("verification_result", {}),
         logs=state.get("logs", []),
+        usage=state.get("usage", {}),
     )
 
 

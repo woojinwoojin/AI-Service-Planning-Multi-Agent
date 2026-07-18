@@ -13,6 +13,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
+from app.services import usage
 from app.agents import (
     business_model,
     competitor,
@@ -112,4 +113,7 @@ def run_workflow(user_input: dict) -> ProjectState:
         "model": (user_input.get("model") or "").strip(),
         "logs": [],
     }
-    return GRAPH.invoke(initial)
+    usage.start()                       # 이번 실행의 토큰·지연 관측 시작
+    state = GRAPH.invoke(initial)
+    state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
+    return state

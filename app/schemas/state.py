@@ -83,3 +83,4 @@ class RunResult(BaseModel):
     verification_result: dict
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)
+    usage: dict = Field(default_factory=dict)  # 토큰·비용·지연 관측치
