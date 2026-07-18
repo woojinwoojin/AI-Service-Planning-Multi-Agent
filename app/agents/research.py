@@ -12,7 +12,7 @@ import json
 
 from app.prompts.templates import RESEARCH_SYSTEM
 from app.schemas.state import ProjectState
-from app.services import llm
+from app.services import llm, search
 
 # 출력 스키마: (키, 기대 타입). market_overview 만 문자열, 나머지는 리스트.
 _SCHEMA: dict[str, type] = {
@@ -46,6 +46,31 @@ def _validate(result: dict, fallback: dict) -> dict:
     return out
 
 
+def _build_query(si: dict) -> str:
+    """검색 쿼리: 프로젝트명 + 주요 키워드 조합."""
+    parts = [si.get("project_name", "")] + list(si.get("keywords", []) or [])
+    return " ".join(p for p in parts if p).strip() + " 시장 동향 경쟁 서비스"
+
+
+def _format_hits(hits: list[dict]) -> str:
+    lines = []
+    for i, h in enumerate(hits, 1):
+        snippet = h["content"][:300]
+        lines.append(f"[{i}] {h['title']}\n{snippet}\n출처: {h['url']}")
+    return "\n\n".join(lines)
+
+
+def _merge_sources(llm_sources: list, hits: list[dict]) -> list:
+    """실제 검색 출처(제목 — URL)를 sources 앞쪽에 보장하고, LLM이 적은 것과 병합."""
+    real = [f"{h['title']} — {h['url']}" if h["title"] else h["url"] for h in hits]
+    seen, merged = set(), []
+    for s in real + [str(x) for x in llm_sources]:
+        if s and s not in seen:
+            seen.add(s)
+            merged.append(s)
+    return merged
+
+
 def _dummy(si: dict) -> dict:
     name = si.get("project_name", "서비스")
     return {
@@ -63,15 +88,26 @@ def research(state: ProjectState) -> dict:
     si = state.get("structured_input", {})
     fallback = _dummy(si)
 
-    user = (
-        "다음 사업 아이디어를 조사하세요.\n"
-        f"{json.dumps(si, ensure_ascii=False, indent=2)}"
-    )
+    # 웹 검색으로 근거 확보 (키 없으면 빈 결과 → LLM 지식 기반으로 진행)
+    hits = search.web_search(_build_query(si)) if not llm.is_dummy() else []
+
+    user = "다음 사업 아이디어를 조사하세요.\n" f"{json.dumps(si, ensure_ascii=False, indent=2)}"
+    if hits:
+        user += (
+            "\n\n아래는 실제 웹 검색 결과입니다. 이 내용을 1차 근거로 삼아 조사하고, "
+            "sources 에는 실제 참고한 출처 URL을 포함하세요.\n\n" + _format_hits(hits)
+        )
+
     status: dict = {}
     raw = llm.complete_json(RESEARCH_SYSTEM, user, fallback=fallback,
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
 
+    # 실제 검색 출처를 sources(인용)로 보장
+    if hits:
+        result["sources"] = _merge_sources(result.get("sources", []), hits)
+
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[research] 시장조사 완료 ({mode})"]
+    src = f"웹검색 {len(hits)}건" if hits else ("검색 비활성" if not search.search_enabled() else "검색 결과 없음")
+    logs = state.get("logs", []) + [f"[research] 시장조사 완료 ({mode}, {src})"]
     return {"research_result": result, "logs": logs}
