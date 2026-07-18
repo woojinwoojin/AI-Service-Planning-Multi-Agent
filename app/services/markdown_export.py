@@ -15,7 +15,8 @@ OUTPUT_DIR = Path("outputs")
 _RUN_KEYS = [
     "structured_input", "research_result", "competitor_result", "swot_result",
     "business_model_result", "risk_result", "pestel_result",
-    "draft", "review_result", "final_draft", "revision_count", "logs",
+    "draft", "review_result", "final_draft", "revision_count",
+    "verification_result", "logs",
 ]
 
 

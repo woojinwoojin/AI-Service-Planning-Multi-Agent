@@ -2,8 +2,8 @@
 
 흐름:
   START → preprocess → research → competitor → pestel → swot → business_model → risk → draft → reviewer
-        → (needs_revision?) → revise → END
-                            → finalize → END
+        → (needs_revision?) → revise → verify → END
+                            → finalize → verify → END
 
 자동 재작성은 최대 1회(revision_count < 1). Reviewer 총점이 충분히 높으면 재작성 없이 종료.
 """
@@ -23,6 +23,7 @@ from app.agents import (
     reviewer,
     risk,
     swot,
+    verifier,
 )
 from app.schemas.state import ProjectState
 
@@ -75,6 +76,7 @@ def build_graph():
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
     g.add_node("finalize", _safe("finalize", _finalize))
+    g.add_node("verify", _safe("verify", verifier.verify))
 
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
@@ -88,8 +90,9 @@ def build_graph():
     g.add_conditional_edges(
         "reviewer", _needs_revision, {"revise": "revise", "finalize": "finalize"}
     )
-    g.add_edge("revise", END)
-    g.add_edge("finalize", END)
+    g.add_edge("revise", "verify")
+    g.add_edge("finalize", "verify")
+    g.add_edge("verify", END)
 
     return g.compile()
 

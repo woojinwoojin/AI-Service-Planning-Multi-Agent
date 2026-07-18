@@ -25,6 +25,7 @@ class ProjectState(TypedDict, total=False):
     review_result: dict
     final_draft: str
     revision_count: int
+    verification_result: dict
     logs: list  # 실행 로그 / 진행 상태 표시용
 
 
@@ -77,4 +78,5 @@ class RunResult(BaseModel):
     review_result: dict
     final_draft: str
     revision_count: int
+    verification_result: dict
     logs: list

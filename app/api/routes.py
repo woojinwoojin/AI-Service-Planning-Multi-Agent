@@ -50,6 +50,7 @@ def run(payload: ProjectInput) -> RunResult:
         review_result=state.get("review_result", {}),
         final_draft=state.get("final_draft", ""),
         revision_count=state.get("revision_count", 0),
+        verification_result=state.get("verification_result", {}),
         logs=state.get("logs", []),
     )
 
