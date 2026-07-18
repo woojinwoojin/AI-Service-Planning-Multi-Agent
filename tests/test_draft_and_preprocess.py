@@ -43,6 +43,10 @@ def test_append_references_adds_and_dedups():
     assert "https://c.io" in twice and "https://a.io" not in twice  # 새 출처로 교체
     # 출처 없으면 원문 유지(섹션 미추가)
     assert "## 참고자료" not in draft_writer._append_references(body, [])
+    # 참고자료 개수 상한
+    many = [f"https://ex.io/{i}" for i in range(20)]
+    capped = draft_writer._append_references(body, many)
+    assert capped.count("- https://ex.io/") == draft_writer._MAX_REFS
 
 
 def test_preprocess_keyword_string_and_defaults():
