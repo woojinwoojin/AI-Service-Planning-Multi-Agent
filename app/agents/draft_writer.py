@@ -29,6 +29,29 @@ SECTIONS = [
 ]
 
 
+def _missing_sections(text: str) -> list[str]:
+    """고정 서식 12개 섹션 중 `## {제목}` 제목이 빠진 것을 찾는다."""
+    return [s for s in SECTIONS if f"## {s}" not in text]
+
+
+def _generate(system: str, user: str, fallback: str, model: str) -> tuple[str, list[str]]:
+    """기획서를 생성하고 서식(12섹션)을 검증한다.
+
+    실제 모드에서 섹션이 누락되면 누락 목록을 명시해 1회만 교정 재호출한다(안정 생성).
+    반환: (본문, 최종적으로 남은 누락 섹션 목록).
+    """
+    text = _strip_wrapping_fence(llm.complete_text(system, user, fallback=fallback, model=model))
+    missing = _missing_sections(text)
+    if missing and not llm.is_dummy():
+        fix_user = (
+            f"{user}\n\n[중요] 아래 섹션이 누락되었습니다. 12개 섹션 전체를 "
+            f"고정 순서·제목(`## `)으로 빠짐없이 다시 작성하세요: {', '.join(missing)}"
+        )
+        text = _strip_wrapping_fence(llm.complete_text(system, fix_user, fallback=fallback, model=model))
+        missing = _missing_sections(text)
+    return text, missing
+
+
 def _dummy_draft(si: dict, research: dict, pestel: dict) -> str:
     name = si.get("project_name", "프로젝트")
     lines = [f"# {name} 기획서\n"]
@@ -42,8 +65,13 @@ def _dummy_draft(si: dict, research: dict, pestel: dict) -> str:
             lines.append(f"- 시장 개요: {research.get('market_overview', '')}")
             lines.append(f"- 트렌드: {', '.join(research.get('industry_trends', []))}\n")
         elif sec == "PESTEL 분석":
+            lines.append("| 요인 | 주요 내용 | 기회 | 위협 | 대응 |")
+            lines.append("|---|---|---|---|---|")
             for factor, v in pestel.items():
-                lines.append(f"- **{factor}**: {v.get('content', '')}")
+                lines.append(
+                    f"| {factor} | {v.get('content', '')} | {v.get('opportunity', '')} "
+                    f"| {v.get('threat', '')} | {v.get('response', '')} |"
+                )
             lines.append("")
         elif sec == "제안 서비스":
             lines.append(f"{si.get('description', '(미입력)')}\n")
@@ -64,11 +92,11 @@ def draft(state: ProjectState) -> dict:
         f"[시장조사]\n{json.dumps(research, ensure_ascii=False)}\n"
         f"[PESTEL]\n{json.dumps(pestel, ensure_ascii=False)}"
     )
-    text = _strip_wrapping_fence(
-        llm.complete_text(DRAFT_WRITER_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
-    )
+    text, missing = _generate(DRAFT_WRITER_SYSTEM, user, fallback, state.get("model", ""))
 
-    logs = state.get("logs", []) + ["[draft_writer] 초안 작성 완료"]
+    mode = "더미" if llm.is_dummy() else f"실제 LLM·{llm.resolve_model(state.get('model', ''))}"
+    note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개: {', '.join(missing)}"
+    logs = state.get("logs", []) + [f"[draft_writer] 초안 작성 완료 ({mode}){note}"]
     return {"draft": text, "logs": logs}
 
 
@@ -92,10 +120,9 @@ def revise(state: ProjectState) -> dict:
         + (f"[사용자 수정요청]\n{user_request}\n" if user_request else "")
         + "위 지시를 반영해 기획서를 1회 재작성하세요."
     )
-    text = _strip_wrapping_fence(
-        llm.complete_text(REVISER_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
-    )
+    text, missing = _generate(REVISER_SYSTEM, user, fallback, state.get("model", ""))
 
     count = state.get("revision_count", 0) + 1
-    logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count})"]
+    note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개"
+    logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count}){note}"]
     return {"final_draft": text, "revision_count": count, "logs": logs}
