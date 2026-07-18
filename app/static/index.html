@@ -166,7 +166,7 @@ function showLogs(logs) {
 
 function renderResults(d) {
   const r = d.research_result || {}, p = d.pestel_result || {}, rv = d.review_result || {}, co = d.competitor_result || {};
-  const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {};
+  const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
   const factors = ["Political","Economic","Social","Technological","Environmental","Legal"];
   const pestelTable = "<table><thead><tr><th>요인</th><th>주요 내용</th><th>기회</th><th>위협</th><th>대응</th></tr></thead><tbody>"
@@ -189,6 +189,12 @@ function renderResults(d) {
     <div class="row">
       <div><h3>경쟁</h3>${listOf(r.competitors)}</div>
       <div><h3>기회 / 위험</h3>${listOf((r.opportunities||[]).concat(r.risks||[]))}</div>
+    </div>
+    <h3 style="margin-top:16px">고객 문제 분석</h3>
+    ${cu.target_persona ? `<p><strong>페르소나:</strong> ${esc(cu.target_persona)}</p>` : ""}
+    <div class="row">
+      <div><strong>Pain Point</strong>${listOf(cu.pain_points)}<strong>니즈</strong>${listOf(cu.needs)}</div>
+      <div><strong>해결 과업(JTBD)</strong>${listOf(cu.jobs_to_be_done)}</div>
     </div>
     <h3 style="margin-top:16px">경쟁사 분석</h3>${compTable}
     ${co.positioning ? `<p><strong>포지셔닝:</strong> ${esc(co.positioning)}</p>` : ""}

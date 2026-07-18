@@ -1,7 +1,7 @@
 """LangGraph 워크플로 정의.
 
 흐름:
-  START → preprocess → research → competitor → pestel → swot → business_model → risk → draft → reviewer
+  START → preprocess → research → competitor → customer → pestel → swot → business_model → risk → draft → reviewer
         → (needs_revision?) → revise → polish → verify → END
                             → finalize → polish → verify → END
 
@@ -16,6 +16,7 @@ from langgraph.graph import END, START, StateGraph
 from app.agents import (
     business_model,
     competitor,
+    customer,
     draft_writer,
     pestel,
     preprocess,
@@ -68,6 +69,7 @@ def build_graph():
     g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
     g.add_node("research", _safe("research", research.research))
     g.add_node("competitor", _safe("competitor", competitor.competitor))
+    g.add_node("customer", _safe("customer", customer.customer))
     g.add_node("pestel", _safe("pestel", pestel.pestel))
     g.add_node("swot", _safe("swot", swot.swot))
     g.add_node("business_model", _safe("business_model", business_model.business_model))
@@ -82,7 +84,8 @@ def build_graph():
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
     g.add_edge("research", "competitor")
-    g.add_edge("competitor", "pestel")
+    g.add_edge("competitor", "customer")
+    g.add_edge("customer", "pestel")
     g.add_edge("pestel", "swot")
     g.add_edge("swot", "business_model")
     g.add_edge("business_model", "risk")
