@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.agents import draft_writer
 from app.graph.workflow import run_workflow
-from app.schemas.state import ProjectInput, RunResult
+from app.schemas.state import ProjectInput, ReviseInput, RunResult
 from app.services import llm
 from app.services.markdown_export import save_markdown, save_run_json
 
@@ -45,6 +46,24 @@ def run(payload: ProjectInput) -> RunResult:
         revision_count=state.get("revision_count", 0),
         logs=state.get("logs", []),
     )
+
+
+@router.post("/revise")
+def revise(payload: ReviseInput) -> dict:
+    """Human-in-the-Loop: 사용자의 수정 요청을 현재 기획서에 1회 반영해 재작성."""
+    state = {
+        "draft": payload.draft,
+        "review_result": {"revision_instructions": payload.revision_instructions},
+        "user_input": {"revision_request": payload.revision_request},
+        "model": payload.model,
+        "revision_count": 0,
+        "logs": [],
+    }
+    result = draft_writer.revise(state)
+    return {
+        "final_draft": result.get("final_draft", ""),
+        "logs": result.get("logs", []),
+    }
 
 
 @router.post("/run/save")
