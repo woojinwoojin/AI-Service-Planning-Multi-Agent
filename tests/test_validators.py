@@ -81,13 +81,20 @@ def test_compare_judge_clamp_and_total(monkeypatch):
     assert j["comment"] == "c"
 
 
+def test_count_citations_counts_unique_urls():
+    text = "본문\n## 참고자료\n- A — https://a.io\n- https://b.io\n- 중복 https://a.io"
+    assert compare.count_citations(text) == 2         # 고유 URL만
+    assert compare.count_citations("출처 없음") == 0
+
+
 def test_compare_aggregate_averages():
     fake = [
-        {"single": {"judge": {"scores": {k: 10 for k in compare.CRITERIA}, "total": 50}},
-         "multi": {"judge": {"scores": {k: 16 for k in compare.CRITERIA}, "total": 80}}},
-        {"single": {"judge": {"scores": {k: 12 for k in compare.CRITERIA}, "total": 60}},
-         "multi": {"judge": {"scores": {k: 18 for k in compare.CRITERIA}, "total": 90}}},
+        {"single": {"judge": {"scores": {k: 10 for k in compare.CRITERIA}, "total": 50}, "citations": 0},
+         "multi": {"judge": {"scores": {k: 16 for k in compare.CRITERIA}, "total": 80}, "citations": 4}},
+        {"single": {"judge": {"scores": {k: 12 for k in compare.CRITERIA}, "total": 60}, "citations": 0},
+         "multi": {"judge": {"scores": {k: 18 for k in compare.CRITERIA}, "total": 90}, "citations": 6}},
     ]
     t = compare.aggregate(fake)
     assert t["total"]["single"] == 55.0 and t["total"]["multi"] == 85.0
     assert t["problem_clarity"]["single"] == 11.0 and t["problem_clarity"]["multi"] == 17.0
+    assert t["citations"]["single"] == 0.0 and t["citations"]["multi"] == 5.0

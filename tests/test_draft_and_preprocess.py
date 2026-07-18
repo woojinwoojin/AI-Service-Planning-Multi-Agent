@@ -32,6 +32,19 @@ def test_strip_wrapping_fence():
     assert s(mid) == mid
 
 
+def test_append_references_adds_and_dedups():
+    body = "# P 기획서\n## 프로젝트 개요\n내용"
+    once = draft_writer._append_references(body, ["제목 — https://a.io", "https://b.io"])
+    assert "## 참고자료" in once
+    assert "https://a.io" in once and "https://b.io" in once
+    # 재적용해도 참고자료 섹션이 중복되지 않음
+    twice = draft_writer._append_references(once, ["https://c.io"])
+    assert twice.count("## 참고자료") == 1
+    assert "https://c.io" in twice and "https://a.io" not in twice  # 새 출처로 교체
+    # 출처 없으면 원문 유지(섹션 미추가)
+    assert "## 참고자료" not in draft_writer._append_references(body, [])
+
+
 def test_preprocess_keyword_string_and_defaults():
     out = preprocess.preprocess({"user_input": {"project_name": "  P  ", "keywords": "a, b ,c"}})
     si = out["structured_input"]

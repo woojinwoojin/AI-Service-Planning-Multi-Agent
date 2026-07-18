@@ -5,10 +5,19 @@
 """
 from __future__ import annotations
 
+import re
+
 from app.agents import single_agent
 from app.graph.workflow import run_workflow
 from app.prompts.templates import COMPARE_JUDGE
 from app.services import llm
+
+_URL_RE = re.compile(r"https?://[^\s)\]]+")
+
+
+def count_citations(plan_text: str) -> int:
+    """기획서 본문에 명시된 '검증 가능한 실제 출처(고유 URL)' 수. LLM 채점이 아닌 하드 카운트."""
+    return len(set(_URL_RE.findall(plan_text or "")))
 
 # 로드맵 7절 비교 기준 (키 → 한글 라벨)
 CRITERIA = {
@@ -53,8 +62,10 @@ def run_topic(topic: dict, model: str = "") -> dict:
     single_plan = single_agent.generate(si, model=model)
     return {
         "topic": topic.get("project_name", ""),
-        "single": {"plan": single_plan, "judge": judge(single_plan, model=model)},
-        "multi": {"plan": multi_plan, "judge": judge(multi_plan, model=model)},
+        "single": {"plan": single_plan, "judge": judge(single_plan, model=model),
+                   "citations": count_citations(single_plan)},
+        "multi": {"plan": multi_plan, "judge": judge(multi_plan, model=model),
+                  "citations": count_citations(multi_plan)},
     }
 
 
@@ -70,5 +81,10 @@ def aggregate(results: list[dict]) -> dict:
     table["total"] = {
         "single": round(sum(r["single"]["judge"]["total"] for r in results) / n, 1),
         "multi": round(sum(r["multi"]["judge"]["total"] for r in results) / n, 1),
+    }
+    # 객관 지표: 검증 가능한 실제 출처 수 (LLM 채점 아님)
+    table["citations"] = {
+        "single": round(sum(r["single"]["citations"] for r in results) / n, 1),
+        "multi": round(sum(r["multi"]["citations"] for r in results) / n, 1),
     }
     return table
