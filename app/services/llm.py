@@ -11,10 +11,30 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+class LLMError(RuntimeError):
+    """LLM 호출이 재시도 후에도 실패했음을 나타낸다."""
+
+
+def _invoke_with_retry(chat, system: str, user: str, attempts: int = 2):
+    """model.invoke를 재시도한다. 모두 실패하면 LLMError를 던진다.
+
+    8일 차: 관통 중 일시적 LLM 오류(레이트리밋/네트워크)가 파이프라인 전체를
+    중단시키지 않도록, 호출부(complete_*)가 이 예외를 잡아 fallback으로 넘어간다.
+    """
+    last_err: Exception | None = None
+    for _ in range(attempts):
+        try:
+            return chat.invoke([("system", system), ("human", user)])
+        except Exception as exc:  # provider별 예외 종류가 다양하므로 광범위하게 잡는다
+            last_err = exc
+    raise LLMError(str(last_err)) from last_err
 
 
 def _env(key: str, default: str = "") -> str:
@@ -123,27 +143,52 @@ def _extract_json(text: str) -> dict:
     return json.loads(text)
 
 
+def _warn(msg: str) -> None:
+    print(f"[llm] {msg}", file=sys.stderr)
+
+
 def complete_text(system: str, user: str, *, fallback: str = "", model: str = "") -> str:
-    """텍스트 응답. 더미 모드면 fallback 반환. model로 사용 모델 지정 가능."""
+    """텍스트 응답. 더미 모드면 fallback 반환. model로 사용 모델 지정 가능.
+
+    호출/재시도가 모두 실패하면 예외를 전파하지 않고 fallback을 반환한다(관통 보장).
+    """
     if is_dummy():
         return fallback
-    chat = _get_model(model)
-    resp = chat.invoke([("system", system), ("human", user)])
-    return resp.content if isinstance(resp.content, str) else str(resp.content)
+    try:
+        chat = _get_model(model)
+        resp = _invoke_with_retry(chat, system, user)
+        return resp.content if isinstance(resp.content, str) else str(resp.content)
+    except Exception as exc:
+        _warn(f"complete_text 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        return fallback
 
 
 def complete_json(system: str, user: str, *, fallback: dict, model: str = "") -> dict:
-    """JSON 응답. 더미 모드면 fallback 반환. 파싱 실패 시 1회 재시도 후 fallback."""
+    """JSON 응답. 더미 모드면 fallback 반환.
+
+    - 호출 실패 시 fallback 반환(관통 보장).
+    - 파싱 실패 시 1회 재시도 후 fallback.
+    """
     if is_dummy():
         return fallback
-    chat = _get_model(model)
+    try:
+        chat = _get_model(model)
+    except Exception as exc:
+        _warn(f"모델 초기화 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        return fallback
+
+    prompt_user = user
     for attempt in range(2):  # 11일 차 요구사항: LLM 재호출 1회
-        resp = chat.invoke([("system", system), ("human", user)])
+        try:
+            resp = _invoke_with_retry(chat, system, prompt_user)
+        except LLMError as exc:
+            _warn(f"complete_json 호출 실패 → fallback 사용 ({exc})")
+            return fallback
         content = resp.content if isinstance(resp.content, str) else str(resp.content)
         try:
             return _extract_json(content)
         except (json.JSONDecodeError, ValueError):
             if attempt == 0:
-                user = user + "\n\n반드시 유효한 JSON 객체만 출력하세요."
+                prompt_user = user + "\n\n반드시 유효한 JSON 객체만 출력하세요."
                 continue
     return fallback
