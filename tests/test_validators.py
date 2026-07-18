@@ -87,6 +87,22 @@ def test_count_citations_counts_unique_urls():
     assert compare.count_citations("출처 없음") == 0
 
 
+def test_run_topic_uses_fixed_judge_model(monkeypatch):
+    """다중 모델 비교: 생성은 model로, 채점은 고정 judge_model로 이뤄져야 한다."""
+    judged_with = []
+    monkeypatch.setattr(compare, "run_workflow",
+                        lambda inp: {"final_draft": "# M", "structured_input": inp})
+    monkeypatch.setattr(compare.single_agent, "generate", lambda si, model="": "# S")
+
+    def fake_judge(plan, model="", **k):
+        judged_with.append(model)
+        return {"scores": {c: 10 for c in compare.CRITERIA}, "total": 50, "comment": "", "samples": 1}
+
+    monkeypatch.setattr(compare, "judge", fake_judge)
+    compare.run_topic({"project_name": "T"}, model="gpt-4o", judge_model="gpt-4o-mini")
+    assert judged_with == ["gpt-4o-mini", "gpt-4o-mini"]   # 단일·멀티 모두 고정 심판
+
+
 def test_compare_aggregate_averages():
     fake = [
         {"single": {"judge": {"scores": {k: 10 for k in compare.CRITERIA}, "total": 50}, "citations": 0},
