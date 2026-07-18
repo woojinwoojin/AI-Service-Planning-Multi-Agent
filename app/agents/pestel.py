@@ -59,9 +59,11 @@ def pestel(state: ProjectState) -> dict:
         "이 결과에 없는 새로운 사실은 지어내지 마세요.\n"
         f"{json.dumps(research, ensure_ascii=False, indent=2)}"
     )
-    raw = llm.complete_json(PESTEL_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
+    status: dict = {}
+    raw = llm.complete_json(PESTEL_SYSTEM, user, fallback=fallback,
+                            model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
 
-    mode = "더미" if llm.is_dummy() else f"실제 LLM·{llm.resolve_model(state.get('model', ''))}"
+    mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [f"[pestel] PESTEL 분석 완료 ({mode})"]
     return {"pestel_result": result, "logs": logs}

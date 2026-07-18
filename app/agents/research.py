@@ -67,9 +67,11 @@ def research(state: ProjectState) -> dict:
         "다음 사업 아이디어를 조사하세요.\n"
         f"{json.dumps(si, ensure_ascii=False, indent=2)}"
     )
-    raw = llm.complete_json(RESEARCH_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
+    status: dict = {}
+    raw = llm.complete_json(RESEARCH_SYSTEM, user, fallback=fallback,
+                            model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
 
-    mode = "더미" if llm.is_dummy() else f"실제 LLM·{llm.resolve_model(state.get('model', ''))}"
+    mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [f"[research] 시장조사 완료 ({mode})"]
     return {"research_result": result, "logs": logs}

@@ -34,20 +34,26 @@ def _missing_sections(text: str) -> list[str]:
     return [s for s in SECTIONS if f"## {s}" not in text]
 
 
-def _generate(system: str, user: str, fallback: str, model: str) -> tuple[str, list[str]]:
+def _generate(system: str, user: str, fallback: str, model: str,
+              status: dict | None = None) -> tuple[str, list[str]]:
     """기획서를 생성하고 서식(12섹션)을 검증한다.
 
     실제 모드에서 섹션이 누락되면 누락 목록을 명시해 1회만 교정 재호출한다(안정 생성).
+    LLM 오류로 fallback되면 status['fallback']=True 로 알린다.
     반환: (본문, 최종적으로 남은 누락 섹션 목록).
     """
-    text = _strip_wrapping_fence(llm.complete_text(system, user, fallback=fallback, model=model))
+    text = _strip_wrapping_fence(
+        llm.complete_text(system, user, fallback=fallback, model=model, status=status)
+    )
     missing = _missing_sections(text)
     if missing and not llm.is_dummy():
         fix_user = (
             f"{user}\n\n[중요] 아래 섹션이 누락되었습니다. 12개 섹션 전체를 "
             f"고정 순서·제목(`## `)으로 빠짐없이 다시 작성하세요: {', '.join(missing)}"
         )
-        text = _strip_wrapping_fence(llm.complete_text(system, fix_user, fallback=fallback, model=model))
+        text = _strip_wrapping_fence(
+            llm.complete_text(system, fix_user, fallback=fallback, model=model, status=status)
+        )
         missing = _missing_sections(text)
     return text, missing
 
@@ -92,9 +98,10 @@ def draft(state: ProjectState) -> dict:
         f"[시장조사]\n{json.dumps(research, ensure_ascii=False)}\n"
         f"[PESTEL]\n{json.dumps(pestel, ensure_ascii=False)}"
     )
-    text, missing = _generate(DRAFT_WRITER_SYSTEM, user, fallback, state.get("model", ""))
+    status: dict = {}
+    text, missing = _generate(DRAFT_WRITER_SYSTEM, user, fallback, state.get("model", ""), status)
 
-    mode = "더미" if llm.is_dummy() else f"실제 LLM·{llm.resolve_model(state.get('model', ''))}"
+    mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개: {', '.join(missing)}"
     logs = state.get("logs", []) + [f"[draft_writer] 초안 작성 완료 ({mode}){note}"]
     return {"draft": text, "logs": logs}
@@ -120,9 +127,11 @@ def revise(state: ProjectState) -> dict:
         + (f"[사용자 수정요청]\n{user_request}\n" if user_request else "")
         + "위 지시를 반영해 기획서를 1회 재작성하세요."
     )
-    text, missing = _generate(REVISER_SYSTEM, user, fallback, state.get("model", ""))
+    status: dict = {}
+    text, missing = _generate(REVISER_SYSTEM, user, fallback, state.get("model", ""), status)
 
     count = state.get("revision_count", 0) + 1
+    mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개"
-    logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count}){note}"]
+    logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count}, {mode}){note}"]
     return {"final_draft": text, "revision_count": count, "logs": logs}

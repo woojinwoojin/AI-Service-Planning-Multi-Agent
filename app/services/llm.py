@@ -147,10 +147,28 @@ def _warn(msg: str) -> None:
     print(f"[llm] {msg}", file=sys.stderr)
 
 
-def complete_text(system: str, user: str, *, fallback: str = "", model: str = "") -> str:
+def _flag(status: dict | None, reason: str) -> None:
+    """호출부가 넘긴 status dict에 'fallback 발생'을 기록한다(로그 표면화용)."""
+    if status is not None:
+        status["fallback"] = True
+        status["reason"] = reason
+
+
+def mode_label(status: dict | None, model: str = "") -> str:
+    """Agent 로그용 실행 모드 문자열. 더미/실제/fallback을 정직하게 구분한다."""
+    if is_dummy():
+        return "더미"
+    if status and status.get("fallback"):
+        return f"fallback·{status.get('reason', '오류')}"
+    return f"실제 LLM·{resolve_model(model)}"
+
+
+def complete_text(system: str, user: str, *, fallback: str = "", model: str = "",
+                  status: dict | None = None) -> str:
     """텍스트 응답. 더미 모드면 fallback 반환. model로 사용 모델 지정 가능.
 
     호출/재시도가 모두 실패하면 예외를 전파하지 않고 fallback을 반환한다(관통 보장).
+    fallback으로 넘어가면 status['fallback']=True 로 알린다.
     """
     if is_dummy():
         return fallback
@@ -160,14 +178,17 @@ def complete_text(system: str, user: str, *, fallback: str = "", model: str = ""
         return resp.content if isinstance(resp.content, str) else str(resp.content)
     except Exception as exc:
         _warn(f"complete_text 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        _flag(status, "호출오류")
         return fallback
 
 
-def complete_json(system: str, user: str, *, fallback: dict, model: str = "") -> dict:
+def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
+                  status: dict | None = None) -> dict:
     """JSON 응답. 더미 모드면 fallback 반환.
 
     - 호출 실패 시 fallback 반환(관통 보장).
     - 파싱 실패 시 1회 재시도 후 fallback.
+    fallback으로 넘어가면 status['fallback']=True 로 알린다.
     """
     if is_dummy():
         return fallback
@@ -175,6 +196,7 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "") ->
         chat = _get_model(model)
     except Exception as exc:
         _warn(f"모델 초기화 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        _flag(status, "호출오류")
         return fallback
 
     prompt_user = user
@@ -183,6 +205,7 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "") ->
             resp = _invoke_with_retry(chat, system, prompt_user)
         except LLMError as exc:
             _warn(f"complete_json 호출 실패 → fallback 사용 ({exc})")
+            _flag(status, "호출오류")
             return fallback
         content = resp.content if isinstance(resp.content, str) else str(resp.content)
         try:
@@ -191,4 +214,5 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "") ->
             if attempt == 0:
                 prompt_user = user + "\n\n반드시 유효한 JSON 객체만 출력하세요."
                 continue
+    _flag(status, "파싱실패")
     return fallback
