@@ -2,8 +2,8 @@
 
 흐름:
   START → preprocess → research → competitor → pestel → swot → business_model → risk → draft → reviewer
-        → (needs_revision?) → revise → verify → END
-                            → finalize → verify → END
+        → (needs_revision?) → revise → polish → verify → END
+                            → finalize → polish → verify → END
 
 자동 재작성은 최대 1회(revision_count < 1). Reviewer 총점이 충분히 높으면 재작성 없이 종료.
 """
@@ -76,6 +76,7 @@ def build_graph():
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
     g.add_node("finalize", _safe("finalize", _finalize))
+    g.add_node("polish", _safe("polish", draft_writer.polish))
     g.add_node("verify", _safe("verify", verifier.verify))
 
     g.add_edge(START, "preprocess")
@@ -90,8 +91,9 @@ def build_graph():
     g.add_conditional_edges(
         "reviewer", _needs_revision, {"revise": "revise", "finalize": "finalize"}
     )
-    g.add_edge("revise", "verify")
-    g.add_edge("finalize", "verify")
+    g.add_edge("revise", "polish")
+    g.add_edge("finalize", "polish")
+    g.add_edge("polish", "verify")
     g.add_edge("verify", END)
 
     return g.compile()
