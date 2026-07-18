@@ -34,6 +34,24 @@ def _missing_sections(text: str) -> list[str]:
     return [s for s in SECTIONS if f"## {s}" not in text]
 
 
+_REF_HEADER = "## 참고자료"
+
+
+def _append_references(text: str, sources: list) -> str:
+    """Research가 확보한 실제 출처(URL 등)를 '참고자료' 섹션으로 최종 문서에 인용한다.
+
+    웹검색 grounding을 최종 산출물까지 흘려보내는 단계. 기존 참고자료 섹션은
+    중복되지 않게 제거하고 다시 붙인다. 출처가 없으면 원문 그대로 둔다.
+    """
+    idx = text.find(_REF_HEADER)
+    if idx != -1:
+        text = text[:idx].rstrip()
+    real = [s.strip() for s in (sources or []) if isinstance(s, str) and s.strip()]
+    if not real:
+        return text.rstrip()
+    return "\n".join([text.rstrip(), "", _REF_HEADER, ""] + [f"- {s}" for s in real])
+
+
 def _generate(system: str, user: str, fallback: str, model: str,
               status: dict | None = None) -> tuple[str, list[str]]:
     """기획서를 생성하고 서식(12섹션)을 검증한다.
@@ -100,6 +118,7 @@ def draft(state: ProjectState) -> dict:
     )
     status: dict = {}
     text, missing = _generate(DRAFT_WRITER_SYSTEM, user, fallback, state.get("model", ""), status)
+    text = _append_references(text, research.get("sources", []))
 
     mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개: {', '.join(missing)}"
@@ -129,6 +148,7 @@ def revise(state: ProjectState) -> dict:
     )
     status: dict = {}
     text, missing = _generate(REVISER_SYSTEM, user, fallback, state.get("model", ""), status)
+    text = _append_references(text, state.get("research_result", {}).get("sources", []))
 
     count = state.get("revision_count", 0) + 1
     mode = llm.mode_label(status, state.get("model", ""))

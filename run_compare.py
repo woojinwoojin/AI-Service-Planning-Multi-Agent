@@ -54,7 +54,9 @@ def _table_md(table: dict) -> str:
         row = table[key]
         lines.append(f"| {label} | {row['single']} | {row['multi']} |")
     t = table["total"]
-    lines.append(f"| **총점** | **{t['single']}** | **{t['multi']}** |")
+    lines.append(f"| **총점 (LLM 심판)** | **{t['single']}** | **{t['multi']}** |")
+    c = table["citations"]
+    lines.append(f"| **검증 가능한 실제 출처 수 (객관)** | **{c['single']}** | **{c['multi']}** |")
     return "\n".join(lines)
 
 
