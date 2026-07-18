@@ -93,6 +93,7 @@
     <div class="doc" id="finalDoc"></div>
     <div class="btns">
       <button class="ghost" onclick="downloadMd()">.md 다운로드</button>
+      <button class="ghost" onclick="downloadDocx()">.docx 다운로드</button>
       <button class="ghost" onclick="downloadJson()">.json 다운로드</button>
     </div>
     <label style="margin-top:18px">수정 요청 (Human-in-the-Loop)</label>
@@ -270,6 +271,19 @@ function downloadMd() {
 function downloadJson() {
   if (!lastRun) return;
   download(slug(lastRun.structured_input?.project_name)+".json", JSON.stringify(lastRun, null, 2), "application/json");
+}
+async function downloadDocx() {
+  if (!lastRun) return;
+  const name = lastRun.structured_input?.project_name || "plan";
+  try {
+    const r = await fetch("/export/docx", {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({project_name:name, markdown:lastRun.final_draft})});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = slug(name)+".docx"; a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (e) { alert("DOCX 변환 실패: " + e.message); }
 }
 
 loadModels();

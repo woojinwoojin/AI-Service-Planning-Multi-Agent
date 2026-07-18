@@ -53,6 +53,13 @@ class ReviseInput(BaseModel):
     model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값)")
 
 
+class ExportInput(BaseModel):
+    """기획서 Markdown → Word(.docx) 내보내기 입력."""
+
+    project_name: str = Field("", description="프로젝트명(파일명)")
+    markdown: str = Field(..., description="변환할 기획서 Markdown")
+
+
 class RunResult(BaseModel):
     """워크플로 실행 결과 (Agent별 결과 확인용)."""
 
