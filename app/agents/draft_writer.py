@@ -24,8 +24,8 @@ def _strip_wrapping_fence(text: str) -> str:
 
 SECTIONS = [
     "프로젝트 개요", "추진 배경", "문제 정의", "목표 사용자",
-    "시장 및 산업 분석", "PESTEL 분석", "제안 서비스", "핵심 기능",
-    "차별성", "기대효과", "추진 계획", "위험요인 및 대응방안",
+    "시장 및 산업 분석", "PESTEL 분석", "SWOT 분석", "제안 서비스", "핵심 기능",
+    "차별성", "수익 모델", "기대효과", "추진 계획", "위험요인 및 대응방안",
 ]
 
 
@@ -109,14 +109,21 @@ def draft(state: ProjectState) -> dict:
     research = state.get("research_result", {})
     pestel = state.get("pestel_result", {})
     comp = state.get("competitor_result", {})
+    swot = state.get("swot_result", {})
+    bizmodel = state.get("business_model_result", {})
+    risks = state.get("risk_result", {})
     fallback = _dummy_draft(si, research, pestel)
 
     user = (
         "아래 정보를 바탕으로 고정 서식 기획서를 Markdown으로 작성하세요.\n"
-        "특히 '차별성' 섹션은 경쟁사 분석 결과를 근거로 구체적으로 작성하세요.\n"
+        "'차별성'은 경쟁사 분석, 'SWOT 분석'은 SWOT 결과, '수익 모델'은 비즈니스 모델 결과,\n"
+        "'위험요인 및 대응방안'은 리스크 분석 결과를 근거로 구체적으로 작성하세요.\n"
         f"[입력]\n{json.dumps(si, ensure_ascii=False)}\n"
         f"[시장조사]\n{json.dumps(research, ensure_ascii=False)}\n"
         f"[경쟁사 분석]\n{json.dumps(comp, ensure_ascii=False)}\n"
+        f"[SWOT]\n{json.dumps(swot, ensure_ascii=False)}\n"
+        f"[비즈니스 모델]\n{json.dumps(bizmodel, ensure_ascii=False)}\n"
+        f"[리스크]\n{json.dumps(risks, ensure_ascii=False)}\n"
         f"[PESTEL]\n{json.dumps(pestel, ensure_ascii=False)}"
     )
     status: dict = {}

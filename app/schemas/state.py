@@ -17,6 +17,9 @@ class ProjectState(TypedDict, total=False):
     structured_input: dict
     research_result: dict
     competitor_result: dict
+    swot_result: dict
+    business_model_result: dict
+    risk_result: dict
     pestel_result: dict
     draft: str
     review_result: dict
@@ -66,6 +69,9 @@ class RunResult(BaseModel):
     structured_input: dict
     research_result: dict
     competitor_result: dict
+    swot_result: dict
+    business_model_result: dict
+    risk_result: dict
     pestel_result: dict
     draft: str
     review_result: dict

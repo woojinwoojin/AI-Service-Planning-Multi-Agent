@@ -1,7 +1,7 @@
 """LangGraph 워크플로 정의.
 
 흐름:
-  START → preprocess → research → competitor → pestel → draft → reviewer
+  START → preprocess → research → competitor → pestel → swot → business_model → risk → draft → reviewer
         → (needs_revision?) → revise → END
                             → finalize → END
 
@@ -13,7 +13,17 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agents import competitor, draft_writer, pestel, preprocess, research, reviewer
+from app.agents import (
+    business_model,
+    competitor,
+    draft_writer,
+    pestel,
+    preprocess,
+    research,
+    reviewer,
+    risk,
+    swot,
+)
 from app.schemas.state import ProjectState
 
 # 이 점수 이상이면 재작성 생략
@@ -58,6 +68,9 @@ def build_graph():
     g.add_node("research", _safe("research", research.research))
     g.add_node("competitor", _safe("competitor", competitor.competitor))
     g.add_node("pestel", _safe("pestel", pestel.pestel))
+    g.add_node("swot", _safe("swot", swot.swot))
+    g.add_node("business_model", _safe("business_model", business_model.business_model))
+    g.add_node("risk", _safe("risk", risk.risk))
     g.add_node("draft", _safe("draft", draft_writer.draft))
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
@@ -67,7 +80,10 @@ def build_graph():
     g.add_edge("preprocess", "research")
     g.add_edge("research", "competitor")
     g.add_edge("competitor", "pestel")
-    g.add_edge("pestel", "draft")
+    g.add_edge("pestel", "swot")
+    g.add_edge("swot", "business_model")
+    g.add_edge("business_model", "risk")
+    g.add_edge("risk", "draft")
     g.add_edge("draft", "reviewer")
     g.add_conditional_edges(
         "reviewer", _needs_revision, {"revise": "revise", "finalize": "finalize"}
