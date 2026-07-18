@@ -73,6 +73,13 @@
     </div>
   </section>
 
+  <!-- 이력 -->
+  <section class="card" id="historyCard">
+    <div class="step">이력</div>
+    <h2>저장된 프로젝트 <button class="ghost" style="padding:4px 10px;font-size:12px;margin-left:6px" onclick="loadHistory()">새로고침</button></h2>
+    <div id="history"><span class="muted">아직 저장된 프로젝트가 없습니다.</span></div>
+  </section>
+
   <!-- 진행 로그 -->
   <section class="card hidden" id="logCard">
     <h2>진행 상태</h2>
@@ -239,6 +246,7 @@ async function runWorkflow() {
     showLogs(d.logs);
     renderResults(d);
     renderFinal(d.final_draft);
+    loadHistory();
     document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
   } catch (e) {
     showLogs(["❌ 실행 실패: " + e.message]);
@@ -305,7 +313,34 @@ async function downloadDocx() {
   } catch (e) { alert("DOCX 변환 실패: " + e.message); }
 }
 
+async function loadHistory() {
+  const box = document.getElementById("history");
+  try {
+    const r = await fetch("/projects"); const d = await r.json();
+    const items = d.projects || [];
+    if (!items.length) { box.innerHTML = '<span class="muted">아직 저장된 프로젝트가 없습니다.</span>'; return; }
+    box.innerHTML = "<table><thead><tr><th>#</th><th>프로젝트</th><th>모델</th><th>총점</th><th>시각(UTC)</th><th></th></tr></thead><tbody>"
+      + items.map(p=>`<tr><td>${p.id}</td><td>${esc(p.project_name)}</td><td>${esc(p.model)}</td><td>${p.total_score ?? "-"}</td><td>${esc((p.created_at||"").replace("T"," "))}</td>`
+        + `<td><button class="ghost" style="padding:3px 9px;font-size:12px" onclick="loadProject(${p.id})">불러오기</button></td></tr>`).join("")
+      + "</tbody></table>";
+  } catch (e) { box.innerHTML = '<span class="err">이력 로드 실패</span>'; }
+}
+
+async function loadProject(id) {
+  try {
+    const r = await fetch("/projects/" + id);
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const d = await r.json();
+    lastRun = d.state;
+    showLogs(d.state.logs || []);
+    renderResults(d.state);
+    renderFinal(d.state.final_draft || "");
+    document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
+  } catch (e) { alert("불러오기 실패: " + e.message); }
+}
+
 loadModels();
+loadHistory();
 </script>
 </body>
 </html>
