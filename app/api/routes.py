@@ -59,6 +59,7 @@ def run(payload: ProjectInput) -> RunResult:
         structured_input=state.get("structured_input", {}),
         research_result=state.get("research_result", {}),
         competitor_result=state.get("competitor_result", {}),
+        customer_result=state.get("customer_result", {}),
         swot_result=state.get("swot_result", {}),
         business_model_result=state.get("business_model_result", {}),
         risk_result=state.get("risk_result", {}),
