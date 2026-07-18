@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from app.graph.workflow import run_workflow
 from app.schemas.state import ProjectInput, RunResult
 from app.services import llm
-from app.services.markdown_export import save_markdown
+from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
 
@@ -49,7 +49,12 @@ def run(payload: ProjectInput) -> RunResult:
 
 @router.post("/run/save")
 def run_and_save(payload: ProjectInput) -> dict:
-    """워크플로 실행 후 최종 기획서를 Markdown으로 저장."""
+    """워크플로 실행 후 최종 기획서(.md)와 전체 실행 결과(.json)를 저장."""
     state = run_workflow(payload.to_state_input())
-    path = save_markdown(payload.project_name, state.get("final_draft", ""))
-    return {"saved_to": path, "revision_count": state.get("revision_count", 0)}
+    saved_md = save_markdown(payload.project_name, state.get("final_draft", ""))
+    saved_json = save_run_json(payload.project_name, state)
+    return {
+        "saved_md": saved_md,
+        "saved_json": saved_json,
+        "revision_count": state.get("revision_count", 0),
+    }

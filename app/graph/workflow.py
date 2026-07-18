@@ -9,6 +9,8 @@
 """
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from langgraph.graph import END, START, StateGraph
 
 from app.agents import draft_writer, pestel, preprocess, research, reviewer
@@ -16,6 +18,22 @@ from app.schemas.state import ProjectState
 
 # 이 점수 이상이면 재작성 생략
 PASS_SCORE = 90
+
+
+def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectState], dict]:
+    """노드 실행 중 예외가 나도 파이프라인을 멈추지 않게 감싼다(관통 보장).
+
+    한 노드가 실패하면 로그에 사유를 남기고 상태 갱신 없이 진행한다. 다음 노드들은
+    각자의 fallback(_dummy)으로 빈 입력에도 구조를 유지하므로 처음~끝 완주한다.
+    """
+    def wrapped(state: ProjectState) -> dict:
+        try:
+            return fn(state)
+        except Exception as exc:
+            logs = state.get("logs", []) + [f"[{name}] 오류로 건너뜀 ({type(exc).__name__}: {exc})"]
+            return {"logs": logs}
+
+    return wrapped
 
 
 def _needs_revision(state: ProjectState) -> str:
@@ -36,13 +54,13 @@ def _finalize(state: ProjectState) -> dict:
 def build_graph():
     g = StateGraph(ProjectState)
 
-    g.add_node("preprocess", preprocess.preprocess)
-    g.add_node("research", research.research)
-    g.add_node("pestel", pestel.pestel)
-    g.add_node("draft", draft_writer.draft)
-    g.add_node("reviewer", reviewer.reviewer)
-    g.add_node("revise", draft_writer.revise)
-    g.add_node("finalize", _finalize)
+    g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
+    g.add_node("research", _safe("research", research.research))
+    g.add_node("pestel", _safe("pestel", pestel.pestel))
+    g.add_node("draft", _safe("draft", draft_writer.draft))
+    g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
+    g.add_node("revise", _safe("revise", draft_writer.revise))
+    g.add_node("finalize", _safe("finalize", _finalize))
 
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
