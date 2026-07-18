@@ -12,8 +12,11 @@ import json
 import os
 import re
 import sys
+import time
 
 from dotenv import load_dotenv
+
+from app.services import usage
 
 load_dotenv()
 
@@ -143,6 +146,16 @@ def _extract_json(text: str) -> dict:
     return json.loads(text)
 
 
+def _timed_invoke(chat, system: str, user: str, model: str):
+    """invoke를 재시도하며 지연·토큰 사용량을 관측성에 기록한다."""
+    t0 = time.perf_counter()
+    resp = _invoke_with_retry(chat, system, user)
+    latency_ms = (time.perf_counter() - t0) * 1000
+    um = getattr(resp, "usage_metadata", None) or {}
+    usage.record(resolve_model(model), um.get("input_tokens", 0), um.get("output_tokens", 0), latency_ms, False)
+    return resp
+
+
 def _warn(msg: str) -> None:
     print(f"[llm] {msg}", file=sys.stderr)
 
@@ -174,10 +187,11 @@ def complete_text(system: str, user: str, *, fallback: str = "", model: str = ""
         return fallback
     try:
         chat = _get_model(model)
-        resp = _invoke_with_retry(chat, system, user)
+        resp = _timed_invoke(chat, system, user, model)
         return resp.content if isinstance(resp.content, str) else str(resp.content)
     except Exception as exc:
         _warn(f"complete_text 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        usage.record(resolve_model(model), 0, 0, 0, True)
         _flag(status, "호출오류")
         return fallback
 
@@ -196,15 +210,17 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
         chat = _get_model(model)
     except Exception as exc:
         _warn(f"모델 초기화 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
+        usage.record(resolve_model(model), 0, 0, 0, True)
         _flag(status, "호출오류")
         return fallback
 
     prompt_user = user
     for attempt in range(2):  # 11일 차 요구사항: LLM 재호출 1회
         try:
-            resp = _invoke_with_retry(chat, system, prompt_user)
+            resp = _timed_invoke(chat, system, prompt_user, model)
         except LLMError as exc:
             _warn(f"complete_json 호출 실패 → fallback 사용 ({exc})")
+            usage.record(resolve_model(model), 0, 0, 0, True)
             _flag(status, "호출오류")
             return fallback
         content = resp.content if isinstance(resp.content, str) else str(resp.content)

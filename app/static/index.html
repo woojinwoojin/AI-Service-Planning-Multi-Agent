@@ -166,7 +166,7 @@ function showLogs(logs) {
 
 function renderResults(d) {
   const r = d.research_result || {}, p = d.pestel_result || {}, rv = d.review_result || {}, co = d.competitor_result || {};
-  const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {};
+  const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {}, u = d.usage || {};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
   const factors = ["Political","Economic","Social","Technological","Environmental","Legal"];
   const pestelTable = "<table><thead><tr><th>요인</th><th>주요 내용</th><th>기회</th><th>위협</th><th>대응</th></tr></thead><tbody>"
@@ -180,7 +180,11 @@ function renderResults(d) {
     : '<span class="muted">-</span>';
   const ss = rv.section_scores || {};
   const scoreChips = Object.entries(ss).map(([k,v])=>`<span class="chip">${k} ${v}</span>`).join("");
+  const usageRow = u.calls
+    ? `<div class="scores"><span class="chip">LLM 호출 ${u.calls}</span><span class="chip">토큰 ${(u.total_tokens||0).toLocaleString()}</span><span class="chip">~$${(u.est_cost_usd??0).toFixed(4)}</span><span class="chip">${((u.latency_ms||0)/1000).toFixed(1)}s</span>${u.fallback_calls?`<span class="chip" style="background:#fde8d7;color:#b45309">fallback ${u.fallback_calls}</span>`:""}</div>`
+    : "";
   document.getElementById("results").innerHTML = `
+    ${usageRow}
     <h3>시장 개요</h3><p>${esc(r.market_overview)||'<span class="muted">-</span>'}</p>
     <div class="row">
       <div><h3>산업 트렌드</h3>${listOf(r.industry_trends)}</div>
