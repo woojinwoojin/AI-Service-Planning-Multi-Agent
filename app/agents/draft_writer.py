@@ -35,6 +35,7 @@ def _missing_sections(text: str) -> list[str]:
 
 
 _REF_HEADER = "## 참고자료"
+_MAX_REFS = 8  # 참고자료 과다 나열 방지(문서 균형)
 
 
 def _append_references(text: str, sources: list) -> str:
@@ -42,11 +43,12 @@ def _append_references(text: str, sources: list) -> str:
 
     웹검색 grounding을 최종 산출물까지 흘려보내는 단계. 기존 참고자료 섹션은
     중복되지 않게 제거하고 다시 붙인다. 출처가 없으면 원문 그대로 둔다.
+    목록이 문서를 압도하지 않도록 최대 _MAX_REFS개까지만 싣는다.
     """
     idx = text.find(_REF_HEADER)
     if idx != -1:
         text = text[:idx].rstrip()
-    real = [s.strip() for s in (sources or []) if isinstance(s, str) and s.strip()]
+    real = [s.strip() for s in (sources or []) if isinstance(s, str) and s.strip()][:_MAX_REFS]
     if not real:
         return text.rstrip()
     return "\n".join([text.rstrip(), "", _REF_HEADER, ""] + [f"- {s}" for s in real])
