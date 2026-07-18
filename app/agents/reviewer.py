@@ -75,10 +75,12 @@ def reviewer(state: ProjectState) -> dict:
     fallback = _dummy(draft)
 
     user = f"아래 기획서 초안을 평가 기준에 따라 심사하세요.\n\n{draft}"
-    raw = llm.complete_json(REVIEWER_SYSTEM, user, fallback=fallback, model=state.get("model", ""))
+    status: dict = {}
+    raw = llm.complete_json(REVIEWER_SYSTEM, user, fallback=fallback,
+                            model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
 
-    mode = "더미" if llm.is_dummy() else f"실제 LLM·{llm.resolve_model(state.get('model', ''))}"
+    mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [
         f"[reviewer] 평가 완료 (총점={result['total_score']}, {mode})"
     ]
