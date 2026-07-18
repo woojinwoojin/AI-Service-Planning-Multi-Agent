@@ -80,3 +80,4 @@ class RunResult(BaseModel):
     revision_count: int
     verification_result: dict
     logs: list
+    project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)

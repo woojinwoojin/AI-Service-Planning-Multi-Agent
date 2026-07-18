@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from urllib.parse import quote
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, HTTPException, Response
 
 from app.agents import draft_writer
 from app.graph.workflow import run_workflow
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult
-from app.services import docx_export, llm
+from app.services import docx_export, llm, store
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -34,11 +34,28 @@ def models() -> dict:
     }
 
 
+@router.get("/projects")
+def projects(limit: int = 50) -> dict:
+    """저장된 프로젝트 이력 목록(최신순)."""
+    return {"projects": store.list_projects(limit=limit)}
+
+
+@router.get("/projects/{project_id}")
+def project_detail(project_id: int) -> dict:
+    """저장된 프로젝트 상세(전체 실행 결과)."""
+    found = store.get_project(project_id)
+    if not found:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다.")
+    return found
+
+
 @router.post("/run", response_model=RunResult)
 def run(payload: ProjectInput) -> RunResult:
-    """아이디어를 입력받아 4-Agent 워크플로를 실행하고 전체 결과를 반환."""
+    """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
     state = run_workflow(payload.to_state_input())
+    project_id = store.save_run(state)
     return RunResult(
+        project_id=project_id,
         structured_input=state.get("structured_input", {}),
         research_result=state.get("research_result", {}),
         competitor_result=state.get("competitor_result", {}),
