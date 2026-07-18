@@ -1,14 +1,15 @@
-"""Draft Writer Agent — 고정 서식 기획서 작성 및 1회 재작성 (6일 차 구현 예정).
+"""Draft Writer Agent — 고정 서식 기획서 작성/재작성 + 일관성 편집.
 
 draft(state): 초안 생성 → state["draft"]
 revise(state): Reviewer 개선지시 + 사용자 수정요청 반영 재작성 → state["final_draft"]
+polish(state): 완성본의 섹션 간 중복 제거·연결 문장 보강(일관성) → state["final_draft"]
 """
 from __future__ import annotations
 
 import json
 import re
 
-from app.prompts.templates import DRAFT_WRITER_SYSTEM, REVISER_SYSTEM
+from app.prompts.templates import DRAFT_WRITER_SYSTEM, EDITOR_SYSTEM, REVISER_SYSTEM
 from app.schemas.state import ProjectState
 from app.services import llm
 
@@ -167,3 +168,29 @@ def revise(state: ProjectState) -> dict:
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개"
     logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count}, {mode}){note}"]
     return {"final_draft": text, "revision_count": count, "logs": logs}
+
+
+def polish(state: ProjectState) -> dict:
+    """완성본의 섹션 간 중복 제거·연결 문장 보강(일관성 편집). 구조·표·참고자료는 유지.
+
+    편집기가 URL을 훼손하지 않도록 참고자료는 떼고 본문만 편집한 뒤 다시 붙인다.
+    편집 결과가 14섹션을 유지하지 못하면 원본 본문을 그대로 쓴다(안전).
+    """
+    text = state.get("final_draft", "") or state.get("draft", "")
+    if llm.is_dummy() or not text.strip():
+        return {}
+
+    sources = state.get("research_result", {}).get("sources", [])
+    body = text.split(f"\n{_REF_HEADER}")[0].rstrip()  # 참고자료 분리
+
+    status: dict = {}
+    edited = _strip_wrapping_fence(
+        llm.complete_text(EDITOR_SYSTEM, body, fallback=body, model=state.get("model", ""), status=status)
+    )
+    if _missing_sections(edited):  # 편집이 구조를 깨면 원본 유지
+        edited = body
+    final = _append_references(edited, sources)
+
+    mode = llm.mode_label(status, state.get("model", ""))
+    logs = state.get("logs", []) + [f"[polish] 일관성 편집 완료 ({mode})"]
+    return {"final_draft": final, "logs": logs}

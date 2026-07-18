@@ -49,6 +49,34 @@ def test_append_references_adds_and_dedups():
     assert capped.count("- https://ex.io/") == draft_writer._MAX_REFS
 
 
+def test_polish_preserves_structure_and_refs(monkeypatch):
+    dw = draft_writer
+    body = "# P 기획서\n" + "\n".join(f"## {s}\n내용입니다." for s in dw.SECTIONS)
+    state = {"final_draft": body + "\n\n## 참고자료\n- https://a.io",
+             "research_result": {"sources": ["https://a.io"]}, "logs": []}
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: a[1])  # 편집기가 본문 그대로 반환
+    out = dw.polish(state)
+    assert dw._missing_sections(out["final_draft"]) == []       # 14섹션 유지
+    assert "## 참고자료" in out["final_draft"] and "https://a.io" in out["final_draft"]
+
+
+def test_polish_falls_back_when_edit_breaks_structure(monkeypatch):
+    dw = draft_writer
+    body = "# P 기획서\n" + "\n".join(f"## {s}\n내용입니다." for s in dw.SECTIONS)
+    state = {"final_draft": body, "research_result": {"sources": []}, "logs": []}
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: "# 망가짐\n## 프로젝트 개요\n일부만")
+    out = dw.polish(state)
+    assert dw._missing_sections(out["final_draft"]) == []       # 깨진 편집 → 원본 유지
+
+
+def test_polish_noop_in_dummy(monkeypatch):
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: True)
+    assert dw.polish({"final_draft": "# X 기획서", "logs": []}) == {}
+
+
 def test_preprocess_keyword_string_and_defaults():
     out = preprocess.preprocess({"user_input": {"project_name": "  P  ", "keywords": "a, b ,c"}})
     si = out["structured_input"]
