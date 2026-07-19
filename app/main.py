@@ -16,7 +16,10 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(
     title="AI 서비스 기획 보조 Multi-Agent",
-    description="Research → PESTEL → Draft Writer → Reviewer 4-Agent 기획서 자동화 (MVP)",
+    description=(
+        "11-노드 Multi-Agent 기획서 자동화 · Research·Competitor·Customer·PESTEL·SWOT·"
+        "Business Model·Risk·Draft·Reviewer·Polish·Verify (웹검색 grounding + 출처 인용)"
+    ),
     version="0.1.0",
 )
 
@@ -25,7 +28,7 @@ app.include_router(router)
 
 @app.get("/")
 def root() -> FileResponse:
-    """최소 UI(입력/결과/최종 3화면)를 제공한다."""
+    """최소 UI(입력/결과/최종/이력 4화면)를 제공한다."""
     return FileResponse(STATIC_DIR / "index.html")
 
 

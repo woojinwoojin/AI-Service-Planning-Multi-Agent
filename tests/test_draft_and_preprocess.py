@@ -43,10 +43,32 @@ def test_append_references_adds_and_dedups():
     assert "https://c.io" in twice and "https://a.io" not in twice  # 새 출처로 교체
     # 출처 없으면 원문 유지(섹션 미추가)
     assert "## 참고자료" not in draft_writer._append_references(body, [])
+    # 회귀(버그 #2): 기존 참고자료가 있는데 새 출처가 없으면 기존 섹션을 보존해야 함.
+    # (/revise 는 sources 를 넘기지 않으므로 여기서 지우면 재작성 때 인용이 사라짐)
+    assert draft_writer._append_references(once, []) == once
+    assert "https://a.io" in draft_writer._append_references(once, [])
     # 참고자료 개수 상한
     many = [f"https://ex.io/{i}" for i in range(20)]
     capped = draft_writer._append_references(body, many)
     assert capped.count("- https://ex.io/") == draft_writer._MAX_REFS
+
+
+def test_revise_preserves_references_without_sources(monkeypatch):
+    """회귀(버그 #2): /revise 는 research_result 를 넘기지 않아도 기존 참고자료가 보존돼야 함."""
+    dw = draft_writer
+    current = "# P 기획서\n## 프로젝트 개요\n내용\n\n## 참고자료\n- 제목 — https://a.io"
+    state = {
+        "draft": current,
+        "review_result": {"revision_instructions": ["더 구체적으로"]},
+        "user_input": {"revision_request": "톤 정리"},
+        "revision_count": 0,
+        "logs": [],
+    }  # research_result 없음 → sources 빈 리스트
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: current)  # 재작성기가 초안 그대로 반환
+    out = dw.revise(state)
+    assert "## 참고자료" in out["final_draft"] and "https://a.io" in out["final_draft"]
+    assert out["revision_count"] == 1
 
 
 def test_polish_preserves_structure_and_refs(monkeypatch):
