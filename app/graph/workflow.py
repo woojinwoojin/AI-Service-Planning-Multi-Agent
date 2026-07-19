@@ -11,11 +11,12 @@
 """
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import usage
+from app.services import llm, usage
 from app.agents import (
     business_model,
     competitor,
@@ -111,6 +112,30 @@ def build_graph():
 GRAPH = build_graph()
 
 
+_FAILED_RE = re.compile(r"\[(.+?)\] 오류로 건너뜀")
+_NODE_RE = re.compile(r"\[(.+?)\]")
+
+
+def _assess_quality(state: ProjectState) -> dict:
+    """로그·더미여부로 실행 품질을 판정해 표면화한다(fallback이 실패를 숨기지 않도록, item 9).
+
+    - failed_nodes: `_safe`가 예외로 건너뛴 노드
+    - fallback_nodes: 로그에 fallback이 표기된(=fallback/오류 흡수) 노드
+    - run_status: 실패 노드 있으면 failed, fallback/더미면 degraded, 아니면 success
+    """
+    logs = state.get("logs", []) or []
+    failed = [m.group(1) for line in logs if (m := _FAILED_RE.search(line))]
+    fallback = sorted({m.group(1) for line in logs
+                       if "fallback" in line and (m := _NODE_RE.search(line))})
+    if failed:
+        status = "failed"
+    elif fallback or llm.is_dummy():
+        status = "degraded"
+    else:
+        status = "success"
+    return {"run_status": status, "failed_nodes": failed, "fallback_nodes": fallback}
+
+
 def run_workflow(user_input: dict) -> ProjectState:
     initial: ProjectState = {
         "user_input": user_input,
@@ -120,4 +145,5 @@ def run_workflow(user_input: dict) -> ProjectState:
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
     state = GRAPH.invoke(initial)
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
+    state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     return state

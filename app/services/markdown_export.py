@@ -17,6 +17,7 @@ _RUN_KEYS = [
     "swot_result", "business_model_result", "risk_result", "pestel_result",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
     "final_review_result", "verification_result", "usage", "logs",
+    "run_status", "failed_nodes", "fallback_nodes",
 ]
 
 
