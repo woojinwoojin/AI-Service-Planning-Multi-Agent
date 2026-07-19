@@ -1,0 +1,10 @@
+# 줄바꿈 정규화: 저장소에는 LF로 저장(Windows/OneDrive에서 CRLF로 체크아웃돼도
+# Linux/제출 환경에서 "모든 파일 수정됨"으로 보이는 문제 방지, item 12).
+* text=auto eol=lf
+
+# 바이너리/산출물은 정규화 대상에서 제외
+*.docx binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.db binary
