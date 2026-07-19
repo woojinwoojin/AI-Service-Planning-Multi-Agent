@@ -1,8 +1,12 @@
-"""Source Verification Agent — 기획서 주장을 수집 근거와 대조 검증.
+"""근거 일치성 검증 Agent — 기획서 주장이 앞 단계 조사 결과와 일치하는지 검토.
 
 파이프라인 맨 끝(최종본 확정 후)에서 동작한다. 최종 기획서의 사실성 주장을 뽑아
 Research가 모은 근거(시장조사 결과·출처)와 대조하고, 지지되지 않는 주장을 표면화한다.
-원래 12-Agent 비전의 '출처 검증'에 해당하며, Multi-Agent의 근거성을 마지막에 점검한다.
+
+주의(정직성): 이 Agent는 URL 원문에 접속해 재확인하지 '않는다'. 어디까지나 '앞 단계에서
+수집된 조사 결과 텍스트'와 기획서 주장의 근거 일치성을 검토하는 것이지, 엄밀한 '출처 검증'
+(URL 접속 → 원문 추출 → 주장 대조)은 아니다. 원래 12-Agent 비전의 '출처 검증' 자리에
+해당하지만 명칭을 구현 수준에 맞게 정직하게 조정했다.
 """
 from __future__ import annotations
 
@@ -67,6 +71,6 @@ def verify(state: ProjectState) -> dict:
 
     mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [
-        f"[verify] 출처 검증 완료 ({mode}, 지지 {result['supported']}/{result['total']})"
+        f"[verify] 근거 일치성 검증 완료 ({mode}, 지지 {result['supported']}/{result['total']})"
     ]
     return {"verification_result": result, "logs": logs}

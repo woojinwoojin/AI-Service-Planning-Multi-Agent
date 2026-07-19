@@ -1,4 +1,4 @@
-"""Source Verification Agent 스키마 검증 테스트 (LLM 호출 없음)."""
+"""근거 일치성 검증 Agent 스키마 검증 테스트 (LLM 호출 없음)."""
 from __future__ import annotations
 
 import json
@@ -28,3 +28,17 @@ def test_validate_non_dict_and_empty_fall_back():
     fb = verifier._dummy("draft")
     assert verifier._validate("깨짐", fb) == fb
     assert verifier._validate({"claims": []}, fb) == fb
+
+
+def test_verify_system_is_named_honestly():
+    """item 5: 명칭이 구현 수준과 일치(근거 일치성 검증, URL 접속 아님)."""
+    from app.prompts import templates
+    assert "근거 일치성 검증" in templates.VERIFY_SYSTEM
+    assert "접속하지 않" in templates.VERIFY_SYSTEM
+
+
+def test_verify_log_uses_honest_label(monkeypatch):
+    monkeypatch.setattr(verifier.llm, "is_dummy", lambda: True)
+    out = verifier.verify({"final_draft": "본문", "research_result": {}, "logs": []})
+    assert "근거 일치성 검증 완료" in out["logs"][-1]
+    assert "출처 검증" not in out["logs"][-1]
