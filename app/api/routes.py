@@ -5,10 +5,10 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException, Response
 
-from app.agents import draft_writer
+from app.agents import draft_writer, reviewer
 from app.graph.workflow import run_workflow
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult
-from app.services import docx_export, llm, store
+from app.services import docx_export, llm, store, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -73,24 +73,56 @@ def run(payload: ProjectInput) -> RunResult:
         verification_result=state.get("verification_result", {}),
         logs=state.get("logs", []),
         usage=state.get("usage", {}),
+        run_status=state.get("run_status", "success"),
+        failed_nodes=state.get("failed_nodes", []),
+        fallback_nodes=state.get("fallback_nodes", []),
     )
 
 
 @router.post("/revise")
 def revise(payload: ReviseInput) -> dict:
-    """Human-in-the-Loop: 사용자의 수정 요청을 현재 기획서에 1회 반영해 재작성."""
+    """Human-in-the-Loop: 사용자의 수정 요청을 현재 기획서에 1회 반영해 재작성.
+
+    - project_id가 주어지면 저장된 상태를 기반으로 삼아 근거(research_result·sources)를 유지한다.
+    - 재작성 후 최종본을 다시 채점(final_reviewer)해 표시 점수를 정합하게 맞춘다.
+    - 결과를 이력에 반영(기존 프로젝트는 갱신, 없으면 신규 저장)하고, 관측치·수정횟수를 반환한다.
+    """
+    base: dict = {}
+    if payload.project_id:
+        found = store.get_project(payload.project_id)
+        if found:
+            base = dict(found.get("state") or {})
+
     state = {
+        **base,
         "draft": payload.draft,
-        "review_result": {"revision_instructions": payload.revision_instructions},
-        "user_input": {"revision_request": payload.revision_request},
-        "model": payload.model,
+        "review_result": {**base.get("review_result", {}),
+                          "revision_instructions": payload.revision_instructions},
+        "user_input": {**base.get("user_input", {}),
+                       "revision_request": payload.revision_request},
+        "model": payload.model or base.get("model", ""),
         "revision_count": 0,
         "logs": [],
     }
-    result = draft_writer.revise(state)
+
+    usage.start()                                  # 수정 재작성의 토큰·비용도 관측
+    state.update(draft_writer.revise(state))
+    state.update(reviewer.final_reviewer(state))   # 수정된 최종본 재평가(표시 점수 정합)
+    state["usage"] = usage.summary()
+
+    # 이력 반영: 기존 프로젝트가 있으면 갱신, 없으면 신규 저장(수정 결과가 이력에 남도록)
+    if payload.project_id and store.update_run(payload.project_id, state):
+        project_id = payload.project_id
+    else:
+        project_id = store.save_run(state)
+
     return {
-        "final_draft": result.get("final_draft", ""),
-        "logs": result.get("logs", []),
+        "project_id": project_id,
+        "final_draft": state.get("final_draft", ""),
+        "revision_count": state.get("revision_count", 0),
+        "final_review_result": state.get("final_review_result", {}),
+        "usage": state.get("usage", {}),
+        "logs": state.get("logs", []),
     }
 
 

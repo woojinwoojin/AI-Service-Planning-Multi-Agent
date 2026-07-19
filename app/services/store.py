@@ -49,6 +49,22 @@ def save_run(state: dict) -> int:
         return int(cur.lastrowid)
 
 
+def update_run(project_id: int, state: dict) -> bool:
+    """기존 프로젝트 레코드를 최신 상태로 갱신(Human-in-the-Loop 수정 반영, item 4).
+
+    수정된 결과가 이력에 반영되지 않아 재조회 시 수정 전 문서가 나오던 문제를 막는다.
+    총점은 최종본 재평가 점수 우선. 대상 id가 없으면 False.
+    """
+    total = (state.get("final_review_result") or state.get("review_result") or {}).get("total_score")
+    payload = {k: state.get(k) for k in _RUN_KEYS}
+    with _conn() as conn:
+        cur = conn.execute(
+            "UPDATE projects SET total_score=?, state_json=? WHERE id=?",
+            (total, json.dumps(payload, ensure_ascii=False), project_id),
+        )
+        return cur.rowcount > 0
+
+
 def list_projects(limit: int = 50) -> list[dict]:
     """최근 프로젝트 목록(상세 제외)."""
     with _conn() as conn:

@@ -30,6 +30,9 @@ class ProjectState(TypedDict, total=False):
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     logs: list  # 실행 로그 / 진행 상태 표시용
+    run_status: str      # success / degraded / failed (실행 품질)
+    failed_nodes: list   # 예외로 건너뛴 노드
+    fallback_nodes: list # fallback/더미로 처리된 노드
 
 
 # ---- API 입출력 ----
@@ -58,6 +61,9 @@ class ReviseInput(BaseModel):
         default_factory=list, description="(선택) Reviewer의 기존 개선지시"
     )
     model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값)")
+    project_id: int = Field(
+        0, description="(선택) 기존 프로젝트 id. 주면 저장된 상태를 근거로 삼아 출처를 유지하고 이력을 갱신한다."
+    )
 
 
 class ExportInput(BaseModel):
@@ -88,3 +94,6 @@ class RunResult(BaseModel):
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)
     usage: dict = Field(default_factory=dict)  # 토큰·비용·지연 관측치
+    run_status: str = "success"                    # 실행 품질: success/degraded/failed
+    failed_nodes: list = Field(default_factory=list)
+    fallback_nodes: list = Field(default_factory=list)

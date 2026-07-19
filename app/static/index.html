@@ -189,8 +189,17 @@ function renderResults(d) {
   const usageRow = u.calls
     ? `<div class="scores"><span class="chip">LLM 호출 ${u.calls}</span><span class="chip">토큰 ${(u.total_tokens||0).toLocaleString()}</span><span class="chip">~$${(u.est_cost_usd??0).toFixed(4)}</span><span class="chip">${((u.latency_ms||0)/1000).toFixed(1)}s</span>${u.fallback_calls?`<span class="chip" style="background:#fde8d7;color:#b45309">fallback ${u.fallback_calls}</span>`:""}</div>`
     : "";
+  // 실행 품질 배너(item 9): fallback/더미/실패를 정직하게 표면화
+  const st = d.run_status || "success";
+  const banner = st === "success" ? "" : (() => {
+    const bs = st === "failed" ? "background:#fde2e1;color:#b42318" : "background:#fef3c7;color:#92400e";
+    const msg = st === "failed"
+      ? `⚠ 일부 Agent 실행 실패: ${(d.failed_nodes||[]).join(", ")} — 결과 신뢰도에 주의하세요.`
+      : `⚠ 일부 Agent가 fallback/더미로 실행됨${(d.fallback_nodes||[]).length?` (${d.fallback_nodes.join(", ")})`:""} — 일부 내용이 근거 없이 채워졌을 수 있습니다.`;
+    return `<div style="padding:9px 12px;border-radius:8px;margin-bottom:10px;font-size:13px;${bs}">${esc(msg)}</div>`;
+  })();
   document.getElementById("results").innerHTML = `
-    ${usageRow}
+    ${banner}${usageRow}
     <h3>시장 개요</h3><p>${esc(r.market_overview)||'<span class="muted">-</span>'}</p>
     <div class="row">
       <div><h3>산업 트렌드</h3>${listOf(r.industry_trends)}</div>
@@ -285,13 +294,22 @@ async function reviseDraft() {
       revision_request: req,
       revision_instructions: (lastRun.review_result||{}).revision_instructions || [],
       model: document.getElementById("model").value,
+      project_id: lastRun.project_id || 0,
     };
     const r = await fetch("/revise", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
     if (!r.ok) throw new Error("서버 오류 " + r.status);
     const d = await r.json();
+    // 수정 결과를 상태에 온전히 반영(점수·수정횟수·관측치·이력 id 갱신)
     lastRun.final_draft = d.final_draft;
+    lastRun.revision_count = d.revision_count;
+    if (d.final_review_result) lastRun.final_review_result = d.final_review_result;
+    if (d.usage) lastRun.usage = d.usage;
+    if (d.project_id) lastRun.project_id = d.project_id;
+    lastRun.logs = (lastRun.logs||[]).concat(d.logs||[]);
+    renderResults(lastRun);
     renderFinal(d.final_draft);
-    showLogs((lastRun.logs||[]).concat(d.logs||[]));
+    showLogs(lastRun.logs);
+    loadHistory();
     document.getElementById("revreq").value = "";
   } catch (e) {
     alert("수정 실패: " + e.message);
@@ -317,6 +335,10 @@ function downloadJson() {
 }
 async function downloadDocx() {
   if (!lastRun) return;
+  // item 9: fallback/더미가 섞인 결과를 정식 산출물로 내려받기 전 경고
+  if ((lastRun.run_status || "success") !== "success") {
+    if (!confirm("이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 DOCX로 내려받을까요?")) return;
+  }
   const name = lastRun.structured_input?.project_name || "plan";
   try {
     const r = await fetch("/export/docx", {method:"POST", headers:{"Content-Type":"application/json"},
@@ -348,6 +370,7 @@ async function loadProject(id) {
     if (!r.ok) throw new Error("서버 오류 " + r.status);
     const d = await r.json();
     lastRun = d.state;
+    lastRun.project_id = d.id;          // 이력에서 불러온 뒤에도 /revise가 같은 레코드를 갱신하도록
     showLogs(d.state.logs || []);
     renderResults(d.state);
     renderFinal(d.state.final_draft || "");
