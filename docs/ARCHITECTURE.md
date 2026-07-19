@@ -199,7 +199,7 @@ def _validate(result, fallback):
 
 ### ADR-4. 더미 모드 (키 없이 골격 검증)
 - **결정**: 키가 없거나 `USE_DUMMY=1`이면 각 호출부의 fallback을 그대로 반환.
-- **배경**: API 비용 없이 파이프라인 흐름·테스트를 돌려야 함(pytest 44개가 LLM 없이 검증).
+- **배경**: API 비용 없이 파이프라인 흐름·테스트를 돌려야 함(pytest 59개가 LLM 없이 검증).
 - **결과**: CI/개발이 무비용·결정적. 대신 더미 산출물은 품질 검증엔 못 씀.
 
 ### ADR-5. 웹검색 grounding + 실제 출처 강제 병합
@@ -257,6 +257,16 @@ def _validate(result, fallback):
 - **결정**: `/revise`는 `project_id`가 있으면 저장된 상태를 근거로 삼아 재작성하고(출처 유지), 최종본을 재평가한 뒤 **기존 레코드를 갱신**(`store.update_run`)한다. 응답에 수정횟수·관측치·재평가 점수·id를 포함.
 - **배경**: 기존 `/revise`는 DB에 반영되지 않아 이력 재조회 시 수정 전 문서가 나왔고, 응답도 빈약했음.
 - **결과**: 수정 결과가 이력·표시 점수와 정합. `project_id` 없이 호출하면 신규 저장으로 폴백. (더 엄밀히는 전 State 복원이 이상적 — 현재는 저장된 state_json 범위 내 복원)
+
+### ADR-16. 비교실험 범위의 정직한 명명 (item 6)
+- **결정**: 비교를 "단일 LLM vs Multi-Agent"가 아니라 **"단일 프롬프트 방식 vs 근거 기반 Multi-Agent 파이프라인"**으로 명명하고, 분업 효과와 웹검색 효과가 함께 측정됨을 문서·발표에 명시.
+- **배경**: Multi 쪽은 웹검색 + 다수 LLM 호출 + Reviewer/재작성/편집을 더 쓰므로, 결과가 "역할 분업 그 자체"의 효과만 증명하지는 않음.
+- **결과**: 과장 없는 주장 유지. 순수 분업 효과 분리는 `단일 Agent + 동일 웹검색 자료` 기준선 추가로 향후 가능(구현은 범위 밖, 명명·프레이밍만 조정).
+
+### ADR-17. 재현성 고정 + 정적 검사 (item 12)
+- **결정**: 직접 의존성은 `requirements.txt`(하한), 발표/재현 환경은 `requirements-lock.txt`(pip freeze 고정). `.gitattributes`(`* text=auto eol=lf`)로 줄바꿈 정규화. `ruff`로 정적 검사.
+- **배경**: `>=`만으로는 라이브러리 업데이트로 발표 직전 깨질 수 있고, OneDrive/Windows의 CRLF가 Linux 제출 환경에서 "전체 파일 수정"으로 보임.
+- **결과**: 재현 가능한 환경 + 일관된 줄바꿈. 기존 파일의 일괄 재정규화(`git add --renormalize .`)는 OneDrive 파일 잠금 위험이 있어 필요 시 별도 수행.
 
 ---
 
@@ -362,5 +372,6 @@ uvicorn app.main:app --reload     # 서버 → http://localhost:8000/
 python run_compare.py             # 단일 vs 멀티 (6주제)
 python run_multimodel.py          # 생성 모델별 (심판 고정)
 python run_demo.py                # 파이프라인 관통 데모
-pytest -q                         # 회귀 테스트 44개(무비용)
+pytest -q                         # 회귀 테스트 59개(무비용)
+ruff check .                       # 정적 검사(무비용)
 ```

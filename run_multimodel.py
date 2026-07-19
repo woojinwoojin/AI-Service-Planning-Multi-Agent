@@ -54,7 +54,8 @@ def _avg(results: list[dict], side: str, field: str) -> float:
 
 def main() -> None:
     if is_dummy():
-        _p("더미 모드입니다. 실제 LLM 키가 필요합니다."); return
+        _p("더미 모드입니다. 실제 LLM 키가 필요합니다.")
+        return
 
     _PARTIAL.parent.mkdir(exist_ok=True)
     cache = json.loads(_PARTIAL.read_text(encoding="utf-8")) if _PARTIAL.exists() else {}

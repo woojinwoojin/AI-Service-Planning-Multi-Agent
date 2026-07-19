@@ -119,9 +119,11 @@ def main() -> None:
     docs = Path("docs")
     docs.mkdir(exist_ok=True)
     md = [
-        "# 단일 LLM vs Multi-Agent 비교실험 결과\n",
+        "# 단일 프롬프트 방식 vs 근거 기반 Multi-Agent 파이프라인 비교 결과\n",
         f"> 주제 {len(TOPICS)}개 · 모델 `{model or '더미'}` · 같은 심판(COMPARE_JUDGE)·같은 5개 기준"
         f" · 플랜당 심판 {compare.JUDGE_SAMPLES}회 평균\n",
+        "> 정직한 범위: 단일 프롬프트 1회 vs (웹검색+단계별 분석·검토 포함) 파이프라인 전체 비교."
+        " 분업 효과와 웹검색 효과가 함께 측정됨. 분업 효과만 분리하려면 `단일+동일 웹검색` 기준선 필요(향후).\n",
         "## 평균 점수표\n",
         table_md,
         "\n## 주제별 총점\n",
