@@ -98,7 +98,7 @@ def aggregate(results: list[dict]) -> dict:
         "single": round(sum(r["single"]["judge"]["total"] for r in results) / n, 1),
         "multi": round(sum(r["multi"]["judge"]["total"] for r in results) / n, 1),
     }
-    # 객관 지표: 검증 가능한 실제 출처 수 (LLM 채점 아님)
+    # 객관 지표: 기획서에 포함된 고유 출처 URL 수 (LLM 채점 아님, 포함 개수만 카운트)
     table["citations"] = {
         "single": round(sum(r["single"]["citations"] for r in results) / n, 1),
         "multi": round(sum(r["multi"]["citations"] for r in results) / n, 1),

@@ -42,16 +42,20 @@ _MAX_REFS = 8  # 참고자료 과다 나열 방지(문서 균형)
 def _append_references(text: str, sources: list) -> str:
     """Research가 확보한 실제 출처(URL 등)를 '참고자료' 섹션으로 최종 문서에 인용한다.
 
-    웹검색 grounding을 최종 산출물까지 흘려보내는 단계. 기존 참고자료 섹션은
-    중복되지 않게 제거하고 다시 붙인다. 출처가 없으면 원문 그대로 둔다.
-    목록이 문서를 압도하지 않도록 최대 _MAX_REFS개까지만 싣는다.
+    웹검색 grounding을 최종 산출물까지 흘려보내는 단계. 새 출처가 있으면 기존 참고자료
+    섹션을 중복 없이 제거하고 다시 붙인다. 목록이 문서를 압도하지 않도록 최대
+    _MAX_REFS개까지만 싣는다.
+
+    새로 붙일 출처가 없으면(sources 가 비면) 본문을 그대로 반환한다 — 이때 기존
+    '## 참고자료' 섹션을 절대 지우지 않는다. /revise 는 research_result 를 넘기지
+    않아 sources 가 비므로, 여기서 섹션을 잘라내면 재작성 시 인용이 통째로 사라진다.
     """
-    idx = text.find(_REF_HEADER)
-    if idx != -1:
-        text = text[:idx].rstrip()
     real = [s.strip() for s in (sources or []) if isinstance(s, str) and s.strip()][:_MAX_REFS]
     if not real:
         return text.rstrip()
+    idx = text.find(_REF_HEADER)
+    if idx != -1:
+        text = text[:idx].rstrip()
     return "\n".join([text.rstrip(), "", _REF_HEADER, ""] + [f"- {s}" for s in real])
 
 
