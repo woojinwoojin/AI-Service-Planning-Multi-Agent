@@ -70,18 +70,39 @@ def _dummy(draft: str) -> dict:
     }
 
 
-def reviewer(state: ProjectState) -> dict:
-    draft = state.get("draft", "")
+def _review(draft: str, model: str) -> tuple[dict, dict]:
+    """기획서 하나를 5항목으로 평가해 (검증된 결과, status)를 반환. 초안/최종본 평가 공통."""
     fallback = _dummy(draft)
-
-    user = f"아래 기획서 초안을 평가 기준에 따라 심사하세요.\n\n{draft}"
     status: dict = {}
-    raw = llm.complete_json(REVIEWER_SYSTEM, user, fallback=fallback,
-                            model=state.get("model", ""), status=status)
-    result = _validate(raw, fallback)
+    raw = llm.complete_json(
+        REVIEWER_SYSTEM, f"아래 기획서를 평가 기준에 따라 심사하세요.\n\n{draft}",
+        fallback=fallback, model=model, status=status,
+    )
+    return _validate(raw, fallback), status
 
+
+def reviewer(state: ProjectState) -> dict:
+    """초안 평가. review_result(재작성 판단용)와 initial_review_result(기록용)에 저장."""
+    result, status = _review(state.get("draft", ""), state.get("model", ""))
     mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [
-        f"[reviewer] 평가 완료 (총점={result['total_score']}, {mode})"
+        f"[reviewer] 초안 평가 완료 (총점={result['total_score']}, {mode})"
     ]
-    return {"review_result": result, "logs": logs}
+    return {"review_result": result, "initial_review_result": result, "logs": logs}
+
+
+def final_reviewer(state: ProjectState) -> dict:
+    """최종본(재작성·일관성 편집 후) 재평가.
+
+    UI·이력에 표시되는 점수가 '실제로 보여주는 최종 문서'와 일치하도록, 초안 점수와
+    별개로 최종본을 다시 채점해 final_review_result에 저장한다. 초안 대비 변화(Δ)도 로그에 남긴다.
+    """
+    result, status = _review(state.get("final_draft", "") or state.get("draft", ""), state.get("model", ""))
+    initial = state.get("initial_review_result") or state.get("review_result") or {}
+    before = initial.get("total_score")
+    delta = f", Δ{result['total_score'] - before:+d} vs 초안" if isinstance(before, int) else ""
+    mode = llm.mode_label(status, state.get("model", ""))
+    logs = state.get("logs", []) + [
+        f"[final_reviewer] 최종본 재평가 완료 (총점={result['total_score']}{delta}, {mode})"
+    ]
+    return {"final_review_result": result, "logs": logs}
