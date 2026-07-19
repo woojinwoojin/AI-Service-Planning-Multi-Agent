@@ -1,6 +1,6 @@
 # 아키텍처 · 설계 결정(ADR) · 주요 코드
 
-> 갱신: 2026-07-19 · 대상: 현재 main(11-노드 Multi-Agent) · 코드 근거를 함께 표기
+> 갱신: 2026-07-19 · 대상: 현재 main(12-노드 Multi-Agent) · 코드 근거를 함께 표기
 > 관련 문서: [`../README.md`](../README.md) · [`ROADMAP.md`](ROADMAP.md) · [`PRD.md`](PRD.md)
 
 이 문서는 **"왜 이렇게 만들었는가"(설계 결정)**와 **"어디를 보면 되는가"(주요 코드)**를 한곳에 모은 개발자용 레퍼런스입니다.
@@ -44,7 +44,7 @@
 └────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 워크플로 (11-노드)
+### 2.2 워크플로 (12-노드)
 
 `app/graph/workflow.py:build_graph`
 
@@ -53,11 +53,12 @@ START → preprocess → research → competitor → customer → pestel → swo
       → business_model → risk → draft → reviewer
       → (reviewer 총점 < 90 이고 재작성 0회면) revise ─┐
       → (아니면)                              finalize ─┤
-                                                       └→ polish → verify → END
+                                          └→ polish → final_reviewer → verify → END
 ```
 
 - **조건 분기**(`_needs_revision`): Reviewer 총점 `< PASS_SCORE(90)` && `revision_count < 1` 이면 `revise`, 아니면 `finalize`. 자동 재작성은 **최대 1회**.
-- **분기 후 합류**: `revise`/`finalize` 모두 `polish → verify`로 합류해, 재작성 여부와 무관하게 일관성 편집·출처 검증을 거친다.
+- **분기 후 합류**: `revise`/`finalize` 모두 `polish → final_reviewer → verify`로 합류해, 재작성 여부와 무관하게 일관성 편집·최종 재평가·출처 검증을 거친다.
+- **최종 재평가**(`final_reviewer`): 초안 평가(`reviewer`)와 별개로 재작성·편집이 끝난 최종본을 다시 채점해, 화면·이력에 표시되는 점수가 실제 최종 문서와 일치하도록 한다(→ item 3).
 
 ### 2.3 노드별 역할
 
@@ -72,10 +73,11 @@ START → preprocess → research → competitor → customer → pestel → swo
 | business_model | `agents/business_model.py` | 수익원·가격·비용·지표 | `business_model_result` |
 | risk | `agents/risk.py` | 리스크(가능성·영향·대응) | `risk_result` |
 | draft | `agents/draft_writer.py:draft` | 고정 14섹션 기획서 + 출처 인용 | `draft` |
-| reviewer | `agents/reviewer.py` | 5항목 100점 + 개선지시 | `review_result` |
+| reviewer | `agents/reviewer.py:reviewer` | 초안 5항목 100점 + 개선지시 | `review_result`·`initial_review_result` |
 | revise | `agents/draft_writer.py:revise` | 개선지시 반영 1회 재작성 | `final_draft` |
 | finalize | `graph/workflow.py:_finalize` | 재작성 없이 초안 확정 | `final_draft` |
 | polish | `agents/draft_writer.py:polish` | 섹션 중복 제거·연결 보강 | `final_draft` |
+| final_reviewer | `agents/reviewer.py:final_reviewer` | 최종본 재평가(표시 점수) | `final_review_result` |
 | verify | `agents/verifier.py` | 주장↔근거 대조, 지지율 | `verification_result` |
 
 ---
@@ -252,7 +254,7 @@ def _validate(result, fallback):
 | 웹검색 쿼리·출처 병합 | `agents/research.py:_build_query`, `_merge_sources` |
 | 기획서 서식(14섹션) | `agents/draft_writer.py:SECTIONS`, `draft`, `_append_references` |
 | 일관성 편집 안전장치 | `agents/draft_writer.py:polish`, `_missing_sections` |
-| 심사 기준·점수 | `agents/reviewer.py`, 비교 기준은 `services/compare.py:CRITERIA` |
+| 심사 기준·점수(초안/최종) | `agents/reviewer.py:reviewer`, `final_reviewer`, `_review`; 비교 기준은 `services/compare.py:CRITERIA` |
 | 비교 채점·집계 | `services/compare.py:judge`, `run_topic`, `aggregate`, `count_citations` |
 | 이력 저장/조회 | `services/store.py:save_run`, `list_projects`, `get_project` |
 | 관측치 집계 | `services/usage.py:start`, `record`, `summary` |

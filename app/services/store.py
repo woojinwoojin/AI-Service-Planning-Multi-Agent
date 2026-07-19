@@ -37,7 +37,8 @@ def save_run(state: dict) -> int:
     """실행 상태를 저장하고 새 프로젝트 id를 반환."""
     si = state.get("structured_input") or {}
     name = si.get("project_name") or (state.get("user_input") or {}).get("project_name") or "제목 없는 프로젝트"
-    total = (state.get("review_result") or {}).get("total_score")
+    # 이력의 총점은 실제 최종 문서 점수(final_review_result) 우선, 없으면 초안 점수로 대체
+    total = (state.get("final_review_result") or state.get("review_result") or {}).get("total_score")
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
     payload = {k: state.get(k) for k in _RUN_KEYS}
     with _conn() as conn:

@@ -23,9 +23,11 @@ class ProjectState(TypedDict, total=False):
     risk_result: dict
     pestel_result: dict
     draft: str
-    review_result: dict
+    review_result: dict          # 재작성 판단에 쓰는 초안 평가 (= initial_review_result)
+    initial_review_result: dict  # 초안 평가(기록용)
     final_draft: str
     revision_count: int
+    final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     logs: list  # 실행 로그 / 진행 상태 표시용
 
@@ -78,8 +80,10 @@ class RunResult(BaseModel):
     pestel_result: dict
     draft: str
     review_result: dict
+    initial_review_result: dict = Field(default_factory=dict)  # 초안 평가
     final_draft: str
     revision_count: int
+    final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)

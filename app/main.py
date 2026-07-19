@@ -17,8 +17,8 @@ STATIC_DIR = Path(__file__).parent / "static"
 app = FastAPI(
     title="AI 서비스 기획 보조 Multi-Agent",
     description=(
-        "11-노드 Multi-Agent 기획서 자동화 · Research·Competitor·Customer·PESTEL·SWOT·"
-        "Business Model·Risk·Draft·Reviewer·Polish·Verify (웹검색 grounding + 출처 인용)"
+        "12-노드 Multi-Agent 기획서 자동화 · Research·Competitor·Customer·PESTEL·SWOT·"
+        "Business Model·Risk·Draft·Reviewer·Polish·Final Reviewer·Verify (웹검색 grounding + 출처 인용)"
     ),
     version="0.1.0",
 )

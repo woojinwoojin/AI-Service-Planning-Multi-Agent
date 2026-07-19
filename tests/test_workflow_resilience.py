@@ -30,7 +30,8 @@ def test_pipeline_completes_despite_llm_failure(force_real_llm):
         "target_user": "U", "problem": "P", "model": "gpt-4o-mini",
     })
     for key in ["structured_input", "research_result", "pestel_result",
-                "draft", "review_result", "final_draft"]:
+                "draft", "review_result", "initial_review_result",
+                "final_draft", "final_review_result"]:
         assert state.get(key), f"누락 산출물: {key}"
     # fallback이 로그에 정직하게 표면화되는지
     joined = json.dumps(state["logs"], ensure_ascii=False)
