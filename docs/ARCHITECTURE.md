@@ -57,7 +57,7 @@ START → preprocess → research → competitor → customer → pestel → swo
 ```
 
 - **조건 분기**(`_needs_revision`): Reviewer 총점 `< PASS_SCORE(90)` && `revision_count < 1` 이면 `revise`, 아니면 `finalize`. 자동 재작성은 **최대 1회**.
-- **분기 후 합류**: `revise`/`finalize` 모두 `polish → final_reviewer → verify`로 합류해, 재작성 여부와 무관하게 일관성 편집·최종 재평가·출처 검증을 거친다.
+- **분기 후 합류**: `revise`/`finalize` 모두 `polish → final_reviewer → verify`로 합류해, 재작성 여부와 무관하게 일관성 편집·최종 재평가·근거 일치성 검증을 거친다.
 - **최종 재평가**(`final_reviewer`): 초안 평가(`reviewer`)와 별개로 재작성·편집이 끝난 최종본을 다시 채점해, 화면·이력에 표시되는 점수가 실제 최종 문서와 일치하도록 한다(→ item 3).
 
 ### 2.3 노드별 역할
@@ -78,7 +78,7 @@ START → preprocess → research → competitor → customer → pestel → swo
 | finalize | `graph/workflow.py:_finalize` | 재작성 없이 초안 확정 | `final_draft` |
 | polish | `agents/draft_writer.py:polish` | 섹션 중복 제거·연결 보강 | `final_draft` |
 | final_reviewer | `agents/reviewer.py:final_reviewer` | 최종본 재평가(표시 점수) | `final_review_result` |
-| verify | `agents/verifier.py` | 주장↔근거 대조, 지지율 | `verification_result` |
+| verify | `agents/verifier.py` | 근거 일치성 검증(주장↔조사결과 대조, URL 접속 아님), 지지율 | `verification_result` |
 
 ---
 
@@ -237,6 +237,16 @@ def _validate(result, fallback):
 - **결정**: `/models`로 provider별 모델 노출, `resolve_model`이 허용목록 외 요청을 기본값으로 흡수.
 - **배경**: 사용자가 모델을 고를 수 있게 하되, 잘못된/타 provider 모델로 죽으면 안 됨.
 - **결과**: 유연한 모델 선택 + 런타임 안전. 새 모델은 `AVAILABLE_MODELS`에만 추가하면 반영.
+
+### ADR-12. 검색 결과 프롬프트 인젝션 방어 (item 11)
+- **결정**: 웹 검색 결과를 넣는 Agent(research·competitor)에 `UNTRUSTED_SEARCH_GUARD`를 부착하고, 주입되는 히트를 `<검색결과>…</검색결과>` 구획으로 감싸 '신뢰 불가 데이터'임을 명시.
+- **배경**: Tavily가 가져온 웹문서 본문에 "이전 지시를 무시하라" 류의 간접 프롬프트 인젝션이 섞일 수 있음.
+- **결과**: 검색 내용의 지시문을 따르지 않도록 방어(저비용·고효과). 완전 차단은 아니며, 신뢰도 필터·게시일·공공기관 우선순위는 향후 과제.
+
+### ADR-13. 검증 Agent 명칭 정직화 (item 5)
+- **결정**: 'Verifier'를 "출처 검증"이 아니라 **"근거 일치성 검증"**으로 명명. 프롬프트·로그·UI·문서에 URL 원문 접속을 하지 않음을 명시.
+- **배경**: 실제 구현은 기획서 주장을 '앞 단계 조사 결과 텍스트'와 대조할 뿐, URL 접속→원문 추출→대조를 하지 않음. "출처 검증"은 구현보다 강한 표현.
+- **결과**: 명칭이 구현 수준과 일치(프로젝트 "정직성" 원칙). 엄밀한 출처 검증(URL 접속·원문 대조)은 향후 과제.
 
 ---
 

@@ -227,7 +227,7 @@ function renderResults(d) {
     <h3 style="margin-top:16px">Reviewer 평가 · 최종본 총점 <span class="total">${finalScore ?? "-"}</span>/100${scoreDelta} (재작성 ${d.revision_count ?? 0}회)</h3>
     <div class="scores">${scoreChips}</div>
     <h3 style="margin-top:12px">개선 지시 <span class="muted">(초안 기준)</span></h3>${listOf(rv.revision_instructions)}
-    <h3 style="margin-top:16px">출처 검증 · 지지 <span class="total">${vf.supported ?? 0}</span>/${vf.total ?? 0} (지지율 ${Math.round((vf.support_rate ?? 0)*100)}%)</h3>
+    <h3 style="margin-top:16px">근거 일치성 검증 · 지지 <span class="total">${vf.supported ?? 0}</span>/${vf.total ?? 0} (지지율 ${Math.round((vf.support_rate ?? 0)*100)}%) <span class="muted">주장↔조사결과 대조</span></h3>
     ${(vf.claims||[]).length ? "<table><thead><tr><th>주장</th><th>판정</th><th>근거</th></tr></thead><tbody>"
       + vf.claims.map(c=>`<tr><td>${esc(c.claim)}</td><td>${esc(c.status)}</td><td>${esc(c.basis)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>'}
