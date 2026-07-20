@@ -33,6 +33,7 @@ class ProjectState(TypedDict, total=False):
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
     fallback_nodes: list # fallback/더미로 처리된 노드
+    fallback_reasons: dict  # {노드: 원인(혼잡/연결/형식/처리)} — 사용자 안내용
 
 
 # ---- API 입출력 ----
@@ -105,3 +106,4 @@ class RunResult(BaseModel):
     run_status: str = "success"                    # 실행 품질: success/degraded/failed
     failed_nodes: list = Field(default_factory=list)
     fallback_nodes: list = Field(default_factory=list)
+    fallback_reasons: dict = Field(default_factory=dict)  # {노드: 원인} 사용자 안내용

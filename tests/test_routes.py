@@ -92,3 +92,18 @@ def test_run_stream_emits_node_events_and_done(client):
     assert types[-1] == "done"                            # 마지막은 done
     assert result and result["project_id"] > 0            # 결과 포함 + 이력 저장
     assert result["final_draft"]
+
+
+def test_fallback_reasons_surface_to_api(client, monkeypatch):
+    """호출 실패(혼잡)가 발생하면 노드별 원인이 응답에 표면화된다(‘[더미]’ 대신 정직한 안내용)."""
+    from app.services import llm
+
+    def boom(*a, **k):
+        raise llm.LLMError("busy", reason="혼잡")
+
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)   # 실제 모드로 간주
+    monkeypatch.setattr(llm, "_invoke_with_retry", boom)  # 모든 LLM 호출이 혼잡으로 실패
+    d = client.post("/run", json={"project_name": "혼잡", "problem": "P"}).json()
+    assert d["run_status"] == "degraded"                  # 실패가 아니라 fallback로 흡수
+    assert d["fallback_reasons"]                           # 노드별 원인 맵 존재
+    assert "혼잡" in d["fallback_reasons"].values()        # 분류된 원인이 전달됨

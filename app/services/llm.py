@@ -22,7 +22,29 @@ load_dotenv()
 
 
 class LLMError(RuntimeError):
-    """LLM 호출이 재시도 후에도 실패했음을 나타낸다."""
+    """LLM 호출이 재시도 후에도 실패했음을 나타낸다.
+
+    reason: 사용자에게 정직하게 안내하기 위한 원인 분류.
+      혼잡(레이트리밋/서버 과부하) | 연결(그 외 호출/네트워크 오류)
+    """
+
+    def __init__(self, msg: str, reason: str = "연결") -> None:
+        super().__init__(msg)
+        self.reason = reason
+
+
+def _classify_error(exc: Exception) -> str:
+    """예외를 사용자 안내용 원인으로 분류. 레이트리밋/과부하는 '혼잡', 나머지는 '연결'.
+
+    provider(OpenAI/Anthropic)마다 예외 형태가 달라, 상태코드·클래스명·메시지를 두루 본다.
+    """
+    status = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
+    name = type(exc).__name__.lower()
+    text = f"{status} {exc}".lower()
+    busy_keys = ("rate limit", "ratelimit", "too many requests", "overloaded", "overload", "429", "503", "529")
+    if status in (429, 503, 529) or "ratelimit" in name or "overload" in name or any(k in text for k in busy_keys):
+        return "혼잡"
+    return "연결"
 
 
 def _invoke_with_retry(chat, system: str, user: str, attempts: int = 2):
@@ -40,7 +62,7 @@ def _invoke_with_retry(chat, system: str, user: str, attempts: int = 2):
             return chat.invoke([("system", system), ("human", user)])
         except Exception as exc:  # provider별 예외 종류가 다양하므로 광범위하게 잡는다
             last_err = exc
-    raise LLMError(str(last_err)) from last_err
+    raise LLMError(str(last_err), reason=_classify_error(last_err)) from last_err
 
 
 def _env(key: str, default: str = "") -> str:
@@ -195,7 +217,7 @@ def complete_text(system: str, user: str, *, fallback: str = "", model: str = ""
     except Exception as exc:
         _warn(f"complete_text 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
         usage.record(resolve_model(model), 0, 0, 0, True)
-        _flag(status, "호출오류")
+        _flag(status, getattr(exc, "reason", "처리"))  # LLMError면 혼잡/연결, 그 외(모델 초기화 등)는 처리
         return fallback
 
 
@@ -214,7 +236,7 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
     except Exception as exc:
         _warn(f"모델 초기화 실패 → fallback 사용 ({type(exc).__name__}: {exc})")
         usage.record(resolve_model(model), 0, 0, 0, True)
-        _flag(status, "호출오류")
+        _flag(status, "처리")  # 모델/provider 설정 문제
         return fallback
 
     prompt_user = user
@@ -224,7 +246,7 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
         except LLMError as exc:
             _warn(f"complete_json 호출 실패 → fallback 사용 ({exc})")
             usage.record(resolve_model(model), 0, 0, 0, True)
-            _flag(status, "호출오류")
+            _flag(status, exc.reason)  # 혼잡/연결
             return fallback
         content = resp.content if isinstance(resp.content, str) else str(resp.content)
         try:
@@ -233,5 +255,5 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
             if attempt == 0:
                 prompt_user = user + "\n\n반드시 유효한 JSON 객체만 출력하세요."
                 continue
-    _flag(status, "파싱실패")
+    _flag(status, "형식")  # 재시도 후에도 유효 JSON 아님
     return fallback
