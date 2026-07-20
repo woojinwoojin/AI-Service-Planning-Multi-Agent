@@ -136,7 +136,8 @@ def _assess_quality(state: ProjectState) -> dict:
     return {"run_status": status, "failed_nodes": failed, "fallback_nodes": fallback}
 
 
-def run_workflow(user_input: dict) -> ProjectState:
+def _prepare_run(user_input: dict):
+    """실행 초기 상태와 Langfuse config를 만든다(invoke/stream 공통)."""
     initial: ProjectState = {
         "user_input": user_input,
         "model": (user_input.get("model") or "").strip(),
@@ -145,11 +146,41 @@ def run_workflow(user_input: dict) -> ProjectState:
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
     idea = (user_input.get("project_name") or user_input.get("description") or "planning-run")
     trace_name = str(idea)[:80]
-    # 콜백을 GRAPH.invoke 한 곳에만 실으면 각 노드/LLM 호출이 하나의 Langfuse 트레이스로 중첩된다.
+    # 콜백을 GRAPH 실행 한 곳에만 실으면 각 노드/LLM 호출이 하나의 Langfuse 트레이스로 중첩된다.
     # (키 없으면 run_config가 빈 dict → 관측성 무영향)
     config = tracing.run_config(trace_name, langfuse_tags=[initial["model"] or llm.default_model()])
-    state = GRAPH.invoke(initial, config=config or None)
+    return initial, (config or None)
+
+
+def _finalize_run(state: ProjectState) -> ProjectState:
+    """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     return state
+
+
+def run_workflow(user_input: dict) -> ProjectState:
+    initial, config = _prepare_run(user_input)
+    state = GRAPH.invoke(initial, config=config)
+    return _finalize_run(state)
+
+
+def run_workflow_stream(user_input: dict):
+    """워크플로를 스트리밍 실행하며 노드 완료 이벤트를 yield하고, 마지막에 최종 state를 yield한다.
+
+    - GRAPH.stream(stream_mode="updates")로 각 노드 완료 직후 부분 업데이트를 받는다.
+    - 각 노드는 완결된 값을 반환하므로(dict.update로 누적) 최종 state는 invoke 결과와 동일하다.
+    - yield 형식: {"type": "node", "node": name, "order": n}
+                  {"type": "done", "state": <최종 ProjectState>}
+    """
+    initial, config = _prepare_run(user_input)
+    state: ProjectState = dict(initial)
+    order = 0
+    for chunk in GRAPH.stream(initial, config=config, stream_mode="updates"):
+        for node, update in chunk.items():
+            if isinstance(update, dict):
+                state.update(update)
+            order += 1
+            yield {"type": "node", "node": node, "order": order}
+    yield {"type": "done", "state": _finalize_run(state)}
