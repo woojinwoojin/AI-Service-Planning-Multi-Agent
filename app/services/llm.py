@@ -30,6 +30,9 @@ def _invoke_with_retry(chat, system: str, user: str, attempts: int = 2):
 
     8일 차: 관통 중 일시적 LLM 오류(레이트리밋/네트워크)가 파이프라인 전체를
     중단시키지 않도록, 호출부(complete_*)가 이 예외를 잡아 fallback으로 넘어간다.
+
+    관측성(Langfuse): 콜백은 run_workflow가 GRAPH.invoke에 실어주며, LangChain의
+    config 전파로 이 chat.invoke까지 자동으로 내려온다(여기서 별도 배선 불필요).
     """
     last_err: Exception | None = None
     for _ in range(attempts):

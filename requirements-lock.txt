@@ -119,6 +119,7 @@ langchain-google-genai==3.2.0
 langchain-openai==1.1.0
 langchain-protocol==0.0.18
 langchain-upstage==0.7.7
+langfuse==4.14.0
 langgraph==1.0.4
 langgraph-checkpoint==3.0.1
 langgraph-prebuilt==1.0.5
@@ -151,12 +152,13 @@ openai==2.8.1
 opencv-contrib-python==4.12.0.88
 opencv-python==4.12.0.88
 openpyxl==3.1.5
-opentelemetry-api==1.38.0
-opentelemetry-exporter-otlp-proto-common==1.38.0
+opentelemetry-api==1.44.0
+opentelemetry-exporter-otlp-proto-common==1.44.0
 opentelemetry-exporter-otlp-proto-grpc==1.38.0
-opentelemetry-proto==1.38.0
-opentelemetry-sdk==1.38.0
-opentelemetry-semantic-conventions==0.59b0
+opentelemetry-exporter-otlp-proto-http==1.44.0
+opentelemetry-proto==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
 optional-django==0.1.0
 orjson==3.11.4
 ormsgpack==1.12.0
@@ -283,6 +285,7 @@ websocket-client==1.8.0
 websockets==15.0.1
 widgetsnbextension==4.0.14
 win32_setctime==1.2.0
+wrapt==2.2.2
 xxhash==3.6.0
 yarl==1.24.2
 zipp==3.23.0

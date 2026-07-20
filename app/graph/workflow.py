@@ -16,7 +16,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import llm, usage
+from app.services import llm, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -143,7 +143,13 @@ def run_workflow(user_input: dict) -> ProjectState:
         "logs": [],
     }
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
-    state = GRAPH.invoke(initial)
+    idea = (user_input.get("project_name") or user_input.get("description") or "planning-run")
+    trace_name = str(idea)[:80]
+    # 콜백을 GRAPH.invoke 한 곳에만 실으면 각 노드/LLM 호출이 하나의 Langfuse 트레이스로 중첩된다.
+    # (키 없으면 run_config가 빈 dict → 관측성 무영향)
+    config = tracing.run_config(trace_name, langfuse_tags=[initial["model"] or llm.default_model()])
+    state = GRAPH.invoke(initial, config=config or None)
+    tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     return state
