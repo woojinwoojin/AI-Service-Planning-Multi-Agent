@@ -76,6 +76,11 @@
   .notice span { color:var(--muted); }
   .notice .retry { margin-top:8px; }
   .notice .retry button { background:#fff; color:var(--warn); border:1px solid #f0b986; padding:5px 11px; font-size:12px; }
+  /* 환각 경고(근거 미확인 주장) — 실패 안내와 구분되는 적색 톤 */
+  .notice.halluc { background:#fdecec; border-color:#f3c0c0; color:#b42318; }
+  .notice.halluc b { color:#961b12; }
+  .notice.halluc ul { margin:8px 0 0 1.1em; }
+  .notice.halluc li { margin:2px 0; }
 
   /* 진행 표시 */
   .pbar { height:10px; background:var(--line); border-radius:6px; overflow:hidden; margin:4px 0 10px; }
@@ -300,6 +305,7 @@ function renderResults(d) {
       ${scoreDelta?`<span class="muted">${scoreDelta.replace(/<[^>]+>/g,"")}</span>`:""}
       <span class="chip">재작성 ${d.revision_count ?? 0}회</span>
       <span class="chip">검증 지지 ${vf.supported ?? 0}/${vf.total ?? 0}</span>
+      ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fdecec;color:#b42318">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}
     </div>`;
   const tabs = [
     ["market","시장·고객"],["compete","경쟁·SWOT"],["money","수익·리스크"],["pestel","PESTEL"],["eval","평가·검증"],
@@ -390,7 +396,12 @@ function renderFinal(md) {
   const head = writeReason
     ? `<div class="notice" style="margin-bottom:14px">⚠ <b>기획서 본문</b>을 완전히 생성하지 못했어요<br><span>${esc(REASON_MSG[writeReason]||REASON_MSG["처리"])}</span></div>`
     : "";
-  document.getElementById("finalDoc").innerHTML = head + renderMarkdown(md);
+  // 환각 경고: 검증에서 근거 미확인(unsupported)으로 판정된 주장을 문서 상단에 명시(사실로 오독 방지)
+  const unsup = ((lastRun && lastRun.verification_result) || {}).unsupported || [];
+  const halluc = unsup.length
+    ? `<div class="notice halluc" style="margin-bottom:14px">⚠ <b>근거가 확인되지 않은 주장 ${unsup.length}건</b> — 아래 내용은 사실로 신뢰하지 마세요(수치·통계는 특히 주의):<ul class="list">${unsup.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
+    : "";
+  document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md);
   document.getElementById("finalCard").classList.remove("hidden");
 }
 
