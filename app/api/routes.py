@@ -1,12 +1,14 @@
 """FastAPI 라우트 — 입력 API + 워크플로 실행."""
 from __future__ import annotations
 
+import json
 from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException, Response
+from fastapi.responses import StreamingResponse
 
 from app.agents import draft_writer, reviewer
-from app.graph.workflow import run_workflow
+from app.graph.workflow import run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
@@ -57,11 +59,8 @@ def suggest_input(payload: SuggestInput) -> dict:
     return suggest.suggest_fields(payload.project_name, payload.memo, payload.model)
 
 
-@router.post("/run", response_model=RunResult)
-def run(payload: ProjectInput) -> RunResult:
-    """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
-    state = run_workflow(payload.to_state_input())
-    project_id = store.save_run(state)
+def _result_payload(state: dict, project_id: int) -> RunResult:
+    """실행 state를 API 응답(RunResult)으로 변환(/run·/run/stream 공통)."""
     return RunResult(
         project_id=project_id,
         structured_input=state.get("structured_input", {}),
@@ -84,6 +83,43 @@ def run(payload: ProjectInput) -> RunResult:
         run_status=state.get("run_status", "success"),
         failed_nodes=state.get("failed_nodes", []),
         fallback_nodes=state.get("fallback_nodes", []),
+    )
+
+
+@router.post("/run", response_model=RunResult)
+def run(payload: ProjectInput) -> RunResult:
+    """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
+    state = run_workflow(payload.to_state_input())
+    project_id = store.save_run(state)
+    return _result_payload(state, project_id)
+
+
+@router.post("/run/stream")
+def run_stream(payload: ProjectInput) -> StreamingResponse:
+    """워크플로를 실행하며 노드 완료를 SSE로 실시간 전송한다(진행 표시·ETA용).
+
+    이벤트(각 줄 `data: {json}\\n\\n`):
+      {"type":"node","node":<노드명>,"order":n}  — 노드 하나 완료
+      {"type":"done","result":<RunResult>}        — 완료(결과 포함, 이력 저장됨)
+      {"type":"error","message":...}               — 실행 중 예외
+    """
+    def event_stream():
+        try:
+            for ev in run_workflow_stream(payload.to_state_input()):
+                if ev.get("type") == "done":
+                    state = ev["state"]
+                    project_id = store.save_run(state)
+                    payload_out = {"type": "done", "result": _result_payload(state, project_id).model_dump()}
+                    yield f"data: {json.dumps(payload_out, ensure_ascii=False)}\n\n"
+                else:
+                    yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
+        except Exception as exc:  # 스트림 도중 실패해도 클라이언트에 사유 전달
+            yield f"data: {json.dumps({'type': 'error', 'message': f'{type(exc).__name__}: {exc}'}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 

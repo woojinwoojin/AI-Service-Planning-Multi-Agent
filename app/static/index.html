@@ -70,6 +70,19 @@
   .list li::marker { color:var(--brand); }
   #results strong { color:var(--ink); font-weight:700; }
   .hl { background:linear-gradient(transparent 60%, var(--brand-weak) 0); font-weight:700; }
+
+  /* 진행 표시 */
+  .pbar { height:10px; background:var(--line); border-radius:6px; overflow:hidden; margin:4px 0 10px; }
+  .pbar-fill { height:100%; width:0; background:linear-gradient(90deg,var(--brand),#5c7cfa); border-radius:6px; transition:width .4s ease; }
+  .prog-meta { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:12px; }
+  .prog-meta b { color:var(--ink); }
+  .steps { display:flex; flex-direction:column; gap:4px; max-height:230px; overflow-y:auto; }
+  .stepline { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
+  .stepline .ic { width:16px; height:16px; border-radius:50%; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+  .stepline.done .ic { background:#e6f4ea; color:var(--ok); }
+  .stepline.done .ic::after { content:"✓"; }
+  .stepline .t { color:var(--ink); }
+  .stepline .d { color:var(--muted); font-size:12px; margin-left:auto; font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -110,6 +123,18 @@
     <div class="step">이력</div>
     <h2>저장된 프로젝트 <button class="ghost" style="padding:4px 10px;font-size:12px;margin-left:6px" onclick="loadHistory()">새로고침</button></h2>
     <div id="history"><span class="muted">아직 저장된 프로젝트가 없습니다.</span></div>
+  </section>
+
+  <!-- 진행 표시(실시간) -->
+  <section class="card hidden" id="progressCard">
+    <div class="step">진행 중</div>
+    <h2 id="progTitle">기획서 생성 중… <span id="progPct">0%</span></h2>
+    <div class="pbar"><div class="pbar-fill" id="progFill"></div></div>
+    <div class="prog-meta">
+      <span id="progStep">여러 Agent를 순차 실행합니다…</span>
+      <span>경과 <b id="progElapsed">0s</b> · 예상 남음 <b id="progEta">~2분</b></span>
+    </div>
+    <div class="steps" id="progSteps"></div>
   </section>
 
   <!-- 진행 로그 -->
@@ -347,12 +372,103 @@ async function suggestFields() {
   }
 }
 
-async function runWorkflow() {
+// 노드 → [한글 라벨, 예상 소요(초)] · 예상치는 Langfuse 실측 평균 기반(ETA는 실행 중 실측으로 보정)
+const NODE_META = {
+  preprocess:["입력 구조화",0.3], research:["시장조사",7], competitor:["경쟁사 분석",3],
+  customer:["고객 문제 분석",2], pestel:["PESTEL 분석",7], swot:["SWOT 분석",1.5],
+  business_model:["수익모델 설계",1.5], risk:["리스크 분석",2.5], draft:["초안 작성",10],
+  reviewer:["초안 평가",2.5], revise:["재작성",13], finalize:["초안 확정",0.3],
+  polish:["일관성 편집",10], final_reviewer:["최종본 평가",3.5], verify:["근거 검증",3.5],
+};
+// 예상 총 가중치(재작성 경로 기준, finalize 제외) — ETA 스케일 계산용
+const EXPECTED_TOTAL = Object.entries(NODE_META).filter(([k])=>k!=="finalize").reduce((s,[,v])=>s+v[1],0);
+
+let progTimer = null;
+
+function fmtSec(s){ s=Math.max(0,Math.round(s)); return s>=60 ? `${Math.floor(s/60)}분 ${s%60}s` : `${s}s`; }
+
+function progReset() {
+  document.getElementById("progressCard").classList.remove("hidden");
+  document.getElementById("progSteps").innerHTML = "";
+  document.getElementById("progFill").style.width = "0%";
+  document.getElementById("progPct").textContent = "0%";
+  document.getElementById("progStep").textContent = "여러 Agent를 순차 실행합니다…";
+  document.getElementById("progElapsed").textContent = "0s";
+  document.getElementById("progEta").textContent = "~2분";
+  document.getElementById("progTitle").firstChild.textContent = "기획서 생성 중… ";
+}
+
+function runStreaming(payload, onDone, onError) {
+  const start = performance.now();
+  let doneWeight = 0, lastNodeAt = start, etaSec = EXPECTED_TOTAL;
+  const stepsEl = document.getElementById("progSteps");
+
+  // 0.5초마다 경과·ETA 카운트다운을 갱신(노드 사이 긴 대기에도 살아있음을 표시)
+  progTimer = setInterval(() => {
+    const el = (performance.now() - start) / 1000;
+    document.getElementById("progElapsed").textContent = fmtSec(el);
+    const remain = etaSec - (performance.now() - lastNodeAt) / 1000;
+    document.getElementById("progEta").textContent = "~" + fmtSec(remain);
+  }, 500);
+
+  function onNode(node) {
+    const now = performance.now();
+    const dur = (now - lastNodeAt) / 1000; lastNodeAt = now;
+    const meta = NODE_META[node] || [node, 1];
+    doneWeight += meta[1];
+    // 진행바(가중치 비율) + ETA 보정: 실측 속도(rate) × 남은 가중치
+    const pct = Math.min(99, Math.round(doneWeight / EXPECTED_TOTAL * 100));
+    document.getElementById("progFill").style.width = pct + "%";
+    document.getElementById("progPct").textContent = pct + "%";
+    document.getElementById("progStep").innerHTML = `방금 완료: <b>${esc(meta[0])}</b>`;
+    const elapsed = (now - start) / 1000;
+    const rate = elapsed / Math.max(doneWeight, 0.1);
+    etaSec = Math.max(0, (EXPECTED_TOTAL - doneWeight) * rate);
+    const div = document.createElement("div");
+    div.className = "stepline done";
+    div.innerHTML = `<span class="ic"></span><span class="t">${esc(meta[0])}</span><span class="d">${dur.toFixed(1)}s</span>`;
+    stepsEl.appendChild(div);
+    stepsEl.scrollTop = stepsEl.scrollHeight;
+  }
+
+  function finish() {
+    clearInterval(progTimer); progTimer = null;
+    document.getElementById("progFill").style.width = "100%";
+    document.getElementById("progPct").textContent = "100%";
+  }
+
+  (async () => {
+    try {
+      const resp = await fetch("/run/stream", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
+      if (!resp.ok || !resp.body) throw new Error("서버 오류 " + resp.status);
+      const reader = resp.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, {stream:true});
+        let idx;
+        while ((idx = buf.indexOf("\n\n")) >= 0) {
+          const raw = buf.slice(0, idx); buf = buf.slice(idx + 2);
+          const line = raw.split("\n").find(l => l.startsWith("data: "));
+          if (!line) continue;
+          const ev = JSON.parse(line.slice(6));
+          if (ev.type === "node") onNode(ev.node);
+          else if (ev.type === "done") { finish(); onDone(ev.result); }
+          else if (ev.type === "error") { finish(); onError(new Error(ev.message)); return; }
+        }
+      }
+    } catch (e) { finish(); onError(e); }
+  })();
+}
+
+function runWorkflow() {
   const name = document.getElementById("project_name").value.trim();
   if (!name) { alert("프로젝트명을 입력하세요."); return; }
   const btn = document.getElementById("runBtn");
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span>생성 중…';
-  showLogs(["실행 요청을 보냈습니다. 여러 Agent 순차 실행 중…"]);
+  progReset();
+  document.getElementById("progressCard").scrollIntoView({behavior:"smooth"});
   const payload = {
     project_name: name,
     description: document.getElementById("description").value,
@@ -361,22 +477,25 @@ async function runWorkflow() {
     keywords: document.getElementById("keywords").value.split(",").map(s=>s.trim()).filter(Boolean),
     model: document.getElementById("model").value,
   };
-  try {
-    const r = await fetch("/run", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
-    if (!r.ok) throw new Error("서버 오류 " + r.status);
-    const d = await r.json();
-    lastRun = d;
-    showLogs(d.logs);
-    renderResults(d);
-    renderFinal(d.final_draft);
-    loadHistory();
-    document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
-  } catch (e) {
-    showLogs(["❌ 실행 실패: " + e.message]);
-    document.getElementById("logs").classList.add("err");
-  } finally {
-    btn.disabled = false; btn.textContent = "기획서 생성";
-  }
+  runStreaming(payload,
+    (result) => {
+      lastRun = result;
+      document.getElementById("progTitle").firstChild.textContent = "생성 완료 ";
+      document.getElementById("progStep").innerHTML = "✓ 모든 Agent 완료";
+      showLogs(result.logs);
+      renderResults(result);
+      renderFinal(result.final_draft);
+      loadHistory();
+      document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
+      btn.disabled = false; btn.textContent = "기획서 생성";
+    },
+    (e) => {
+      document.getElementById("progStep").innerHTML = `<span class="err">❌ 실행 실패: ${esc(e.message)}</span>`;
+      showLogs(["❌ 실행 실패: " + e.message]);
+      document.getElementById("logs").classList.add("err");
+      btn.disabled = false; btn.textContent = "기획서 생성";
+    }
+  );
 }
 
 async function reviseDraft() {

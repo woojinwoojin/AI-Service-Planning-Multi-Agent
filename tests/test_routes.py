@@ -70,3 +70,25 @@ def test_suggest_returns_fields_in_dummy_mode(client):
     assert set(d) == {"description", "target_user", "problem", "keywords"}
     assert isinstance(d["keywords"], list)
     assert d["description"]                                 # 더미라도 초안은 채워짐
+
+
+def test_run_stream_emits_node_events_and_done(client):
+    import json
+    with client.stream("POST", "/run/stream",
+                       json={"project_name": "스트림", "problem": "P"}) as r:
+        assert r.status_code == 200
+        assert "text/event-stream" in r.headers["content-type"]
+        types, nodes, result = [], [], None
+        for line in r.iter_lines():
+            if not line or not line.startswith("data: "):
+                continue
+            ev = json.loads(line[6:])
+            types.append(ev["type"])
+            if ev["type"] == "node":
+                nodes.append(ev["node"])
+            elif ev["type"] == "done":
+                result = ev["result"]
+    assert "preprocess" in nodes and "verify" in nodes   # 실제 노드 순차 완료 이벤트
+    assert types[-1] == "done"                            # 마지막은 done
+    assert result and result["project_id"] > 0            # 결과 포함 + 이력 저장
+    assert result["final_draft"]
