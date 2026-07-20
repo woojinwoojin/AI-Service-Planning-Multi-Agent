@@ -92,3 +92,37 @@ def test_run_stream_emits_node_events_and_done(client):
     assert types[-1] == "done"                            # 마지막은 done
     assert result and result["project_id"] > 0            # 결과 포함 + 이력 저장
     assert result["final_draft"]
+
+
+def test_fallback_reasons_surface_to_api(client, monkeypatch):
+    """호출 실패(혼잡)가 발생하면 노드별 원인이 응답에 표면화된다(‘[더미]’ 대신 정직한 안내용)."""
+    from app.services import llm
+
+    def boom(*a, **k):
+        raise llm.LLMError("busy", reason="혼잡")
+
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)   # 실제 모드로 간주
+    monkeypatch.setattr(llm, "_invoke_with_retry", boom)  # 모든 LLM 호출이 혼잡으로 실패
+    d = client.post("/run", json={"project_name": "혼잡", "problem": "P"}).json()
+    assert d["run_status"] == "degraded"                  # 실패가 아니라 fallback로 흡수
+    assert d["fallback_reasons"]                           # 노드별 원인 맵 존재
+    assert "혼잡" in d["fallback_reasons"].values()        # 분류된 원인이 전달됨
+
+
+def test_demo_fail_injection_via_payload(client, monkeypatch):
+    """UI 데모 토글: demo_fail_nodes로 지정한 노드만 실패해 fallback_reasons에 표면화."""
+    from app.services import llm
+
+    class FakeResp:
+        content = "{}"
+        usage_metadata = {}
+
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)          # 실제 모드로 간주
+    monkeypatch.setattr(llm, "_invoke_with_retry", lambda *a, **k: FakeResp())  # 비대상 노드는 정상
+    d = client.post("/run", json={
+        "project_name": "데모", "problem": "P",
+        "demo_fail_nodes": ["customer", "risk"], "demo_fail_reason": "형식",
+    }).json()
+    assert d["fallback_reasons"].get("customer") == "형식"       # 지정 노드만 실패
+    assert d["fallback_reasons"].get("risk") == "형식"
+    assert "pestel" not in d["fallback_reasons"]                 # 미지정 노드는 정상

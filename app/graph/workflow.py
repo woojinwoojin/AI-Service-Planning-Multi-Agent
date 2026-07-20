@@ -16,7 +16,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import llm, tracing, usage
+from app.services import demo, llm, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -43,6 +43,7 @@ def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectSta
     각자의 fallback(_dummy)으로 빈 입력에도 구조를 유지하므로 처음~끝 완주한다.
     """
     def wrapped(state: ProjectState) -> dict:
+        demo.apply_for_node(state, name)  # 데모 장애 주입: 이 노드를 실패시킬지 판단해 설정
         try:
             return fn(state)
         except Exception as exc:
@@ -114,6 +115,7 @@ GRAPH = build_graph()
 
 _FAILED_RE = re.compile(r"\[(.+?)\] 오류로 건너뜀")
 _NODE_RE = re.compile(r"\[(.+?)\]")
+_REASON_RE = re.compile(r"fallback·([^,)\s]+)")
 
 
 def _assess_quality(state: ProjectState) -> dict:
@@ -121,19 +123,31 @@ def _assess_quality(state: ProjectState) -> dict:
 
     - failed_nodes: `_safe`가 예외로 건너뛴 노드
     - fallback_nodes: 로그에 fallback이 표기된(=fallback/오류 흡수) 노드
+    - fallback_reasons: {노드: 원인} — 사용자에게 정직한 안내를 위해(혼잡/연결/형식/처리)
+      fallback 노드는 로그의 `fallback·<원인>`에서, 예외로 건너뛴 노드는 '처리'로 매핑.
     - run_status: 실패 노드 있으면 failed, fallback/더미면 degraded, 아니면 success
     """
     logs = state.get("logs", []) or []
     failed = [m.group(1) for line in logs if (m := _FAILED_RE.search(line))]
     fallback = sorted({m.group(1) for line in logs
                        if "fallback" in line and (m := _NODE_RE.search(line))})
+    reasons: dict[str, str] = {}
+    for line in logs:
+        node_m = _NODE_RE.search(line)
+        if not node_m:
+            continue
+        if (rm := _REASON_RE.search(line)):
+            reasons[node_m.group(1)] = rm.group(1)
+    for node in failed:
+        reasons.setdefault(node, "처리")
     if failed:
         status = "failed"
     elif fallback or llm.is_dummy():
         status = "degraded"
     else:
         status = "success"
-    return {"run_status": status, "failed_nodes": failed, "fallback_nodes": fallback}
+    return {"run_status": status, "failed_nodes": failed,
+            "fallback_nodes": fallback, "fallback_reasons": reasons}
 
 
 def _prepare_run(user_input: dict):

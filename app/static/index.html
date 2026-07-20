@@ -70,6 +70,12 @@
   .list li::marker { color:var(--brand); }
   #results strong { color:var(--ink); font-weight:700; }
   .hl { background:linear-gradient(transparent 60%, var(--brand-weak) 0); font-weight:700; }
+  /* 미완성 섹션 안내(‘[더미]’ 대신 정직한 실패 표시) */
+  .notice { background:#fff8f1; border:1px solid #f6d9bd; border-radius:8px; padding:11px 13px; font-size:13px; color:#8a4b12; }
+  .notice b { color:#7a3f0e; }
+  .notice span { color:var(--muted); }
+  .notice .retry { margin-top:8px; }
+  .notice .retry button { background:#fff; color:var(--warn); border:1px solid #f0b986; padding:5px 11px; font-size:12px; }
 
   /* 진행 표시 */
   .pbar { height:10px; background:var(--line); border-radius:6px; overflow:hidden; margin:4px 0 10px; }
@@ -83,6 +89,12 @@
   .stepline.done .ic::after { content:"✓"; }
   .stepline .t { color:var(--ink); }
   .stepline .d { color:var(--muted); font-size:12px; margin-left:auto; font-variant-numeric:tabular-nums; }
+  /* 🧪 데모 도구(임시) */
+  .demo-tool { margin-top:12px; border:1px dashed var(--line); border-radius:8px; padding:6px 12px 12px; background:#fbfbfd; }
+  .demo-tool summary { cursor:pointer; font-size:13px; color:var(--muted); font-weight:600; padding:4px 0; }
+  .demo-nodes { display:flex; flex-wrap:wrap; gap:6px 14px; }
+  .demo-nodes label { display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:400; margin:0; width:auto; }
+  .demo-nodes input { width:auto; }
 </style>
 </head>
 <body>
@@ -116,6 +128,22 @@
       <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
       <span class="muted" id="runHint">여러 Agent가 순차 실행됩니다 (약 30초~1분)</span>
     </div>
+
+    <!-- 🧪 데모/개발용 장애 주입 토글 (임시 도구 · 운영 배포 시 제거) -->
+    <details class="demo-tool">
+      <summary>🧪 데모: 특정 Agent 일부러 실패시키기</summary>
+      <p class="muted" style="margin:8px 0">선택한 Agent를 의도적으로 실패시켜, 미완성 섹션의 정직한 안내가 어떻게 보이는지 시연합니다. (실제 LLM 모드에서만 동작)</p>
+      <div class="demo-nodes" id="demoNodes"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <label style="margin:0">실패 원인</label>
+        <select id="demoReason" style="width:auto">
+          <option value="혼잡">혼잡 (서버 과부하·레이트리밋)</option>
+          <option value="연결">연결 (네트워크)</option>
+          <option value="형식">형식 (결과 파싱 실패)</option>
+          <option value="처리">처리 (노드 예외)</option>
+        </select>
+      </div>
+    </details>
   </section>
 
   <!-- 이력 -->
@@ -227,6 +255,16 @@ function renderResults(d) {
   const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {}, u = d.usage || {};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${inline(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
   const badge = s => { const m={supported:["지지","#e6f4ea","#1e7a34"],unsupported:["불일치","#fde2e1","#b42318"],uncertain:["불충분","#fef3c7","#92400e"]}; const [t,bg,c]=m[s]||[s||"-","#eef1f5","#555"]; return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
+  // 미완성(fallback) 섹션은 '[더미]' 내용 대신 정직한 원인 안내를 보여준다(혼잡/연결/형식/처리)
+  const reasons = d.fallback_reasons || {};
+  const REASON_MSG = {
+    혼잡:"AI 서버가 혼잡합니다. 잠시 후 다시 생성하세요.",
+    연결:"연결 문제로 완성하지 못했습니다. 다시 생성하세요.",
+    형식:"결과 형식이 올바르지 않았습니다. 다시 생성하세요.",
+    처리:"처리 중 문제가 발생했습니다. 다시 생성하세요.",
+  };
+  const notice = (label, reason) => `<div class="notice">⚠ <b>'${esc(label)}'</b>을(를) 완성하지 못했어요<br><span>${esc(REASON_MSG[reason]||REASON_MSG["처리"])}</span></div>`;
+  const secOr = (node, label, content) => reasons[node] ? notice(label, reasons[node]) : content;
   const factors = ["Political","Economic","Social","Technological","Environmental","Legal"];
   const pestelTable = "<table><thead><tr><th>요인</th><th>주요 내용</th><th>기회</th><th>위협</th><th>대응</th></tr></thead><tbody>"
     + factors.map(f=>{ const v=p[f]||{}; return `<tr><td><strong>${f}</strong></td><td>${esc(v.content)}</td><td>${esc(v.opportunity)}</td><td>${esc(v.threat)}</td><td>${esc(v.response)}</td></tr>`; }).join("")
@@ -253,7 +291,7 @@ function renderResults(d) {
     const bs = st === "failed" ? "background:#fde2e1;color:#b42318" : "background:#fef3c7;color:#92400e";
     const msg = st === "failed"
       ? `⚠ 일부 Agent 실행 실패: ${(d.failed_nodes||[]).join(", ")} — 결과 신뢰도에 주의하세요.`
-      : `⚠ 일부 Agent가 fallback/더미로 실행됨${(d.fallback_nodes||[]).length?` (${d.fallback_nodes.join(", ")})`:""} — 일부 내용이 근거 없이 채워졌을 수 있습니다.`;
+      : `⚠ 일부 섹션을 완성하지 못했습니다 — 아래 표시된 항목을 다시 생성하면 대부분 해결됩니다.`;
     return `<div style="padding:9px 12px;border-radius:8px;margin-bottom:10px;font-size:13px;${bs}">${esc(msg)}</div>`;
   })();
   // 항상 보이는 요약 스트립: 실행 품질 배너 + 총점 + 관측치
@@ -268,8 +306,10 @@ function renderResults(d) {
   ];
   const tabBar = `<div class="tabs">${tabs.map((t,i)=>`<button class="tab${i===0?" active":""}" onclick="switchTab('${t[0]}',this)">${t[1]}</button>`).join("")}</div>`;
 
-  const panelMarket = `<div class="tabpanel active" id="tp-market">
-    <div class="sec"><h4>시장 개요</h4><p>${inline(r.market_overview)||'<span class="muted">-</span>'}</p></div>
+  // fallback 가능 섹션의 본문을 미리 만들어 secOr로 감싼다(미완성이면 정직한 안내로 대체)
+  const researchBlock = reasons.research
+    ? `<div class="sec"><h4>시장·경쟁 조사</h4>${notice("시장·경쟁 조사", reasons.research)}</div>`
+    : `<div class="sec"><h4>시장 개요</h4><p>${inline(r.market_overview)||'<span class="muted">-</span>'}</p></div>
     <div class="grid2">
       <div class="sec"><h4>산업 트렌드</h4>${listOf(r.industry_trends)}</div>
       <div class="sec"><h4>고객 니즈</h4>${listOf(r.customer_needs)}</div>
@@ -277,45 +317,47 @@ function renderResults(d) {
     <div class="grid2">
       <div class="sec"><h4>경쟁 개요</h4>${listOf(r.competitors)}</div>
       <div class="sec"><h4>기회 / 위험</h4>${listOf((r.opportunities||[]).concat(r.risks||[]))}</div>
-    </div>
-    <div class="sec"><h4>고객 문제 분석</h4>
-      ${cu.target_persona ? `<p><strong>페르소나</strong> · ${inline(cu.target_persona)}</p>` : ""}
+    </div>`;
+  const customerContent = `${cu.target_persona ? `<p><strong>페르소나</strong> · ${inline(cu.target_persona)}</p>` : ""}
       <div class="grid2">
         <div><div class="subh">Pain Point</div>${listOf(cu.pain_points)}<div class="subh">니즈</div>${listOf(cu.needs)}</div>
         <div><div class="subh">해결 과업 (JTBD)</div>${listOf(cu.jobs_to_be_done)}</div>
-      </div>
-    </div>
+      </div>`;
+  const compContent = `${compTable}
+      ${co.positioning ? `<p style="margin-top:10px"><strong>포지셔닝</strong> · ${inline(co.positioning)}</p>` : ""}
+      ${(co.differentiation||[]).length ? `<div class="subh opp">차별화 포인트</div>${listOf(co.differentiation)}` : ""}`;
+  const swotContent = `<div class="grid2">
+        <div><div class="subh ok">강점 (S)</div>${listOf(sw.strengths)}<div class="subh bad">약점 (W)</div>${listOf(sw.weaknesses)}</div>
+        <div><div class="subh opp">기회 (O)</div>${listOf(sw.opportunities)}<div class="subh warn">위협 (T)</div>${listOf(sw.threats)}</div>
+      </div>`;
+  const moneyContent = `<div class="grid2">
+        <div><div class="subh">수익원</div>${listOf(bm.revenue_streams)}<div class="subh">가격 정책</div><p>${inline(bm.pricing)||'<span class="muted">-</span>'}</p></div>
+        <div><div class="subh">비용 구조</div>${listOf(bm.cost_structure)}<div class="subh">핵심 지표</div>${listOf(bm.key_metrics)}</div>
+      </div>`;
+  const riskContent = (rk.risks||[]).length ? "<table><thead><tr><th>유형</th><th>내용</th><th>가능성</th><th>영향</th><th>대응</th></tr></thead><tbody>"
+      + rk.risks.map(x=>`<tr><td><strong>${esc(x.category)}</strong></td><td>${inline(x.description)}</td><td>${esc(x.likelihood)}</td><td>${esc(x.impact)}</td><td>${inline(x.mitigation)}</td></tr>`).join("")
+      + "</tbody></table>" : '<span class="muted">-</span>';
+  const verifyContent = (vf.claims||[]).length ? "<table><thead><tr><th>주장</th><th style='width:76px'>판정</th><th>근거</th></tr></thead><tbody>"
+      + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
+      + "</tbody></table>" : '<span class="muted">-</span>';
+
+  const panelMarket = `<div class="tabpanel active" id="tp-market">
+    ${researchBlock}
+    <div class="sec"><h4>고객 문제 분석</h4>${secOr("customer","고객 문제 분석", customerContent)}</div>
   </div>`;
 
   const panelCompete = `<div class="tabpanel" id="tp-compete">
-    <div class="sec"><h4>경쟁사 분석</h4>${compTable}
-      ${co.positioning ? `<p style="margin-top:10px"><strong>포지셔닝</strong> · ${inline(co.positioning)}</p>` : ""}
-      ${(co.differentiation||[]).length ? `<div class="subh opp">차별화 포인트</div>${listOf(co.differentiation)}` : ""}
-    </div>
-    <div class="sec"><h4>SWOT 분석</h4>
-      <div class="grid2">
-        <div><div class="subh ok">강점 (S)</div>${listOf(sw.strengths)}<div class="subh bad">약점 (W)</div>${listOf(sw.weaknesses)}</div>
-        <div><div class="subh opp">기회 (O)</div>${listOf(sw.opportunities)}<div class="subh warn">위협 (T)</div>${listOf(sw.threats)}</div>
-      </div>
-    </div>
+    <div class="sec"><h4>경쟁사 분석</h4>${secOr("competitor","경쟁사 분석", compContent)}</div>
+    <div class="sec"><h4>SWOT 분석</h4>${secOr("swot","SWOT 분석", swotContent)}</div>
   </div>`;
 
   const panelMoney = `<div class="tabpanel" id="tp-money">
-    <div class="sec"><h4>수익 모델</h4>
-      <div class="grid2">
-        <div><div class="subh">수익원</div>${listOf(bm.revenue_streams)}<div class="subh">가격 정책</div><p>${inline(bm.pricing)||'<span class="muted">-</span>'}</p></div>
-        <div><div class="subh">비용 구조</div>${listOf(bm.cost_structure)}<div class="subh">핵심 지표</div>${listOf(bm.key_metrics)}</div>
-      </div>
-    </div>
-    <div class="sec"><h4>리스크 분석</h4>
-    ${(rk.risks||[]).length ? "<table><thead><tr><th>유형</th><th>내용</th><th>가능성</th><th>영향</th><th>대응</th></tr></thead><tbody>"
-      + rk.risks.map(x=>`<tr><td><strong>${esc(x.category)}</strong></td><td>${inline(x.description)}</td><td>${esc(x.likelihood)}</td><td>${esc(x.impact)}</td><td>${inline(x.mitigation)}</td></tr>`).join("")
-      + "</tbody></table>" : '<span class="muted">-</span>'}
-    </div>
+    <div class="sec"><h4>수익 모델</h4>${secOr("business_model","수익 모델", moneyContent)}</div>
+    <div class="sec"><h4>리스크 분석</h4>${secOr("risk","리스크 분석", riskContent)}</div>
   </div>`;
 
   const panelPestel = `<div class="tabpanel" id="tp-pestel">
-    <div class="sec"><h4>PESTEL 분석</h4>${pestelTable}</div>
+    <div class="sec"><h4>PESTEL 분석</h4>${secOr("pestel","PESTEL 분석", pestelTable)}</div>
   </div>`;
 
   const panelEval = `<div class="tabpanel" id="tp-eval">
@@ -324,9 +366,7 @@ function renderResults(d) {
       <div class="subh">개선 지시 <span class="muted" style="font-weight:400">(초안 기준)</span></div>${listOf(rv.revision_instructions)}
     </div>
     <div class="sec"><h4>근거 일치성 검증 · 지지 <span class="total" style="font-size:18px">${vf.supported ?? 0}</span><span class="muted">/${vf.total ?? 0} (지지율 ${Math.round((vf.support_rate ?? 0)*100)}%) · 주장↔조사결과 대조</span></h4>
-    ${(vf.claims||[]).length ? "<table><thead><tr><th>주장</th><th style='width:76px'>판정</th><th>근거</th></tr></thead><tbody>"
-      + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
-      + "</tbody></table>" : '<span class="muted">-</span>'}
+    ${secOr("verify","근거 일치성 검증", verifyContent)}
     </div>
   </div>`;
 
@@ -343,7 +383,14 @@ function switchTab(id, btn) {
 }
 
 function renderFinal(md) {
-  document.getElementById("finalDoc").innerHTML = renderMarkdown(md);
+  // 작성 단계(초안/재작성/편집)가 미완성이면 문서 상단에 정직한 안내를 덧붙인다
+  const reasons = (lastRun && lastRun.fallback_reasons) || {};
+  const writeReason = reasons.draft || reasons.revise || reasons.polish;
+  const REASON_MSG = {혼잡:"AI 서버가 혼잡합니다. 잠시 후 다시 생성하세요.", 연결:"연결 문제로 완성하지 못했습니다. 다시 생성하세요.", 형식:"결과 형식이 올바르지 않았습니다. 다시 생성하세요.", 처리:"처리 중 문제가 발생했습니다. 다시 생성하세요."};
+  const head = writeReason
+    ? `<div class="notice" style="margin-bottom:14px">⚠ <b>기획서 본문</b>을 완전히 생성하지 못했어요<br><span>${esc(REASON_MSG[writeReason]||REASON_MSG["처리"])}</span></div>`
+    : "";
+  document.getElementById("finalDoc").innerHTML = head + renderMarkdown(md);
   document.getElementById("finalCard").classList.remove("hidden");
 }
 
@@ -382,6 +429,13 @@ const NODE_META = {
 };
 // 예상 총 가중치(재작성 경로 기준, finalize 제외) — ETA 스케일 계산용
 const EXPECTED_TOTAL = Object.entries(NODE_META).filter(([k])=>k!=="finalize").reduce((s,[,v])=>s+v[1],0);
+
+// 🧪 데모: 실패 주입 대상으로 고를 수 있는 LLM 노드
+const DEMO_NODES = ["research","competitor","customer","pestel","swot","business_model","risk","draft","reviewer","verify"];
+function loadDemoNodes() {
+  document.getElementById("demoNodes").innerHTML = DEMO_NODES.map(n =>
+    `<label><input type="checkbox" class="demo-node" value="${n}"> ${esc((NODE_META[n]||[n])[0])}</label>`).join("");
+}
 
 let progTimer = null;
 
@@ -476,6 +530,8 @@ function runWorkflow() {
     problem: document.getElementById("problem").value,
     keywords: document.getElementById("keywords").value.split(",").map(s=>s.trim()).filter(Boolean),
     model: document.getElementById("model").value,
+    demo_fail_nodes: [...document.querySelectorAll(".demo-node:checked")].map(c=>c.value),
+    demo_fail_reason: document.getElementById("demoReason").value,
   };
   runStreaming(payload,
     (result) => {
@@ -597,6 +653,7 @@ async function loadProject(id) {
 
 loadModels();
 loadHistory();
+loadDemoNodes();
 </script>
 </body>
 </html>

@@ -33,6 +33,7 @@ class ProjectState(TypedDict, total=False):
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
     fallback_nodes: list # fallback/더미로 처리된 노드
+    fallback_reasons: dict  # {노드: 원인(혼잡/연결/형식/처리)} — 사용자 안내용
 
 
 # ---- API 입출력 ----
@@ -46,6 +47,9 @@ class ProjectInput(BaseModel):
     problem: str = Field("", description="해결하려는 문제")
     keywords: list[str] = Field(default_factory=list, description="주요 키워드")
     model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값). /models 참고")
+    # 데모/개발용 장애 주입(임시). 비우면 무영향. 운영에선 사용하지 않는다.
+    demo_fail_nodes: list[str] = Field(default_factory=list, description="[데모] 일부러 실패시킬 노드")
+    demo_fail_reason: str = Field("", description="[데모] 실패 원인: 혼잡|연결|형식|처리")
 
     def to_state_input(self) -> dict:
         return self.model_dump()
@@ -105,3 +109,4 @@ class RunResult(BaseModel):
     run_status: str = "success"                    # 실행 품질: success/degraded/failed
     failed_nodes: list = Field(default_factory=list)
     fallback_nodes: list = Field(default_factory=list)
+    fallback_reasons: dict = Field(default_factory=dict)  # {노드: 원인} 사용자 안내용
