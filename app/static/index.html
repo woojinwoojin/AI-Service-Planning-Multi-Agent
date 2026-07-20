@@ -56,7 +56,11 @@
     <div class="step">STEP 1 · 입력</div>
     <h2>사업 아이디어</h2>
     <label>프로젝트명 *</label>
-    <input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" />
+    <div class="row" style="align-items:stretch">
+      <div style="flex:1 1 auto"><input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" /></div>
+      <button class="ghost" id="suggestBtn" style="flex:0 0 auto;white-space:nowrap" onclick="suggestFields()" title="프로젝트명으로 아래 항목을 AI가 채웁니다">✨ AI로 나머지 채우기</button>
+    </div>
+    <span class="muted" id="suggestHint"></span>
     <div class="row">
       <div><label>목표 사용자</label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
       <div><label>모델</label><select id="model"></select></div>
@@ -247,6 +251,31 @@ function renderResults(d) {
 function renderFinal(md) {
   document.getElementById("finalDoc").innerHTML = renderMarkdown(md);
   document.getElementById("finalCard").classList.remove("hidden");
+}
+
+async function suggestFields() {
+  const name = document.getElementById("project_name").value.trim();
+  if (!name) { alert("먼저 프로젝트명을 입력하세요."); return; }
+  const btn = document.getElementById("suggestBtn");
+  const hint = document.getElementById("suggestHint");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>생성 중…';
+  hint.className = "muted"; hint.textContent = "";
+  try {
+    const r = await fetch("/suggest", {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({project_name:name, model:document.getElementById("model").value})});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const d = await r.json();
+    // 비어 있는 칸만 채우지 않고, 추천값으로 채운 뒤 사용자가 수정하도록 전부 덮어씀
+    if (d.description != null) document.getElementById("description").value = d.description;
+    if (d.target_user != null) document.getElementById("target_user").value = d.target_user;
+    if (d.problem != null) document.getElementById("problem").value = d.problem;
+    if (Array.isArray(d.keywords)) document.getElementById("keywords").value = d.keywords.join(", ");
+    hint.textContent = "✓ AI 추천으로 채웠습니다. 내용을 확인·수정한 뒤 생성하세요.";
+  } catch (e) {
+    hint.className = "err"; hint.textContent = "자동완성 실패: " + e.message;
+  } finally {
+    btn.disabled = false; btn.innerHTML = "✨ AI로 나머지 채우기";
+  }
 }
 
 async function runWorkflow() {
