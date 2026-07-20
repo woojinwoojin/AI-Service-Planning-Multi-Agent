@@ -16,7 +16,7 @@ import time
 
 from dotenv import load_dotenv
 
-from app.services import usage
+from app.services import demo, usage
 
 load_dotenv()
 
@@ -173,6 +173,9 @@ def _extract_json(text: str) -> dict:
 
 def _timed_invoke(chat, system: str, user: str, model: str):
     """invoke를 재시도하며 지연·토큰 사용량을 관측성에 기록한다."""
+    demo_reason = demo.fail_reason_for()  # 데모 장애 주입(설정 없으면 None → 무영향)
+    if demo_reason:
+        raise LLMError("데모 장애 주입", reason=demo_reason)
     t0 = time.perf_counter()
     resp = _invoke_with_retry(chat, system, user)
     latency_ms = (time.perf_counter() - t0) * 1000

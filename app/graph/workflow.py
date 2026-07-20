@@ -16,7 +16,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import llm, tracing, usage
+from app.services import demo, llm, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -43,6 +43,7 @@ def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectSta
     각자의 fallback(_dummy)으로 빈 입력에도 구조를 유지하므로 처음~끝 완주한다.
     """
     def wrapped(state: ProjectState) -> dict:
+        demo.apply_for_node(state, name)  # 데모 장애 주입: 이 노드를 실패시킬지 판단해 설정
         try:
             return fn(state)
         except Exception as exc:
