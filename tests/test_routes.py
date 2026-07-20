@@ -58,3 +58,15 @@ def test_revise_without_project_id_saves_new(client):
     }).json()
     assert rev["project_id"] > 0                            # id 없으면 신규 저장
     assert rev["revision_count"] == 1
+
+
+def test_suggest_requires_project_name(client):
+    r = client.post("/suggest", json={"project_name": ""})
+    assert r.status_code == 400                             # 프로젝트명 필수
+
+
+def test_suggest_returns_fields_in_dummy_mode(client):
+    d = client.post("/suggest", json={"project_name": "AI 반려식물 케어"}).json()
+    assert set(d) == {"description", "target_user", "problem", "keywords"}
+    assert isinstance(d["keywords"], list)
+    assert d["description"]                                 # 더미라도 초안은 채워짐

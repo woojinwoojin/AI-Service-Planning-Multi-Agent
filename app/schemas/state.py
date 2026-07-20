@@ -66,6 +66,14 @@ class ReviseInput(BaseModel):
     )
 
 
+class SuggestInput(BaseModel):
+    """프로젝트명 기반 입력 자동완성 요청."""
+
+    project_name: str = Field(..., description="프로젝트명(필수)")
+    memo: str = Field("", description="(선택) 아이디어에 대한 짧은 메모")
+    model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값)")
+
+
 class ExportInput(BaseModel):
     """기획서 Markdown → Word(.docx) 내보내기 입력."""
 

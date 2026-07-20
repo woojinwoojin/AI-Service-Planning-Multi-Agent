@@ -7,8 +7,8 @@ from fastapi import APIRouter, HTTPException, Response
 
 from app.agents import draft_writer, reviewer
 from app.graph.workflow import run_workflow
-from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult
-from app.services import docx_export, llm, store, usage
+from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
+from app.services import docx_export, llm, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -47,6 +47,14 @@ def project_detail(project_id: int) -> dict:
     if not found:
         raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다.")
     return found
+
+
+@router.post("/suggest")
+def suggest_input(payload: SuggestInput) -> dict:
+    """프로젝트명(+선택 메모)으로 나머지 입력 필드(설명·목표사용자·문제·키워드) 초안을 추천."""
+    if not payload.project_name.strip():
+        raise HTTPException(status_code=400, detail="프로젝트명을 입력하세요.")
+    return suggest.suggest_fields(payload.project_name, payload.memo, payload.model)
 
 
 @router.post("/run", response_model=RunResult)
