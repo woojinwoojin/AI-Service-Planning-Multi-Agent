@@ -261,7 +261,13 @@ VERIFY_SYSTEM = """당신은 기획서의 주장이 '앞 단계에서 수집된 
 - 이런 정량 주장은 '동일한 수치가 근거에 실제로 존재할 때만' supported입니다.
   근거에 그 수치가 없으면(문구가 그럴듯해도) 반드시 unsupported로 판정하세요.
 
-- status: supported(근거에서 확인됨) | unsupported(근거에 없거나 모순) | uncertain(근거가 불충분)
+- status: supported(제공된 근거에서 확인됨) | unsupported(제공된 근거에서 확인되지 않음) | uncertain(근거가 불충분해 판단 불가)
+  · 매우 중요: URL 원문에 접속하지 않으므로 unsupported 는 '거짓/틀림'이 아니라 '현재 근거에서
+    확인되지 않음'을 뜻합니다. 실제로 틀렸다고 단정하지 마세요.
+  · 확신이 서지 않으면 supported 로 넘기지 말고 uncertain(판단 불가)으로 두세요. 모르면 판단 불가입니다.
+- 출처 유형(source_type: government/academic/news/community 등)은 '누가 발행했는지'에 대한 힌트일 뿐입니다.
+  유형만으로 지지/불일치를 판정하지 마세요 — 판정은 오직 주장과 근거 '내용'의 일치로만 합니다.
+  (정부 출처라도 주제와 무관할 수 있고, 블로그라도 특정 경험 근거로는 적절할 수 있습니다.)
 - basis: 판정 이유를 한 문장으로. 근거에 없는 내용을 새로 지어내지 마세요.
 - 근거가 빈약하면 supported로 남발하지 말고 unsupported/uncertain으로 정직하게 판정하세요.
 
