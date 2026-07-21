@@ -7,6 +7,8 @@
 """
 from __future__ import annotations
 
+from copy import deepcopy
+
 DISCLAIMER_TEXT = (
     "본 기획서는 근거 추적성(참고 출처 표시)은 보장하지만, 출처 URL의 원문 사실성은 "
     "재검증하지 않았습니다. 검증 판정은 수집된 검색 요약 근거와의 일치 여부이며, "
@@ -20,6 +22,15 @@ VERIFICATION_SUMMARY: dict = {
     "fact_check_completed": False,       # 외부 사실성 검증 완료 아님
     "note": DISCLAIMER_TEXT,
 }
+
+def summary() -> dict:
+    """VERIFICATION_SUMMARY 의 '복사본'을 돌려준다.
+
+    공유 상수 dict 를 그대로 state·응답에 넣으면 어느 호출부가 수정할 때 원본이 오염될 수
+    있으므로, 매번 deepcopy 한 사본을 준다(잠재적 부작용 차단).
+    """
+    return deepcopy(VERIFICATION_SUMMARY)
+
 
 # 내보내기 문서(MD/DOCX)에 붙일 섹션. DOCX 렌더러가 처리하는 요소(## 제목 + 문단)만 쓴다.
 _MARKER = "검증 범위 및 한계"

@@ -60,6 +60,26 @@ def test_revise_without_project_id_saves_new(client):
     assert rev["revision_count"] == 1
 
 
+def test_run_and_history_include_verification_summary(client):
+    """PR-D: /run 응답과 이력 조회 모두에 검증 범위·한계 문구가 포함된다."""
+    from app.services import reliability
+    d = client.post("/run", json={"project_name": "신뢰", "problem": "P"}).json()
+    assert d["verification_summary"]["scope"] == "search_snippet_only"
+    assert d["verification_summary"]["note"] == reliability.DISCLAIMER_TEXT
+    state = client.get(f"/projects/{d['project_id']}").json()["state"]
+    assert state["verification_summary"]["note"] == reliability.DISCLAIMER_TEXT
+
+
+def test_legacy_project_without_summary_gets_default(client):
+    """과거 레코드(verification_summary 없음)를 조회해도 안전 기본값이 채워진다."""
+    from app.services import reliability, store
+    pid = store.save_run({"structured_input": {"project_name": "옛프로젝트"},
+                          "final_draft": "# 옛 기획서\n내용", "model": "gpt-4o-mini"})
+    state = client.get(f"/projects/{pid}").json()["state"]
+    assert state["verification_summary"]["scope"] == "search_snippet_only"
+    assert state["verification_summary"]["note"] == reliability.DISCLAIMER_TEXT
+
+
 def test_suggest_requires_project_name(client):
     r = client.post("/suggest", json={"project_name": ""})
     assert r.status_code == 400                             # 프로젝트명 필수

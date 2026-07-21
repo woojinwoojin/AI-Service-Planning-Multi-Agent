@@ -40,3 +40,12 @@ def test_disclaimer_renders_into_docx():
 
 def test_run_json_includes_verification_summary_key():
     assert "verification_summary" in _RUN_KEYS
+
+
+def test_summary_returns_isolated_copy():
+    """공유 상수 오염 방지: summary()는 매번 독립 사본을 준다."""
+    a = reliability.summary()
+    a["scope"] = "MUTATED"
+    a["note"] = "changed"
+    assert reliability.VERIFICATION_SUMMARY["scope"] == "search_snippet_only"  # 원본 불변
+    assert reliability.summary()["note"] == reliability.DISCLAIMER_TEXT
