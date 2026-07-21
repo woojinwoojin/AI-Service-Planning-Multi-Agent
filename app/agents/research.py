@@ -61,7 +61,11 @@ def _format_hits(hits: list[dict]) -> str:
 
 
 def _merge_sources(llm_sources: list, hits: list[dict]) -> list:
-    """실제 검색 출처(제목 — URL)를 sources 앞쪽에 보장하고, LLM이 적은 것과 병합."""
+    """실제 검색 출처(제목 — URL)를 sources 앞쪽에 보장하고, LLM이 적은 것과 병합.
+
+    문서의 '참고자료' 섹션 렌더링·/revise 인용 보존에 쓰이는 '표시용 문자열' 목록이다.
+    구조화된(제목/URL/스니펫) 출처는 별도로 `_source_objects()`가 만든다(배지·유형 분류용).
+    """
     real = [f"{h['title']} — {h['url']}" if h["title"] else h["url"] for h in hits]
     seen, merged = set(), []
     for s in real + [str(x) for x in llm_sources]:
@@ -69,6 +73,31 @@ def _merge_sources(llm_sources: list, hits: list[dict]) -> list:
             seen.add(s)
             merged.append(s)
     return merged
+
+
+def _source_objects(hits: list[dict]) -> list[dict]:
+    """실제 검색 출처를 구조화 객체(제목/URL/스니펫)로 보존한다.
+
+    기존 `sources`(문자열)만으로는 도메인 기반 '출처 유형' 태깅·배지 표시를 할 수 없어,
+    URL을 잃지 않도록 원본 필드를 유지한다. `source_type`은 규칙 기반 분류 단계(다음 PR)에서
+    채운다 — 지금은 자리만 비워 둔다(현재 시스템이 무엇을 아직 판정하지 않는지 정직하게 표시).
+
+    URL 기준으로 중복을 제거하며, snippet 은 과다 길이를 막기 위해 앞부분만 싣는다.
+    """
+    seen: set[str] = set()
+    objs: list[dict] = []
+    for h in hits:
+        url = (h.get("url") or "").strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        objs.append({
+            "title": (h.get("title") or "").strip(),
+            "url": url,
+            "snippet": (h.get("content") or "").strip()[:300],
+            "source_type": "",  # 다음 PR(규칙 기반 도메인 분류)에서 채움
+        })
+    return objs
 
 
 def _dummy(si: dict) -> dict:
@@ -106,7 +135,8 @@ def research(state: ProjectState) -> dict:
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
 
-    # 실제 검색 출처를 sources(인용)로 보장
+    # 실제 검색 출처를 sources(표시용 문자열)로 보장 + 구조화 객체로도 보존(배지·유형 분류용)
+    result["source_objects"] = _source_objects(hits)  # 검색 없으면 []
     if hits:
         result["sources"] = _merge_sources(result.get("sources", []), hits)
 
