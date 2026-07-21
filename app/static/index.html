@@ -421,7 +421,12 @@ function renderFinal(md) {
   const halluc = unsup.length
     ? `<div class="notice halluc" style="margin-bottom:14px">⚠ <b>근거가 확인되지 않은 주장 ${unsup.length}건</b> — 아래 내용은 사실로 신뢰하지 마세요(수치·통계는 특히 주의):<ul class="list">${unsup.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
     : "";
-  document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md);
+  // 검증 범위·한계 문구(내보내기·JSON과 동일한 단일 소스: 응답의 verification_summary.note)
+  const vnote = ((lastRun && lastRun.verification_summary) || {}).note || "";
+  const disclaimer = vnote
+    ? `<div class="notice" style="margin-top:16px">ⓘ <b>검증 범위 및 한계</b><br><span>${esc(vnote)}</span></div>`
+    : "";
+  document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md) + disclaimer;
   document.getElementById("finalCard").classList.remove("hidden");
 }
 
@@ -608,6 +613,7 @@ async function reviseDraft() {
     lastRun.revision_count = d.revision_count;
     if (d.final_review_result) lastRun.final_review_result = d.final_review_result;
     if (d.usage) lastRun.usage = d.usage;
+    if (d.verification_summary) lastRun.verification_summary = d.verification_summary;
     if (d.project_id) lastRun.project_id = d.project_id;
     lastRun.logs = (lastRun.logs||[]).concat(d.logs||[]);
     renderResults(lastRun);
@@ -631,7 +637,11 @@ function download(filename, text, type) {
 function slug(s){ return (s||"plan").replace(/[^0-9A-Za-z가-힣]+/g,"-").replace(/^-|-$/g,"") || "plan"; }
 function downloadMd() {
   if (!lastRun) return;
-  download(slug(lastRun.structured_input?.project_name)+".md", lastRun.final_draft, "text/markdown");
+  // 내보내기 문서(MD)에도 화면·DOCX·JSON과 동일한 한계 문구를 붙인다(단일 소스: verification_summary.note)
+  const note = ((lastRun.verification_summary)||{}).note || "";
+  let md = lastRun.final_draft || "";
+  if (note && !md.includes("검증 범위 및 한계")) md = md.replace(/\s*$/,"") + "\n\n## 검증 범위 및 한계\n\n" + note + "\n";
+  download(slug(lastRun.structured_input?.project_name)+".md", md, "text/markdown");
 }
 function downloadJson() {
   if (!lastRun) return;
