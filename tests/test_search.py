@@ -48,13 +48,29 @@ def test_classify_source_type_by_domain():
     assert c("https://www.data.go.kr/dataset") == "government"
     assert c("https://nsf.gov/report") == "government"
     assert c("https://cs.kaist.ac.kr/paper") == "academic"
+    assert c("https://sub.example.edu/x") == "academic"
     assert c("https://arxiv.org/abs/1234") == "unknown"       # 확신 없으면 과잉분류 안 함
     assert c("https://www.chosun.com/a") == "news"
     assert c("https://reuters.com/x") == "news"
-    assert c("https://foo.tistory.com/1") == "community"      # 서브도메인도 매칭
+    assert c("https://news.reuters.com/x") == "news"          # 서브도메인 경계 매칭
+    assert c("https://foo.tistory.com/1") == "community"
     assert c("https://ko.wikipedia.org/wiki/AI") == "community"
     assert c("https://some-random-company.com") == "unknown"  # 임의 .com 을 기업으로 단정 안 함
     assert c("not a url") == "unknown" and c("") == "unknown"
+
+
+def test_classify_source_type_boundary_safety():
+    """PR-B 보강: 문자열 포함이 아니라 도메인 경계로 판정(위장 도메인 차단)."""
+    c = search.classify_source_type
+    # 위장/부분일치 도메인은 절대 유형 배지를 받지 못한다(잘못된 확신 방지)
+    assert c("https://reuters.com.fake.org/x") == "unknown"   # 브랜드가 앞에 있어도 실제 도메인 아님
+    assert c("https://mygovernmentblog.com") == "unknown"     # 'gov' 부분문자열이 있어도 아님
+    assert c("https://gov.example.com") == "unknown"          # 라벨에 gov 있어도 접미 아님
+    assert c("https://fake-reuters-news.com") == "unknown"
+    # 정규화: 대소문자·포트·쿼리·fragment 가 있어도 정확히 분류
+    assert c("HTTPS://DATA.GO.KR/") == "government"
+    assert c("https://example.edu:443/path") == "academic"
+    assert c("https://data.go.kr/page?a=1#section") == "government"
 
 
 def test_source_objects_fills_type():
