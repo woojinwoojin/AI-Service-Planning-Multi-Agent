@@ -103,7 +103,7 @@ def _source_objects(hits: list[dict]) -> list[dict]:
             "snippet": (h.get("content") or "").strip()[:300],
             "content_scope": "search_snippet",  # 원문 아님(검색 요약문)
             "original_text_extracted": False,   # URL 원문 추출·재확인 안 함
-            "source_type": "",  # 다음 PR(규칙 기반 도메인 분류)에서 채움
+            "source_type": search.classify_source_type(url),  # 규칙 기반 유형(권위성 힌트)
         })
     return objs
 
