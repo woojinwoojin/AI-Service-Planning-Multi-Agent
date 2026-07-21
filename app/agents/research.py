@@ -82,6 +82,12 @@ def _source_objects(hits: list[dict]) -> list[dict]:
     URL을 잃지 않도록 원본 필드를 유지한다. `source_type`은 규칙 기반 분류 단계(다음 PR)에서
     채운다 — 지금은 자리만 비워 둔다(현재 시스템이 무엇을 아직 판정하지 않는지 정직하게 표시).
 
+    snippet 은 원문(full text)이 아니라 Tavily 검색 결과의 '요약문'이다. 뒤단 verifier 가
+    이를 원문 사실 검증으로 오해하지 않도록 성격을 메타데이터로 함께 남긴다:
+    - content_scope="search_snippet": 담긴 텍스트는 검색 요약문 수준임.
+    - original_text_extracted=False: URL 원문을 추출·재확인하지 않았음.
+    (Tier 1 의 verification_scope="search_snippet_only" 와 맞물리는 지점.)
+
     URL 기준으로 중복을 제거하며, snippet 은 과다 길이를 막기 위해 앞부분만 싣는다.
     """
     seen: set[str] = set()
@@ -95,6 +101,8 @@ def _source_objects(hits: list[dict]) -> list[dict]:
             "title": (h.get("title") or "").strip(),
             "url": url,
             "snippet": (h.get("content") or "").strip()[:300],
+            "content_scope": "search_snippet",  # 원문 아님(검색 요약문)
+            "original_text_extracted": False,   # URL 원문 추출·재확인 안 함
             "source_type": "",  # 다음 PR(규칙 기반 도메인 분류)에서 채움
         })
     return objs

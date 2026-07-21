@@ -37,6 +37,9 @@ def test_source_objects_keeps_fields_and_dedups():
     assert o["title"] == "시장 보고서" and o["url"] == "https://ex.com/a"
     assert o["snippet"] == "본문 내용"
     assert o["source_type"] == ""                            # 유형은 다음 PR에서 채움(지금은 미판정)
+    # snippet 이 원문이 아니라 검색 요약문임을 메타로 명시(원문 사실 검증 오해 방지)
+    assert o["content_scope"] == "search_snippet"
+    assert o["original_text_extracted"] is False
 
 
 def test_research_injects_real_sources(monkeypatch):
