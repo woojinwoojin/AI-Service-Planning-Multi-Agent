@@ -44,6 +44,8 @@ def _validate(result: dict, fallback: dict) -> dict:
         "total": total,
         "support_rate": round(supported / total, 2) if total else 0.0,
         "unsupported": [c["claim"] for c in claims if c["status"] == "unsupported"],
+        # 검증 범위 명시: 수집된 검색 요약 근거와의 일치 여부일 뿐, URL 원문 사실 검증이 아니다.
+        "verification_scope": "search_snippet_only",
     }
 
 
@@ -51,7 +53,8 @@ def _dummy(_: str) -> dict:
     claims = [
         {"claim": "[더미] 시장이 성장 중이다", "status": "uncertain", "basis": "[더미] 근거 불충분"},
     ]
-    return {"claims": claims, "supported": 0, "total": 1, "support_rate": 0.0, "unsupported": []}
+    return {"claims": claims, "supported": 0, "total": 1, "support_rate": 0.0,
+            "unsupported": [], "verification_scope": "search_snippet_only"}
 
 
 def verify(state: ProjectState) -> dict:
@@ -71,6 +74,6 @@ def verify(state: ProjectState) -> dict:
 
     mode = llm.mode_label(status, state.get("model", ""))
     logs = state.get("logs", []) + [
-        f"[verify] 근거 일치성 검증 완료 ({mode}, 지지 {result['supported']}/{result['total']})"
+        f"[verify] 근거 일치성 검증 완료 ({mode}, 근거 확인 {result['supported']}/{result['total']}, 검색 요약 기준)"
     ]
     return {"verification_result": result, "logs": logs}
