@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse
 from app.agents import draft_writer, reviewer
 from app.graph.workflow import run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
-from app.services import docx_export, llm, store, suggest, usage
+from app.services import docx_export, llm, reliability, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -48,6 +48,11 @@ def project_detail(project_id: int) -> dict:
     found = store.get_project(project_id)
     if not found:
         raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다.")
+    # 과거 레코드는 verification_summary 가 없을 수 있으므로 안전 기본값을 채운다
+    # (한계 문구는 실행이 아니라 시스템 성격에 대한 것이라 옛 프로젝트에도 동일하게 표시).
+    state = found.get("state")
+    if isinstance(state, dict) and not state.get("verification_summary"):
+        state["verification_summary"] = reliability.summary()
     return found
 
 
@@ -78,6 +83,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         revision_count=state.get("revision_count", 0),
         final_review_result=state.get("final_review_result", {}),
         verification_result=state.get("verification_result", {}),
+        verification_summary=state.get("verification_summary") or reliability.summary(),
         logs=state.get("logs", []),
         usage=state.get("usage", {}),
         run_status=state.get("run_status", "success"),
@@ -91,6 +97,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
 def run(payload: ProjectInput) -> RunResult:
     """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
     state = run_workflow(payload.to_state_input())
+    state["verification_summary"] = reliability.summary()
     project_id = store.save_run(state)
     return _result_payload(state, project_id)
 
@@ -109,6 +116,7 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
             for ev in run_workflow_stream(payload.to_state_input()):
                 if ev.get("type") == "done":
                     state = ev["state"]
+                    state["verification_summary"] = reliability.summary()
                     project_id = store.save_run(state)
                     payload_out = {"type": "done", "result": _result_payload(state, project_id).model_dump()}
                     yield f"data: {json.dumps(payload_out, ensure_ascii=False)}\n\n"
@@ -154,6 +162,7 @@ def revise(payload: ReviseInput) -> dict:
     state.update(draft_writer.revise(state))
     state.update(reviewer.final_reviewer(state))   # 수정된 최종본 재평가(표시 점수 정합)
     state["usage"] = usage.summary()
+    state["verification_summary"] = reliability.summary()
 
     # 이력 반영: 기존 프로젝트가 있으면 갱신, 없으면 신규 저장(수정 결과가 이력에 남도록)
     if payload.project_id and store.update_run(payload.project_id, state):
@@ -167,6 +176,7 @@ def revise(payload: ReviseInput) -> dict:
         "revision_count": state.get("revision_count", 0),
         "final_review_result": state.get("final_review_result", {}),
         "usage": state.get("usage", {}),
+        "verification_summary": state.get("verification_summary", {}),
         "logs": state.get("logs", []),
     }
 
@@ -174,7 +184,7 @@ def revise(payload: ReviseInput) -> dict:
 @router.post("/export/docx")
 def export_docx(payload: ExportInput) -> Response:
     """기획서 Markdown을 Word(.docx)로 변환해 다운로드 응답으로 반환."""
-    data = docx_export.docx_bytes(payload.markdown)
+    data = docx_export.docx_bytes(reliability.append_disclaimer(payload.markdown))
     fname = f"{docx_export._slugify(payload.project_name)}.docx"
     # RFC 5987: 한글 등 비-ASCII 파일명을 헤더(latin-1)에 안전하게 싣는다
     disposition = f"attachment; filename=\"plan.docx\"; filename*=UTF-8''{quote(fname)}"
@@ -189,7 +199,8 @@ def export_docx(payload: ExportInput) -> Response:
 def run_and_save(payload: ProjectInput) -> dict:
     """워크플로 실행 후 최종 기획서(.md/.docx)와 전체 실행 결과(.json)를 저장."""
     state = run_workflow(payload.to_state_input())
-    final = state.get("final_draft", "")
+    state["verification_summary"] = reliability.summary()
+    final = reliability.append_disclaimer(state.get("final_draft", ""))  # 내보내기 문서에 한계 문구
     saved_md = save_markdown(payload.project_name, final)
     saved_json = save_run_json(payload.project_name, state)
     saved_docx = docx_export.save_docx(payload.project_name, final)

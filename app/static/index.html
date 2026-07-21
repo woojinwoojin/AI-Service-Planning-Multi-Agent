@@ -259,7 +259,8 @@ function renderResults(d) {
   const frv = d.final_review_result || {};
   const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {}, u = d.usage || {};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${inline(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
-  const badge = s => { const m={supported:["지지","#e6f4ea","#1e7a34"],unsupported:["불일치","#fde2e1","#b42318"],uncertain:["불충분","#fef3c7","#92400e"]}; const [t,bg,c]=m[s]||[s||"-","#eef1f5","#555"]; return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
+  // 정직한 라벨: unsupported 는 '거짓'이 아니라 '근거 미확인'(원문 미접속). 색도 오류(빨강)가 아닌 주의(주황).
+  const badge = s => { const m={supported:["근거 확인","#e6f4ea","#1e7a34"],unsupported:["근거 미확인","#fff3e0","#b45309"],uncertain:["판단 불가","#eef1f5","#555"]}; const [t,bg,c]=m[s]||[s||"-","#eef1f5","#555"]; return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
   // 미완성(fallback) 섹션은 '[더미]' 내용 대신 정직한 원인 안내를 보여준다(혼잡/연결/형식/처리)
   const reasons = d.fallback_reasons || {};
   const REASON_MSG = {
@@ -304,8 +305,8 @@ function renderResults(d) {
       <span class="chip" style="background:var(--brand);color:#fff">총점 ${finalScore ?? "-"}/100</span>
       ${scoreDelta?`<span class="muted">${scoreDelta.replace(/<[^>]+>/g,"")}</span>`:""}
       <span class="chip">재작성 ${d.revision_count ?? 0}회</span>
-      <span class="chip">검증 지지 ${vf.supported ?? 0}/${vf.total ?? 0}</span>
-      ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fdecec;color:#b42318">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}
+      <span class="chip">근거 확인 ${vf.supported ?? 0}/${vf.total ?? 0}</span>
+      ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fff3e0;color:#b45309">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}
     </div>`;
   const tabs = [
     ["market","시장·고객"],["compete","경쟁·SWOT"],["money","수익·리스크"],["pestel","PESTEL"],["eval","평가·검증"],
@@ -343,12 +344,31 @@ function renderResults(d) {
   const riskContent = (rk.risks||[]).length ? "<table><thead><tr><th>유형</th><th>내용</th><th>가능성</th><th>영향</th><th>대응</th></tr></thead><tbody>"
       + rk.risks.map(x=>`<tr><td><strong>${esc(x.category)}</strong></td><td>${inline(x.description)}</td><td>${esc(x.likelihood)}</td><td>${esc(x.impact)}</td><td>${inline(x.mitigation)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>';
-  const verifyContent = (vf.claims||[]).length ? "<table><thead><tr><th>주장</th><th style='width:76px'>판정</th><th>근거</th></tr></thead><tbody>"
+  // 검증 범위 범례: '근거 미확인'이 거짓이 아님을 명시하고, 판정이 검색 요약 기준임을 밝힌다.
+  const verifyLegend = `<div class="muted" style="font-size:12px;margin-bottom:8px">판정 기준: 수집된 검색 요약 근거와의 일치 여부(URL 원문 사실 검증 아님). ‘근거 미확인’은 <b>거짓이 아니라</b> 현재 근거에서 확인되지 않았다는 뜻입니다.</div>`;
+  const verifyContent = (vf.claims||[]).length ? verifyLegend + "<table><thead><tr><th>주장</th><th style='width:84px'>판정</th><th>근거</th></tr></thead><tbody>"
       + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>';
 
+  // 검색으로 '확인된 출처'(source_objects)만 유형별로 집계·표시한다. 문서의 '참고자료'(LLM이
+  // 적은 항목 포함)와는 개수가 다를 수 있어 용어를 분리한다. 유형은 '권위성 힌트'일 뿐 신뢰도 아님.
+  const SRC_TYPE_LABELS = {government:"정부·공공기관",academic:"학술·연구기관",corporate:"기업 공식자료",news:"언론",community:"블로그·커뮤니티",unknown:"기타"};
+  const srcObjs = r.source_objects || [];
+  const srcCounts = {};
+  srcObjs.forEach(s => { const t = s.source_type||"unknown"; srcCounts[t] = (srcCounts[t]||0)+1; });
+  const srcOrder = ["government","academic","news","corporate","community","unknown"];
+  const srcChips = srcOrder.filter(t=>srcCounts[t]).map(t=>`<span class="chip">${SRC_TYPE_LABELS[t]} ${srcCounts[t]}</span>`).join(" ");
+  const escAttr = s => esc(s).replace(/"/g,"&quot;");
+  const srcList = srcObjs.map(s=>`<li><a href="${escAttr(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title||s.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[s.source_type||"unknown"]}</span></li>`).join("");
+  const sourcesBlock = srcObjs.length
+    ? `<div class="sec"><h4>검색으로 확인된 출처 ${srcObjs.length}건 <span class="muted" style="font-weight:400;font-size:12px">· 검색 요약 기준, URL 원문 사실 검증은 하지 않음</span></h4>
+        <div style="margin:8px 0">${srcChips}</div>
+        <ul class="list">${srcList}</ul></div>`
+    : "";
+
   const panelMarket = `<div class="tabpanel active" id="tp-market">
     ${researchBlock}
+    ${sourcesBlock}
     <div class="sec"><h4>고객 문제 분석</h4>${secOr("customer","고객 문제 분석", customerContent)}</div>
   </div>`;
 
@@ -371,7 +391,7 @@ function renderResults(d) {
       <div class="scores">${scoreChips||'<span class="muted">-</span>'}</div>
       <div class="subh">개선 지시 <span class="muted" style="font-weight:400">(초안 기준)</span></div>${listOf(rv.revision_instructions)}
     </div>
-    <div class="sec"><h4>근거 일치성 검증 · 지지 <span class="total" style="font-size:18px">${vf.supported ?? 0}</span><span class="muted">/${vf.total ?? 0} (지지율 ${Math.round((vf.support_rate ?? 0)*100)}%) · 주장↔조사결과 대조</span></h4>
+    <div class="sec"><h4>근거 일치성 검증 · 근거 확인 <span class="total" style="font-size:18px">${vf.supported ?? 0}</span><span class="muted">/${vf.total ?? 0} (확인율 ${Math.round((vf.support_rate ?? 0)*100)}%) · 검색 요약 기준</span></h4>
     ${secOr("verify","근거 일치성 검증", verifyContent)}
     </div>
   </div>`;
@@ -401,7 +421,12 @@ function renderFinal(md) {
   const halluc = unsup.length
     ? `<div class="notice halluc" style="margin-bottom:14px">⚠ <b>근거가 확인되지 않은 주장 ${unsup.length}건</b> — 아래 내용은 사실로 신뢰하지 마세요(수치·통계는 특히 주의):<ul class="list">${unsup.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
     : "";
-  document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md);
+  // 검증 범위·한계 문구(내보내기·JSON과 동일한 단일 소스: 응답의 verification_summary.note)
+  const vnote = ((lastRun && lastRun.verification_summary) || {}).note || "";
+  const disclaimer = vnote
+    ? `<div class="notice" style="margin-top:16px">ⓘ <b>검증 범위 및 한계</b><br><span>${esc(vnote)}</span></div>`
+    : "";
+  document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md) + disclaimer;
   document.getElementById("finalCard").classList.remove("hidden");
 }
 
@@ -588,6 +613,7 @@ async function reviseDraft() {
     lastRun.revision_count = d.revision_count;
     if (d.final_review_result) lastRun.final_review_result = d.final_review_result;
     if (d.usage) lastRun.usage = d.usage;
+    if (d.verification_summary) lastRun.verification_summary = d.verification_summary;
     if (d.project_id) lastRun.project_id = d.project_id;
     lastRun.logs = (lastRun.logs||[]).concat(d.logs||[]);
     renderResults(lastRun);
@@ -611,7 +637,11 @@ function download(filename, text, type) {
 function slug(s){ return (s||"plan").replace(/[^0-9A-Za-z가-힣]+/g,"-").replace(/^-|-$/g,"") || "plan"; }
 function downloadMd() {
   if (!lastRun) return;
-  download(slug(lastRun.structured_input?.project_name)+".md", lastRun.final_draft, "text/markdown");
+  // 내보내기 문서(MD)에도 화면·DOCX·JSON과 동일한 한계 문구를 붙인다(단일 소스: verification_summary.note)
+  const note = ((lastRun.verification_summary)||{}).note || "";
+  let md = lastRun.final_draft || "";
+  if (note && !md.includes("검증 범위 및 한계")) md = md.replace(/\s*$/,"") + "\n\n## 검증 범위 및 한계\n\n" + note + "\n";
+  download(slug(lastRun.structured_input?.project_name)+".md", md, "text/markdown");
 }
 function downloadJson() {
   if (!lastRun) return;

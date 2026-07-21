@@ -42,3 +42,20 @@ def test_verify_log_uses_honest_label(monkeypatch):
     out = verifier.verify({"final_draft": "본문", "research_result": {}, "logs": []})
     assert "근거 일치성 검증 완료" in out["logs"][-1]
     assert "출처 검증" not in out["logs"][-1]
+
+
+def test_validate_sets_verification_scope():
+    """PR-C: 검증 결과에 범위(검색 요약 기준)가 항상 명시된다."""
+    fb = verifier._dummy("draft")
+    assert fb["verification_scope"] == "search_snippet_only"          # fallback 도 명시
+    raw = {"claims": [{"claim": "x", "status": "supported", "basis": "b"}]}
+    out = verifier._validate(raw, fb)
+    assert out["verification_scope"] == "search_snippet_only"         # 정상 경로도 명시
+
+
+def test_verify_prompt_guards_against_type_and_falsehood():
+    """PR-C: 프롬프트가 (1)출처 유형으로 판정 금지 (2)미확인≠거짓 가드레일을 담는다."""
+    from app.prompts import templates
+    assert "유형만으로 지지/불일치를 판정하지" in templates.VERIFY_SYSTEM  # §7-2 가드레일
+    assert "거짓/틀림" in templates.VERIFY_SYSTEM                        # unsupported ≠ 거짓
+    assert "모르면 판단 불가" in templates.VERIFY_SYSTEM                 # 확신 없으면 uncertain

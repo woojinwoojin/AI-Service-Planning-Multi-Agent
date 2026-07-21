@@ -29,6 +29,7 @@ class ProjectState(TypedDict, total=False):
     revision_count: int
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
+    verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
     logs: list  # 실행 로그 / 진행 상태 표시용
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
@@ -103,6 +104,7 @@ class RunResult(BaseModel):
     revision_count: int
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
+    verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)
     usage: dict = Field(default_factory=dict)  # 토큰·비용·지연 관측치
