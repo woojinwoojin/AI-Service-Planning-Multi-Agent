@@ -33,6 +33,7 @@ class ProjectState(TypedDict, total=False):
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
     logs: list  # 실행 로그 / 진행 상태 표시용
     usage: dict  # 토큰·추정 비용·지연 관측치(실행 종료 시 집계해 기록)
+    workflow_mode: str   # 실행 구조: serial / parallel (병렬화 비교 실험 태깅용)
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
     fallback_nodes: list # fallback/더미로 처리된 노드
@@ -114,3 +115,4 @@ class RunResult(BaseModel):
     failed_nodes: list = Field(default_factory=list)
     fallback_nodes: list = Field(default_factory=list)
     fallback_reasons: dict = Field(default_factory=dict)  # {노드: 원인} 사용자 안내용
+    workflow_mode: str = "serial"                  # 실행 구조: serial/parallel

@@ -24,6 +24,8 @@ def test_run_persists_and_reports_quality(client):
     assert d["project_id"] > 0
     assert d["run_status"] == "degraded"                    # 더미 실행 → 정직하게 degraded
     assert d["final_review_result"]                         # 최종본 재평가 포함
+    assert d["workflow_mode"] == "serial"                   # PR-1: 실행 구조 태깅(기본 직렬)
+    assert "wall_time_ms" in d["usage"] and "llm_latency_sum_ms" in d["usage"]  # PR-1: 지연 지표 분리
     ids = [p["id"] for p in client.get("/projects").json()["projects"]]
     assert d["project_id"] in ids                           # 이력에 저장됨
 

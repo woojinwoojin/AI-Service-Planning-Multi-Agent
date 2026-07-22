@@ -90,6 +90,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         failed_nodes=state.get("failed_nodes", []),
         fallback_nodes=state.get("fallback_nodes", []),
         fallback_reasons=state.get("fallback_reasons", {}),
+        workflow_mode=state.get("workflow_mode", "serial"),
     )
 
 
