@@ -17,7 +17,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import demo, llm, tracing, usage
+from app.services import demo, llm, timing, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -45,11 +45,18 @@ def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectSta
     """
     def wrapped(state: ProjectState) -> dict:
         demo.apply_for_node(state, name)  # 데모 장애 주입: 이 노드를 실패시킬지 판단해 설정
+        started = timing.now_ms()
         try:
-            return fn(state)
+            result = fn(state)
         except Exception as exc:
-            logs = [f"[{name}] 오류로 건너뜀 ({type(exc).__name__}: {exc})"]
-            return {"logs": logs}
+            result = {"logs": [f"[{name}] 오류로 건너뜀 ({type(exc).__name__}: {exc})"]}
+        # 단계별 계측 부착(자기 event 만 반환 → reducer 병합). 계측 실패는 본 실행에 영향 없음.
+        try:
+            ev = timing.event(name, started, timing.now_ms())
+            result = {**result, "timing_events": [*result.get("timing_events", []), ev]}
+        except Exception:
+            pass
+        return result
 
     return wrapped
 
@@ -201,14 +208,14 @@ def _assess_quality(state: ProjectState) -> dict:
 def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     """그래프 '밖'에서 노드 결과를 state 에 병합한다(logs 는 reducer 처럼 이어붙임).
 
-    노드는 이제 '자기 새 로그만' 반환한다(병렬 reducer 대응). LangGraph 안에서는
-    logs reducer 가 자동 누적하지만, 그래프 밖(예: /revise, rerun_finalizers)에서는
-    dict.update 가 logs 를 덮어써 이전 로그가 사라진다. 여기서 logs 만 누적 병합한다.
+    노드는 이제 '자기 새 값만' 반환한다(병렬 reducer 대응). LangGraph 안에서는 reducer 가
+    자동 누적하지만, 그래프 밖(예: /revise, rerun_finalizers, stream 재구성)에서는
+    dict.update 가 덮어써 이전 값이 사라진다. 여기서 reducer-list 필드(logs·timing_events)를 누적 병합한다.
     """
-    prev_logs = list(state.get("logs") or [])
+    merged = {k: list(state.get(k) or []) + list(update[k] or [])
+              for k in ("logs", "timing_events") if k in update}
     state.update(update)
-    if "logs" in update:
-        state["logs"] = prev_logs + list(update["logs"] or [])
+    state.update(merged)   # reducer-list 필드는 덮어쓰기 대신 누적으로 교정
     return state
 
 
@@ -238,6 +245,7 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
         "logs": [],
     }
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
+    timing.start()                      # 단계별 계측의 시각 원점
     idea = (user_input.get("project_name") or user_input.get("description") or "planning-run")
     trace_name = str(idea)[:80]
     # 콜백을 GRAPH 실행 한 곳에만 실으면 각 노드/LLM 호출이 하나의 Langfuse 트레이스로 중첩된다.
@@ -250,6 +258,9 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
+    state["timing"] = timing.summarize(  # 단계별 wall time·critical path·coverage
+        state.get("timing_events", []), state.get("workflow_mode", "serial"),
+        state["usage"].get("wall_time_ms"))
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     return state
 

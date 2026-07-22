@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse
 from app.agents import draft_writer
 from app.graph.workflow import apply_node_update, rerun_finalizers, run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
-from app.services import docx_export, llm, pptx_export, reliability, store, suggest, usage
+from app.services import docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -91,6 +91,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         fallback_nodes=state.get("fallback_nodes", []),
         fallback_reasons=state.get("fallback_reasons", {}),
         workflow_mode=state.get("workflow_mode", "serial"),
+        timing=state.get("timing", {}),
     )
 
 
@@ -157,14 +158,19 @@ def revise(payload: ReviseInput) -> dict:
         "model": payload.model or base.get("model", ""),
         "revision_count": base.get("revision_count", 0),  # 누적(매 수정마다 0으로 초기화하지 않음)
         "logs": [],
+        "timing_events": [],   # 이번 재작성 구간만 계측(옛 실행 이벤트 이어받지 않음)
     }
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
+    timing.start()                                 # 단계별 계측 시각 원점
     apply_node_update(state, draft_writer.revise(state))  # 노드가 자기 로그만 반환 → 누적 병합
     # 수정된 최종본을 /run 뒷부분과 동일하게 재처리(polish→재평가→근거검증→품질판정).
     # 옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않도록(외부 리뷰 P0-1).
     rerun_finalizers(state)
     state["usage"] = usage.summary()
+    state["timing"] = timing.summarize(state.get("timing_events", []),
+                                       state.get("workflow_mode", "serial"),
+                                       state["usage"].get("wall_time_ms"))
     state["verification_summary"] = reliability.summary()
 
     # 이력 반영: 기존 프로젝트가 있으면 갱신, 없으면 신규 저장(수정 결과가 이력에 남도록)
@@ -180,6 +186,7 @@ def revise(payload: ReviseInput) -> dict:
         "final_review_result": state.get("final_review_result", {}),
         "verification_result": state.get("verification_result", {}),
         "usage": state.get("usage", {}),
+        "timing": state.get("timing", {}),
         "verification_summary": state.get("verification_summary", {}),
         "run_status": state.get("run_status", "success"),
         "logs": state.get("logs", []),

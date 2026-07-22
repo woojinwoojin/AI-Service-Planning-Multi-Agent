@@ -105,6 +105,7 @@ def run_once(topic: dict, mode: str) -> dict:
         "est_cost_usd": u.get("est_cost_usd"),
         "fallback_calls": u.get("fallback_calls"),
         "run_status": state.get("run_status"),
+        "timing": state.get("timing") or {},          # 단계별 실행시간(병목 위치)
         "quality": structural_quality(state),
     }
 
@@ -112,6 +113,20 @@ def run_once(topic: dict, mode: str) -> dict:
 def _median(values: list[float]) -> float | None:
     nums = [v for v in values if isinstance(v, (int, float))]
     return round(statistics.median(nums), 1) if nums else None
+
+
+def _stage_medians(rows: list[dict]) -> dict:
+    """실행들의 단계별 wall time 중앙값. 어느 구간이 병목인지 한눈에 보기 위함."""
+    stage_names: list[str] = []
+    for r in rows:
+        for k in ((r.get("timing") or {}).get("stages") or {}):
+            if k not in stage_names:
+                stage_names.append(k)
+    out = {}
+    for name in stage_names:
+        vals = [(r.get("timing") or {}).get("stages", {}).get(name) for r in rows]
+        out[name] = _median(vals)
+    return out
 
 
 def _percentile(values: list[float], pct: float) -> float | None:
@@ -156,6 +171,10 @@ def aggregate(runs: list[dict]) -> dict:
                 sum(r["quality"]["empty_sections"] for r in rows) / n, 2),
             "unique_source_urls_mean": round(
                 sum(r["quality"]["unique_source_urls"] for r in rows) / n, 2),
+            # 단계별 wall time 중앙값(병목 위치) + coverage 중앙값(측정이 전체를 얼마나 설명하는지)
+            "stage_ms_median": _stage_medians(rows),
+            "timing_coverage_median": _median(
+                [(r.get("timing") or {}).get("coverage") for r in rows]),
         }
     # 병렬화 성능 요약(직렬 대비): wall time 감소율
     if "serial" in out and "parallel" in out:

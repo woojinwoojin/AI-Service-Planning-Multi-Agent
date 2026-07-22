@@ -18,6 +18,7 @@ _RUN_KEYS = [
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
     "final_review_result", "verification_result", "verification_summary", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",
+    "timing", "timing_events",
 ]
 
 
