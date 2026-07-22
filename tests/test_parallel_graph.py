@@ -56,6 +56,70 @@ def test_serial_and_parallel_produce_equivalent_results(monkeypatch):
         assert s.get(k) == p.get(k), f"직렬/병렬 결과 불일치: {k}"
 
 
+def _fake_real_llm(monkeypatch, per_call_tokens: int = 15):
+    """실제 LLM 모드로 두되 호출을 고정 응답으로 대체(무료). 호출당 토큰을 usage 에 기록."""
+    from app.services import llm
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(llm, "_get_model", lambda model="": object())
+    inp, out = 10, per_call_tokens - 10
+
+    class _Resp:
+        content = "{}"
+        usage_metadata = {"input_tokens": inp, "output_tokens": out}
+
+    monkeypatch.setattr(llm, "_invoke_with_retry", lambda chat, s, u, attempts=2: _Resp())
+    return llm
+
+
+def test_parallel_usage_collects_all_calls(monkeypatch):
+    """리뷰 최우선: 병렬 분기의 모든 LLM 호출이 usage 에 누락 없이 집계되는지 검증.
+
+    ContextVar 로 실행별 collector 를 공유하는데, 병렬 노드가 별도 작업 스레드에서
+    record() 를 호출해도 같은 실행의 calls/토큰에 모두 잡혀야 한다(직렬과 동일해야 함).
+    """
+    _fake_real_llm(monkeypatch, per_call_tokens=15)
+    payload = {"project_name": "usage", "problem": "P", "target_user": "U", "description": "D"}
+    s = run_workflow(payload, workflow_mode="serial")["usage"]
+    p = run_workflow(payload, workflow_mode="parallel")["usage"]
+    assert s["calls"] > 0 and p["calls"] > 0                  # 실제로 호출이 기록됨
+    assert s["calls"] == p["calls"]                            # 병렬에서 호출 누락 없음
+    assert s["total_tokens"] == p["total_tokens"]             # 토큰 합계 동일(누락 없음)
+    assert p["total_tokens"] == p["calls"] * 15               # 모든 호출의 토큰이 합산됨
+    assert s["fallback_calls"] == 0 and p["fallback_calls"] == 0
+
+
+def test_parallel_actually_overlaps_nodes(monkeypatch):
+    """직접 증거: 병렬 실행 중 최소 2개 노드가 동시에 실행된다(peak concurrency ≥ 2).
+
+    시간 임계값 비교보다 CI 에서 안정적으로 '겹침'을 증명한다.
+    """
+    import threading
+    import time
+
+    from app.services import llm
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(llm, "_get_model", lambda model="": object())
+    lock = threading.Lock()
+    counters = {"active": 0, "peak": 0}
+
+    class _Resp:
+        content = "{}"
+        usage_metadata = {}
+
+    def _slow(chat, system, user, attempts=2):
+        with lock:
+            counters["active"] += 1
+            counters["peak"] = max(counters["peak"], counters["active"])
+        time.sleep(0.15)
+        with lock:
+            counters["active"] -= 1
+        return _Resp()
+
+    monkeypatch.setattr(llm, "_invoke_with_retry", _slow)
+    run_workflow({"project_name": "overlap", "problem": "P"}, workflow_mode="parallel")
+    assert counters["peak"] >= 2                               # 노드 실행 구간이 실제로 겹침
+
+
 def test_parallel_faster_than_serial(monkeypatch):
     """분석 노드가 실제로 겹쳐 실행돼 병렬 wall time 이 직렬보다 짧다(LLM 호출에 고정 지연 주입)."""
     from app.services import llm

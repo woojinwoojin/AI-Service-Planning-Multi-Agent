@@ -43,10 +43,16 @@ def _table_md(agg: dict) -> str:
     rows = [
         ("실행 횟수", s.get("runs"), p.get("runs")),
         ("wall time 중앙값(ms) ↓", s.get("wall_time_ms_median"), p.get("wall_time_ms_median")),
+        ("wall time p95(ms)", s.get("wall_time_ms_p95"), p.get("wall_time_ms_p95")),
+        ("wall time 최대(ms)", s.get("wall_time_ms_max"), p.get("wall_time_ms_max")),
         ("LLM 호출시간 합 중앙값(ms)", s.get("llm_latency_sum_ms_median"), p.get("llm_latency_sum_ms_median")),
+        ("평균 LLM 호출 수", s.get("calls_mean"), p.get("calls_mean")),
         ("평균 토큰", s.get("total_tokens_mean"), p.get("total_tokens_mean")),
         ("평균 비용(USD)", s.get("est_cost_usd_mean"), p.get("est_cost_usd_mean")),
+        ("실행 품질 분포", s.get("run_status"), p.get("run_status")),
         ("14섹션 완성률", s.get("sections_complete_rate"), p.get("sections_complete_rate")),
+        ("섹션 순서 정상률", s.get("sections_ordered_rate"), p.get("sections_ordered_rate")),
+        ("PESTEL 표 정상률", s.get("pestel_table_rate"), p.get("pestel_table_rate")),
         ("평균 빈 섹션 수", s.get("empty_sections_mean"), p.get("empty_sections_mean")),
         ("평균 고유 출처 URL 수", s.get("unique_source_urls_mean"), p.get("unique_source_urls_mean")),
         ("fallback 총계", s.get("fallback_calls_total"), p.get("fallback_calls_total")),
@@ -62,6 +68,7 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=1, help="주제당 반복 횟수(AB/BA 교차)")
     ap.add_argument("--shuffle", action="store_true", help="주제 순서를 무작위화")
     ap.add_argument("--seed", type=int, default=0, help="무작위 시드(재현용)")
+    ap.add_argument("--fresh", action="store_true", help="이전 partial 무시하고 처음부터")
     args = ap.parse_args()
 
     topics = list(TOPICS[: max(1, min(args.topics, len(TOPICS)))])
@@ -76,8 +83,19 @@ def main() -> None:
         _p("⚠ 실제 LLM 모드 — 이 실행은 API 비용이 발생합니다.")
     _p("=" * 64)
 
+    # 이어하기 캐시는 '같은 실험 조건'일 때만 재사용한다(모델·주제·코드·반복이 바뀌면 무효).
+    sig = parallel_bench.experiment_signature(topics, args.reps, model)
     _PARTIAL.parent.mkdir(exist_ok=True)
-    runs = json.loads(_PARTIAL.read_text(encoding="utf-8")) if _PARTIAL.exists() else []
+    if args.fresh:
+        _PARTIAL.unlink(missing_ok=True)
+    cached = json.loads(_PARTIAL.read_text(encoding="utf-8")) if _PARTIAL.exists() else None
+    if cached and cached.get("signature") == sig:
+        runs = cached.get("runs", [])
+        _p(f"이어하기: 이전 진행분 {len(runs)}회 재사용(같은 실험 조건).")
+    else:
+        if cached:
+            _p("⚠ 이전 partial 의 실험 조건이 달라 재사용하지 않고 새로 시작합니다(--fresh 로 강제 초기화 가능).")
+        runs = []
     done = {(r["topic"], r["mode"], r["rep"]) for r in runs}
 
     i = 0
@@ -93,7 +111,9 @@ def main() -> None:
                 rec = parallel_bench.run_once(topic, mode)
                 rec["rep"] = rep
                 runs.append(rec)
-                _PARTIAL.write_text(json.dumps(runs, ensure_ascii=False, indent=2), encoding="utf-8")
+                _PARTIAL.write_text(
+                    json.dumps({"signature": sig, "runs": runs}, ensure_ascii=False, indent=2),
+                    encoding="utf-8")
 
     agg = parallel_bench.aggregate(runs)
     table_md = _table_md(agg)
@@ -121,7 +141,8 @@ def main() -> None:
     out = Path("outputs")
     out.mkdir(exist_ok=True)
     (out / "parallel_bench.json").write_text(
-        json.dumps({"model": model, "aggregate": agg, "runs": runs}, ensure_ascii=False, indent=2),
+        json.dumps({"signature": sig, "model": model, "aggregate": agg, "runs": runs},
+                   ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
