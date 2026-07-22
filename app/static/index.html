@@ -191,6 +191,7 @@
     <div class="btns">
       <button class="ghost" onclick="downloadMd()">.md 다운로드</button>
       <button class="ghost" onclick="downloadDocx()">.docx 다운로드</button>
+      <button class="ghost" onclick="downloadPptx()">.pptx 다운로드</button>
       <button class="ghost" onclick="downloadJson()">.json 다운로드</button>
     </div>
     <label style="margin-top:18px">수정 요청 (Human-in-the-Loop)</label>
@@ -663,6 +664,23 @@ async function downloadDocx() {
     a.href = URL.createObjectURL(blob); a.download = slug(name)+".docx"; a.click();
     URL.revokeObjectURL(a.href);
   } catch (e) { alert("DOCX 변환 실패: " + e.message); }
+}
+async function downloadPptx() {
+  if (!lastRun) return;
+  // item 9: fallback/더미가 섞인 결과를 정식 산출물로 내려받기 전 경고
+  if ((lastRun.run_status || "success") !== "success") {
+    if (!confirm("이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 PPTX로 내려받을까요?")) return;
+  }
+  const name = lastRun.structured_input?.project_name || "plan";
+  try {
+    const r = await fetch("/export/pptx", {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({project_name:name, markdown:lastRun.final_draft})});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = slug(name)+".pptx"; a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (e) { alert("PPTX 변환 실패: " + e.message); }
 }
 
 async function loadHistory() {
