@@ -8,9 +8,11 @@
   :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --ink:#1f2430; --muted:#6b7280; --brand:#3b5bdb; --brand-weak:#eef1fe; --ok:#2b8a3e; --warn:#e8590c; }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.6 -apple-system,"Segoe UI",Roboto,"Malgun Gothic",sans-serif; }
-  header { background:var(--brand); color:#fff; padding:18px 20px; }
+  header { background:var(--brand); color:#fff; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
   header h1 { margin:0; font-size:18px; }
   header p { margin:4px 0 0; opacity:.85; font-size:13px; }
+  .admin-link { flex:0 0 auto; background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:7px; padding:8px 14px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap; }
+  .admin-link:hover { background:rgba(255,255,255,.28); }
   main { max-width:900px; margin:0 auto; padding:20px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:18px; }
   .card h2 { margin:0 0 14px; font-size:15px; color:var(--brand); border-bottom:1px solid var(--line); padding-bottom:8px; }
@@ -99,9 +101,11 @@
 </head>
 <body>
 <header>
-  <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
-  <p>Research → Competitor → PESTEL → SWOT → 수익모델 → 리스크 → Draft → Reviewer · 여러 AI Agent가 협업해 기획서를 만듭니다</p>
-  <p style="margin-top:6px"><a href="/admin" style="font-size:12px;color:var(--muted)">🧪 관리자(데모 도구)</a></p>
+  <div>
+    <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
+    <p>Research → Competitor → PESTEL → SWOT → 수익모델 → 리스크 → Draft → Reviewer · 여러 AI Agent가 협업해 기획서를 만듭니다</p>
+  </div>
+  <a href="/admin" class="admin-link">🧪 관리자</a>
 </header>
 <main>
 
