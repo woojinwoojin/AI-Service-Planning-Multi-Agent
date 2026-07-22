@@ -68,3 +68,41 @@ def test_route_preserves_existing(dummy):
         "project_name": "시니어 복약", "existing": {"target_user": "독거 고령층"}}).json()
     assert d["target_user"] is None                           # 사용자 입력 보존
     assert d["description"]                                    # 빈 항목만 채움
+
+
+def test_compare_mode_suggests_all_fields(dummy):
+    """비교 모드: 사용자가 일부 입력했어도 4개 항목 '모두' 제안(None 없음)."""
+    out = suggest.suggest_fields("복약 관리", existing={"target_user": "고령층"}, compare=True)
+    assert set(out) == _ALL
+    assert all(out[k] is not None for k in _ALL)              # 채워진 항목도 제안 생성
+    assert isinstance(out["keywords"], list)
+
+
+def test_compare_mode_does_not_mutate_existing_arg(dummy):
+    """비교 제안 생성이 넘겨받은 existing 을 변경하지 않는다(순수)."""
+    existing = {"target_user": "고령층", "keywords": ["복약"]}
+    suggest.suggest_fields("복약", existing=existing, compare=True)
+    assert existing == {"target_user": "고령층", "keywords": ["복약"]}
+
+
+def test_compare_mode_uses_existing_as_context(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)
+
+    def fake(system, user, **k):
+        seen["system"] = system
+        seen["user"] = user
+        return {"description": "d", "target_user": "t", "problem": "p", "keywords": ["a"]}
+
+    monkeypatch.setattr(llm, "complete_json", fake)
+    from app.prompts import templates
+    suggest.suggest_fields("복약", existing={"problem": "복약 혼동"}, compare=True)
+    assert seen["system"] == templates.SUGGEST_COMPARE_SYSTEM  # 비교 전용 프롬프트 사용
+    assert "복약 혼동" in seen["user"]                          # 사용자 현재 값이 문맥에 포함
+
+
+def test_compare_mode_route(dummy):
+    c = TestClient(app)
+    d = c.post("/suggest", json={
+        "project_name": "복약", "existing": {"target_user": "고령층"}, "compare": True}).json()
+    assert all(d[k] is not None for k in _ALL)                # 라우트에서도 전 항목 제안

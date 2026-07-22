@@ -90,6 +90,10 @@ class SuggestInput(BaseModel):
         default_factory=dict,
         description="사용자가 이미 입력한 항목(description/target_user/problem/keywords). 빈 항목만 채우고 이 값들은 보존·문맥으로만 사용",
     )
+    compare: bool = Field(
+        False,
+        description="True면 비교 모드: 4개 항목 모두에 AI 제안을 생성(사용자 입력은 덮어쓰지 않고 화면 비교용)",
+    )
 
 
 class ExportInput(BaseModel):

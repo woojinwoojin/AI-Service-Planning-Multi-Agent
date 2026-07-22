@@ -22,6 +22,23 @@
   .fbadge { display:none; font-size:11px; font-weight:700; border-radius:5px; padding:1px 6px; margin-left:4px; vertical-align:1px; }
   .fbadge.ai { display:inline-block; background:#eef1fe; color:var(--brand); }
   .fbadge.ai_edited { display:inline-block; background:#fff3e0; color:var(--warn); }
+  /* AI 제안 비교 패널 */
+  .cmp { margin-top:12px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#fafbff; }
+  .cmp-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .cmp-top b { font-size:13px; }
+  .cmp-top .sp { flex:1 1 auto; }
+  .cmp-row { border-top:1px solid var(--line); padding:10px 0; }
+  .cmp-row .cmp-field { font-size:12px; font-weight:700; color:var(--brand); margin-bottom:6px; }
+  .cmp-cols { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:640px){ .cmp-cols { grid-template-columns:1fr; } }
+  .cmp-cell { border:1px solid var(--line); border-radius:7px; padding:7px 9px; background:#fff; font-size:13px; }
+  .cmp-cell .cmp-h { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:3px; }
+  .cmp-cell.ai { border-color:#c9d4fb; background:#f4f6ff; }
+  .cmp-act { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+  .cmp-act button { padding:4px 10px; font-size:12px; }
+  .cmp-row.done { opacity:.55; }
+  .cmp-row.done .cmp-act { display:none; }
+  .cmp-done-tag { font-size:11px; font-weight:700; color:var(--ok); margin-left:6px; }
   input, textarea, select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font:inherit; background:#fff; }
   textarea { resize:vertical; min-height:64px; }
   .row { display:flex; gap:12px; flex-wrap:wrap; }
@@ -121,8 +138,10 @@
     <div class="row" style="align-items:stretch">
       <div style="flex:1 1 auto"><input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" /></div>
       <button class="ghost" id="suggestBtn" style="flex:0 0 auto;white-space:nowrap" onclick="suggestFields()" title="비어 있는 항목만 AI가 채웁니다(이미 입력한 값은 보존)">✨ AI로 빈 항목 채우기</button>
+      <button class="ghost" id="compareBtn" style="flex:0 0 auto;white-space:nowrap" onclick="compareFields()" title="모든 항목에 AI 제안을 받아 내 값과 비교합니다(선택 적용)">🔍 AI 제안과 비교</button>
     </div>
     <span class="muted" id="suggestHint"></span>
+    <div class="cmp hidden" id="comparePanel"></div>
     <div class="row">
       <div><label>목표 사용자 <span class="fbadge" id="badge_target_user"></span></label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
       <div><label>모델</label><select id="model"></select></div>
@@ -479,6 +498,89 @@ async function suggestFields() {
     btn.disabled = false; btn.innerHTML = "✨ AI로 빈 항목 채우기";
   }
 }
+
+// 🔍 AI 제안과 비교(2차) — 4개 항목 모두 AI 제안을 받아 '내 값 vs AI'를 나란히 보고 선택 적용
+const FIELD_LABEL = {description:"아이디어 설명", target_user:"목표 사용자", problem:"해결하려는 문제", keywords:"키워드"};
+let compareData = null;
+function fieldValue(f){ return document.getElementById(f).value.trim(); }
+function asText(v){ return Array.isArray(v) ? v.join(", ") : (v||""); }
+
+async function compareFields() {
+  const name = document.getElementById("project_name").value.trim();
+  if (!name) { alert("먼저 프로젝트명을 입력하세요."); return; }
+  const btn = document.getElementById("compareBtn");
+  const hint = document.getElementById("suggestHint");
+  const existing = {};
+  for (const f of SUGGEST_FIELDS) {
+    const raw = fieldValue(f);
+    if (raw) existing[f] = f === "keywords" ? raw.split(",").map(s=>s.trim()).filter(Boolean) : raw;
+  }
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>비교 준비…';
+  hint.className = "muted"; hint.textContent = "";
+  try {
+    const r = await fetch("/suggest", {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({project_name:name, model:document.getElementById("model").value, existing, compare:true})});
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    compareData = await r.json();
+    renderCompare();
+    hint.textContent = "AI 제안을 항목별로 비교해 선택하세요. (선택 전까지 기존 입력은 그대로입니다)";
+  } catch (e) {
+    hint.className = "err"; hint.textContent = "AI 제안 실패: " + e.message + " (기존 입력은 그대로입니다)";
+  } finally {
+    btn.disabled = false; btn.innerHTML = "🔍 AI 제안과 비교";
+  }
+}
+
+function renderCompare() {
+  const rows = SUGGEST_FIELDS.map(f => {
+    const cur = fieldValue(f), sug = asText(compareData[f]);
+    return `<div class="cmp-row" id="cmprow_${f}">
+      <div class="cmp-field">${esc(FIELD_LABEL[f])}</div>
+      <div class="cmp-cols">
+        <div class="cmp-cell"><div class="cmp-h">내 값</div><div>${cur ? esc(cur) : '<span class="muted">미입력</span>'}</div></div>
+        <div class="cmp-cell ai"><div class="cmp-h">AI 추천</div><div>${esc(sug) || '<span class="muted">제안 없음</span>'}</div></div>
+      </div>
+      <div class="cmp-act">
+        <button class="ghost" onclick="applyCompare('${f}','keep')">기존 유지</button>
+        <button class="ghost" onclick="applyCompare('${f}','ai')">AI 적용</button>
+        <button class="ghost" onclick="applyCompare('${f}','merge')">합치기</button>
+      </div></div>`;
+  }).join("");
+  const panel = document.getElementById("comparePanel");
+  panel.innerHTML =
+    `<div class="cmp-top"><b>AI 제안과 비교</b><span class="muted">항목별로 선택하세요</span>`
+    + `<span class="sp"></span>`
+    + `<button class="ghost" onclick="applyAllCompare()">AI 전체 적용</button>`
+    + `<button class="ghost" onclick="closeCompare()">닫기(기존 유지)</button></div>` + rows;
+  panel.classList.remove("hidden");
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function applyCompare(f, action) {
+  if (action !== "keep") {
+    const ai = compareData[f], el = document.getElementById(f);
+    if (action === "ai") {
+      el.value = asText(ai); markAiField(f);
+    } else {  // merge: 내 값 + AI (키워드는 합집합)
+      const cur = fieldValue(f);
+      if (f === "keywords") {
+        const set = [...new Set([...cur.split(",").map(s=>s.trim()).filter(Boolean), ...(Array.isArray(ai)?ai:[])])];
+        el.value = set.join(", ");
+      } else {
+        el.value = cur ? (cur + "\n" + asText(ai)) : asText(ai);
+      }
+      setBadge(f, "ai_edited");
+    }
+  }
+  const row = document.getElementById("cmprow_" + f);
+  if (row && !row.classList.contains("done")) {
+    row.classList.add("done");
+    const tag = {keep:"유지", ai:"AI 적용", merge:"합침"}[action];
+    row.querySelector(".cmp-field").insertAdjacentHTML("beforeend", `<span class="cmp-done-tag">✓ ${tag}</span>`);
+  }
+}
+function applyAllCompare() { for (const f of SUGGEST_FIELDS) applyCompare(f, "ai"); }
+function closeCompare() { document.getElementById("comparePanel").classList.add("hidden"); }
 
 // 노드 → [한글 라벨, 예상 소요(초)] · 예상치는 Langfuse 실측 평균 기반(ETA는 실행 중 실측으로 보정)
 const NODE_META = {
