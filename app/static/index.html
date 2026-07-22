@@ -95,18 +95,13 @@
   .stepline.done .ic::after { content:"✓"; }
   .stepline .t { color:var(--ink); }
   .stepline .d { color:var(--muted); font-size:12px; margin-left:auto; font-variant-numeric:tabular-nums; }
-  /* 🧪 데모 도구(임시) */
-  .demo-tool { margin-top:12px; border:1px dashed var(--line); border-radius:8px; padding:6px 12px 12px; background:#fbfbfd; }
-  .demo-tool summary { cursor:pointer; font-size:13px; color:var(--muted); font-weight:600; padding:4px 0; }
-  .demo-nodes { display:flex; flex-wrap:wrap; gap:6px 14px; }
-  .demo-nodes label { display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:400; margin:0; width:auto; }
-  .demo-nodes input { width:auto; }
 </style>
 </head>
 <body>
 <header>
   <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
   <p>Research → Competitor → PESTEL → SWOT → 수익모델 → 리스크 → Draft → Reviewer · 여러 AI Agent가 협업해 기획서를 만듭니다</p>
+  <p style="margin-top:6px"><a href="/admin" style="font-size:12px;color:var(--muted)">🧪 관리자(데모 도구)</a></p>
 </header>
 <main>
 
@@ -134,22 +129,6 @@
       <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
       <span class="muted" id="runHint">여러 Agent가 순차 실행됩니다 (약 30초~1분)</span>
     </div>
-
-    <!-- 🧪 데모/개발용 장애 주입 토글 (임시 도구 · 운영 배포 시 제거) -->
-    <details class="demo-tool">
-      <summary>🧪 데모: 특정 Agent 일부러 실패시키기</summary>
-      <p class="muted" style="margin:8px 0">선택한 Agent를 의도적으로 실패시켜, 미완성 섹션의 정직한 안내가 어떻게 보이는지 시연합니다. (실제 LLM 모드에서만 동작)</p>
-      <div class="demo-nodes" id="demoNodes"></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-        <label style="margin:0">실패 원인</label>
-        <select id="demoReason" style="width:auto">
-          <option value="혼잡">혼잡 (서버 과부하·레이트리밋)</option>
-          <option value="연결">연결 (네트워크)</option>
-          <option value="형식">형식 (결과 파싱 실패)</option>
-          <option value="처리">처리 (노드 예외)</option>
-        </select>
-      </div>
-    </details>
   </section>
 
   <!-- 이력 -->
@@ -470,13 +449,6 @@ const NODE_META = {
 // 예상 총 가중치(재작성 경로 기준, finalize 제외) — ETA 스케일 계산용
 const EXPECTED_TOTAL = Object.entries(NODE_META).filter(([k])=>k!=="finalize").reduce((s,[,v])=>s+v[1],0);
 
-// 🧪 데모: 실패 주입 대상으로 고를 수 있는 LLM 노드
-const DEMO_NODES = ["research","competitor","customer","pestel","swot","business_model","risk","draft","reviewer","verify"];
-function loadDemoNodes() {
-  document.getElementById("demoNodes").innerHTML = DEMO_NODES.map(n =>
-    `<label><input type="checkbox" class="demo-node" value="${n}"> ${esc((NODE_META[n]||[n])[0])}</label>`).join("");
-}
-
 let progTimer = null;
 
 function fmtSec(s){ s=Math.max(0,Math.round(s)); return s>=60 ? `${Math.floor(s/60)}분 ${s%60}s` : `${s}s`; }
@@ -570,8 +542,6 @@ function runWorkflow() {
     problem: document.getElementById("problem").value,
     keywords: document.getElementById("keywords").value.split(",").map(s=>s.trim()).filter(Boolean),
     model: document.getElementById("model").value,
-    demo_fail_nodes: [...document.querySelectorAll(".demo-node:checked")].map(c=>c.value),
-    demo_fail_reason: document.getElementById("demoReason").value,
   };
   runStreaming(payload,
     (result) => {
@@ -715,7 +685,6 @@ async function loadProject(id) {
 
 loadModels();
 loadHistory();
-loadDemoNodes();
 </script>
 </body>
 </html>

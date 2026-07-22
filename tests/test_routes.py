@@ -147,8 +147,16 @@ def test_fallback_reasons_surface_to_api(client, monkeypatch):
     assert "혼잡" in d["fallback_reasons"].values()        # 분류된 원인이 전달됨
 
 
+def test_admin_page_served(client):
+    """관리자·데모 도구 페이지가 /admin 으로 분리 제공된다(메인 UI에서 분리)."""
+    r = client.get("/admin")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+    assert "관리자" in r.text and "demo_fail_nodes" in r.text
+
+
 def test_demo_fail_injection_via_payload(client, monkeypatch):
-    """UI 데모 토글: demo_fail_nodes로 지정한 노드만 실패해 fallback_reasons에 표면화."""
+    """관리자 페이지 데모 토글: demo_fail_nodes로 지정한 노드만 실패해 fallback_reasons에 표면화."""
     from app.services import llm
 
     class FakeResp:
