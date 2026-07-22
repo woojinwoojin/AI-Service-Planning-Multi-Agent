@@ -86,6 +86,10 @@ class SuggestInput(BaseModel):
     project_name: str = Field(..., description="프로젝트명(필수)")
     memo: str = Field("", description="(선택) 아이디어에 대한 짧은 메모")
     model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값)")
+    existing: dict = Field(
+        default_factory=dict,
+        description="사용자가 이미 입력한 항목(description/target_user/problem/keywords). 빈 항목만 채우고 이 값들은 보존·문맥으로만 사용",
+    )
 
 
 class ExportInput(BaseModel):
