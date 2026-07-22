@@ -12,6 +12,7 @@ from app.services import llm
 
 _STR_KEYS = ["description", "target_user", "problem"]
 _ALL = [*_STR_KEYS, "keywords"]
+_CONF = {"high", "medium", "low"}
 
 # 프롬프트 표기용 한글 라벨
 _LABEL = {"description": "서비스 설명", "target_user": "목표 사용자",
@@ -47,25 +48,46 @@ def _dummy(project_name: str, empty: list[str]) -> dict:
     return {k: (base[k] if k in empty else None) for k in _ALL}
 
 
+def _entry_value(entry, is_list: bool):
+    """LLM 항목 응답에서 value 를 뽑는다. {value,reason,...} 객체 또는 값 자체 둘 다 허용."""
+    v = entry.get("value") if isinstance(entry, dict) else entry
+    if is_list:
+        return [s.strip() for s in v if isinstance(s, str) and s.strip()] if isinstance(v, list) else []
+    return v.strip() if isinstance(v, str) and v.strip() else ""
+
+
+def _meta_of(entry) -> dict:
+    """항목 응답에서 추천 이유·확신도·참고 입력을 정리한다(없으면 안전 기본값)."""
+    reason = entry.get("reason") if isinstance(entry, dict) else ""
+    conf = entry.get("confidence") if isinstance(entry, dict) else ""
+    based = entry.get("based_on") if isinstance(entry, dict) else []
+    return {
+        "reason": reason.strip() if isinstance(reason, str) else "",
+        "confidence": conf if conf in _CONF else "medium",
+        "based_on": [b for b in based if b in _ALL] if isinstance(based, list) else [],
+    }
+
+
 def _validate(result: dict, fallback: dict, empty: list[str]) -> dict:
     """LLM 응답을 정리한다. 빈 필드에만 값을 채우고, 사용자 입력 필드는 None으로 보존.
 
-    - 빈 필드가 아닌 키에 값이 와도 무시한다(사용자 입력을 임의로 덮어쓰지 않도록).
-    - 형식이 어긋나거나 빈 필드 내용이 전혀 없으면 그 필드는 fallback 값을 쓴다.
+    각 추천 필드에 추천 이유·확신도(meta)를 함께 담는다(개선안 §5). 빈 필드가 아닌 키에
+    값이 와도 무시한다(덮어쓰기 방지). 값이 비면 fallback 초안(확신도 low)으로 채운다.
+    반환: {..필드 값.., "meta": {필드: {reason, confidence, based_on}}}.
     """
     if not isinstance(result, dict):
-        return dict(fallback)
-    out: dict = {k: None for k in _ALL}
-    for k in _STR_KEYS:
-        if k not in empty:
-            continue
-        v = result.get(k)
-        out[k] = v.strip() if isinstance(v, str) and v.strip() else fallback[k]
-    if "keywords" in empty:
-        kw = result.get("keywords")
-        cleaned = [s.strip() for s in kw if isinstance(s, str) and s.strip()] if isinstance(kw, list) else []
-        out["keywords"] = cleaned or fallback["keywords"]
-    return out
+        result = {}
+    values: dict = {k: None for k in _ALL}
+    meta: dict = {}
+    for k in empty:
+        val = _entry_value(result.get(k), is_list=(k == "keywords"))
+        if val:
+            values[k] = val
+            meta[k] = _meta_of(result.get(k))
+        else:
+            values[k] = fallback[k]
+            meta[k] = {"reason": "기본 초안(자동 생성)", "confidence": "low", "based_on": []}
+    return {**values, "meta": meta}
 
 
 def _build_user(project_name: str, memo: str, existing: dict, empty: list[str]) -> str:
