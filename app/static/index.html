@@ -18,6 +18,10 @@
   .card h2 { margin:0 0 14px; font-size:15px; color:var(--brand); border-bottom:1px solid var(--line); padding-bottom:8px; }
   .step { color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; }
   label { display:block; font-size:13px; font-weight:600; margin:10px 0 4px; }
+  /* 필드 출처 배지: AI 추천 / 수정됨 구분(사용자 입력과 구별) */
+  .fbadge { display:none; font-size:11px; font-weight:700; border-radius:5px; padding:1px 6px; margin-left:4px; vertical-align:1px; }
+  .fbadge.ai { display:inline-block; background:#eef1fe; color:var(--brand); }
+  .fbadge.ai_edited { display:inline-block; background:#fff3e0; color:var(--warn); }
   input, textarea, select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font:inherit; background:#fff; }
   textarea { resize:vertical; min-height:64px; }
   .row { display:flex; gap:12px; flex-wrap:wrap; }
@@ -116,18 +120,18 @@
     <label>프로젝트명 *</label>
     <div class="row" style="align-items:stretch">
       <div style="flex:1 1 auto"><input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" /></div>
-      <button class="ghost" id="suggestBtn" style="flex:0 0 auto;white-space:nowrap" onclick="suggestFields()" title="프로젝트명으로 아래 항목을 AI가 채웁니다">✨ AI로 나머지 채우기</button>
+      <button class="ghost" id="suggestBtn" style="flex:0 0 auto;white-space:nowrap" onclick="suggestFields()" title="비어 있는 항목만 AI가 채웁니다(이미 입력한 값은 보존)">✨ AI로 빈 항목 채우기</button>
     </div>
     <span class="muted" id="suggestHint"></span>
     <div class="row">
-      <div><label>목표 사용자</label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
+      <div><label>목표 사용자 <span class="fbadge" id="badge_target_user"></span></label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
       <div><label>모델</label><select id="model"></select></div>
     </div>
-    <label>아이디어 설명</label>
+    <label>아이디어 설명 <span class="fbadge" id="badge_description"></span></label>
     <textarea id="description" placeholder="어떤 서비스인지 한두 문장으로"></textarea>
-    <label>해결하려는 문제</label>
+    <label>해결하려는 문제 <span class="fbadge" id="badge_problem"></span></label>
     <textarea id="problem" placeholder="사용자가 겪는 문제"></textarea>
-    <label>키워드 (쉼표로 구분)</label>
+    <label>키워드 (쉼표로 구분) <span class="fbadge" id="badge_keywords"></span></label>
     <input id="keywords" placeholder="진로, 대학생, 취업" />
     <div class="btns">
       <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
@@ -417,28 +421,62 @@ function renderFinal(md) {
   document.getElementById("finalCard").classList.remove("hidden");
 }
 
+const SUGGEST_FIELDS = ["description", "target_user", "problem", "keywords"];
+
+// 필드 출처 배지 설정: "" | ai | ai_edited. ai 로 채운 필드는 사용자가 수정하면 ai_edited 로 바뀐다.
+function setBadge(field, state) {
+  const b = document.getElementById("badge_" + field);
+  if (!b) return;
+  b.className = "fbadge" + (state ? " " + state : "");
+  b.textContent = state === "ai" ? "AI 추천" : state === "ai_edited" ? "AI 추천 수정됨" : "";
+}
+function markAiField(field) {
+  setBadge(field, "ai");
+  const el = document.getElementById(field);
+  const onEdit = () => { setBadge(field, "ai_edited"); el.removeEventListener("input", onEdit); };
+  el.addEventListener("input", onEdit);
+}
+
 async function suggestFields() {
   const name = document.getElementById("project_name").value.trim();
   if (!name) { alert("먼저 프로젝트명을 입력하세요."); return; }
   const btn = document.getElementById("suggestBtn");
   const hint = document.getElementById("suggestHint");
+  // 사용자가 이미 입력한 값(보존·문맥)과 빈 항목을 구분한다
+  const existing = {}; const emptyFields = [];
+  for (const f of SUGGEST_FIELDS) {
+    const raw = document.getElementById(f).value.trim();
+    if (raw) existing[f] = f === "keywords" ? raw.split(",").map(s=>s.trim()).filter(Boolean) : raw;
+    else emptyFields.push(f);
+  }
+  if (emptyFields.length === 0) {
+    hint.className = "muted";
+    hint.textContent = "모든 항목이 이미 채워져 있어 새로 채울 빈 항목이 없습니다. (전체 AI 제안·비교는 추후 지원)";
+    return;
+  }
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span>생성 중…';
   hint.className = "muted"; hint.textContent = "";
   try {
     const r = await fetch("/suggest", {method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({project_name:name, model:document.getElementById("model").value})});
+      body:JSON.stringify({project_name:name, model:document.getElementById("model").value, existing})});
     if (!r.ok) throw new Error("서버 오류 " + r.status);
     const d = await r.json();
-    // 비어 있는 칸만 채우지 않고, 추천값으로 채운 뒤 사용자가 수정하도록 전부 덮어씀
-    if (d.description != null) document.getElementById("description").value = d.description;
-    if (d.target_user != null) document.getElementById("target_user").value = d.target_user;
-    if (d.problem != null) document.getElementById("problem").value = d.problem;
-    if (Array.isArray(d.keywords)) document.getElementById("keywords").value = d.keywords.join(", ");
-    hint.textContent = "✓ AI 추천으로 채웠습니다. 내용을 확인·수정한 뒤 생성하세요.";
+    // 빈 항목만 채운다. 사용자가 입력한 항목(응답 null)은 절대 건드리지 않는다.
+    let filled = 0;
+    for (const f of emptyFields) {
+      const v = d[f];
+      if (v == null) continue;
+      document.getElementById(f).value = Array.isArray(v) ? v.join(", ") : v;
+      markAiField(f);
+      filled++;
+    }
+    hint.textContent = filled
+      ? `✓ 빈 항목 ${filled}개를 AI로 채웠습니다. 내용을 확인·수정한 뒤 생성하세요.`
+      : "AI가 채울 내용을 만들지 못했습니다. 직접 입력해 주세요.";
   } catch (e) {
-    hint.className = "err"; hint.textContent = "자동완성 실패: " + e.message;
+    hint.className = "err"; hint.textContent = "자동완성 실패: " + e.message + " (기존 입력은 그대로입니다)";
   } finally {
-    btn.disabled = false; btn.innerHTML = "✨ AI로 나머지 채우기";
+    btn.disabled = false; btn.innerHTML = "✨ AI로 빈 항목 채우기";
   }
 }
 
