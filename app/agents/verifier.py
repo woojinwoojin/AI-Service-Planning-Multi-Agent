@@ -81,7 +81,7 @@ def verify(state: ProjectState) -> dict:
     result = _validate(raw, fallback)
 
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [
+    logs = [
         f"[verify] 근거 일치성 검증 완료 ({mode}, 근거 확인 {result['supported']}/{result['total']}, 검색 요약 기준)"
     ]
     return {"verification_result": result, "logs": logs}

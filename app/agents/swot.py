@@ -38,5 +38,5 @@ def swot(state: ProjectState) -> dict:
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[swot] SWOT 분석 완료 ({mode})"]
+    logs = [f"[swot] SWOT 분석 완료 ({mode})"]
     return {"swot_result": result, "logs": logs}

@@ -85,7 +85,7 @@ def reviewer(state: ProjectState) -> dict:
     """초안 평가. review_result(재작성 판단용)와 initial_review_result(기록용)에 저장."""
     result, status = _review(state.get("draft", ""), state.get("model", ""))
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [
+    logs = [
         f"[reviewer] 초안 평가 완료 (총점={result['total_score']}, {mode})"
     ]
     return {"review_result": result, "initial_review_result": result, "logs": logs}
@@ -102,7 +102,7 @@ def final_reviewer(state: ProjectState) -> dict:
     before = initial.get("total_score")
     delta = f", Δ{result['total_score'] - before:+d} vs 초안" if isinstance(before, int) else ""
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [
+    logs = [
         f"[final_reviewer] 최종본 재평가 완료 (총점={result['total_score']}{delta}, {mode})"
     ]
     return {"final_review_result": result, "logs": logs}

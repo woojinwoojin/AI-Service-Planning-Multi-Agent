@@ -138,5 +138,5 @@ def research(state: ProjectState) -> dict:
         src = "검색 오류(fallback·검색)"
     else:
         src = "검색 결과 없음"
-    logs = state.get("logs", []) + [f"[research] 시장조사 완료 ({mode}, {src})"]
+    logs = [f"[research] 시장조사 완료 ({mode}, {src})"]
     return {"research_result": result, "logs": logs}

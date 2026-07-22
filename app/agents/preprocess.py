@@ -24,5 +24,5 @@ def preprocess(state: ProjectState) -> dict:
         "target_market": (ui.get("target_market") or ui.get("target_user") or "미지정").strip(),
     }
 
-    logs = state.get("logs", []) + ["[preprocess] 입력 구조화 완료"]
+    logs = ["[preprocess] 입력 구조화 완료"]
     return {"structured_input": structured, "logs": logs, "revision_count": 0}

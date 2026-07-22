@@ -48,5 +48,5 @@ def business_model(state: ProjectState) -> dict:
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[business_model] 수익모델 설계 완료 ({mode})"]
+    logs = [f"[business_model] 수익모델 설계 완료 ({mode})"]
     return {"business_model_result": result, "logs": logs}

@@ -57,5 +57,5 @@ def risk(state: ProjectState) -> dict:
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[risk] 리스크 분석 완료 ({mode}, {len(result['risks'])}건)"]
+    logs = [f"[risk] 리스크 분석 완료 ({mode}, {len(result['risks'])}건)"]
     return {"risk_result": result, "logs": logs}

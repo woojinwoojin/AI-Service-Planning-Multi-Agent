@@ -53,7 +53,7 @@ def customer(state: ProjectState) -> dict:
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [
+    logs = [
         f"[customer] 고객 문제 분석 완료 ({mode}, pain {len(result['pain_points'])}건)"
     ]
     return {"customer_result": result, "logs": logs}
