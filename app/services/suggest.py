@@ -7,7 +7,7 @@
 """
 from __future__ import annotations
 
-from app.prompts.templates import SUGGEST_SYSTEM
+from app.prompts.templates import SUGGEST_COMPARE_SYSTEM, SUGGEST_SYSTEM
 from app.services import llm
 
 _STR_KEYS = ["description", "target_user", "problem"]
@@ -81,18 +81,40 @@ def _build_user(project_name: str, memo: str, existing: dict, empty: list[str]) 
     return "\n\n".join(lines)
 
 
-def suggest_fields(project_name: str, memo: str = "", model: str = "",
-                   existing: dict | None = None) -> dict:
-    """프로젝트명(+메모+기존 입력)으로 '빈 필드만' 초안을 추천한다.
+def _build_compare_user(project_name: str, memo: str, existing: dict) -> str:
+    lines = [f"[프로젝트명]\n{(project_name or '').strip()}"]
+    if memo.strip():
+        lines.append(f"[사용자 메모]\n{memo.strip()}")
+    if existing:
+        cur = "\n".join(
+            f"- {_LABEL[k]}: {', '.join(existing[k]) if isinstance(existing[k], list) else existing[k]}"
+            for k in _ALL if k in existing)
+        lines.append("[사용자 현재 값 — 존중하되 더 구체적·일관된 대안을 제시]\n" + cur)
+    lines.append("[요청] 아래 4개 항목 모두에 비교용 제안을 작성: " + ", ".join(_LABEL[k] for k in _ALL))
+    return "\n\n".join(lines)
 
-    반환: {description, target_user, problem, keywords} — 빈 필드는 추천값, 사용자 입력 필드는 None.
-    채울 빈 필드가 없으면 전부 None.
+
+def suggest_fields(project_name: str, memo: str = "", model: str = "",
+                   existing: dict | None = None, compare: bool = False) -> dict:
+    """프로젝트명(+메모+기존 입력)으로 입력 필드 초안을 추천한다.
+
+    - compare=False(기본): '빈 필드만' 추천, 사용자 입력 필드는 None(보존).
+      채울 빈 필드가 없으면 전부 None.
+    - compare=True: 4개 항목 '모두'에 대해 비교용 제안을 생성(사용자 입력은 문맥으로만 사용,
+      실제 덮어쓰기는 프론트에서 사용자가 선택). 반환은 4개 필드 모두 값(None 없음).
+    반환 키: {description, target_user, problem, keywords}.
     """
     filled = _clean_existing(existing)
+
+    if compare:
+        fallback = _dummy(project_name, _ALL)
+        user = _build_compare_user(project_name, memo, filled)
+        raw = llm.complete_json(SUGGEST_COMPARE_SYSTEM, user, fallback=fallback, model=model)
+        return _validate(raw, fallback, _ALL)
+
     empty = [k for k in _ALL if k not in filled]
     if not empty:                       # 모두 채워져 있으면 추천 안 함(입력 보존)
         return {k: None for k in _ALL}
-
     fallback = _dummy(project_name, empty)
     user = _build_user(project_name, memo, filled, empty)
     raw = llm.complete_json(SUGGEST_SYSTEM, user, fallback=fallback, model=model)

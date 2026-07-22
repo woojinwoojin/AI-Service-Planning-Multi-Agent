@@ -61,7 +61,8 @@ def suggest_input(payload: SuggestInput) -> dict:
     """프로젝트명(+메모+기존 입력)으로 '빈 항목만' 초안을 추천(사용자 입력은 보존·문맥 활용)."""
     if not payload.project_name.strip():
         raise HTTPException(status_code=400, detail="프로젝트명을 입력하세요.")
-    return suggest.suggest_fields(payload.project_name, payload.memo, payload.model, payload.existing)
+    return suggest.suggest_fields(payload.project_name, payload.memo, payload.model,
+                                  payload.existing, payload.compare)
 
 
 def _result_payload(state: dict, project_id: int) -> RunResult:
