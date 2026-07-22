@@ -31,7 +31,7 @@ SECTIONS = [
 
 
 def _missing_sections(text: str) -> list[str]:
-    """고정 서식 12개 섹션 중 `## {제목}` 제목이 빠진 것을 찾는다."""
+    """고정 서식 14개 섹션 중 `## {제목}` 제목이 빠진 것을 찾는다."""
     return [s for s in SECTIONS if f"## {s}" not in text]
 
 
@@ -39,21 +39,65 @@ _REF_HEADER = "## 참고자료"
 _MAX_REFS = 8  # 참고자료 과다 나열 방지(문서 균형)
 
 
-def _append_references(text: str, sources: list) -> str:
-    """Research가 확보한 실제 출처(URL 등)를 '참고자료' 섹션으로 최종 문서에 인용한다.
+def _real_sources(state: ProjectState) -> list[str]:
+    """참고자료로 인용할 '실제 검색 출처'만 모은다(LLM이 지어낸 sources 는 제외).
 
-    웹검색 grounding을 최종 산출물까지 흘려보내는 단계. 새 출처가 있으면 기존 참고자료
-    섹션을 중복 없이 제거하고 다시 붙인다. 목록이 문서를 압도하지 않도록 최대
-    _MAX_REFS개까지만 싣는다.
+    Research + Competitor 가 실제 웹검색으로 확보한 source_objects(제목/URL)만 사용한다.
+    이 시스템의 핵심 차별점은 '추적 가능한 실제 출처'이므로, 참고자료에 LLM 생성 URL이
+    섞여 실제 출처와 구분되지 않던 문제(외부 리뷰 P0-2/P0-3)를 막는다.
+    """
+    objs = list((state.get("research_result") or {}).get("source_objects") or [])
+    objs += list(state.get("competitor_sources") or [])
+    seen: set[str] = set()
+    lines: list[str] = []
+    for o in objs:
+        if not isinstance(o, dict):
+            continue
+        url = (o.get("url") or "").strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        title = (o.get("title") or "").strip()
+        lines.append(f"{title} — {url}" if title else url)
+    return lines
 
-    새로 붙일 출처가 없으면(sources 가 비면) 본문을 그대로 반환한다 — 이때 기존
-    '## 참고자료' 섹션을 절대 지우지 않는다. /revise 는 research_result 를 넘기지
-    않아 sources 가 비므로, 여기서 섹션을 잘라내면 재작성 시 인용이 통째로 사라진다.
+
+def _existing_ref_lines(text: str) -> list[str]:
+    """본문에 이미 있는 '## 참고자료' 섹션의 항목(- ...)을 추출한다.
+
+    실제 검색 출처 정보가 없는 재작성/편집(/revise·polish, 특히 옛 프로젝트 재조회) 시,
+    이전 실행에서 인용했던 참고자료를 잃지 않도록 보존용으로 쓴다.
+    """
+    idx = text.find(_REF_HEADER)
+    if idx == -1:
+        return []
+    out = []
+    for ln in text[idx + len(_REF_HEADER):].splitlines():
+        ln = ln.strip()
+        if ln.startswith("- "):
+            item = ln[2:].strip()
+            if item:
+                out.append(item)
+    return out
+
+
+def _append_references(text: str, sources: list, preserve_when_empty: bool = True) -> str:
+    """실제 출처(제목 — URL 문자열)를 '참고자료' 섹션으로 최종 문서에 인용한다.
+
+    새 출처가 있으면 기존 참고자료 섹션을 중복 없이 제거하고 다시 붙인다(최대 _MAX_REFS개).
+
+    sources 가 비었을 때:
+    - preserve_when_empty=True(기본): 본문을 그대로 반환(기존 '## 참고자료'를 지우지 않음).
+      재작성/편집 경로에서 이전 인용을 보존하기 위함(회귀 버그 #2).
+    - preserve_when_empty=False: 기존 참고자료 섹션을 제거한다. 실제 검색 출처가 없는데
+      LLM이 지어낸 참고자료가 초안에 남는 것을 막기 위함(draft 최초 생성 경로).
     """
     real = [s.strip() for s in (sources or []) if isinstance(s, str) and s.strip()][:_MAX_REFS]
-    if not real:
-        return text.rstrip()
     idx = text.find(_REF_HEADER)
+    if not real:
+        if preserve_when_empty:
+            return text.rstrip()
+        return text[:idx].rstrip() if idx != -1 else text.rstrip()
     if idx != -1:
         text = text[:idx].rstrip()
     return "\n".join([text.rstrip(), "", _REF_HEADER, ""] + [f"- {s}" for s in real])
@@ -61,7 +105,7 @@ def _append_references(text: str, sources: list) -> str:
 
 def _generate(system: str, user: str, fallback: str, model: str,
               status: dict | None = None) -> tuple[str, list[str]]:
-    """기획서를 생성하고 서식(12섹션)을 검증한다.
+    """기획서를 생성하고 서식(14섹션)을 검증한다.
 
     실제 모드에서 섹션이 누락되면 누락 목록을 명시해 1회만 교정 재호출한다(안정 생성).
     LLM 오류로 fallback되면 status['fallback']=True 로 알린다.
@@ -73,7 +117,7 @@ def _generate(system: str, user: str, fallback: str, model: str,
     missing = _missing_sections(text)
     if missing and not llm.is_dummy():
         fix_user = (
-            f"{user}\n\n[중요] 아래 섹션이 누락되었습니다. 12개 섹션 전체를 "
+            f"{user}\n\n[중요] 아래 섹션이 누락되었습니다. 14개 섹션 전체를 "
             f"고정 순서·제목(`## `)으로 빠짐없이 다시 작성하세요: {', '.join(missing)}"
         )
         text = _strip_wrapping_fence(
@@ -137,7 +181,8 @@ def draft(state: ProjectState) -> dict:
     )
     status: dict = {}
     text, missing = _generate(DRAFT_WRITER_SYSTEM, user, fallback, state.get("model", ""), status)
-    text = _append_references(text, research.get("sources", []))
+    # 실제 검색 출처만 인용한다. 검색 근거가 없으면 LLM이 지어낸 참고자료를 남기지 않는다.
+    text = _append_references(text, _real_sources(state), preserve_when_empty=False)
 
     mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개: {', '.join(missing)}"
@@ -167,7 +212,8 @@ def revise(state: ProjectState) -> dict:
     )
     status: dict = {}
     text, missing = _generate(REVISER_SYSTEM, user, fallback, state.get("model", ""), status)
-    text = _append_references(text, state.get("research_result", {}).get("sources", []))
+    # 실제 검색 출처 우선. 없으면(옛 상태 등) 재작성 결과에 이미 있던 참고자료를 보존한다.
+    text = _append_references(text, _real_sources(state) or _existing_ref_lines(text))
 
     count = state.get("revision_count", 0) + 1
     mode = llm.mode_label(status, state.get("model", ""))
@@ -186,7 +232,8 @@ def polish(state: ProjectState) -> dict:
     if llm.is_dummy() or not text.strip():
         return {}
 
-    sources = state.get("research_result", {}).get("sources", [])
+    # 실제 검색 출처 우선. 없으면 편집 전 본문에 있던 참고자료를 보존한다(인용 유실 방지).
+    sources = _real_sources(state) or _existing_ref_lines(text)
     body = text.split(f"\n{_REF_HEADER}")[0].rstrip()  # 참고자료 분리
 
     status: dict = {}

@@ -63,3 +63,18 @@ def test_update_run_missing_id_returns_false(tmp_db):
 def test_save_defaults_name_when_missing(tmp_db):
     pid = tmp_db.save_run({"logs": []})
     assert tmp_db.get_project(pid)["project_name"] == "제목 없는 프로젝트"
+
+
+def test_fallback_reasons_and_competitor_sources_persist(tmp_db):
+    """외부 리뷰 P0-6/P0-3: fallback_reasons·competitor_sources 가 저장·재조회에서 살아남는다.
+
+    (이전에는 _RUN_KEYS 에 없어 DB 저장 후 프로젝트를 다시 열면 사라졌다.)
+    """
+    state = _state("근거 보존", 80)
+    state["fallback_reasons"] = {"customer": "형식", "risk": "혼잡"}
+    state["competitor_sources"] = [{"title": "경쟁 보고서", "url": "https://comp.io/a",
+                                    "source_type": "unknown"}]
+    pid = tmp_db.save_run(state)
+    got = tmp_db.get_project(pid)["state"]
+    assert got["fallback_reasons"] == {"customer": "형식", "risk": "혼잡"}
+    assert got["competitor_sources"][0]["url"] == "https://comp.io/a"

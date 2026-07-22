@@ -102,6 +102,49 @@ def test_source_objects_empty_without_search(monkeypatch):
     assert out["research_result"]["source_objects"] == []
 
 
+def test_web_search_status_disabled_without_key(monkeypatch):
+    """외부 리뷰 P0-4: status 로 '검색 실패'와 '결과 없음'을 구분한다(키 없음 → disabled)."""
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+    st: dict = {}
+    assert search.web_search("쿼리", status=st) == []
+    assert st["state"] == "disabled"
+
+
+def test_build_source_objects_dedups_and_types():
+    hits = [{"title": "공공데이터", "url": "https://www.data.go.kr/x", "content": "c"},
+            {"title": "중복", "url": "https://www.data.go.kr/x", "content": "다른 스니펫"},
+            {"title": "", "url": "", "content": "무 URL"}]
+    objs = search.build_source_objects(hits)
+    assert len(objs) == 1                                    # URL 중복/무 URL 제거
+    assert objs[0]["source_type"] == "government"
+    assert objs[0]["content_scope"] == "search_snippet" and objs[0]["original_text_extracted"] is False
+
+
+def test_research_search_error_marks_degraded(monkeypatch):
+    """외부 리뷰 P0-4: 검색 '오류'는 run_status 를 degraded 로 만든다(‘결과 없음’과 구분)."""
+    from app.graph import workflow
+
+    def failing_search(q, **k):
+        st = k.get("status")
+        if st is not None:
+            st["state"] = "error"
+            st["error"] = "RuntimeError: boom"
+        return []
+
+    monkeypatch.setattr(research.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(research.search, "search_enabled", lambda: True)
+    monkeypatch.setattr(research.search, "web_search", failing_search)
+    monkeypatch.setattr(research.llm, "complete_json",
+                        lambda *a, **k: {"market_overview": "o", "industry_trends": [],
+                                         "customer_needs": [], "competitors": [],
+                                         "opportunities": [], "risks": [], "sources": []})
+    out = research.research({"structured_input": {"project_name": "P"}, "logs": []})
+    assert "검색 오류" in out["logs"][-1]                     # 로그에 오류로 표기
+    q = workflow._assess_quality({"logs": out["logs"]})
+    assert q["run_status"] == "degraded"                      # 성공으로 위장하지 않음
+    assert q["fallback_reasons"].get("research") == "검색"     # 원인 표면화
+
+
 def test_search_injection_guard_attached_to_prompts():
     """item 11: 웹 검색을 쓰는 Agent의 시스템 프롬프트에 인젝션 방어 규칙이 부착된다."""
     from app.prompts import templates

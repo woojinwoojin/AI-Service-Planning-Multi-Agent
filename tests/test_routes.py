@@ -51,6 +51,24 @@ def test_revise_updates_same_history_record(client, monkeypatch):
     assert len(client.get("/projects").json()["projects"]) == 1
 
 
+def test_revise_reverifies_final_draft(client):
+    """외부 리뷰 P0-1: /revise 는 수정본을 다시 검증(polish→재평가→verify→품질판정)해,
+
+    옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않게 한다.
+    """
+    run = client.post("/run", json={"project_name": "재검증", "problem": "P"}).json()
+    pid = run["project_id"]
+    rev = client.post("/revise", json={
+        "project_name": "재검증", "draft": run["final_draft"],
+        "revision_request": "더 구체적으로", "project_id": pid,
+    }).json()
+    assert rev["verification_result"]                       # 수정본에 대해 검증이 다시 수행됨
+    assert "run_status" in rev                               # 실행 품질도 재판정
+    # 이력에도 수정본 기준 검증 결과가 저장됨
+    saved = client.get(f"/projects/{pid}").json()["state"]
+    assert saved.get("verification_result")
+
+
 def test_revise_without_project_id_saves_new(client):
     rev = client.post("/revise", json={
         "project_name": "새기획", "draft": "# 새기획 기획서\n내용",

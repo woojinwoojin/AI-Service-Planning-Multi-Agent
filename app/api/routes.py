@@ -7,8 +7,8 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import StreamingResponse
 
-from app.agents import draft_writer, reviewer
-from app.graph.workflow import run_workflow, run_workflow_stream
+from app.agents import draft_writer
+from app.graph.workflow import rerun_finalizers, run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, pptx_export, reliability, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
@@ -154,13 +154,15 @@ def revise(payload: ReviseInput) -> dict:
         "user_input": {**base.get("user_input", {}),
                        "revision_request": payload.revision_request},
         "model": payload.model or base.get("model", ""),
-        "revision_count": 0,
+        "revision_count": base.get("revision_count", 0),  # 누적(매 수정마다 0으로 초기화하지 않음)
         "logs": [],
     }
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
     state.update(draft_writer.revise(state))
-    state.update(reviewer.final_reviewer(state))   # 수정된 최종본 재평가(표시 점수 정합)
+    # 수정된 최종본을 /run 뒷부분과 동일하게 재처리(polish→재평가→근거검증→품질판정).
+    # 옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않도록(외부 리뷰 P0-1).
+    rerun_finalizers(state)
     state["usage"] = usage.summary()
     state["verification_summary"] = reliability.summary()
 
@@ -175,8 +177,10 @@ def revise(payload: ReviseInput) -> dict:
         "final_draft": state.get("final_draft", ""),
         "revision_count": state.get("revision_count", 0),
         "final_review_result": state.get("final_review_result", {}),
+        "verification_result": state.get("verification_result", {}),
         "usage": state.get("usage", {}),
         "verification_summary": state.get("verification_summary", {}),
+        "run_status": state.get("run_status", "success"),
         "logs": state.get("logs", []),
     }
 

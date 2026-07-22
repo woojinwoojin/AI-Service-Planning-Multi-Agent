@@ -31,3 +31,16 @@ def test_validate_normalizes_competitors():
 def test_validate_non_dict_falls_back():
     fb = competitor._dummy({})
     assert competitor._validate("깨짐", fb) == fb
+
+
+def test_competitor_saves_search_sources(monkeypatch):
+    """외부 리뷰 P0-3: Competitor 가 쓴 실제 검색 출처를 competitor_sources 로 보존한다."""
+    monkeypatch.setattr(competitor.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(competitor.search, "web_search",
+                        lambda q, **k: [{"title": "경쟁 비교", "url": "https://cmp.io/x", "content": "내용"}])
+    monkeypatch.setattr(competitor.llm, "complete_json",
+                        lambda *a, **k: {"competitors": [], "positioning": "P", "differentiation": ["d"]})
+    out = competitor.competitor({"structured_input": {"project_name": "P"},
+                                 "research_result": {}, "logs": []})
+    assert out["competitor_sources"][0]["url"] == "https://cmp.io/x"   # 검색 출처 보존
+    assert "웹검색 1건" in out["logs"][-1]

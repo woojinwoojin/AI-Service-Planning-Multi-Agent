@@ -17,6 +17,7 @@ class ProjectState(TypedDict, total=False):
     structured_input: dict
     research_result: dict
     competitor_result: dict
+    competitor_sources: list  # Competitor Agent가 쓴 실제 검색 출처(참고자료·검증 근거로 보존)
     customer_result: dict
     swot_result: dict
     business_model_result: dict
@@ -31,6 +32,7 @@ class ProjectState(TypedDict, total=False):
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
     logs: list  # 실행 로그 / 진행 상태 표시용
+    usage: dict  # 토큰·추정 비용·지연 관측치(실행 종료 시 집계해 기록)
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
     fallback_nodes: list # fallback/더미로 처리된 노드
