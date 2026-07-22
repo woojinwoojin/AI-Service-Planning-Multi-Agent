@@ -13,11 +13,11 @@ OUTPUT_DIR = Path("outputs")
 
 # 실행 결과 JSON에 담을 State 키 (Agent별 산출물 전체)
 _RUN_KEYS = [
-    "structured_input", "research_result", "competitor_result", "customer_result",
-    "swot_result", "business_model_result", "risk_result", "pestel_result",
+    "structured_input", "research_result", "competitor_result", "competitor_sources",
+    "customer_result", "swot_result", "business_model_result", "risk_result", "pestel_result",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
     "final_review_result", "verification_result", "verification_summary", "usage", "logs",
-    "run_status", "failed_nodes", "fallback_nodes",
+    "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons",
 ]
 
 

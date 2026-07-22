@@ -72,6 +72,35 @@ def classify_source_type(url: str) -> str:
     return "unknown"
 
 
+def build_source_objects(hits: list[dict]) -> list[dict]:
+    """검색 히트를 구조화 출처 객체(제목/URL/스니펫/유형)로 변환한다(URL 기준 중복 제거).
+
+    Research·Competitor 등 실제 검색을 쓰는 Agent가 공유한다 — 실제 출처만 담기므로
+    최종 '참고자료' 인용과 배지 표시의 단일 근거가 된다(LLM이 지어낸 URL은 섞이지 않음).
+
+    snippet 은 원문(full text)이 아니라 Tavily 검색 결과의 '요약문'이다. 뒤단 verifier 가
+    이를 원문 사실 검증으로 오해하지 않도록 성격을 메타데이터로 함께 남긴다:
+    - content_scope="search_snippet": 담긴 텍스트는 검색 요약문 수준임.
+    - original_text_extracted=False: URL 원문을 추출·재확인하지 않았음.
+    """
+    seen: set[str] = set()
+    objs: list[dict] = []
+    for h in hits:
+        url = (h.get("url") or "").strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        objs.append({
+            "title": (h.get("title") or "").strip(),
+            "url": url,
+            "snippet": (h.get("content") or "").strip()[:300],
+            "content_scope": "search_snippet",  # 원문 아님(검색 요약문)
+            "original_text_extracted": False,   # URL 원문 추출·재확인 안 함
+            "source_type": classify_source_type(url),  # 규칙 기반 유형(권위성 힌트)
+        })
+    return objs
+
+
 def _key() -> str:
     return os.getenv("TAVILY_API_KEY", "").strip()
 
@@ -80,9 +109,17 @@ def search_enabled() -> bool:
     return bool(_key())
 
 
-def web_search(query: str, max_results: int = 5) -> list[dict]:
-    """웹 검색 결과를 [{title, url, content}] 로 반환. 실패 시 빈 리스트."""
+def web_search(query: str, max_results: int = 5, status: dict | None = None) -> list[dict]:
+    """웹 검색 결과를 [{title, url, content}] 로 반환. 실패 시 빈 리스트.
+
+    status(dict)를 주면 검색 '상태'를 기록한다 — 호출부가 '검색 실패'와 '결과 없음'을
+    구분할 수 있게 하기 위함(정직한 run_status 표면화용):
+      state = "disabled" | "no_results" | "ok" | "error", error = 사유 문자열.
+    반환값(빈 리스트)만으로는 세 경우가 구분되지 않던 문제(외부 리뷰 P0-4)를 보완한다.
+    """
+    st = status if status is not None else {}
     if not search_enabled() or not query.strip():
+        st["state"] = "disabled"
         return []
     try:
         from tavily import TavilyClient
@@ -96,7 +133,11 @@ def web_search(query: str, max_results: int = 5) -> list[dict]:
                 "url": (r.get("url") or "").strip(),
                 "content": (r.get("content") or "").strip(),
             })
-        return [r for r in out if r["url"]]
-    except Exception as exc:  # 네트워크/쿼터/패키지 문제 모두 안전하게 흡수
+        hits = [r for r in out if r["url"]]
+        st["state"] = "ok" if hits else "no_results"
+        return hits
+    except Exception as exc:  # 네트워크/쿼터/패키지 문제 모두 안전하게 흡수(관통 보장)
+        st["state"] = "error"
+        st["error"] = f"{type(exc).__name__}: {exc}"
         print(f"[search] Tavily 검색 실패 → 검색 생략 ({type(exc).__name__}: {exc})", file=sys.stderr)
         return []

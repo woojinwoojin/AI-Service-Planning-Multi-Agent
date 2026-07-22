@@ -60,12 +60,20 @@ def _dummy(_: str) -> dict:
 def verify(state: ProjectState) -> dict:
     draft = state.get("final_draft", "") or state.get("draft", "")
     research = state.get("research_result", {})
+    competitor = state.get("competitor_result", {})
+    # 경쟁사 분석이 쓴 실제 검색 출처(제목·요약)도 근거에 포함한다 — 차별성/경쟁 관련 주장이
+    # 근거 없이 unsupported 로 몰리지 않도록(외부 리뷰 P0-3: verifier 가 경쟁 근거를 못 보던 문제).
+    comp_sources = state.get("competitor_sources", []) or []
+    comp_evidence = [{"title": s.get("title", ""), "snippet": s.get("snippet", "")}
+                     for s in comp_sources if isinstance(s, dict)]
     fallback = _dummy(draft)
 
     user = (
         "아래 기획서의 사실성 주장을 근거와 대조해 검증하세요.\n"
         f"[기획서]\n{draft}\n\n"
-        f"[근거: 시장조사 결과]\n{json.dumps(research, ensure_ascii=False)}"
+        f"[근거: 시장조사 결과]\n{json.dumps(research, ensure_ascii=False)}\n\n"
+        f"[근거: 경쟁사 분석]\n{json.dumps(competitor, ensure_ascii=False)}\n\n"
+        f"[근거: 경쟁사 검색 요약]\n{json.dumps(comp_evidence, ensure_ascii=False)}"
     )
     status: dict = {}
     raw = llm.complete_json(VERIFY_SYSTEM, user, fallback=fallback,

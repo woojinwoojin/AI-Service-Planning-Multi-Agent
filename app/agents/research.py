@@ -76,36 +76,14 @@ def _merge_sources(llm_sources: list, hits: list[dict]) -> list:
 
 
 def _source_objects(hits: list[dict]) -> list[dict]:
-    """실제 검색 출처를 구조화 객체(제목/URL/스니펫)로 보존한다.
+    """실제 검색 출처를 구조화 객체(제목/URL/스니펫/유형)로 보존한다.
 
     기존 `sources`(문자열)만으로는 도메인 기반 '출처 유형' 태깅·배지 표시를 할 수 없어,
-    URL을 잃지 않도록 원본 필드를 유지한다. `source_type`은 규칙 기반 분류 단계(다음 PR)에서
-    채운다 — 지금은 자리만 비워 둔다(현재 시스템이 무엇을 아직 판정하지 않는지 정직하게 표시).
-
-    snippet 은 원문(full text)이 아니라 Tavily 검색 결과의 '요약문'이다. 뒤단 verifier 가
-    이를 원문 사실 검증으로 오해하지 않도록 성격을 메타데이터로 함께 남긴다:
-    - content_scope="search_snippet": 담긴 텍스트는 검색 요약문 수준임.
-    - original_text_extracted=False: URL 원문을 추출·재확인하지 않았음.
+    URL을 잃지 않도록 원본 필드를 유지한다. 구현은 Competitor 등과 공유하는
+    `search.build_source_objects()` 에 위임한다(실제 검색 출처의 단일 형식).
     (Tier 1 의 verification_scope="search_snippet_only" 와 맞물리는 지점.)
-
-    URL 기준으로 중복을 제거하며, snippet 은 과다 길이를 막기 위해 앞부분만 싣는다.
     """
-    seen: set[str] = set()
-    objs: list[dict] = []
-    for h in hits:
-        url = (h.get("url") or "").strip()
-        if not url or url in seen:
-            continue
-        seen.add(url)
-        objs.append({
-            "title": (h.get("title") or "").strip(),
-            "url": url,
-            "snippet": (h.get("content") or "").strip()[:300],
-            "content_scope": "search_snippet",  # 원문 아님(검색 요약문)
-            "original_text_extracted": False,   # URL 원문 추출·재확인 안 함
-            "source_type": search.classify_source_type(url),  # 규칙 기반 유형(권위성 힌트)
-        })
-    return objs
+    return search.build_source_objects(hits)
 
 
 def _dummy(si: dict) -> dict:
@@ -126,7 +104,8 @@ def research(state: ProjectState) -> dict:
     fallback = _dummy(si)
 
     # 웹 검색으로 근거 확보 (키 없으면 빈 결과 → LLM 지식 기반으로 진행)
-    hits = search.web_search(_build_query(si)) if not llm.is_dummy() else []
+    search_status: dict = {}
+    hits = search.web_search(_build_query(si), status=search_status) if not llm.is_dummy() else []
 
     user = "다음 사업 아이디어를 조사하세요.\n" f"{json.dumps(si, ensure_ascii=False, indent=2)}"
     if hits:
@@ -149,6 +128,15 @@ def research(state: ProjectState) -> dict:
         result["sources"] = _merge_sources(result.get("sources", []), hits)
 
     mode = llm.mode_label(status, state.get("model", ""))
-    src = f"웹검색 {len(hits)}건" if hits else ("검색 비활성" if not search.search_enabled() else "검색 결과 없음")
+    # 검색 실패(오류)와 '결과 없음'을 구분해 로그에 정직하게 남긴다.
+    # 실패면 fallback·검색 으로 표기 → _assess_quality 가 run_status 를 degraded 로 판정.
+    if hits:
+        src = f"웹검색 {len(hits)}건"
+    elif not search.search_enabled():
+        src = "검색 비활성"
+    elif search_status.get("state") == "error":
+        src = "검색 오류(fallback·검색)"
+    else:
+        src = "검색 결과 없음"
     logs = state.get("logs", []) + [f"[research] 시장조사 완료 ({mode}, {src})"]
     return {"research_result": result, "logs": logs}

@@ -77,8 +77,9 @@
   .notice .retry { margin-top:8px; }
   .notice .retry button { background:#fff; color:var(--warn); border:1px solid #f0b986; padding:5px 11px; font-size:12px; }
   /* 환각 경고(근거 미확인 주장) — 실패 안내와 구분되는 적색 톤 */
-  .notice.halluc { background:#fdecec; border-color:#f3c0c0; color:#b42318; }
-  .notice.halluc b { color:#961b12; }
+  /* 근거 미확인 안내: '거짓'이 아닌 '주의'이므로 오류(빨강)가 아닌 주황 계열로 표시(배지 정책과 일관) */
+  .notice.halluc { background:#fff3e0; border-color:#f0c48a; color:#b45309; }
+  .notice.halluc b { color:#8a3f0a; }
   .notice.halluc ul { margin:8px 0 0 1.1em; }
   .notice.halluc li { margin:2px 0; }
 
@@ -217,6 +218,8 @@ async function loadModels() {
 }
 
 function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+// 출처 링크는 http/https 만 허용한다. HTML escape 만으로는 javascript:·data: URL을 막지 못한다.
+function safeUrl(u){ u=(u||"").trim(); return /^https?:\/\//i.test(u) ? u : "#"; }
 function inline(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>"); }
 
 // 간단 마크다운 렌더러 (제목/표/목록/굵게/문단)
@@ -360,7 +363,7 @@ function renderResults(d) {
   const srcOrder = ["government","academic","news","corporate","community","unknown"];
   const srcChips = srcOrder.filter(t=>srcCounts[t]).map(t=>`<span class="chip">${SRC_TYPE_LABELS[t]} ${srcCounts[t]}</span>`).join(" ");
   const escAttr = s => esc(s).replace(/"/g,"&quot;");
-  const srcList = srcObjs.map(s=>`<li><a href="${escAttr(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title||s.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[s.source_type||"unknown"]}</span></li>`).join("");
+  const srcList = srcObjs.map(s=>`<li><a href="${escAttr(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title||s.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[s.source_type||"unknown"]}</span></li>`).join("");
   const sourcesBlock = srcObjs.length
     ? `<div class="sec"><h4>검색으로 확인된 출처 ${srcObjs.length}건 <span class="muted" style="font-weight:400;font-size:12px">· 검색 요약 기준, URL 원문 사실 검증은 하지 않음</span></h4>
         <div style="margin:8px 0">${srcChips}</div>
@@ -417,10 +420,10 @@ function renderFinal(md) {
   const head = writeReason
     ? `<div class="notice" style="margin-bottom:14px">⚠ <b>기획서 본문</b>을 완전히 생성하지 못했어요<br><span>${esc(REASON_MSG[writeReason]||REASON_MSG["처리"])}</span></div>`
     : "";
-  // 환각 경고: 검증에서 근거 미확인(unsupported)으로 판정된 주장을 문서 상단에 명시(사실로 오독 방지)
+  // 근거 미확인 안내: '거짓'이 아니라 '현재 검색 요약에서 근거를 확인하지 못함' — 원문 확인 필요를 문서 상단에 명시
   const unsup = ((lastRun && lastRun.verification_result) || {}).unsupported || [];
   const halluc = unsup.length
-    ? `<div class="notice halluc" style="margin-bottom:14px">⚠ <b>근거가 확인되지 않은 주장 ${unsup.length}건</b> — 아래 내용은 사실로 신뢰하지 마세요(수치·통계는 특히 주의):<ul class="list">${unsup.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
+    ? `<div class="notice halluc" style="margin-bottom:14px">⚠ <b>근거가 확인되지 않은 주장 ${unsup.length}건</b> — 현재 수집된 검색 요약에서는 근거를 확인하지 못했습니다. 거짓이라는 뜻은 아니며, 원문에서 직접 확인이 필요합니다(수치·통계는 특히 주의):<ul class="list">${unsup.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
     : "";
   // 검증 범위·한계 문구(내보내기·JSON과 동일한 단일 소스: 응답의 verification_summary.note)
   const vnote = ((lastRun && lastRun.verification_summary) || {}).note || "";

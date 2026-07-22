@@ -53,6 +53,45 @@ def test_append_references_adds_and_dedups():
     assert capped.count("- https://ex.io/") == draft_writer._MAX_REFS
 
 
+def test_real_sources_excludes_llm_and_merges_competitor():
+    """외부 리뷰 P0-2/P0-3: 참고자료는 실제 검색 출처(Research+Competitor)만, LLM이 지어낸 것 제외."""
+    state = {
+        "research_result": {
+            "source_objects": [{"title": "시장 보고서", "url": "https://real.io/a"}],
+            "sources": ["https://real.io/a", "LLM이 지어낸 근거 https://made-up.io"],  # 문자열엔 LLM 것도 있음
+        },
+        "competitor_sources": [{"title": "경쟁 비교", "url": "https://cmp.io/b"},
+                               {"title": "중복", "url": "https://real.io/a"}],  # URL 중복 제거
+    }
+    lines = draft_writer._real_sources(state)
+    assert lines == ["시장 보고서 — https://real.io/a", "경쟁 비교 — https://cmp.io/b"]
+    assert not any("made-up.io" in ln for ln in lines)          # LLM 생성 URL은 인용에서 제외
+
+
+def test_draft_references_use_real_search_sources_only(monkeypatch):
+    """draft() 최종 참고자료에는 실제 source_objects URL만 들어가고 LLM sources 문자열은 안 들어간다."""
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: True)        # _generate → fallback 초안(참고자료 없음)
+    state = {
+        "structured_input": {"project_name": "P", "problem": "x"},
+        "research_result": {"source_objects": [{"title": "실제", "url": "https://real.io/a"}],
+                            "sources": ["https://made-up.io/hallucinated"]},
+        "pestel_result": {}, "logs": [],
+    }
+    out = dw.draft(state)
+    assert "## 참고자료" in out["draft"] and "https://real.io/a" in out["draft"]
+    assert "made-up.io" not in out["draft"]                      # LLM이 지어낸 출처는 인용 안 됨
+
+
+def test_draft_omits_references_when_no_real_sources(monkeypatch):
+    """검색 근거가 없으면 참고자료 섹션을 만들지 않는다(LLM 지어낸 인용 방지)."""
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: True)
+    out = dw.draft({"structured_input": {"project_name": "P"}, "research_result": {},
+                    "pestel_result": {}, "logs": []})
+    assert "## 참고자료" not in out["draft"]
+
+
 def test_revise_preserves_references_without_sources(monkeypatch):
     """회귀(버그 #2): /revise 는 research_result 를 넘기지 않아도 기존 참고자료가 보존돼야 함."""
     dw = draft_writer

@@ -58,9 +58,10 @@ def competitor(state: ProjectState) -> dict:
     fallback = _dummy(research)
 
     hits = []
+    search_status: dict = {}
     if not llm.is_dummy():
         query = f"{si.get('project_name', '')} 경쟁 서비스 비교 대안".strip()
-        hits = search.web_search(query, max_results=4)
+        hits = search.web_search(query, max_results=4, status=search_status)
 
     user = (
         "아래 시장조사 결과를 근거로 경쟁사 분석을 수행하세요.\n"
@@ -78,10 +79,18 @@ def competitor(state: ProjectState) -> dict:
     raw = llm.complete_json(COMPETITOR_SYSTEM, user, fallback=fallback,
                             model=state.get("model", ""), status=status)
     result = _validate(raw, fallback)
+    # 경쟁사 분석이 쓴 실제 검색 출처를 State에 보존한다(외부 리뷰 P0-3).
+    # → 최종 '참고자료' 인용과 verifier 근거에 Research 출처와 함께 반영된다(근거 유실 방지).
+    sources = search.build_source_objects(hits)
 
     mode = llm.mode_label(status, state.get("model", ""))
-    src = f", 웹검색 {len(hits)}건" if hits else ""
+    if hits:
+        src = f", 웹검색 {len(hits)}건"
+    elif search_status.get("state") == "error":
+        src = ", 검색 오류(fallback·검색)"
+    else:
+        src = ""
     logs = state.get("logs", []) + [
         f"[competitor] 경쟁사 분석 완료 ({mode}{src}, {len(result['competitors'])}개사)"
     ]
-    return {"competitor_result": result, "logs": logs}
+    return {"competitor_result": result, "competitor_sources": sources, "logs": logs}

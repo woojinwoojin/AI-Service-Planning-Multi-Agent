@@ -150,6 +150,22 @@ def _assess_quality(state: ProjectState) -> dict:
             "fallback_nodes": fallback, "fallback_reasons": reasons}
 
 
+def rerun_finalizers(state: ProjectState) -> ProjectState:
+    """수동 재작성(/revise) 후 최종본을 파이프라인 후반부와 동일하게 다시 처리한다.
+
+    polish → final_reviewer → verify → 실행 품질 재판정 순으로, /run 의 뒷부분과 같은
+    후처리를 적용한다. 이렇게 하지 않으면 수정 전 문서에 대한 옛 verification_result·
+    run_status 가 수정 후 문서와 함께 저장돼 화면 점수·검증이 실제 문서와 어긋난다
+    (외부 리뷰 P0-1). 각 단계는 _safe 로 감싸 한 단계가 실패해도 /revise 가 완주한다.
+    """
+    for node, fn in (("polish", draft_writer.polish),
+                     ("final_reviewer", reviewer.final_reviewer),
+                     ("verify", verifier.verify)):
+        state.update(_safe(node, fn)(state))
+    state.update(_assess_quality(state))
+    return state
+
+
 def _prepare_run(user_input: dict):
     """실행 초기 상태와 Langfuse config를 만든다(invoke/stream 공통)."""
     initial: ProjectState = {
