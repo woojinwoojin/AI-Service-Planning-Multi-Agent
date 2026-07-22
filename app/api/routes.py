@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse
 from app.agents import draft_writer, reviewer
 from app.graph.workflow import run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
-from app.services import docx_export, llm, reliability, store, suggest, usage
+from app.services import docx_export, llm, pptx_export, reliability, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -195,18 +195,35 @@ def export_docx(payload: ExportInput) -> Response:
     )
 
 
+@router.post("/export/pptx")
+def export_pptx(payload: ExportInput) -> Response:
+    """기획서 Markdown을 PowerPoint(.pptx)로 변환해 다운로드 응답으로 반환."""
+    md = reliability.append_disclaimer(payload.markdown)
+    data = pptx_export.pptx_bytes(md, title=payload.project_name)
+    fname = f"{pptx_export._slugify(payload.project_name)}.pptx"
+    # RFC 5987: 한글 등 비-ASCII 파일명을 헤더(latin-1)에 안전하게 싣는다
+    disposition = f"attachment; filename=\"plan.pptx\"; filename*=UTF-8''{quote(fname)}"
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": disposition},
+    )
+
+
 @router.post("/run/save")
 def run_and_save(payload: ProjectInput) -> dict:
-    """워크플로 실행 후 최종 기획서(.md/.docx)와 전체 실행 결과(.json)를 저장."""
+    """워크플로 실행 후 최종 기획서(.md/.docx/.pptx)와 전체 실행 결과(.json)를 저장."""
     state = run_workflow(payload.to_state_input())
     state["verification_summary"] = reliability.summary()
     final = reliability.append_disclaimer(state.get("final_draft", ""))  # 내보내기 문서에 한계 문구
     saved_md = save_markdown(payload.project_name, final)
     saved_json = save_run_json(payload.project_name, state)
     saved_docx = docx_export.save_docx(payload.project_name, final)
+    saved_pptx = pptx_export.save_pptx(payload.project_name, final)
     return {
         "saved_md": saved_md,
         "saved_json": saved_json,
         "saved_docx": saved_docx,
+        "saved_pptx": saved_pptx,
         "revision_count": state.get("revision_count", 0),
     }
