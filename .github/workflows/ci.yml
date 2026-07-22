@@ -1,0 +1,48 @@
+name: CI
+
+# 로드맵 v2 · 상시 트랙 A — PR/main push마다 lint + test.
+# 테스트는 실제 LLM을 호출하지 않으므로(conftest.py) API 키 없이 결정론적으로 돈다.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 같은 브랜치에서 새 push가 오면 이전 실행 취소(불필요한 CI 시간 절감).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    name: ruff + pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # LLM 더미 모드 강제(실 호출 차단). conftest도 방어하지만 이중 안전.
+      OPENAI_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
+      TAVILY_API_KEY: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff==0.15.20
+
+      - name: Ruff (lint)
+        run: ruff check .
+
+      - name: Pytest
+        run: pytest -q
