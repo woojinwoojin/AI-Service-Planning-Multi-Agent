@@ -186,7 +186,7 @@ def draft(state: ProjectState) -> dict:
 
     mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개: {', '.join(missing)}"
-    logs = state.get("logs", []) + [f"[draft_writer] 초안 작성 완료 ({mode}){note}"]
+    logs = [f"[draft_writer] 초안 작성 완료 ({mode}){note}"]
     return {"draft": text, "logs": logs}
 
 
@@ -218,7 +218,7 @@ def revise(state: ProjectState) -> dict:
     count = state.get("revision_count", 0) + 1
     mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개"
-    logs = state.get("logs", []) + [f"[draft_writer] 재작성 완료 (revision={count}, {mode}){note}"]
+    logs = [f"[draft_writer] 재작성 완료 (revision={count}, {mode}){note}"]
     return {"final_draft": text, "revision_count": count, "logs": logs}
 
 
@@ -245,5 +245,5 @@ def polish(state: ProjectState) -> dict:
     final = _append_references(edited, sources)
 
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[polish] 일관성 편집 완료 ({mode})"]
+    logs = [f"[polish] 일관성 편집 완료 ({mode})"]
     return {"final_draft": final, "logs": logs}

@@ -47,7 +47,7 @@ def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectSta
         try:
             return fn(state)
         except Exception as exc:
-            logs = state.get("logs", []) + [f"[{name}] 오류로 건너뜀 ({type(exc).__name__}: {exc})"]
+            logs = [f"[{name}] 오류로 건너뜀 ({type(exc).__name__}: {exc})"]
             return {"logs": logs}
 
     return wrapped
@@ -64,7 +64,7 @@ def _needs_revision(state: ProjectState) -> str:
 
 def _finalize(state: ProjectState) -> dict:
     """재작성 없이 초안을 최종본으로 확정."""
-    logs = state.get("logs", []) + ["[finalize] 초안을 최종본으로 확정 (재작성 없음)"]
+    logs = ["[finalize] 초안을 최종본으로 확정 (재작성 없음)"]
     return {"final_draft": state.get("draft", ""), "logs": logs}
 
 
@@ -150,6 +150,20 @@ def _assess_quality(state: ProjectState) -> dict:
             "fallback_nodes": fallback, "fallback_reasons": reasons}
 
 
+def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
+    """그래프 '밖'에서 노드 결과를 state 에 병합한다(logs 는 reducer 처럼 이어붙임).
+
+    노드는 이제 '자기 새 로그만' 반환한다(병렬 reducer 대응). LangGraph 안에서는
+    logs reducer 가 자동 누적하지만, 그래프 밖(예: /revise, rerun_finalizers)에서는
+    dict.update 가 logs 를 덮어써 이전 로그가 사라진다. 여기서 logs 만 누적 병합한다.
+    """
+    prev_logs = list(state.get("logs") or [])
+    state.update(update)
+    if "logs" in update:
+        state["logs"] = prev_logs + list(update["logs"] or [])
+    return state
+
+
 def rerun_finalizers(state: ProjectState) -> ProjectState:
     """수동 재작성(/revise) 후 최종본을 파이프라인 후반부와 동일하게 다시 처리한다.
 
@@ -157,11 +171,12 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
     후처리를 적용한다. 이렇게 하지 않으면 수정 전 문서에 대한 옛 verification_result·
     run_status 가 수정 후 문서와 함께 저장돼 화면 점수·검증이 실제 문서와 어긋난다
     (외부 리뷰 P0-1). 각 단계는 _safe 로 감싸 한 단계가 실패해도 /revise 가 완주한다.
+    그래프 밖이므로 apply_node_update 로 logs 를 누적한다(노드가 자기 로그만 반환).
     """
     for node, fn in (("polish", draft_writer.polish),
                      ("final_reviewer", reviewer.final_reviewer),
                      ("verify", verifier.verify)):
-        state.update(_safe(node, fn)(state))
+        apply_node_update(state, _safe(node, fn)(state))
     state.update(_assess_quality(state))
     return state
 
@@ -212,7 +227,9 @@ def run_workflow_stream(user_input: dict, workflow_mode: str = "serial"):
     for chunk in GRAPH.stream(initial, config=config, stream_mode="updates"):
         for node, update in chunk.items():
             if isinstance(update, dict):
-                state.update(update)
+                # updates 모드는 노드의 '원본 반환'(자기 로그만)을 준다 → logs 를 누적 병합해야
+                # 최종 state 의 로그가 전 노드를 포함한다(reducer 는 그래프 내부에만 적용됨).
+                apply_node_update(state, update)
             order += 1
             yield {"type": "node", "node": node, "order": order}
     yield {"type": "done", "state": _finalize_run(state)}

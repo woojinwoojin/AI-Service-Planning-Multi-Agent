@@ -90,7 +90,7 @@ def competitor(state: ProjectState) -> dict:
         src = ", 검색 오류(fallback·검색)"
     else:
         src = ""
-    logs = state.get("logs", []) + [
+    logs = [
         f"[competitor] 경쟁사 분석 완료 ({mode}{src}, {len(result['competitors'])}개사)"
     ]
     return {"competitor_result": result, "competitor_sources": sources, "logs": logs}

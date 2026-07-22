@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import StreamingResponse
 
 from app.agents import draft_writer
-from app.graph.workflow import rerun_finalizers, run_workflow, run_workflow_stream
+from app.graph.workflow import apply_node_update, rerun_finalizers, run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, pptx_export, reliability, store, suggest, usage
 from app.services.markdown_export import save_markdown, save_run_json
@@ -160,7 +160,7 @@ def revise(payload: ReviseInput) -> dict:
     }
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
-    state.update(draft_writer.revise(state))
+    apply_node_update(state, draft_writer.revise(state))  # 노드가 자기 로그만 반환 → 누적 병합
     # 수정된 최종본을 /run 뒷부분과 동일하게 재처리(polish→재평가→근거검증→품질판정).
     # 옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않도록(외부 리뷰 P0-1).
     rerun_finalizers(state)

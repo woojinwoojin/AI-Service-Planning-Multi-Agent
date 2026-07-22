@@ -65,5 +65,5 @@ def pestel(state: ProjectState) -> dict:
     result = _validate(raw, fallback)
 
     mode = llm.mode_label(status, state.get("model", ""))
-    logs = state.get("logs", []) + [f"[pestel] PESTEL 분석 완료 ({mode})"]
+    logs = [f"[pestel] PESTEL 분석 완료 ({mode})"]
     return {"pestel_result": result, "logs": logs}
