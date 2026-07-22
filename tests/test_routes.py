@@ -107,9 +107,10 @@ def test_suggest_requires_project_name(client):
 
 def test_suggest_returns_fields_in_dummy_mode(client):
     d = client.post("/suggest", json={"project_name": "AI 반려식물 케어"}).json()
-    assert set(d) == {"description", "target_user", "problem", "keywords"}
+    assert {"description", "target_user", "problem", "keywords"} <= set(d)
     assert isinstance(d["keywords"], list)
     assert d["description"]                                 # 더미라도 초안은 채워짐
+    assert "meta" in d                                      # 추천 이유·확신도 메타 포함(§5)
 
 
 def test_run_stream_emits_node_events_and_done(client):

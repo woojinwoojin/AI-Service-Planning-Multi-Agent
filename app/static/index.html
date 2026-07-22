@@ -22,6 +22,11 @@
   .fbadge { display:none; font-size:11px; font-weight:700; border-radius:5px; padding:1px 6px; margin-left:4px; vertical-align:1px; }
   .fbadge.ai { display:inline-block; background:#eef1fe; color:var(--brand); }
   .fbadge.ai_edited { display:inline-block; background:#fff3e0; color:var(--warn); }
+  /* 추천 이유·확신도 표시(§5) */
+  .fmeta { font-size:11px; color:var(--muted); margin:3px 0 2px; line-height:1.5; }
+  .fmeta .conf { font-weight:700; }
+  .conf-high { color:var(--ok); } .conf-med { color:var(--brand); } .conf-low { color:var(--warn); }
+  .cmp-meta { font-size:11px; color:var(--muted); margin-top:5px; }
   /* AI 제안 비교 패널 */
   .cmp { margin-top:12px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#fafbff; }
   .cmp-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
@@ -143,15 +148,18 @@
     <span class="muted" id="suggestHint"></span>
     <div class="cmp hidden" id="comparePanel"></div>
     <div class="row">
-      <div><label>목표 사용자 <span class="fbadge" id="badge_target_user"></span></label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /></div>
+      <div><label>목표 사용자 <span class="fbadge" id="badge_target_user"></span></label><input id="target_user" placeholder="예: 진로를 고민하는 대학생" /><div class="fmeta hidden" id="meta_target_user"></div></div>
       <div><label>모델</label><select id="model"></select></div>
     </div>
     <label>아이디어 설명 <span class="fbadge" id="badge_description"></span></label>
     <textarea id="description" placeholder="어떤 서비스인지 한두 문장으로"></textarea>
+    <div class="fmeta hidden" id="meta_description"></div>
     <label>해결하려는 문제 <span class="fbadge" id="badge_problem"></span></label>
     <textarea id="problem" placeholder="사용자가 겪는 문제"></textarea>
+    <div class="fmeta hidden" id="meta_problem"></div>
     <label>키워드 (쉼표로 구분) <span class="fbadge" id="badge_keywords"></span></label>
     <input id="keywords" placeholder="진로, 대학생, 취업" />
+    <div class="fmeta hidden" id="meta_keywords"></div>
     <div class="btns">
       <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
       <span class="muted" id="runHint">여러 Agent가 순차 실행됩니다 (약 30초~1분)</span>
@@ -456,6 +464,21 @@ function markAiField(field) {
   el.addEventListener("input", onEdit);
 }
 
+// 추천 이유·확신도 표시(§5)
+const CONF_LABEL = {high:["높음","conf-high"], medium:["보통","conf-med"], low:["낮음","conf-low"]};
+function confText(c){ return (CONF_LABEL[c] || CONF_LABEL.medium)[0]; }
+function setMeta(field, meta) {
+  const el = document.getElementById("meta_" + field);
+  if (!el) return;
+  if (!meta || (!meta.reason && !meta.confidence)) { el.className = "fmeta hidden"; el.innerHTML = ""; return; }
+  const [lbl, cls] = CONF_LABEL[meta.confidence] || CONF_LABEL.medium;
+  const based = (meta.based_on && meta.based_on.length)
+    ? " · 참고: " + meta.based_on.map(b => FIELD_LABEL[b] || b).join(", ") : "";
+  const reason = meta.reason ? esc(meta.reason) + " " : "";
+  el.className = "fmeta";
+  el.innerHTML = `💡 ${reason}<span class="conf ${cls}">확신도 ${lbl}</span>${esc(based)}`;
+}
+
 async function suggestFields() {
   const name = document.getElementById("project_name").value.trim();
   if (!name) { alert("먼저 프로젝트명을 입력하세요."); return; }
@@ -482,11 +505,13 @@ async function suggestFields() {
     const d = await r.json();
     // 빈 항목만 채운다. 사용자가 입력한 항목(응답 null)은 절대 건드리지 않는다.
     let filled = 0;
+    for (const f of SUGGEST_FIELDS) setMeta(f, null);         // 이전 메타 초기화
     for (const f of emptyFields) {
       const v = d[f];
       if (v == null) continue;
       document.getElementById(f).value = Array.isArray(v) ? v.join(", ") : v;
       markAiField(f);
+      setMeta(f, (d.meta || {})[f]);                          // 추천 이유·확신도 표시
       filled++;
     }
     hint.textContent = filled
@@ -532,13 +557,17 @@ async function compareFields() {
 }
 
 function renderCompare() {
+  const cmeta = compareData.meta || {};
   const rows = SUGGEST_FIELDS.map(f => {
     const cur = fieldValue(f), sug = asText(compareData[f]);
+    const m = cmeta[f];
+    const metaLine = m && (m.reason || m.confidence)
+      ? `<div class="cmp-meta">💡 ${esc(m.reason || "")} · 확신도 ${confText(m.confidence)}</div>` : "";
     return `<div class="cmp-row" id="cmprow_${f}">
       <div class="cmp-field">${esc(FIELD_LABEL[f])}</div>
       <div class="cmp-cols">
         <div class="cmp-cell"><div class="cmp-h">내 값</div><div>${cur ? esc(cur) : '<span class="muted">미입력</span>'}</div></div>
-        <div class="cmp-cell ai"><div class="cmp-h">AI 추천</div><div>${esc(sug) || '<span class="muted">제안 없음</span>'}</div></div>
+        <div class="cmp-cell ai"><div class="cmp-h">AI 추천</div><div>${esc(sug) || '<span class="muted">제안 없음</span>'}</div>${metaLine}</div>
       </div>
       <div class="cmp-act">
         <button class="ghost" onclick="applyCompare('${f}','keep')">기존 유지</button>
@@ -561,6 +590,7 @@ function applyCompare(f, action) {
     const ai = compareData[f], el = document.getElementById(f);
     if (action === "ai") {
       el.value = asText(ai); markAiField(f);
+      setMeta(f, (compareData.meta || {})[f]);               // 적용 시 이유·확신도 표시
     } else {  // merge: 내 값 + AI (키워드는 합집합)
       const cur = fieldValue(f);
       if (f === "keywords") {
@@ -569,7 +599,7 @@ function applyCompare(f, action) {
       } else {
         el.value = cur ? (cur + "\n" + asText(ai)) : asText(ai);
       }
-      setBadge(f, "ai_edited");
+      setBadge(f, "ai_edited"); setMeta(f, null);             // 합친 값은 사용자 편집물 → 메타 제거
     }
   }
   const row = document.getElementById("cmprow_" + f);

@@ -17,7 +17,7 @@ def dummy(monkeypatch):
 
 def test_no_existing_fills_all(dummy):
     out = suggest.suggest_fields("반려식물 케어")
-    assert set(out) == _ALL
+    assert _ALL <= set(out)
     assert all(out[k] for k in _ALL)                          # 빈 항목 전부 채움
     assert isinstance(out["keywords"], list)
 
@@ -73,7 +73,7 @@ def test_route_preserves_existing(dummy):
 def test_compare_mode_suggests_all_fields(dummy):
     """비교 모드: 사용자가 일부 입력했어도 4개 항목 '모두' 제안(None 없음)."""
     out = suggest.suggest_fields("복약 관리", existing={"target_user": "고령층"}, compare=True)
-    assert set(out) == _ALL
+    assert _ALL <= set(out)
     assert all(out[k] is not None for k in _ALL)              # 채워진 항목도 제안 생성
     assert isinstance(out["keywords"], list)
 
@@ -106,3 +106,25 @@ def test_compare_mode_route(dummy):
     d = c.post("/suggest", json={
         "project_name": "복약", "existing": {"target_user": "고령층"}, "compare": True}).json()
     assert all(d[k] is not None for k in _ALL)                # 라우트에서도 전 항목 제안
+
+
+def test_meta_reason_confidence_based_on(monkeypatch):
+    """§5: 각 추천 필드에 이유·확신도·참고 입력(meta)이 담기고, 확신도는 정규화된다."""
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(llm, "complete_json", lambda *a, **k: {
+        "description": {"value": "설명", "reason": "문제 기반 요약", "confidence": "high",
+                        "based_on": ["problem", "존재하지않음"]},
+        "keywords": {"value": ["a", "b"], "reason": "도메인", "confidence": "이상값", "based_on": []},
+    })
+    out = suggest.suggest_fields("P", existing={"problem": "복약 혼동"})
+    m = out["meta"]["description"]
+    assert m["reason"] == "문제 기반 요약" and m["confidence"] == "high"
+    assert m["based_on"] == ["problem"]                       # 알 수 없는 필드 id 제거
+    assert out["meta"]["keywords"]["confidence"] == "medium"  # 잘못된 확신도 → medium 정규화
+
+
+def test_meta_only_for_suggested_fields(dummy):
+    """사용자 입력 필드(보존)에는 meta 를 만들지 않는다."""
+    out = suggest.suggest_fields("P", existing={"target_user": "U"})
+    assert "target_user" not in out["meta"]                   # 보존 필드는 meta 없음
+    assert "description" in out["meta"]                        # 채운 필드만 meta
