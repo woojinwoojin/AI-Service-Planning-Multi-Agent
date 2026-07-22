@@ -31,3 +31,15 @@ def test_summary_without_start_is_empty():
     usage._calls.set(None)
     usage.record("gpt-4o", 100, 100, 10.0, False)
     assert usage.summary()["calls"] == 0
+
+
+def test_wall_time_and_llm_latency_sum_split():
+    """병렬화 비교용: wall_time_ms(실제 대기)와 llm_latency_sum_ms(호출 합)를 분리 집계."""
+    usage.start()
+    usage.record("gpt-4o-mini", 100, 50, 5000.0, False)   # LLM 호출 '시간' 5초로 기록
+    usage.record("gpt-4o-mini", 100, 50, 5000.0, False)   # 또 5초 → 합계 10초
+    s = usage.summary()
+    assert s["llm_latency_sum_ms"] == 10000.0             # 호출 시간 합계
+    assert s["latency_ms"] == s["llm_latency_sum_ms"]     # 하위호환 별칭
+    # wall time 은 실제 경과(테스트 즉시 실행) → 호출 시간 합계보다 훨씬 작아야 한다
+    assert 0 <= s["wall_time_ms"] < 5000.0

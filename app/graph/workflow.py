@@ -166,11 +166,12 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
     return state
 
 
-def _prepare_run(user_input: dict):
+def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
     """실행 초기 상태와 Langfuse config를 만든다(invoke/stream 공통)."""
     initial: ProjectState = {
         "user_input": user_input,
         "model": (user_input.get("model") or "").strip(),
+        "workflow_mode": workflow_mode,   # 실행 구조(serial/parallel) 기록 — 비교 실험용
         "logs": [],
     }
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
@@ -190,13 +191,14 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     return state
 
 
-def run_workflow(user_input: dict) -> ProjectState:
-    initial, config = _prepare_run(user_input)
+def run_workflow(user_input: dict, workflow_mode: str = "serial") -> ProjectState:
+    # workflow_mode 는 현재 관측 기록용(그래프는 직렬 하나). 병렬 그래프는 후속 PR에서 추가.
+    initial, config = _prepare_run(user_input, workflow_mode)
     state = GRAPH.invoke(initial, config=config)
     return _finalize_run(state)
 
 
-def run_workflow_stream(user_input: dict):
+def run_workflow_stream(user_input: dict, workflow_mode: str = "serial"):
     """워크플로를 스트리밍 실행하며 노드 완료 이벤트를 yield하고, 마지막에 최종 state를 yield한다.
 
     - GRAPH.stream(stream_mode="updates")로 각 노드 완료 직후 부분 업데이트를 받는다.
@@ -204,7 +206,7 @@ def run_workflow_stream(user_input: dict):
     - yield 형식: {"type": "node", "node": name, "order": n}
                   {"type": "done", "state": <최종 ProjectState>}
     """
-    initial, config = _prepare_run(user_input)
+    initial, config = _prepare_run(user_input, workflow_mode)
     state: ProjectState = dict(initial)
     order = 0
     for chunk in GRAPH.stream(initial, config=config, stream_mode="updates"):
