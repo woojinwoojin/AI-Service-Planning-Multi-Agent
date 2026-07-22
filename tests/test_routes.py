@@ -143,6 +143,7 @@ def test_fallback_reasons_surface_to_api(client, monkeypatch):
         raise llm.LLMError("busy", reason="혼잡")
 
     monkeypatch.setattr(llm, "is_dummy", lambda: False)   # 실제 모드로 간주
+    monkeypatch.setattr(llm, "_get_model", lambda model="": object())  # 환경(키/provider) 비의존
     monkeypatch.setattr(llm, "_invoke_with_retry", boom)  # 모든 LLM 호출이 혼잡으로 실패
     d = client.post("/run", json={"project_name": "혼잡", "problem": "P"}).json()
     assert d["run_status"] == "degraded"                  # 실패가 아니라 fallback로 흡수
@@ -167,6 +168,7 @@ def test_demo_fail_injection_via_payload(client, monkeypatch):
         usage_metadata = {}
 
     monkeypatch.setattr(llm, "is_dummy", lambda: False)          # 실제 모드로 간주
+    monkeypatch.setattr(llm, "_get_model", lambda model="": object())  # 환경(키/provider) 비의존
     monkeypatch.setattr(llm, "_invoke_with_retry", lambda *a, **k: FakeResp())  # 비대상 노드는 정상
     d = client.post("/run", json={
         "project_name": "데모", "problem": "P",
