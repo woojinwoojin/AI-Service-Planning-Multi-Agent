@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Callable
 
@@ -68,9 +69,8 @@ def _finalize(state: ProjectState) -> dict:
     return {"final_draft": state.get("draft", ""), "logs": logs}
 
 
-def build_graph():
-    g = StateGraph(ProjectState)
-
+def _register_nodes(g: StateGraph) -> None:
+    """모든 노드를 등록한다(직렬·병렬 그래프 공통). 노드 함수·프롬프트는 동일."""
     g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
     g.add_node("research", _safe("research", research.research))
     g.add_node("competitor", _safe("competitor", competitor.competitor))
@@ -87,15 +87,9 @@ def build_graph():
     g.add_node("final_reviewer", _safe("final_reviewer", reviewer.final_reviewer))
     g.add_node("verify", _safe("verify", verifier.verify))
 
-    g.add_edge(START, "preprocess")
-    g.add_edge("preprocess", "research")
-    g.add_edge("research", "competitor")
-    g.add_edge("competitor", "customer")
-    g.add_edge("customer", "pestel")
-    g.add_edge("pestel", "swot")
-    g.add_edge("swot", "business_model")
-    g.add_edge("business_model", "risk")
-    g.add_edge("risk", "draft")
+
+def _add_finish_edges(g: StateGraph) -> None:
+    """draft 이후 마무리 구간(직렬·병렬 공통, 동일 순서)."""
     g.add_edge("draft", "reviewer")
     g.add_conditional_edges(
         "reviewer", _needs_revision, {"revise": "revise", "finalize": "finalize"}
@@ -106,11 +100,65 @@ def build_graph():
     g.add_edge("final_reviewer", "verify")
     g.add_edge("verify", END)
 
+
+def build_serial_graph():
+    """기존 직렬 구조: 분석 노드를 한 줄로 순차 실행(비교 기준)."""
+    g = StateGraph(ProjectState)
+    _register_nodes(g)
+    g.add_edge(START, "preprocess")
+    g.add_edge("preprocess", "research")
+    g.add_edge("research", "competitor")
+    g.add_edge("competitor", "customer")
+    g.add_edge("customer", "pestel")
+    g.add_edge("pestel", "swot")
+    g.add_edge("swot", "business_model")
+    g.add_edge("business_model", "risk")
+    g.add_edge("risk", "draft")
+    _add_finish_edges(g)
     return g.compile()
 
 
-# 앱 로드 시 1회 컴파일
-GRAPH = build_graph()
+def build_parallel_graph():
+    """최소 변경 병렬 구조: Research 이후 서로 독립인 4분기를 동시 실행 → Draft 에서 합류.
+
+    분기(실제 데이터 의존성만 반영, Agent 입력·프롬프트는 직렬과 동일):
+      A: Competitor → SWOT      (SWOT 은 competitor_result 사용)
+      B: Customer
+      C: PESTEL → Risk          (Risk 는 pestel_result 사용)
+      D: Business Model
+    Draft 는 네 분기의 '끝 노드'(swot·customer·risk·business_model)를 리스트 edge 로 받아
+    '모두 완료된 뒤 정확히 1회' 실행한다. 개별 edge 로 연결하면 깊이가 다른 분기 때문에
+    Draft 가 조기 실행·중복 실행되므로(실측 확인), 반드시 리스트(fan-in join) 형태를 쓴다.
+    """
+    g = StateGraph(ProjectState)
+    _register_nodes(g)
+    g.add_edge(START, "preprocess")
+    g.add_edge("preprocess", "research")
+    g.add_edge("research", "competitor")
+    g.add_edge("competitor", "swot")
+    g.add_edge("research", "customer")
+    g.add_edge("research", "pestel")
+    g.add_edge("pestel", "risk")
+    g.add_edge("research", "business_model")
+    g.add_edge(["swot", "customer", "risk", "business_model"], "draft")  # fan-in join
+    _add_finish_edges(g)
+    return g.compile()
+
+
+# 앱 로드 시 1회씩 컴파일(두 구조 모두 유지 — 비교 실험용)
+SERIAL_GRAPH = build_serial_graph()
+PARALLEL_GRAPH = build_parallel_graph()
+GRAPH = SERIAL_GRAPH   # 하위호환 별칭(기본은 직렬)
+
+
+def _select_graph(mode: str):
+    return PARALLEL_GRAPH if mode == "parallel" else SERIAL_GRAPH
+
+
+def _resolve_mode(mode: str | None) -> str:
+    """실행 모드 결정: 인자 우선, 없으면 env(WORKFLOW_MODE), 기본 serial."""
+    resolved = (mode or os.getenv("WORKFLOW_MODE", "") or "serial").strip().lower()
+    return "parallel" if resolved == "parallel" else "serial"
 
 
 _FAILED_RE = re.compile(r"\[(.+?)\] 오류로 건너뜀")
@@ -206,14 +254,15 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     return state
 
 
-def run_workflow(user_input: dict, workflow_mode: str = "serial") -> ProjectState:
-    # workflow_mode 는 현재 관측 기록용(그래프는 직렬 하나). 병렬 그래프는 후속 PR에서 추가.
-    initial, config = _prepare_run(user_input, workflow_mode)
-    state = GRAPH.invoke(initial, config=config)
+def run_workflow(user_input: dict, workflow_mode: str | None = None) -> ProjectState:
+    """워크플로 실행. workflow_mode=serial|parallel(없으면 env WORKFLOW_MODE, 기본 serial)."""
+    mode = _resolve_mode(workflow_mode)
+    initial, config = _prepare_run(user_input, mode)
+    state = _select_graph(mode).invoke(initial, config=config)
     return _finalize_run(state)
 
 
-def run_workflow_stream(user_input: dict, workflow_mode: str = "serial"):
+def run_workflow_stream(user_input: dict, workflow_mode: str | None = None):
     """워크플로를 스트리밍 실행하며 노드 완료 이벤트를 yield하고, 마지막에 최종 state를 yield한다.
 
     - GRAPH.stream(stream_mode="updates")로 각 노드 완료 직후 부분 업데이트를 받는다.
@@ -221,10 +270,11 @@ def run_workflow_stream(user_input: dict, workflow_mode: str = "serial"):
     - yield 형식: {"type": "node", "node": name, "order": n}
                   {"type": "done", "state": <최종 ProjectState>}
     """
-    initial, config = _prepare_run(user_input, workflow_mode)
+    mode = _resolve_mode(workflow_mode)
+    initial, config = _prepare_run(user_input, mode)
     state: ProjectState = dict(initial)
     order = 0
-    for chunk in GRAPH.stream(initial, config=config, stream_mode="updates"):
+    for chunk in _select_graph(mode).stream(initial, config=config, stream_mode="updates"):
         for node, update in chunk.items():
             if isinstance(update, dict):
                 # updates 모드는 노드의 '원본 반환'(자기 로그만)을 준다 → logs 를 누적 병합해야
