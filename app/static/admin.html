@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>관리자 · 데모 도구</title>
+<style>
+  :root { --ink:#1f2a37; --muted:#667085; --line:#e4e7ec; --accent:#2b59c3; --warn:#b45309; --err:#b42318; --ok:#1e7a34; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,"Segoe UI",Roboto,"Malgun Gothic",sans-serif; color:var(--ink); background:#f7f8fa; }
+  header { padding:20px 24px; background:#fff; border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:18px; }
+  header p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  header a { color:var(--accent); font-size:12px; }
+  main { max-width:820px; margin:0 auto; padding:22px 18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-bottom:18px; }
+  .warn-box { background:#fff3e0; border:1px solid #f0c48a; color:var(--warn); border-radius:8px; padding:10px 13px; font-size:13px; margin-bottom:16px; }
+  label { display:block; font-size:13px; font-weight:600; margin:12px 0 5px; }
+  input, select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1 1 200px; }
+  .nodes { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:4px; }
+  .nodes label { display:inline-flex; align-items:center; gap:6px; font-weight:400; margin:0; }
+  .nodes input { width:auto; }
+  button { margin-top:16px; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:default; }
+  .badge { display:inline-block; border-radius:6px; padding:3px 10px; font-size:13px; font-weight:700; }
+  .b-success { background:#e6f4ea; color:var(--ok); }
+  .b-degraded { background:#fff3e0; color:var(--warn); }
+  .b-failed { background:#fdecec; color:var(--err); }
+  table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; }
+  th { background:#f2f5fb; }
+  pre { background:#0f1729; color:#d7e0f2; border-radius:8px; padding:12px; font-size:12px; overflow:auto; max-height:280px; white-space:pre-wrap; }
+  .muted { color:var(--muted); font-size:12px; }
+  .hidden { display:none; }
+  .spin { display:inline-block; width:13px; height:13px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:s .7s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes s { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧪 관리자 · 데모 도구</h1>
+  <p>특정 Agent를 일부러 실패시켜, 미완성 결과의 <b>정직한 안내(run_status·fallback 원인)</b>가 어떻게 표면화되는지 시연합니다. · <a href="/">← 메인으로</a></p>
+</header>
+<main>
+  <div class="warn-box">⚠ 임시 도구입니다. 운영 배포 시 제거하거나 비활성 상태로 둡니다. 지정한 Agent만 의도적으로 실패시키며, 실제 LLM 모드에서만 동작합니다(더미 모드는 전체가 degraded).</div>
+
+  <div class="card">
+    <label>프로젝트명 *</label>
+    <input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" />
+    <label>해결하려는 문제</label>
+    <input id="problem" placeholder="사용자가 겪는 문제" />
+    <div class="row">
+      <div><label>모델</label><select id="model"></select></div>
+    </div>
+
+    <label>일부러 실패시킬 Agent</label>
+    <div class="nodes" id="nodes"></div>
+
+    <div class="row">
+      <div>
+        <label>실패 원인</label>
+        <select id="reason">
+          <option value="혼잡">혼잡 (서버 과부하·레이트리밋)</option>
+          <option value="연결">연결 (네트워크)</option>
+          <option value="형식">형식 (결과 파싱 실패)</option>
+          <option value="처리">처리 (노드 예외)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="runBtn" onclick="run()">실행</button>
+    <span class="muted" id="hint" style="margin-left:10px"></span>
+  </div>
+
+  <div class="card hidden" id="resultCard">
+    <div>실행 품질: <span id="statusBadge" class="badge"></span> <span class="muted" id="pidNote"></span></div>
+    <div id="reasonsWrap" class="hidden">
+      <label>노드별 fallback 원인</label>
+      <table><thead><tr><th>Agent</th><th>원인</th></tr></thead><tbody id="reasonsBody"></tbody></table>
+    </div>
+    <label style="margin-top:14px">실행 로그</label>
+    <pre id="logs"></pre>
+  </div>
+</main>
+<script>
+const NODES = [
+  ["research","시장조사"],["competitor","경쟁사 분석"],["customer","고객 문제 분석"],
+  ["pestel","PESTEL 분석"],["swot","SWOT 분석"],["business_model","수익모델 설계"],
+  ["risk","리스크 분석"],["draft","초안 작성"],["reviewer","초안 평가"],["verify","근거 검증"],
+];
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+document.getElementById("nodes").innerHTML = NODES.map(([v,t]) =>
+  `<label><input type="checkbox" class="node" value="${v}"> ${esc(t)}</label>`).join("");
+
+async function loadModels() {
+  try {
+    const d = await (await fetch("/models")).json();
+    const sel = document.getElementById("model");
+    sel.innerHTML = (d.models || []).map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+    if (d.default_model) sel.value = d.default_model;
+  } catch (e) { /* 모델 목록 없으면 서버 기본값 사용 */ }
+}
+
+async function run() {
+  const name = document.getElementById("project_name").value.trim();
+  if (!name) { alert("프로젝트명을 입력하세요."); return; }
+  const nodes = [...document.querySelectorAll(".node:checked")].map(c => c.value);
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>실행 중…';
+  document.getElementById("hint").textContent = "여러 Agent가 순차 실행됩니다 (약 30초~1분)";
+  try {
+    const r = await fetch("/run", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        project_name: name,
+        problem: document.getElementById("problem").value,
+        model: document.getElementById("model").value,
+        demo_fail_nodes: nodes,
+        demo_fail_reason: document.getElementById("reason").value,
+      }),
+    });
+    if (!r.ok) throw new Error("서버 오류 " + r.status);
+    render(await r.json());
+  } catch (e) {
+    alert("실행 실패: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "실행";
+    document.getElementById("hint").textContent = "";
+  }
+}
+
+function render(d) {
+  document.getElementById("resultCard").classList.remove("hidden");
+  const status = d.run_status || "success";
+  const badge = document.getElementById("statusBadge");
+  badge.textContent = status;
+  badge.className = "badge b-" + status;
+  document.getElementById("pidNote").textContent =
+    d.project_id ? `· 저장됨(project_id=${d.project_id}) · 메인 화면 이력에서 확인` : "";
+
+  const reasons = d.fallback_reasons || {};
+  const keys = Object.keys(reasons);
+  document.getElementById("reasonsWrap").classList.toggle("hidden", keys.length === 0);
+  document.getElementById("reasonsBody").innerHTML = keys.map(k =>
+    `<tr><td>${esc(k)}</td><td>${esc(reasons[k])}</td></tr>`).join("");
+
+  document.getElementById("logs").textContent = (d.logs || []).join("\n");
+  document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
+}
+
+loadModels();
+</script>
+</body>
+</html>

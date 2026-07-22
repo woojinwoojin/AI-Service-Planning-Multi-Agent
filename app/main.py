@@ -32,6 +32,12 @@ def root() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
 
+@app.get("/admin")
+def admin() -> FileResponse:
+    """관리자 · 데모 도구(임시): 특정 Agent를 일부러 실패시켜 정직한 미완성 안내를 시연."""
+    return FileResponse(STATIC_DIR / "admin.html")
+
+
 @app.get("/info")
 def info() -> dict:
     return {
