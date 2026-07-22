@@ -62,6 +62,21 @@ def _table_md(agg: dict) -> str:
     return "\n".join(lines)
 
 
+def _stage_table_md(agg: dict) -> str:
+    """단계별 wall time 중앙값(ms) — 병목이 어느 구간인지. 병렬 효과는 analysis_block 에서 보인다."""
+    s = agg.get("serial", {}).get("stage_ms_median", {}) or {}
+    p = agg.get("parallel", {}).get("stage_ms_median", {}) or {}
+    order = ["preprocess", "research", "analysis_block", "draft", "initial_review",
+             "revise_or_finalize", "polish", "final_review", "verify"]
+    names = [n for n in order if n in s or n in p]
+    lines = ["| 단계 | 직렬(ms) | 병렬(ms) |", "|---|---|---|"]
+    lines += [f"| {n} | {s.get(n)} | {p.get(n)} |" for n in names]
+    cov_s = agg.get("serial", {}).get("timing_coverage_median")
+    cov_p = agg.get("parallel", {}).get("timing_coverage_median")
+    lines.append(f"| _coverage(대wall)_ | {cov_s} | {cov_p} |")
+    return "\n".join(lines)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="직렬 vs 병렬 워크플로 비교 실험")
     ap.add_argument("--topics", type=int, default=3, help="사용할 주제 수(스모크=3, 본실험=6)")
@@ -117,7 +132,9 @@ def main() -> None:
 
     agg = parallel_bench.aggregate(runs)
     table_md = _table_md(agg)
+    stage_md = _stage_table_md(agg)
     _p("\n" + table_md)
+    _p("\n[단계별 wall time 중앙값 — 병목 위치]\n" + stage_md)
     summary = agg.get("summary", {})
     if summary.get("wall_time_reduction_pct") is not None:
         _p(f"\nwall time 감소율(직렬→병렬): {summary['wall_time_reduction_pct']}%  ·  "
@@ -132,6 +149,10 @@ def main() -> None:
         " 품질은 '비열등성(하락 없음)' 확인이 목적. 품질 지표는 LLM 심판이 아닌 결정론적 구조 검사.\n",
         "## 요약표\n",
         table_md,
+        "\n## 단계별 wall time 중앙값 (병목 위치)\n",
+        "> node duration 과 다름: analysis_block 은 분석 4분기의 실제 대기시간(겹침 반영). "
+        "coverage 는 측정 단계가 전체 wall 을 설명하는 비율(프레임워크 오버헤드 제외 시 ≥95%).\n",
+        stage_md,
     ]
     if summary:
         md.append(f"\n> **wall time 감소율(직렬→병렬): {summary.get('wall_time_reduction_pct')}%** · "
