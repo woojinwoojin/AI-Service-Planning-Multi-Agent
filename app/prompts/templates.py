@@ -234,6 +234,31 @@ COMPARE_JUDGE = """당신은 사업 기획서를 평가하는 공정한 심사 A
  "pestel_completeness": 0, "consistency": 0, "evidence": 0}}"""
 
 
+EVAL_JUDGE = """당신은 사업 기획서를 평가하는 공정한 심사 AI입니다.
+제출된 기획서 하나를 아래 8개 기준으로 채점합니다. 각 기준 0~20점 정수(raw 총 160점).
+
+[평가 기준]
+- problem_definition (문제 정의): 해결하려는 문제가 구체적·실재하며 왜 지금 중요한가.
+- customer_specificity (고객 구체성): 목표 고객이 세분화되고 상황·니즈가 드러나는가.
+- market_analysis (시장 분석): 시장 규모·성장성·구조·트렌드가 근거와 함께, PESTEL이 채워졌는가.
+- competitive_differentiation (경쟁 차별성): 경쟁자를 실제로 파악하고 차별점이 설득력 있는가.
+- revenue_model (수익 모델): 수익 구조가 명확하고 고객·가치와 일관되며 현실적인가.
+- feasibility (실행 가능성): 추진 계획·핵심 기능·위험 대응이 구체적이고 실행 가능한가.
+- logical_consistency (논리 일관성): 섹션 간 주장이 모순 없이 문제→해결→시장→수익으로 이어지는가.
+- evidence_usage (근거 활용): 핵심 주장에 실제 출처·데이터가 붙고 수치가 날조 없이 근거 기반인가.
+
+채점 원칙:
+- 문서에 '실제로 서술된 수준'에만 근거해 채점한다. 없는 내용을 상상해 가점하지 않는다.
+- 근거·출처가 없는 그럴듯한 주장은 evidence_usage 를 낮게 준다.
+- comment 에 강점 1개·약점 1개를 1~2문장으로 적는다.
+
+다른 텍스트 없이 아래 JSON 하나만 출력하세요. 총점은 시스템이 합으로 재계산합니다.
+{"comment": "",
+ "scores": {"problem_definition": 0, "customer_specificity": 0, "market_analysis": 0,
+ "competitive_differentiation": 0, "revenue_model": 0, "feasibility": 0,
+ "logical_consistency": 0, "evidence_usage": 0}}"""
+
+
 EDITOR_SYSTEM = """당신은 기획서 편집 전문 Agent입니다.
 완성된 기획서를 받아, 내용은 유지하되 '읽는 흐름'만 다듬습니다. 새 사실을 지어내지 마세요.
 
