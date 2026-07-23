@@ -13,7 +13,7 @@ import json
 
 from app.prompts.templates import COMPETITOR_SYSTEM
 from app.schemas.state import ProjectState
-from app.services import llm, search
+from app.services import evidence, llm, search
 
 
 def _validate(result: dict, fallback: dict) -> dict:
@@ -59,8 +59,8 @@ def competitor(state: ProjectState) -> dict:
 
     hits = []
     search_status: dict = {}
+    query = f"{si.get('project_name', '')} 경쟁 서비스 비교 대안".strip()
     if not llm.is_dummy():
-        query = f"{si.get('project_name', '')} 경쟁 서비스 비교 대안".strip()
         hits = search.web_search(query, max_results=4, status=search_status)
 
     user = (
@@ -93,4 +93,8 @@ def competitor(state: ProjectState) -> dict:
     logs = [
         f"[competitor] 경쟁사 분석 완료 ({mode}{src}, {len(result['competitors'])}개사)"
     ]
-    return {"competitor_result": result, "competitor_sources": sources, "logs": logs}
+    # 경쟁사 검색 출처도 통합 근거 레지스트리로 방출한다(로드맵 2-1) — Research 출처와 함께
+    # 하나의 목록으로 합쳐진다(같은 URL 이면 source_agents 에 competitor 가 추가됨).
+    registry = evidence.entries_from("competitor", query, sources)
+    return {"competitor_result": result, "competitor_sources": sources,
+            "evidence_registry": registry, "logs": logs}

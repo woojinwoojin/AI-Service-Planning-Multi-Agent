@@ -12,7 +12,7 @@ import json
 
 from app.prompts.templates import RESEARCH_SYSTEM
 from app.schemas.state import ProjectState
-from app.services import llm, search
+from app.services import evidence, llm, search
 
 # 출력 스키마: (키, 기대 타입). market_overview 만 문자열, 나머지는 리스트.
 _SCHEMA: dict[str, type] = {
@@ -105,7 +105,8 @@ def research(state: ProjectState) -> dict:
 
     # 웹 검색으로 근거 확보 (키 없으면 빈 결과 → LLM 지식 기반으로 진행)
     search_status: dict = {}
-    hits = search.web_search(_build_query(si), status=search_status) if not llm.is_dummy() else []
+    query = _build_query(si)
+    hits = search.web_search(query, status=search_status) if not llm.is_dummy() else []
 
     user = "다음 사업 아이디어를 조사하세요.\n" f"{json.dumps(si, ensure_ascii=False, indent=2)}"
     if hits:
@@ -139,4 +140,7 @@ def research(state: ProjectState) -> dict:
     else:
         src = "검색 결과 없음"
     logs = [f"[research] 시장조사 완료 ({mode}, {src})"]
-    return {"research_result": result, "logs": logs}
+    # 실제 검색 출처를 통합 근거 레지스트리에도 방출한다(로드맵 2-1). reducer 로 누적되고
+    # 실행 종료 시 evidence.normalize()가 URL 중복 제거·evidence_id 부여를 한다.
+    registry = evidence.entries_from("research", query, result["source_objects"])
+    return {"research_result": result, "evidence_registry": registry, "logs": logs}
