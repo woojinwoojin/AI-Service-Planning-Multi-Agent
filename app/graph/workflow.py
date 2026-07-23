@@ -232,6 +232,7 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
                      ("final_reviewer", reviewer.final_reviewer),
                      ("verify", verifier.verify)):
         apply_node_update(state, _safe(node, fn)(state))
+    _finalize_evidence(state)   # 재작성 후에도 주장-근거 연결(used_by_claims) 재계산
     state.update(_assess_quality(state))
     return state
 
@@ -254,11 +255,22 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
     return initial, (config or None)
 
 
+def _finalize_evidence(state: ProjectState) -> None:
+    """근거 레지스트리를 확정한다(로드맵 2-1/2-1b).
+
+    1) normalize: 누적 원시 근거를 URL 중복 제거·evidence_id 부여로 단일 레지스트리 확정.
+    2) link_claims: verifier 가 주장별로 인용한 evidence_id 를 역인덱스로 뒤집어 각 근거의
+       used_by_claims 를 채운다(주장-근거 연결). verify 이후에 호출돼야 한다.
+    """
+    reg = evidence.normalize(state.get("evidence_registry", []))
+    claims = (state.get("verification_result") or {}).get("claims") or []
+    state["evidence_registry"] = evidence.link_claims(reg, claims)
+
+
 def _finalize_run(state: ProjectState) -> ProjectState:
     """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
-    # 누적된 원시 근거를 단일 레지스트리로 확정: URL 중복 제거·evidence_id 부여(로드맵 2-1).
-    state["evidence_registry"] = evidence.normalize(state.get("evidence_registry", []))
+    _finalize_evidence(state)           # 근거 레지스트리 확정 + 주장-근거 연결(로드맵 2-1/2-1b)
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
     state["timing"] = timing.summarize(  # 단계별 wall time·critical path·coverage
         state.get("timing_events", []), state.get("workflow_mode", "serial"),

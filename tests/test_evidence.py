@@ -112,6 +112,47 @@ def test_normalize_empty_and_garbage():
     assert evidence.normalize(["x", 3, {"no": "url"}]) == []
 
 
+# --- for_prompt / link_claims (2-1b: 주장-근거 연결) ---
+
+def test_for_prompt_labels_each_evidence_with_id():
+    reg = evidence.normalize(
+        evidence.entries_from("research", "q", [_obj("https://a.com", "A", "news")])
+    )
+    text = evidence.for_prompt(reg)
+    assert text.startswith("[ev1]")
+    assert "(news)" in text and "A" in text
+
+
+def test_link_claims_fills_used_by_claims():
+    reg = evidence.normalize(
+        evidence.entries_from("research", "q", [_obj("https://a.com"), _obj("https://b.com")])
+    )
+    claims = [
+        {"id": "c1", "evidence_ids": ["ev1"]},
+        {"id": "c2", "evidence_ids": ["ev1", "ev2"]},
+    ]
+    out = evidence.link_claims(reg, claims)
+    by_id = {e["evidence_id"]: e for e in out}
+    assert by_id["ev1"]["used_by_claims"] == ["c1", "c2"]
+    assert by_id["ev2"]["used_by_claims"] == ["c2"]
+
+
+def test_link_claims_ignores_unknown_id_and_is_idempotent():
+    reg = evidence.normalize(evidence.entries_from("research", "q", [_obj("https://a.com")]))
+    claims = [{"id": "c1", "evidence_ids": ["ev1", "ev99"]}]  # ev99 없음
+    once = evidence.link_claims(reg, claims)
+    assert once[0]["used_by_claims"] == ["c1"]               # ev99 무시
+    twice = evidence.link_claims(once, claims)               # 재실행해도 중복 안 쌓임
+    assert twice[0]["used_by_claims"] == ["c1"]
+
+
+def test_link_claims_resets_when_no_claims():
+    reg = evidence.normalize(evidence.entries_from("research", "q", [_obj("https://a.com")]))
+    evidence.link_claims(reg, [{"id": "c1", "evidence_ids": ["ev1"]}])
+    out = evidence.link_claims(reg, [])                      # 주장 없으면 비움
+    assert out[0]["used_by_claims"] == []
+
+
 # --- 통합: Agent 방출 → State reducer 누적 → finalize 정규화 ---
 
 def _patch_search(monkeypatch, module, hits: list[dict]):
