@@ -162,7 +162,7 @@
     <div class="fmeta hidden" id="meta_keywords"></div>
     <div class="btns">
       <button id="runBtn" onclick="runWorkflow()">기획서 생성</button>
-      <span class="muted" id="runHint">여러 Agent가 순차 실행됩니다 (약 30초~1분)</span>
+      <span class="muted" id="runHint">여러 전문 Agent가 시장·고객·경쟁·환경 분석을 병렬로 수행합니다 (약 30초~1분)</span>
     </div>
   </section>
 
@@ -179,7 +179,7 @@
     <h2 id="progTitle">기획서 생성 중… <span id="progPct">0%</span></h2>
     <div class="pbar"><div class="pbar-fill" id="progFill"></div></div>
     <div class="prog-meta">
-      <span id="progStep">여러 Agent를 순차 실행합니다…</span>
+      <span id="progStep">시장·고객·경쟁·환경 분석을 병렬로 수행합니다…</span>
       <span>경과 <b id="progElapsed">0s</b> · 예상 남음 <b id="progEta">~2분</b></span>
     </div>
     <div class="steps" id="progSteps"></div>
@@ -493,7 +493,7 @@ async function suggestFields() {
   }
   if (emptyFields.length === 0) {
     hint.className = "muted";
-    hint.textContent = "모든 항목이 이미 채워져 있어 새로 채울 빈 항목이 없습니다. (전체 AI 제안·비교는 추후 지원)";
+    hint.textContent = "모든 항목이 입력되어 있습니다. 다른 제안을 확인하려면 ‘AI 제안과 비교’를 이용하세요.";
     return;
   }
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span>생성 중…';
@@ -632,7 +632,7 @@ function progReset() {
   document.getElementById("progSteps").innerHTML = "";
   document.getElementById("progFill").style.width = "0%";
   document.getElementById("progPct").textContent = "0%";
-  document.getElementById("progStep").textContent = "여러 Agent를 순차 실행합니다…";
+  document.getElementById("progStep").textContent = "시장·고객·경쟁·환경 분석을 병렬로 수행합니다…";
   document.getElementById("progElapsed").textContent = "0s";
   document.getElementById("progEta").textContent = "~2분";
   document.getElementById("progTitle").firstChild.textContent = "기획서 생성 중… ";
@@ -653,7 +653,7 @@ function runStreaming(payload, onDone, onError) {
 
   function onNode(node) {
     const now = performance.now();
-    const dur = (now - lastNodeAt) / 1000; lastNodeAt = now;
+    lastNodeAt = now;   // ETA 보정용 기준점만 갱신(개별 Agent 초는 표시하지 않음 — 병렬 실행 시 오해 소지)
     const meta = NODE_META[node] || [node, 1];
     doneWeight += meta[1];
     // 진행바(가중치 비율) + ETA 보정: 실측 속도(rate) × 남은 가중치
@@ -666,7 +666,7 @@ function runStreaming(payload, onDone, onError) {
     etaSec = Math.max(0, (EXPECTED_TOTAL - doneWeight) * rate);
     const div = document.createElement("div");
     div.className = "stepline done";
-    div.innerHTML = `<span class="ic"></span><span class="t">${esc(meta[0])}</span><span class="d">${dur.toFixed(1)}s</span>`;
+    div.innerHTML = `<span class="ic"></span><span class="t">${esc(meta[0])} 완료</span>`;
     stepsEl.appendChild(div);
     stepsEl.scrollTop = stepsEl.scrollHeight;
   }
