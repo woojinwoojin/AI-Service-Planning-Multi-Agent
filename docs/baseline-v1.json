@@ -1,0 +1,1617 @@
+{
+  "signature": {
+    "git_commit": "ce7049e",
+    "model": "gpt-4o-mini",
+    "topics_hash": "a98a5a28c023",
+    "topic_count": 6,
+    "reps": 2,
+    "version": "parallel-v1"
+  },
+  "model": "gpt-4o-mini",
+  "aggregate": {
+    "serial": {
+      "runs": 12,
+      "wall_time_ms_median": 127355.2,
+      "wall_time_ms_p95": 149044.0,
+      "wall_time_ms_max": 153866.3,
+      "llm_latency_sum_ms_median": 124562.5,
+      "calls_mean": 13.0,
+      "total_tokens_mean": 49124.5,
+      "est_cost_usd_mean": 0.012058,
+      "fallback_calls_total": 0,
+      "run_status": {
+        "success": 12
+      },
+      "sections_complete_rate": 1.0,
+      "sections_ordered_rate": 1.0,
+      "pestel_table_rate": 1.0,
+      "empty_sections_mean": 0.0,
+      "unique_source_urls_mean": 9.0,
+      "stage_ms_median": {
+        "preprocess": 0.0,
+        "research": 8668.5,
+        "analysis_block": 35703.0,
+        "draft": 17251.2,
+        "initial_review": 5787.5,
+        "revise_or_finalize": 24471.4,
+        "polish": 18315.7,
+        "final_review": 5146.9,
+        "verify": 7698.6
+      },
+      "timing_coverage_median": 1.0
+    },
+    "parallel": {
+      "runs": 12,
+      "wall_time_ms_median": 106808.2,
+      "wall_time_ms_p95": 123681.6,
+      "wall_time_ms_max": 133098.6,
+      "llm_latency_sum_ms_median": 121546.4,
+      "calls_mean": 13.0,
+      "total_tokens_mean": 48377.0,
+      "est_cost_usd_mean": 0.011825,
+      "fallback_calls_total": 0,
+      "run_status": {
+        "success": 12
+      },
+      "sections_complete_rate": 1.0,
+      "sections_ordered_rate": 1.0,
+      "pestel_table_rate": 1.0,
+      "empty_sections_mean": 0.0,
+      "unique_source_urls_mean": 9.0,
+      "stage_ms_median": {
+        "preprocess": 0.0,
+        "research": 8254.1,
+        "analysis_block": 20985.7,
+        "draft": 16694.9,
+        "initial_review": 4859.5,
+        "revise_or_finalize": 24435.2,
+        "polish": 17038.1,
+        "final_review": 4667.6,
+        "verify": 8091.7
+      },
+      "timing_coverage_median": 1.0
+    },
+    "summary": {
+      "wall_time_reduction_pct": 16.1,
+      "token_diff_pct": -1.5
+    }
+  },
+  "runs": [
+    {
+      "topic": "AI 기반 대학생 진로 설계 서비스",
+      "mode": "serial",
+      "wall_time_ms": 145098.5,
+      "llm_latency_sum_ms": 132033.0,
+      "calls": 13,
+      "total_tokens": 50662,
+      "est_cost_usd": 0.0125,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 145098.5,
+        "span_ms": 142966.7,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 19082.6,
+          "analysis_block": 40342.9,
+          "draft": 17458.6,
+          "initial_review": 5466.1,
+          "revise_or_finalize": 24764.8,
+          "polish": 23960.3,
+          "final_review": 4813.0,
+          "verify": 7032.9
+        },
+        "nodes": {
+          "competitor": 7155.5,
+          "customer": 3395.7,
+          "pestel": 15972.0,
+          "swot": 2753.4,
+          "business_model": 4031.1,
+          "risk": 7019.5
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 142921.2,
+        "coverage": 0.985,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 기반 대학생 진로 설계 서비스",
+      "mode": "parallel",
+      "wall_time_ms": 101039.2,
+      "llm_latency_sum_ms": 118878.6,
+      "calls": 13,
+      "total_tokens": 46735,
+      "est_cost_usd": 0.0115,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 101039.2,
+        "span_ms": 100924.5,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 7385.7,
+          "analysis_block": 16683.6,
+          "draft": 14846.2,
+          "initial_review": 4748.3,
+          "revise_or_finalize": 24337.3,
+          "polish": 16841.6,
+          "final_review": 5397.1,
+          "verify": 10659.2
+        },
+        "nodes": {
+          "competitor": 6519.4,
+          "customer": 7183.9,
+          "pestel": 11858.5,
+          "swot": 2585.1,
+          "business_model": 3072.5,
+          "risk": 4803.7
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 100899.0,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "소상공인 AI 재고관리 SaaS",
+      "mode": "serial",
+      "wall_time_ms": 131584.6,
+      "llm_latency_sum_ms": 128028.7,
+      "calls": 13,
+      "total_tokens": 50329,
+      "est_cost_usd": 0.0123,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 131584.6,
+        "span_ms": 131457.5,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 11989.9,
+          "analysis_block": 38256.7,
+          "draft": 18371.6,
+          "initial_review": 6108.5,
+          "revise_or_finalize": 23588.1,
+          "polish": 17952.8,
+          "final_review": 5310.3,
+          "verify": 9858.4
+        },
+        "nodes": {
+          "competitor": 8742.1,
+          "customer": 2903.1,
+          "pestel": 14980.7,
+          "swot": 2389.4,
+          "business_model": 4113.6,
+          "risk": 5109.5
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 131436.3,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "소상공인 AI 재고관리 SaaS",
+      "mode": "parallel",
+      "wall_time_ms": 115976.8,
+      "llm_latency_sum_ms": 127614.1,
+      "calls": 13,
+      "total_tokens": 51046,
+      "est_cost_usd": 0.0125,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 115976.8,
+        "span_ms": 115799.3,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 12386.8,
+          "analysis_block": 21206.6,
+          "draft": 16956.9,
+          "initial_review": 4634.4,
+          "revise_or_finalize": 25633.8,
+          "polish": 22832.0,
+          "final_review": 4735.5,
+          "verify": 7361.5
+        },
+        "nodes": {
+          "competitor": 5100.0,
+          "customer": 3313.1,
+          "pestel": 14628.3,
+          "swot": 2541.9,
+          "business_model": 2400.5,
+          "risk": 6556.7
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 115747.5,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 10,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 시니어 복약 관리 알림",
+      "mode": "serial",
+      "wall_time_ms": 129805.4,
+      "llm_latency_sum_ms": 125753.7,
+      "calls": 13,
+      "total_tokens": 52070,
+      "est_cost_usd": 0.0128,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 129805.4,
+        "span_ms": 129668.5,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 7698.6,
+          "analysis_block": 37493.8,
+          "draft": 17386.8,
+          "initial_review": 4509.1,
+          "revise_or_finalize": 26799.6,
+          "polish": 23225.0,
+          "final_review": 4768.8,
+          "verify": 7764.4
+        },
+        "nodes": {
+          "competitor": 9261.4,
+          "customer": 3269.8,
+          "pestel": 13749.5,
+          "swot": 2389.6,
+          "business_model": 3356.5,
+          "risk": 5450.6
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 129646.1,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 7,
+          "unsupported": 3,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 시니어 복약 관리 알림",
+      "mode": "parallel",
+      "wall_time_ms": 112365.1,
+      "llm_latency_sum_ms": 124266.2,
+      "calls": 13,
+      "total_tokens": 54400,
+      "est_cost_usd": 0.0134,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 112365.1,
+        "span_ms": 112233.0,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8040.7,
+          "analysis_block": 17478.1,
+          "draft": 17482.7,
+          "initial_review": 6045.3,
+          "revise_or_finalize": 26578.5,
+          "polish": 23506.7,
+          "final_review": 4520.5,
+          "verify": 8537.0
+        },
+        "nodes": {
+          "competitor": 5749.5,
+          "customer": 3185.1,
+          "pestel": 12144.9,
+          "swot": 2995.6,
+          "business_model": 2421.2,
+          "risk": 5323.3
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 112189.5,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 6,
+          "unsupported": 4,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 반려동물 건강 모니터링",
+      "mode": "serial",
+      "wall_time_ms": 117237.1,
+      "llm_latency_sum_ms": 114065.2,
+      "calls": 13,
+      "total_tokens": 46135,
+      "est_cost_usd": 0.0115,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 117237.1,
+        "span_ms": 117119.4,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8741.6,
+          "analysis_block": 32730.3,
+          "draft": 14055.1,
+          "initial_review": 7847.3,
+          "revise_or_finalize": 22324.5,
+          "polish": 16902.9,
+          "final_review": 4798.5,
+          "verify": 9679.5
+        },
+        "nodes": {
+          "competitor": 6989.1,
+          "customer": 2793.6,
+          "pestel": 12612.7,
+          "swot": 2728.8,
+          "business_model": 2100.1,
+          "risk": 5491.8
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 117079.7,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 7,
+          "unsupported": 3,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 반려동물 건강 모니터링",
+      "mode": "parallel",
+      "wall_time_ms": 101739.6,
+      "llm_latency_sum_ms": 117114.6,
+      "calls": 13,
+      "total_tokens": 46142,
+      "est_cost_usd": 0.0114,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 101739.6,
+        "span_ms": 101620.0,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 7647.8,
+          "analysis_block": 23231.0,
+          "draft": 13953.3,
+          "initial_review": 5158.1,
+          "revise_or_finalize": 23899.0,
+          "polish": 15474.1,
+          "final_review": 4599.7,
+          "verify": 7627.3
+        },
+        "nodes": {
+          "competitor": 7293.6,
+          "customer": 3902.2,
+          "pestel": 13375.4,
+          "swot": 3406.8,
+          "business_model": 2261.2,
+          "risk": 9840.1
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 101590.3,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 7,
+          "unsupported": 3,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 중고거래 사기 탐지",
+      "mode": "serial",
+      "wall_time_ms": 122909.2,
+      "llm_latency_sum_ms": 119672.0,
+      "calls": 13,
+      "total_tokens": 47989,
+      "est_cost_usd": 0.0118,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 122909.2,
+        "span_ms": 122788.8,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8595.3,
+          "analysis_block": 33448.6,
+          "draft": 17115.7,
+          "initial_review": 4725.9,
+          "revise_or_finalize": 27248.0,
+          "polish": 18381.3,
+          "final_review": 5602.8,
+          "verify": 7632.9
+        },
+        "nodes": {
+          "competitor": 7109.3,
+          "customer": 3263.6,
+          "pestel": 11924.2,
+          "swot": 2697.5,
+          "business_model": 2571.5,
+          "risk": 5864.8
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 122750.5,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 10,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 중고거래 사기 탐지",
+      "mode": "parallel",
+      "wall_time_ms": 115475.5,
+      "llm_latency_sum_ms": 129630.7,
+      "calls": 13,
+      "total_tokens": 46921,
+      "est_cost_usd": 0.0115,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 115475.5,
+        "span_ms": 115342.9,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 7608.1,
+          "analysis_block": 23607.5,
+          "draft": 20322.9,
+          "initial_review": 4879.8,
+          "revise_or_finalize": 21131.5,
+          "polish": 18138.3,
+          "final_review": 11877.8,
+          "verify": 7736.1
+        },
+        "nodes": {
+          "competitor": 5651.1,
+          "customer": 3246.4,
+          "pestel": 17444.5,
+          "swot": 3972.9,
+          "business_model": 2873.8,
+          "risk": 6144.0
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 115302.0,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 회의록 자동 요약",
+      "mode": "serial",
+      "wall_time_ms": 136085.5,
+      "llm_latency_sum_ms": 132979.5,
+      "calls": 13,
+      "total_tokens": 47821,
+      "est_cost_usd": 0.0113,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 136085.5,
+        "span_ms": 135960.7,
+        "stages": {
+          "preprocess": 0.1,
+          "research": 11306.0,
+          "analysis_block": 46359.6,
+          "draft": 18795.2,
+          "initial_review": 10101.3,
+          "revise_or_finalize": 26288.9,
+          "polish": 16289.9,
+          "final_review": 5000.3,
+          "verify": 1788.7
+        },
+        "nodes": {
+          "competitor": 8364.6,
+          "customer": 4085.8,
+          "pestel": 15730.4,
+          "swot": 8079.0,
+          "business_model": 2899.5,
+          "risk": 7179.5
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 135930.0,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 1,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 회의록 자동 요약",
+      "mode": "parallel",
+      "wall_time_ms": 133098.6,
+      "llm_latency_sum_ms": 147484.4,
+      "calls": 13,
+      "total_tokens": 48579,
+      "est_cost_usd": 0.0118,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 133098.6,
+        "span_ms": 132926.6,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 9228.5,
+          "analysis_block": 32886.0,
+          "draft": 32481.3,
+          "initial_review": 4839.1,
+          "revise_or_finalize": 23378.0,
+          "polish": 15935.2,
+          "final_review": 5696.4,
+          "verify": 8447.3
+        },
+        "nodes": {
+          "competitor": 7016.2,
+          "customer": 3373.0,
+          "pestel": 27095.9,
+          "swot": 3264.8,
+          "business_model": 2294.2,
+          "risk": 5773.9
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 132891.8,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 0
+    },
+    {
+      "topic": "AI 기반 대학생 진로 설계 서비스",
+      "mode": "parallel",
+      "wall_time_ms": 110340.1,
+      "llm_latency_sum_ms": 124214.1,
+      "calls": 13,
+      "total_tokens": 46976,
+      "est_cost_usd": 0.0116,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 110340.1,
+        "span_ms": 110216.9,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 9317.0,
+          "analysis_block": 19152.3,
+          "draft": 18801.7,
+          "initial_review": 4484.2,
+          "revise_or_finalize": 25324.6,
+          "polish": 18660.4,
+          "final_review": 5146.3,
+          "verify": 9295.6
+        },
+        "nodes": {
+          "competitor": 7080.0,
+          "customer": 3226.4,
+          "pestel": 14317.6,
+          "swot": 2715.7,
+          "business_model": 2395.8,
+          "risk": 4795.1
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 110182.1,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 7,
+          "unsupported": 3,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 기반 대학생 진로 설계 서비스",
+      "mode": "serial",
+      "wall_time_ms": 153866.3,
+      "llm_latency_sum_ms": 152358.9,
+      "calls": 13,
+      "total_tokens": 48406,
+      "est_cost_usd": 0.0121,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 153866.3,
+        "span_ms": 153732.2,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 6672.4,
+          "analysis_block": 41981.8,
+          "draft": 16272.1,
+          "initial_review": 6216.3,
+          "revise_or_finalize": 45094.5,
+          "polish": 23366.2,
+          "final_review": 5080.8,
+          "verify": 9025.8
+        },
+        "nodes": {
+          "competitor": 6576.5,
+          "customer": 6580.9,
+          "pestel": 13285.1,
+          "swot": 8184.1,
+          "business_model": 2716.0,
+          "risk": 4613.6
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 153709.9,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "소상공인 AI 재고관리 SaaS",
+      "mode": "parallel",
+      "wall_time_ms": 103276.3,
+      "llm_latency_sum_ms": 118049.3,
+      "calls": 13,
+      "total_tokens": 50015,
+      "est_cost_usd": 0.0122,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 103276.3,
+        "span_ms": 103166.0,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 9492.0,
+          "analysis_block": 20951.9,
+          "draft": 15851.6,
+          "initial_review": 4642.4,
+          "revise_or_finalize": 24533.2,
+          "polish": 16470.9,
+          "final_review": 3992.9,
+          "verify": 7193.8
+        },
+        "nodes": {
+          "competitor": 6741.6,
+          "customer": 3842.6,
+          "pestel": 14220.4,
+          "swot": 2690.4,
+          "business_model": 3083.7,
+          "risk": 6711.3
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 103128.7,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "소상공인 AI 재고관리 SaaS",
+      "mode": "serial",
+      "wall_time_ms": 138837.1,
+      "llm_latency_sum_ms": 137255.7,
+      "calls": 13,
+      "total_tokens": 51249,
+      "est_cost_usd": 0.0127,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 138837.1,
+        "span_ms": 138720.6,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8146.5,
+          "analysis_block": 34623.6,
+          "draft": 18013.9,
+          "initial_review": 4379.9,
+          "revise_or_finalize": 25175.1,
+          "polish": 25752.5,
+          "final_review": 6685.5,
+          "verify": 15900.0
+        },
+        "nodes": {
+          "competitor": 5155.3,
+          "customer": 2727.3,
+          "pestel": 14493.6,
+          "swot": 2062.2,
+          "business_model": 2787.9,
+          "risk": 7387.1
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 138677.0,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 10,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 시니어 복약 관리 알림",
+      "mode": "parallel",
+      "wall_time_ms": 102176.6,
+      "llm_latency_sum_ms": 116874.5,
+      "calls": 13,
+      "total_tokens": 49372,
+      "est_cost_usd": 0.0118,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 102176.6,
+        "span_ms": 102053.4,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 6772.7,
+          "analysis_block": 15995.2,
+          "draft": 14031.7,
+          "initial_review": 5666.2,
+          "revise_or_finalize": 27784.4,
+          "polish": 17234.6,
+          "final_review": 5734.4,
+          "verify": 8792.4
+        },
+        "nodes": {
+          "competitor": 7683.6,
+          "customer": 2980.9,
+          "pestel": 11666.0,
+          "swot": 2303.3,
+          "business_model": 3259.4,
+          "risk": 4317.6
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 102011.6,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 시니어 복약 관리 알림",
+      "mode": "serial",
+      "wall_time_ms": 118744.1,
+      "llm_latency_sum_ms": 117190.0,
+      "calls": 13,
+      "total_tokens": 50836,
+      "est_cost_usd": 0.0122,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 118744.1,
+        "span_ms": 118623.8,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 7777.3,
+          "analysis_block": 33570.6,
+          "draft": 17887.4,
+          "initial_review": 5646.7,
+          "revise_or_finalize": 21751.2,
+          "polish": 18119.6,
+          "final_review": 7048.5,
+          "verify": 6791.6
+        },
+        "nodes": {
+          "competitor": 6222.3,
+          "customer": 2818.6,
+          "pestel": 13760.3,
+          "swot": 2135.0,
+          "business_model": 3468.3,
+          "risk": 5151.2
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 118592.9,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 8,
+          "unsupported": 2,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 반려동물 건강 모니터링",
+      "mode": "parallel",
+      "wall_time_ms": 103128.8,
+      "llm_latency_sum_ms": 114512.2,
+      "calls": 13,
+      "total_tokens": 43577,
+      "est_cost_usd": 0.0108,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 103128.8,
+        "span_ms": 103019.6,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 6470.6,
+          "analysis_block": 17711.9,
+          "draft": 16432.9,
+          "initial_review": 8707.1,
+          "revise_or_finalize": 19611.8,
+          "polish": 15682.9,
+          "final_review": 4379.9,
+          "verify": 13992.3
+        },
+        "nodes": {
+          "competitor": 4387.5,
+          "customer": 3300.9,
+          "pestel": 12784.6,
+          "swot": 2239.0,
+          "business_model": 2969.5,
+          "risk": 4919.4
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 102989.4,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 9,
+          "unsupported": 1,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 반려동물 건강 모니터링",
+      "mode": "serial",
+      "wall_time_ms": 108834.9,
+      "llm_latency_sum_ms": 107333.9,
+      "calls": 13,
+      "total_tokens": 44678,
+      "est_cost_usd": 0.0111,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 108834.9,
+        "span_ms": 108733.0,
+        "stages": {
+          "preprocess": 0.1,
+          "research": 7644.3,
+          "analysis_block": 27895.2,
+          "draft": 16382.5,
+          "initial_review": 5659.1,
+          "revise_or_finalize": 21775.1,
+          "polish": 16335.0,
+          "final_review": 5936.8,
+          "verify": 7082.2
+        },
+        "nodes": {
+          "competitor": 3988.3,
+          "customer": 2907.4,
+          "pestel": 12860.3,
+          "swot": 1889.1,
+          "business_model": 2518.9,
+          "risk": 3718.6
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 108710.3,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 10,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 중고거래 사기 탐지",
+      "mode": "parallel",
+      "wall_time_ms": 115598.2,
+      "llm_latency_sum_ms": 128643.0,
+      "calls": 13,
+      "total_tokens": 49347,
+      "est_cost_usd": 0.0122,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 115598.2,
+        "span_ms": 115486.6,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 10244.2,
+          "analysis_block": 21806.6,
+          "draft": 18035.4,
+          "initial_review": 8673.9,
+          "revise_or_finalize": 25261.2,
+          "polish": 20329.5,
+          "final_review": 3969.1,
+          "verify": 7126.1
+        },
+        "nodes": {
+          "competitor": 6692.2,
+          "customer": 3110.7,
+          "pestel": 15575.9,
+          "swot": 2203.4,
+          "business_model": 2641.8,
+          "risk": 6195.0
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 115446.0,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 7,
+          "unsupported": 3,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 중고거래 사기 탐지",
+      "mode": "serial",
+      "wall_time_ms": 124905.0,
+      "llm_latency_sum_ms": 123371.3,
+      "calls": 13,
+      "total_tokens": 48907,
+      "est_cost_usd": 0.0121,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 124905.0,
+        "span_ms": 124763.6,
+        "stages": {
+          "preprocess": 0.1,
+          "research": 9299.6,
+          "analysis_block": 36782.4,
+          "draft": 16925.1,
+          "initial_review": 6018.7,
+          "revise_or_finalize": 24178.1,
+          "polish": 18250.1,
+          "final_review": 5212.9,
+          "verify": 8069.1
+        },
+        "nodes": {
+          "competitor": 5336.9,
+          "customer": 3053.1,
+          "pestel": 14276.2,
+          "swot": 3031.9,
+          "business_model": 2107.3,
+          "risk": 8965.2
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 124736.1,
+        "coverage": 0.999,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 8,
+          "unsupported": 2,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 회의록 자동 요약",
+      "mode": "parallel",
+      "wall_time_ms": 94000.5,
+      "llm_latency_sum_ms": 106880.2,
+      "calls": 13,
+      "total_tokens": 47414,
+      "est_cost_usd": 0.0112,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "parallel",
+        "wall_time_ms": 94000.5,
+        "span_ms": 93859.3,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8467.6,
+          "analysis_block": 21019.5,
+          "draft": 15885.1,
+          "initial_review": 4702.7,
+          "revise_or_finalize": 22667.3,
+          "polish": 15051.6,
+          "final_review": 4077.2,
+          "verify": 1968.6
+        },
+        "nodes": {
+          "competitor": 5446.0,
+          "customer": 3105.6,
+          "pestel": 13364.6,
+          "swot": 2687.4,
+          "business_model": 3462.8,
+          "risk": 7642.4
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 93839.6,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 1,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    },
+    {
+      "topic": "AI 회의록 자동 요약",
+      "mode": "serial",
+      "wall_time_ms": 116740.7,
+      "llm_latency_sum_ms": 115107.9,
+      "calls": 13,
+      "total_tokens": 50412,
+      "est_cost_usd": 0.0123,
+      "fallback_calls": 0,
+      "run_status": "success",
+      "timing": {
+        "workflow_mode": "serial",
+        "wall_time_ms": 116740.7,
+        "span_ms": 116511.5,
+        "stages": {
+          "preprocess": 0.0,
+          "research": 8870.3,
+          "analysis_block": 32624.2,
+          "draft": 16807.2,
+          "initial_review": 5915.8,
+          "revise_or_finalize": 23498.3,
+          "polish": 19306.7,
+          "final_review": 4771.3,
+          "verify": 4693.7
+        },
+        "nodes": {
+          "competitor": 6181.2,
+          "customer": 2566.2,
+          "pestel": 14010.0,
+          "swot": 2416.7,
+          "business_model": 2398.7,
+          "risk": 5036.4
+        },
+        "critical_path": [
+          "preprocess",
+          "research",
+          "risk",
+          "draft",
+          "reviewer",
+          "revise",
+          "polish",
+          "final_reviewer",
+          "verify"
+        ],
+        "stage_sum_ms": 116487.5,
+        "coverage": 0.998,
+        "coverage_active": 1.0
+      },
+      "quality": {
+        "sections_present": 14,
+        "sections_total": 14,
+        "sections_complete": true,
+        "sections_ordered": true,
+        "empty_sections": 0,
+        "pestel_table": true,
+        "unique_source_urls": 9,
+        "verification": {
+          "supported": 5,
+          "unsupported": 0,
+          "uncertain": 0
+        }
+      },
+      "rep": 1
+    }
+  ]
+}
