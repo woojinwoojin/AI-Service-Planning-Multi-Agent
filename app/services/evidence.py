@@ -112,3 +112,47 @@ def normalize(raw_entries: list) -> list[dict]:
         item["evidence_id"] = f"ev{i}"
         registry.append(item)
     return registry
+
+
+def for_prompt(registry: list) -> str:
+    """정규화된 레지스트리를 verifier 프롬프트용 근거 목록 문자열로 만든다.
+
+    각 줄에 evidence_id 를 앞세워, LLM 이 주장별로 '어느 근거가 뒷받침하는지'를
+    evidence_id 로 지목(인용)할 수 있게 한다(2-3/Tier 2 의 주장-근거 연결 토대).
+    """
+    lines: list[str] = []
+    for e in registry or []:
+        if not isinstance(e, dict):
+            continue
+        eid = e.get("evidence_id", "")
+        stype = e.get("source_type", "") or "unknown"
+        title = (e.get("title") or "").strip()
+        snippet = (e.get("snippet") or "").strip()
+        head = f"[{eid}] ({stype})"
+        body = f"{title}: {snippet}" if title else snippet
+        lines.append(f"{head} {body}".rstrip())
+    return "\n".join(lines)
+
+
+def link_claims(registry: list, claims: list) -> list[dict]:
+    """verifier 주장의 evidence_ids 인용을 역인덱스로 뒤집어 각 근거의 used_by_claims 를 채운다.
+
+    - claim `{id, evidence_ids: [ev1, ...]}` → 해당 근거 항목의 used_by_claims 에 claim id 추가.
+    - 멱등: 매 호출마다 used_by_claims 를 재계산하므로 finalize/재작성을 여러 번 거쳐도 안정적.
+    입력 registry(정규화됨)를 제자리 갱신해 반환한다.
+    """
+    by_id: dict[str, dict] = {e.get("evidence_id"): e for e in (registry or [])
+                             if isinstance(e, dict) and e.get("evidence_id")}
+    for e in by_id.values():
+        e["used_by_claims"] = []
+    for c in claims or []:
+        if not isinstance(c, dict):
+            continue
+        cid = c.get("id")
+        if not cid:
+            continue
+        for eid in c.get("evidence_ids") or []:
+            e = by_id.get(eid)
+            if e is not None and cid not in e["used_by_claims"]:
+                e["used_by_claims"].append(cid)
+    return list(registry or [])

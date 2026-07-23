@@ -11,7 +11,7 @@ import re
 
 from app.prompts.templates import DRAFT_WRITER_SYSTEM, EDITOR_SYSTEM, REVISER_SYSTEM
 from app.schemas.state import ProjectState
-from app.services import llm
+from app.services import evidence, llm
 
 # 실제 LLM은 종종 기획서 전체를 ```markdown ... ``` 로 감싸서 반환한다.
 # 최종 .md 산출물에 코드펜스가 남지 않도록, 문서 전체를 감싼 펜스만 벗긴다.
@@ -42,12 +42,17 @@ _MAX_REFS = 8  # 참고자료 과다 나열 방지(문서 균형)
 def _real_sources(state: ProjectState) -> list[str]:
     """참고자료로 인용할 '실제 검색 출처'만 모은다(LLM이 지어낸 sources 는 제외).
 
-    Research + Competitor 가 실제 웹검색으로 확보한 source_objects(제목/URL)만 사용한다.
-    이 시스템의 핵심 차별점은 '추적 가능한 실제 출처'이므로, 참고자료에 LLM 생성 URL이
-    섞여 실제 출처와 구분되지 않던 문제(외부 리뷰 P0-2/P0-3)를 막는다.
+    통합 근거 레지스트리(evidence_registry)를 우선 사용한다(로드맵 2-1: 단일 출처 소스).
+    레지스트리가 없으면(옛 프로젝트/재작성 등) 기존 source_objects+competitor_sources 로 fallback.
+    어느 경로든 실제 웹검색 출처(제목/URL)만 담기므로, 참고자료에 LLM 생성 URL이 섞여
+    실제 출처와 구분되지 않던 문제(외부 리뷰 P0-2/P0-3)를 막는다.
     """
-    objs = list((state.get("research_result") or {}).get("source_objects") or [])
-    objs += list(state.get("competitor_sources") or [])
+    reg = state.get("evidence_registry") or []
+    if reg:
+        objs = evidence.normalize(reg)  # URL 중복 제거 + 안정 id(제목/URL 보존)
+    else:
+        objs = list((state.get("research_result") or {}).get("source_objects") or [])
+        objs += list(state.get("competitor_sources") or [])
     seen: set[str] = set()
     lines: list[str] = []
     for o in objs:
