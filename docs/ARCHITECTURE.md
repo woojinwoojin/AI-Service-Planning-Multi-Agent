@@ -199,7 +199,7 @@ def _validate(result, fallback):
 
 ### ADR-4. 더미 모드 (키 없이 골격 검증)
 - **결정**: 키가 없거나 `USE_DUMMY=1`이면 각 호출부의 fallback을 그대로 반환.
-- **배경**: API 비용 없이 파이프라인 흐름·테스트를 돌려야 함(pytest 59개가 LLM 없이 검증).
+- **배경**: API 비용 없이 파이프라인 흐름·테스트를 돌려야 함(pytest 138개가 LLM 없이 검증).
 - **결과**: CI/개발이 무비용·결정적. 대신 더미 산출물은 품질 검증엔 못 씀.
 
 ### ADR-5. 웹검색 grounding + 실제 출처 강제 병합
@@ -372,6 +372,6 @@ uvicorn app.main:app --reload     # 서버 → http://localhost:8000/
 python run_compare.py             # 단일 vs 멀티 (6주제)
 python run_multimodel.py          # 생성 모델별 (심판 고정)
 python run_demo.py                # 파이프라인 관통 데모
-pytest -q                         # 회귀 테스트 59개(무비용)
+pytest -q                         # 회귀 테스트 138개(무비용)
 ruff check .                       # 정적 검사(무비용)
 ```
