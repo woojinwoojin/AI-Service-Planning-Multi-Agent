@@ -17,7 +17,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import demo, llm, timing, tracing, usage
+from app.services import demo, evidence, llm, timing, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -213,7 +213,7 @@ def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     dict.update 가 덮어써 이전 값이 사라진다. 여기서 reducer-list 필드(logs·timing_events)를 누적 병합한다.
     """
     merged = {k: list(state.get(k) or []) + list(update[k] or [])
-              for k in ("logs", "timing_events") if k in update}
+              for k in ("logs", "timing_events", "evidence_registry") if k in update}
     state.update(update)
     state.update(merged)   # reducer-list 필드는 덮어쓰기 대신 누적으로 교정
     return state
@@ -257,6 +257,8 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
 def _finalize_run(state: ProjectState) -> ProjectState:
     """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
+    # 누적된 원시 근거를 단일 레지스트리로 확정: URL 중복 제거·evidence_id 부여(로드맵 2-1).
+    state["evidence_registry"] = evidence.normalize(state.get("evidence_registry", []))
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
     state["timing"] = timing.summarize(  # 단계별 wall time·critical path·coverage
         state.get("timing_events", []), state.get("workflow_mode", "serial"),

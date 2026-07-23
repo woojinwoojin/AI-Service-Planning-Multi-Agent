@@ -19,6 +19,11 @@ class ProjectState(TypedDict, total=False):
     research_result: dict
     competitor_result: dict
     competitor_sources: list  # Competitor Agent가 쓴 실제 검색 출처(참고자료·검증 근거로 보존)
+    # evidence_registry 도 reducer 필드: 병렬 분기의 여러 Agent(research/competitor)가 각자
+    # 자기 근거만 방출해도 유실 없이 병합된다. 실행 종료 시 evidence.normalize()로 URL 중복 제거·
+    # evidence_id 부여를 거쳐 단일 레지스트리로 확정한다(로드맵 2-1). 각 항목은
+    # {evidence_id, source_agents[], queries[], url, title, snippet, source_type, used_by_claims[]}.
+    evidence_registry: Annotated[list, operator.add]
     customer_result: dict
     swot_result: dict
     business_model_result: dict
@@ -122,6 +127,7 @@ class RunResult(BaseModel):
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
+    evidence_registry: list = Field(default_factory=list)      # 통합 근거 레지스트리(로드맵 2-1)
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)
     usage: dict = Field(default_factory=dict)  # 토큰·비용·지연 관측치
