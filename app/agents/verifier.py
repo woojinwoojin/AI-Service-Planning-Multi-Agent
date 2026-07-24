@@ -155,3 +155,28 @@ def verify(state: ProjectState) -> dict:
         f"반대근거 {contra}건, 근거연결 {result.get('evidence_linked', 0)}건, 검색 요약 기준)"
     ]
     return {"verification_result": result, "logs": logs}
+
+
+def judge_claim(claim: str, evidence_registry: list | None = None, model: str = "") -> dict:
+    """단일 주장 하나를 제공된 근거로 검증해 판정 dict 하나를 반환한다(Ground Truth 평가·재사용용).
+
+    verify() 는 기획서에서 주장을 스스로 뽑아 일괄 판정하지만, 이 함수는 '이미 정해진 주장 1개'를
+    통제된 근거와 대조한다 — 균형 GT 스모크셋으로 verifier 판정 품질을 측정할 때 쓴다. 같은
+    VERIFY_SYSTEM 프롬프트·_validate 규칙을 재사용해 실제 프로덕션 판정 기준을 그대로 측정한다.
+    반환은 claim dict {id, claim, claim_type, status, basis, evidence_ids}.
+    """
+    reg = evidence.normalize(evidence_registry or [])
+    if reg:
+        block = evidence.for_prompt(reg)
+        valid_ids: set | None = {e["evidence_id"] for e in reg}
+    else:
+        block, valid_ids = "", None
+    user = (
+        "아래 '단일 주장' 하나만 검증하세요. claims 에는 이 주장 1개만 담습니다.\n"
+        f"[주장]\n{claim}\n\n"
+        "[근거 출처 목록 — 이 주장을 뒷받침하는 출처의 evidence_id 를 evidence_ids 에 적으세요]\n"
+        f"{block}"
+    )
+    fb = _dummy(claim)
+    raw = llm.complete_json(VERIFY_SYSTEM, user, fallback=fb, model=model)
+    return _validate(raw, fb, valid_ids)["claims"][0]
