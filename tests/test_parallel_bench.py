@@ -36,7 +36,9 @@ def test_structural_quality_full_doc():
     assert q["empty_sections"] == 0
     assert q["pestel_table"] is True
     assert q["unique_source_urls"] == 3                        # a,b,c (a 중복 제거)
-    assert q["verification"] == {"supported": 2, "unsupported": 1, "uncertain": 0}
+    # Tier 2: 근거 상태 분포에 contradicted·not_applicable 도 포함(반대 근거·비-사실 분리)
+    assert q["verification"] == {"supported": 2, "unsupported": 1,
+                                 "contradicted": 0, "uncertain": 0, "not_applicable": 0}
 
 
 def test_structural_quality_detects_empty_section():

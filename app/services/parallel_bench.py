@@ -69,8 +69,11 @@ def structural_quality(state: dict) -> dict:
     srcs = list((state.get("research_result") or {}).get("source_objects") or [])
     srcs += list(state.get("competitor_sources") or [])
     unique_urls = len({o.get("url") for o in srcs if isinstance(o, dict) and o.get("url")})
-    claims = (state.get("verification_result") or {}).get("claims") or []
-    dist = {"supported": 0, "unsupported": 0, "uncertain": 0}
+    vr = state.get("verification_result") or {}
+    claims = vr.get("claims") or []
+    # 근거 상태 분포(Tier 2): contradicted(반대 근거)·not_applicable(비-사실)까지 분리 집계.
+    dist = {"supported": 0, "unsupported": 0, "contradicted": 0,
+            "uncertain": 0, "not_applicable": 0}
     for c in claims:
         st = c.get("status") if isinstance(c, dict) else None
         if st in dist:
@@ -84,6 +87,9 @@ def structural_quality(state: dict) -> dict:
         "pestel_table": bool(_TABLE_SEP.search(draft)),
         "unique_source_urls": unique_urls,
         "verification": dist,
+        # Tier 2 신뢰도 지표: 사실 주장 검증률·근거 연결률(완료 게이트 리포트용).
+        "fact_support_rate": vr.get("fact_support_rate"),
+        "evidence_link_rate": vr.get("evidence_link_rate"),
     }
 
 
