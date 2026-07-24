@@ -11,6 +11,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.services import migrate
 from app.services.markdown_export import _RUN_KEYS
 
 DB_PATH = Path("data/projects.db")
@@ -83,5 +84,6 @@ def get_project(project_id: int) -> dict | None:
     if not row:
         return None
     d = dict(row)
-    d["state"] = json.loads(d.pop("state_json"))
+    # 재조회 시 옛 기록을 현재 스키마로 정규화(누락 필드 안전 기본값 + 게이트 소급, Phase 5).
+    d["state"] = migrate.upgrade_state(json.loads(d.pop("state_json")))
     return d

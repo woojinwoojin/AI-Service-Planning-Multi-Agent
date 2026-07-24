@@ -11,16 +11,19 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 
 from app.api.routes import router
+from app.services.migrate import STATE_VERSION
 
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(
     title="AI 서비스 기획 보조 Multi-Agent",
     description=(
-        "12-노드 Multi-Agent 기획서 자동화 · Research·Competitor·Customer·PESTEL·SWOT·"
-        "Business Model·Risk·Draft·Reviewer·Polish·Final Reviewer·Verify (웹검색 grounding + 출처 인용)"
+        "14-섹션 Multi-Agent 기획서 자동화 · Research·Competitor·Customer·PESTEL·SWOT·"
+        "Business Model·Risk·Draft·Reviewer·(Section)Revise·Polish·Final Reviewer·Select-Best·Verify "
+        "(웹검색 grounding + 통합 근거 레지스트리 + 신뢰도 Tier 2 + 품질 게이트). "
+        f"응답 State 스키마 버전 v{STATE_VERSION}."
     ),
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.include_router(router)

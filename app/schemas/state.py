@@ -157,3 +157,4 @@ class RunResult(BaseModel):
     fallback_reasons: dict = Field(default_factory=dict)  # {노드: 원인} 사용자 안내용
     workflow_mode: str = "serial"                  # 실행 구조: serial/parallel
     timing: dict = Field(default_factory=dict)     # 단계별 실행시간·critical path·coverage
+    state_version: int = 0                          # State 스키마 버전(Phase 5, 옛 기록 재조회 호환)
