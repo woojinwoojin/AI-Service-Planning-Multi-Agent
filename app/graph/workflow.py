@@ -343,12 +343,15 @@ def run_workflow_stream(user_input: dict, workflow_mode: str | None = None):
 
     - GRAPH.stream(stream_mode="updates")로 각 노드 완료 직후 부분 업데이트를 받는다.
     - 각 노드는 완결된 값을 반환하므로(dict.update로 누적) 최종 state는 invoke 결과와 동일하다.
-    - yield 형식: {"type": "node", "node": name, "order": n}
+    - yield 형식(SSE 이벤트 계약): {"type": "start", "workflow_mode": mode}
+                  {"type": "node", "node": name, "order": n}
                   {"type": "done", "state": <최종 ProjectState>}
+      (오류 이벤트 "error"는 스트림을 소비하는 라우트가 예외를 잡아 방출한다.)
     """
     mode = _resolve_mode(workflow_mode)
     initial, config = _prepare_run(user_input, mode)
     state: ProjectState = dict(initial)
+    yield {"type": "start", "workflow_mode": mode}   # 스트림 시작 마커(+실행 구조)
     order = 0
     for chunk in _select_graph(mode).stream(initial, config=config, stream_mode="updates"):
         for node, update in chunk.items():
