@@ -140,8 +140,12 @@ State 기록:
 ---
 
 ## 5. 이후 로드맵
-- **PR-8 — 조건부 Polish** (저위험, PR-7의 구조화 issues 재사용):
-  문체·중복·가독성 이슈 있으면 Polish 실행 / 내용 이슈만 있고 수정 섹션이 형식검사 통과면 Polish 생략. → 동일 벤치로 누적 효과 측정.
+- **PR-8 — 조건부 Polish ✅ 구현(`feat/pr8-conditional-polish`)** (저위험, PR-7의 구조화 issues 재사용):
+  문체·중복·가독성 이슈(issue_type/설명에 style 힌트) 있으면 Polish 실행 / 전체 재작성(full)이면 실행 /
+  내용 이슈만 + 구조 정상 + 섹션단위·재작성없음이면 **Polish 생략**(문서 전체 재편집 LLM 호출 절감).
+  안전 편향(애매하면 실행)·구조 이상 시 실행. `draft_writer._polish_skip_reason`, state `polish_applied`·
+  `polish_skip_reason`, bench `polish_applied_rate`. 실측(polish는 baseline 병렬 ~21s로 현재 최대 단계)은
+  동일 벤치(3주제×2)로 누적 효과 측정 예정.
 - 필요 시: 본 실험 6주제×2(AB/BA), max_concurrency 실험, UI 병렬 ETA/노드시간 문구, `docs/ARCHITECTURE.md` 최신화.
 
 ## 6. 재현 방법

@@ -114,10 +114,12 @@ def test_polish_preserves_structure_and_refs(monkeypatch):
     dw = draft_writer
     body = "# P 기획서\n" + "\n".join(f"## {s}\n내용입니다." for s in dw.SECTIONS)
     state = {"final_draft": body + "\n\n## 참고자료\n- https://a.io",
-             "research_result": {"sources": ["https://a.io"]}, "logs": []}
+             "research_result": {"sources": ["https://a.io"]},
+             "revision_strategy": "full", "logs": []}   # full → Polish 실행(PR-8)
     monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
     monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: a[1])  # 편집기가 본문 그대로 반환
     out = dw.polish(state)
+    assert out["polish_applied"] is True
     assert dw._missing_sections(out["final_draft"]) == []       # 14섹션 유지
     assert "## 참고자료" in out["final_draft"] and "https://a.io" in out["final_draft"]
 
@@ -125,7 +127,8 @@ def test_polish_preserves_structure_and_refs(monkeypatch):
 def test_polish_falls_back_when_edit_breaks_structure(monkeypatch):
     dw = draft_writer
     body = "# P 기획서\n" + "\n".join(f"## {s}\n내용입니다." for s in dw.SECTIONS)
-    state = {"final_draft": body, "research_result": {"sources": []}, "logs": []}
+    state = {"final_draft": body, "research_result": {"sources": []},
+             "revision_strategy": "full", "logs": []}   # full → Polish 실행(PR-8)
     monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
     monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: "# 망가짐\n## 프로젝트 개요\n일부만")
     out = dw.polish(state)
@@ -136,6 +139,65 @@ def test_polish_noop_in_dummy(monkeypatch):
     dw = draft_writer
     monkeypatch.setattr(dw.llm, "is_dummy", lambda: True)
     assert dw.polish({"final_draft": "# X 기획서", "logs": []}) == {}
+
+
+# ── PR-8 조건부 Polish ─────────────────────────────────────────────────────
+
+def _valid_doc() -> str:
+    dw = draft_writer
+    return "# P 기획서\n" + "\n".join(f"## {s}\n내용입니다." for s in dw.SECTIONS)
+
+
+def test_polish_skips_when_content_only_and_structure_valid(monkeypatch):
+    """내용 이슈만 + 구조 정상 + 섹션 단위 재작성 → Polish 생략(LLM 호출 안 함)."""
+    dw = draft_writer
+    called = {"n": 0}
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text",
+                        lambda *a, **k: called.__setitem__("n", called["n"] + 1) or a[1])
+    state = {"final_draft": _valid_doc(), "revision_strategy": "section",
+             "review_result": {"issues": [
+                 {"issue_type": "insufficient_evidence", "severity": "major",
+                  "target_section_id": "market_analysis", "revision_instruction": "근거 보강"}]},
+             "logs": []}
+    out = dw.polish(state)
+    assert out["polish_applied"] is False
+    assert out["polish_skip_reason"]
+    assert called["n"] == 0                      # 편집 LLM 호출 자체를 생략
+
+
+def test_polish_runs_when_style_issue_present(monkeypatch):
+    """문체·중복 등 표현 이슈가 있으면 Polish 실행."""
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: a[1])
+    state = {"final_draft": _valid_doc(), "revision_strategy": "section",
+             "review_result": {"issues": [
+                 {"issue_type": "duplication", "severity": "minor",
+                  "target_section_id": "service", "revision_instruction": "중복 문장 정리"}]},
+             "logs": []}
+    out = dw.polish(state)
+    assert out["polish_applied"] is True
+
+
+def test_polish_runs_on_full_revise(monkeypatch):
+    """전체 재작성 후에는 이슈 유형과 무관하게 Polish 실행(문서 전체 일관성 정리)."""
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: a[1])
+    state = {"final_draft": _valid_doc(), "revision_strategy": "full",
+             "review_result": {"issues": []}, "logs": []}
+    assert dw.polish(state)["polish_applied"] is True
+
+
+def test_polish_runs_when_structure_broken(monkeypatch):
+    """최종본이 14섹션을 못 지키면(구조 이상) 생략하지 않고 실행(안전)."""
+    dw = draft_writer
+    monkeypatch.setattr(dw.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(dw.llm, "complete_text", lambda *a, **k: _valid_doc())
+    state = {"final_draft": "# P 기획서\n## 프로젝트 개요\n일부만", "revision_strategy": "section",
+             "review_result": {"issues": []}, "logs": []}
+    assert dw.polish(state)["polish_applied"] is True
 
 
 def test_preprocess_keyword_string_and_defaults():

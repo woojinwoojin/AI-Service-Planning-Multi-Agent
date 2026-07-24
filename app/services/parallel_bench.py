@@ -127,6 +127,8 @@ def _revision_metrics(state: dict) -> dict:
         "revision_scope": strategy,                        # none / section / full
         "revised_sections": len(state.get("revised_section_ids") or []),
         "fallback_reason": state.get("revision_fallback_reason"),
+        # 조건부 Polish(PR-8): 일관성 편집을 실제로 실행했는지(생략 시 문서재생성 LLM 호출 절감).
+        "polish_applied": bool(state.get("polish_applied", True)),
     }
 
 
@@ -207,6 +209,9 @@ def aggregate(runs: list[dict]) -> dict:
                           for sc in ("none", "section", "full")},
                 "revised_sections_mean": round(
                     sum((r.get("revision") or {}).get("revised_sections", 0) for r in rows) / n, 2),
+                # 조건부 Polish 실행률(PR-8): 낮을수록 생략이 많아 문서재생성 구간을 아낀 것.
+                "polish_applied_rate": round(
+                    sum(1 for r in rows if (r.get("revision") or {}).get("polish_applied")) / n, 3),
             },
             # 신뢰도 Tier 2 지표 평균(사실 검증률·근거 연결률). 옛 실행엔 없을 수 있어 None 제외 평균.
             "fact_support_rate_mean": _mean_metric(rows, "fact_support_rate"),

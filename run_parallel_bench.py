@@ -60,6 +60,7 @@ def _table_md(agg: dict) -> str:
         ("재작성 실행률", _rev(s, "executed_rate"), _rev(p, "executed_rate")),
         ("재작성 범위(none/section/full)", _rev_scope(s), _rev_scope(p)),
         ("평균 수정 섹션 수", _rev(s, "revised_sections_mean"), _rev(p, "revised_sections_mean")),
+        ("Polish 실행률(PR-8)", _rev(s, "polish_applied_rate"), _rev(p, "polish_applied_rate")),
         # 신뢰도 Tier 2: 사실 주장 검증률·주장별 근거 연결률(완료 게이트 지표)
         ("사실 검증률(평균)", s.get("fact_support_rate_mean"), p.get("fact_support_rate_mean")),
         ("근거 연결률(평균)", s.get("evidence_link_rate_mean"), p.get("evidence_link_rate_mean")),

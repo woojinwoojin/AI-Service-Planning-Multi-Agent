@@ -38,6 +38,8 @@ class ProjectState(TypedDict, total=False):
     revision_strategy: str
     revised_section_ids: list        # section 전략일 때 실제 수정된 섹션 ID(sections.KNOWN_IDS)
     revision_fallback_reason: str    # full 로 fallback한 사유(user_request/parse_*/no_targets/too_many/section_gen/assemble)
+    polish_applied: bool             # 조건부 Polish(PR-8): 일관성 편집을 실제로 수행했는지
+    polish_skip_reason: str          # Polish 생략 사유(내용 이슈만·구조 정상 등). 실행 시 None
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
@@ -131,6 +133,8 @@ class RunResult(BaseModel):
     revision_strategy: str = "none"                            # none/section/full (로드맵 2-4)
     revised_section_ids: list = Field(default_factory=list)    # section 전략 시 수정된 섹션 ID
     revision_fallback_reason: str | None = None                # full 로 fallback한 사유
+    polish_applied: bool = True                                # 조건부 Polish(PR-8) 수행 여부
+    polish_skip_reason: str | None = None                      # Polish 생략 사유(실행 시 None)
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
