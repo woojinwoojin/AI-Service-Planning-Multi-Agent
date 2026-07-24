@@ -10,6 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 
+from app.api.errors import register_error_handlers
 from app.api.routes import router
 from app.services.migrate import STATE_VERSION
 
@@ -26,6 +27,7 @@ app = FastAPI(
     version="0.2.0",
 )
 
+register_error_handlers(app)   # 통일 오류 응답 형식(Phase 5)
 app.include_router(router)
 
 
