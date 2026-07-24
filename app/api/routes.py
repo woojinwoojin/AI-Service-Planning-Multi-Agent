@@ -85,6 +85,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         final_review_result=state.get("final_review_result", {}),
         verification_result=state.get("verification_result", {}),
         verification_summary=state.get("verification_summary") or reliability.summary(),
+        quality_gate=state.get("quality_gate", {}),
         evidence_registry=state.get("evidence_registry", []),
         logs=state.get("logs", []),
         usage=state.get("usage", {}),

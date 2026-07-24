@@ -43,6 +43,7 @@ class ProjectState(TypedDict, total=False):
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
+    quality_gate: dict           # 출력 가능 여부 게이트(release_ready·checks·미해결 이슈, Phase 4)
     # logs 는 reducer 필드: 병렬 노드가 동시에 로그를 추가해도 유실·충돌 없이 이어붙는다.
     # 각 노드는 '자기 새 로그만' 반환하고(operator.add 로 누적), 기존 전체 로그를 다시 반환하지 않는다.
     logs: Annotated[list, operator.add]  # 실행 로그 / 진행 상태 표시용
@@ -138,6 +139,7 @@ class RunResult(BaseModel):
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
+    quality_gate: dict = Field(default_factory=dict)           # 출력 가능 여부 게이트(Phase 4)
     evidence_registry: list = Field(default_factory=list)      # 통합 근거 레지스트리(로드맵 2-1)
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)

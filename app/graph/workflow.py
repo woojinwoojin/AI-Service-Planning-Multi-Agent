@@ -17,7 +17,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import demo, evidence, llm, timing, tracing, usage
+from app.services import demo, evidence, llm, quality_gate, timing, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -250,6 +250,7 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
         apply_node_update(state, _safe(node, fn)(state))
     _finalize_evidence(state)   # 재작성 후에도 주장-근거 연결(used_by_claims) 재계산
     state.update(_assess_quality(state))
+    state["quality_gate"] = quality_gate.evaluate(state)  # 수정본에 대해 품질 게이트 재판정
     return state
 
 
@@ -292,6 +293,7 @@ def _finalize_run(state: ProjectState) -> ProjectState:
         state.get("timing_events", []), state.get("workflow_mode", "serial"),
         state["usage"].get("wall_time_ms"))
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
+    state["quality_gate"] = quality_gate.evaluate(state)  # 출력 가능 여부 게이트(로드맵 Phase 4)
     return state
 
 

@@ -39,6 +39,10 @@ def test_pipeline_completes_despite_llm_failure(force_real_llm):
     # item 9: 실행 품질이 상태로 표면화(전부 fallback → degraded)
     assert state.get("run_status") == "degraded"
     assert state.get("fallback_nodes")
+    # Phase 4: 품질 게이트가 실행 결과에 표면화된다(release_ready + 항목별 체크)
+    gate = state.get("quality_gate") or {}
+    assert isinstance(gate.get("release_ready"), bool)
+    assert set(gate.get("checks", {})) == {"score", "critical_issues", "major_issues", "structure", "evidence"}
 
 
 def test_assess_quality_classifies(monkeypatch):
