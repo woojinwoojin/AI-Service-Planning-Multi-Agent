@@ -331,6 +331,22 @@ function renderResults(d) {
       : `⚠ 일부 섹션을 완성하지 못했습니다 — 아래 표시된 항목을 다시 생성하면 대부분 해결됩니다.`;
     return `<div style="padding:9px 12px;border-radius:8px;margin-bottom:10px;font-size:13px;${bs}">${esc(msg)}</div>`;
   })();
+  // 가치 중심 품질 배너(Phase 6): "출력 가능 여부"와 "추가 확인 필요 항목"을 결과 최상단에 노출.
+  // (세부 항목별 체크는 '평가·검증' 탭의 게이트 섹션에 유지 — 여기는 한눈 요약)
+  const gateBanner = (qg && typeof qg.release_ready === "boolean") ? (() => {
+    if (qg.release_ready)
+      return `<div style="padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#e6f4ea;color:#1e7a34;font-size:13px"><b>✓ 출력 가능</b> — 품질 검토 기준(점수·근거·서식·이슈)을 충족했습니다.</div>`;
+    const reasons = (qg.blocking_reasons || []).map(r => GATE_LABEL[r] || r).join(" · ");
+    const un = qg.unresolved_issues || [];
+    const items = un.slice(0, 3).map(i =>
+      `<li>${badge(i.severity === "critical" ? "contradicted" : "unsupported")} <b>${esc(i.section_title || "")}</b> — ${inline(i.instruction || "")}</li>`).join("");
+    return `<div style="padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#fef3c7;color:#92400e;font-size:13px">
+        <b>⚠ 보완 필요</b>${reasons ? ` — 미충족: ${esc(reasons)}` : ""}
+        ${un.length ? `<div style="margin-top:6px;color:var(--ink)"><b>추가 확인 필요 항목</b>
+          <ul class="list" style="margin:4px 0 0">${items}</ul>
+          ${un.length > 3 ? `<span class="muted">외 ${un.length - 3}건 — ‘평가·검증’ 탭 참조</span>` : ""}</div>` : ""}
+      </div>`;
+  })() : "";
   // 항상 보이는 요약 스트립: 실행 품질 배너 + 총점 + 관측치
   const gateChip = (qg && typeof qg.release_ready === "boolean")
       ? (qg.release_ready
@@ -451,7 +467,7 @@ function renderResults(d) {
   </div>`;
 
   document.getElementById("results").innerHTML =
-    banner + usageRow + scoreStrip + tabBar +
+    banner + gateBanner + usageRow + scoreStrip + tabBar +
     panelMarket + panelCompete + panelMoney + panelPestel + panelEval;
   document.getElementById("resultCard").classList.remove("hidden");
 }
