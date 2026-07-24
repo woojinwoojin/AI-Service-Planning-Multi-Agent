@@ -16,7 +16,17 @@ from app.prompts.templates import VERIFY_SYSTEM
 from app.schemas.state import ProjectState
 from app.services import evidence, llm
 
-_STATUS = {"supported", "unsupported", "uncertain"}
+# 사실 주장의 근거 판정값(로드맵 Tier 2). contradicted(반대 근거)를 unsupported(근거 미확인)와 분리한다.
+#   supported   = 수집된 검색 근거에서 확인됨
+#   unsupported = 수집된 검색 근거에서 확인되지 않음(= 근거 미확인, '거짓'이 아님)
+#   contradicted= 수집된 근거가 주장과 배치됨(반대 근거)
+#   uncertain   = 근거가 불충분해 판단 불가
+_STATUS = {"supported", "unsupported", "contradicted", "uncertain"}
+# 주장 유형(로드맵 Tier 2). 근거 검증은 '사실 주장(fact)'만 대상으로 한다.
+#   fact=검증 가능한 사실 주장, inference=분석적 추론, proposal=서비스 제안(둘 다 검증 대상 아님).
+_CLAIM_TYPES = {"fact", "inference", "proposal"}
+# 비-사실 주장(inference/proposal)에 강제하는 근거 상태 — 근거 검증 대상이 아님.
+_NOT_APPLICABLE = "not_applicable"
 
 
 def _clean_evidence_ids(raw, valid_ids: set | None) -> list[str]:
@@ -47,24 +57,49 @@ def _validate(result: dict, fallback: dict, valid_ids: set | None = None) -> dic
             claim = c.get("claim") if isinstance(c.get("claim"), str) else ""
             if not claim.strip():
                 continue
-            status = c.get("status") if c.get("status") in _STATUS else "uncertain"
+            # 주장 유형 분류(Tier 2). 유형이 이상하면 보수적으로 fact 로 둔다(검증 대상에 포함).
+            ctype = c.get("claim_type") if c.get("claim_type") in _CLAIM_TYPES else "fact"
+            # 근거 검증은 사실 주장만. 추론/제안은 근거 상태를 not_applicable 로 강제(검증 대상 아님).
+            if ctype == "fact":
+                status = c.get("status") if c.get("status") in _STATUS else "uncertain"
+            else:
+                status = _NOT_APPLICABLE
             basis = c.get("basis") if isinstance(c.get("basis"), str) else ""
             eids = _clean_evidence_ids(c.get("evidence_ids"), valid_ids)
             # claim 에 실행 내 안정 id(c1, c2 …)를 부여 — 근거의 used_by_claims 역연결 키.
             claims.append({"id": f"c{len(claims) + 1}", "claim": claim.strip(),
-                           "status": status, "basis": basis, "evidence_ids": eids})
+                           "claim_type": ctype, "status": status,
+                           "basis": basis, "evidence_ids": eids})
     if not claims:
         return dict(fallback)
-    supported = sum(1 for c in claims if c["status"] == "supported")
+    return _metrics(claims)
+
+
+def _metrics(claims: list[dict]) -> dict:
+    """검증 지표를 계산한다. 기존 필드(supported/total/support_rate/unsupported/evidence_linked)는
+    하위호환으로 유지하고, Tier 2 지표(사실 주장 검증률·반대 근거 분리·근거 연결률)를 추가한다."""
     total = len(claims)
+    supported = sum(1 for c in claims if c["status"] == "supported")
+    facts = [c for c in claims if c["claim_type"] == "fact"]
+    fact_total = len(facts)
+    fact_supported = sum(1 for c in facts if c["status"] == "supported")
+    fact_linked = sum(1 for c in facts if c["evidence_ids"])
     return {
         "claims": claims,
         "supported": supported,
         "total": total,
         "support_rate": round(supported / total, 2) if total else 0.0,
+        # '근거 미확인'과 '반대 근거'를 분리해 표면화(Tier 2 요구).
         "unsupported": [c["claim"] for c in claims if c["status"] == "unsupported"],
+        "contradicted": [c["claim"] for c in claims if c["status"] == "contradicted"],
         # 주장-근거 연결 지표(2-1b): evidence_id 로 특정 근거에 연결된 주장 수.
         "evidence_linked": sum(1 for c in claims if c["evidence_ids"]),
+        # Tier 2 지표: 주장 유형 분포 + '사실 주장'에 한정한 검증률·근거 연결률(완료 게이트).
+        "claim_type_counts": {t: sum(1 for c in claims if c["claim_type"] == t) for t in _CLAIM_TYPES},
+        "fact_total": fact_total,
+        "fact_supported": fact_supported,
+        "fact_support_rate": round(fact_supported / fact_total, 2) if fact_total else 0.0,
+        "evidence_link_rate": round(fact_linked / fact_total, 2) if fact_total else 0.0,
         # 검증 범위 명시: 수집된 검색 요약 근거와의 일치 여부일 뿐, URL 원문 사실 검증이 아니다.
         "verification_scope": "search_snippet_only",
     }
@@ -72,11 +107,10 @@ def _validate(result: dict, fallback: dict, valid_ids: set | None = None) -> dic
 
 def _dummy(_: str) -> dict:
     claims = [
-        {"id": "c1", "claim": "[더미] 시장이 성장 중이다", "status": "uncertain",
-         "basis": "[더미] 근거 불충분", "evidence_ids": []},
+        {"id": "c1", "claim": "[더미] 시장이 성장 중이다", "claim_type": "fact",
+         "status": "uncertain", "basis": "[더미] 근거 불충분", "evidence_ids": []},
     ]
-    return {"claims": claims, "supported": 0, "total": 1, "support_rate": 0.0,
-            "unsupported": [], "evidence_linked": 0, "verification_scope": "search_snippet_only"}
+    return _metrics(claims)
 
 
 def verify(state: ProjectState) -> dict:
@@ -114,8 +148,10 @@ def verify(state: ProjectState) -> dict:
     result = _validate(raw, fallback, valid_ids)
 
     mode = llm.mode_label(status, state.get("model", ""))
+    contra = len(result.get("contradicted", []))
     logs = [
-        f"[verify] 근거 일치성 검증 완료 ({mode}, 근거 확인 {result['supported']}/{result['total']}, "
-        f"근거연결 {result.get('evidence_linked', 0)}건, 검색 요약 기준)"
+        f"[verify] 근거 일치성 검증 완료 ({mode}, 사실주장 확인 "
+        f"{result.get('fact_supported', 0)}/{result.get('fact_total', 0)}, "
+        f"반대근거 {contra}건, 근거연결 {result.get('evidence_linked', 0)}건, 검색 요약 기준)"
     ]
     return {"verification_result": result, "logs": logs}

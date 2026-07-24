@@ -278,7 +278,11 @@ function renderResults(d) {
   const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {}, u = d.usage || {};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${inline(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
   // 정직한 라벨: unsupported 는 '거짓'이 아니라 '근거 미확인'(원문 미접속). 색도 오류(빨강)가 아닌 주의(주황).
-  const badge = s => { const m={supported:["근거 확인","#e6f4ea","#1e7a34"],unsupported:["근거 미확인","#fff3e0","#b45309"],uncertain:["판단 불가","#eef1f5","#555"]}; const [t,bg,c]=m[s]||[s||"-","#eef1f5","#555"]; return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
+  // Tier 2: contradicted(반대 근거)는 미확인과 구분해 적색, not_applicable(추론·제안=검증 대상 아님)은 회색.
+  const badge = s => { const m={supported:["근거 확인","#e6f4ea","#1e7a34"],unsupported:["근거 미확인","#fff3e0","#b45309"],contradicted:["반대 근거","#fde2e1","#b42318"],uncertain:["판단 불가","#eef1f5","#555"],not_applicable:["검증 대상 아님","#eef1f5","#8a8f98"]}; const [t,bg,c]=m[s]||[s||"-","#eef1f5","#555"]; return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
+  // 주장 유형 칩(Tier 2): 사실/추론/제안. 근거 검증은 '사실' 주장만 대상임을 시각적으로 구분.
+  const CTYPE = {fact:"사실", inference:"추론", proposal:"제안"};
+  const ctypeChip = t => t ? `<span style="background:#eef1f5;color:#555;border-radius:6px;padding:1px 6px;font-size:11px;white-space:nowrap">${CTYPE[t]||t}</span>` : "";
   // 미완성(fallback) 섹션은 '[더미]' 내용 대신 정직한 원인 안내를 보여준다(혼잡/연결/형식/처리)
   const reasons = d.fallback_reasons || {};
   const REASON_MSG = {
@@ -323,7 +327,8 @@ function renderResults(d) {
       <span class="chip" style="background:var(--brand);color:#fff">총점 ${finalScore ?? "-"}/100</span>
       ${scoreDelta?`<span class="muted">${scoreDelta.replace(/<[^>]+>/g,"")}</span>`:""}
       <span class="chip">재작성 ${d.revision_count ?? 0}회</span>
-      <span class="chip">근거 확인 ${vf.supported ?? 0}/${vf.total ?? 0}</span>
+      <span class="chip" title="사실 주장에 한한 근거 확인 수(추론·제안은 검증 대상 아님)">사실 근거 확인 ${vf.fact_supported ?? vf.supported ?? 0}/${vf.fact_total ?? vf.total ?? 0}</span>
+      ${(vf.contradicted||[]).length?`<span class="chip" style="background:#fde2e1;color:#b42318">⚠ 반대 근거 ${vf.contradicted.length}건</span>`:""}
       ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fff3e0;color:#b45309">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}
     </div>`;
   const tabs = [
@@ -363,9 +368,9 @@ function renderResults(d) {
       + rk.risks.map(x=>`<tr><td><strong>${esc(x.category)}</strong></td><td>${inline(x.description)}</td><td>${esc(x.likelihood)}</td><td>${esc(x.impact)}</td><td>${inline(x.mitigation)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>';
   // 검증 범위 범례: '근거 미확인'이 거짓이 아님을 명시하고, 판정이 검색 요약 기준임을 밝힌다.
-  const verifyLegend = `<div class="muted" style="font-size:12px;margin-bottom:8px">판정 기준: 수집된 검색 요약 근거와의 일치 여부(URL 원문 사실 검증 아님). ‘근거 미확인’은 <b>거짓이 아니라</b> 현재 근거에서 확인되지 않았다는 뜻입니다.</div>`;
-  const verifyContent = (vf.claims||[]).length ? verifyLegend + "<table><thead><tr><th>주장</th><th style='width:84px'>판정</th><th>근거</th></tr></thead><tbody>"
-      + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
+  const verifyLegend = `<div class="muted" style="font-size:12px;margin-bottom:8px">판정 기준: 수집된 검색 요약 근거와의 일치 여부(URL 원문 사실 검증 아님). ‘근거 미확인’은 <b>거짓이 아니라</b> 현재 근거에서 확인되지 않았다는 뜻입니다. 근거 검증은 <b>사실 주장</b>만 대상이며, 추론·제안은 ‘검증 대상 아님’으로 표시합니다.</div>`;
+  const verifyContent = (vf.claims||[]).length ? verifyLegend + "<table><thead><tr><th>주장</th><th style='width:56px'>유형</th><th style='width:96px'>판정</th><th>근거</th></tr></thead><tbody>"
+      + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${ctypeChip(c.claim_type)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>';
 
   // 검색으로 '확인된 출처'(source_objects)만 유형별로 집계·표시한다. 문서의 '참고자료'(LLM이
@@ -409,7 +414,7 @@ function renderResults(d) {
       <div class="scores">${scoreChips||'<span class="muted">-</span>'}</div>
       <div class="subh">개선 지시 <span class="muted" style="font-weight:400">(초안 기준)</span></div>${listOf(rv.revision_instructions)}
     </div>
-    <div class="sec"><h4>근거 일치성 검증 · 근거 확인 <span class="total" style="font-size:18px">${vf.supported ?? 0}</span><span class="muted">/${vf.total ?? 0} (확인율 ${Math.round((vf.support_rate ?? 0)*100)}%) · 검색 요약 기준</span></h4>
+    <div class="sec"><h4>근거 일치성 검증 · 사실 근거 확인 <span class="total" style="font-size:18px">${vf.fact_supported ?? vf.supported ?? 0}</span><span class="muted">/${vf.fact_total ?? vf.total ?? 0} (사실 검증률 ${Math.round((vf.fact_support_rate ?? vf.support_rate ?? 0)*100)}% · 근거연결 ${Math.round((vf.evidence_link_rate ?? 0)*100)}%) · 검색 요약 기준</span></h4>
     ${secOr("verify","근거 일치성 검증", verifyContent)}
     </div>
   </div>`;
