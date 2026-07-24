@@ -9,9 +9,14 @@ from __future__ import annotations
 import json
 import re
 
-from app.prompts.templates import DRAFT_WRITER_SYSTEM, EDITOR_SYSTEM, REVISER_SYSTEM
+from app.prompts.templates import (
+    DRAFT_WRITER_SYSTEM,
+    EDITOR_SYSTEM,
+    REVISER_SYSTEM,
+    SECTION_REVISER_SYSTEM,
+)
 from app.schemas.state import ProjectState
-from app.services import evidence, llm
+from app.services import evidence, llm, sections
 
 # 실제 LLM은 종종 기획서 전체를 ```markdown ... ``` 로 감싸서 반환한다.
 # 최종 .md 산출물에 코드펜스가 남지 않도록, 문서 전체를 감싼 펜스만 벗긴다.
@@ -23,11 +28,8 @@ def _strip_wrapping_fence(text: str) -> str:
     return m.group(1).strip() if m else text.strip()
 
 
-SECTIONS = [
-    "프로젝트 개요", "추진 배경", "문제 정의", "목표 사용자",
-    "시장 및 산업 분석", "PESTEL 분석", "SWOT 분석", "제안 서비스", "핵심 기능",
-    "차별성", "수익 모델", "기대효과", "추진 계획", "위험요인 및 대응방안",
-]
+# 고정 서식 14섹션 제목. 단일 진실원천은 sections.SECTION_SPECS(섹션 ID↔제목)이며 여기서 파생한다.
+SECTIONS = list(sections.SECTION_TITLES)
 
 
 def _missing_sections(text: str) -> list[str]:
@@ -195,8 +197,14 @@ def draft(state: ProjectState) -> dict:
     return {"draft": text, "logs": logs}
 
 
-def revise(state: ProjectState) -> dict:
-    """Reviewer 개선지시(및 사용자 수정요청)를 1회 반영해 최종본 생성."""
+def revise(state: ProjectState, fallback_reason: str | None = None) -> dict:
+    """Reviewer 개선지시(및 사용자 수정요청)를 1회 반영해 '전체' 재작성한 최종본 생성.
+
+    섹션 단위 수정(section_revise)이 불가능하거나 실패했을 때의 안전한 전체 재작성 경로다
+    (로드맵 2-5 full-revise fallback). fallback_reason 은 왜 전체 재작성으로 왔는지 기록용
+    (section_revise 가 넘겨준 사유). 직접(라우터의 full 분기·수동 /revise) 호출 시엔 상태에서
+    스스로 사유를 도출해 revision_fallback_reason 에 남긴다.
+    """
     current = state.get("draft", "")
     review = state.get("review_result", {})
     instructions = review.get("revision_instructions", [])
@@ -221,10 +229,161 @@ def revise(state: ProjectState) -> dict:
     text = _append_references(text, _real_sources(state) or _existing_ref_lines(text))
 
     count = state.get("revision_count", 0) + 1
+    reason = fallback_reason if fallback_reason is not None else plan_section_revision(state)[1]
     mode = llm.mode_label(status, state.get("model", ""))
     note = "" if not missing else f" ⚠ 누락 섹션 {len(missing)}개"
-    logs = [f"[draft_writer] 재작성 완료 (revision={count}, {mode}){note}"]
-    return {"final_draft": text, "revision_count": count, "logs": logs}
+    logs = [f"[draft_writer] 전체 재작성 완료 (revision={count}, {mode}){note}"]
+    return {"final_draft": text, "revision_count": count,
+            "revision_strategy": "full", "revised_section_ids": [],
+            "revision_fallback_reason": reason, "logs": logs}
+
+
+MAX_REVISED_SECTIONS = 4  # 자동 섹션 단위 수정 대상 상한. 초과하면 전체 재작성으로 fallback(로드맵 2-4).
+
+# 섹션 ID → (근거 라벨, state 키). 섹션 단위 수정 시 그 섹션과 관련된 분석 결과만 프롬프트에 실어
+# 입력 토큰을 줄인다(전체 기획서·전체 분석 재전달 금지).
+_SECTION_EVIDENCE: dict[str, tuple[str, str]] = {
+    "problem": ("고객 문제", "customer_result"),
+    "target_user": ("고객 문제", "customer_result"),
+    "market_analysis": ("시장조사", "research_result"),
+    "pestel": ("PESTEL", "pestel_result"),
+    "swot": ("SWOT", "swot_result"),
+    "differentiation": ("경쟁사 분석", "competitor_result"),
+    "revenue_model": ("비즈니스 모델", "business_model_result"),
+    "risk": ("리스크", "risk_result"),
+}
+
+
+def plan_section_revision(state: ProjectState) -> tuple[list[str], str | None]:
+    """섹션 단위 수정이 가능한지 판정하고 대상 섹션 ID 목록을 돌려준다(로드맵 2-4 라우팅).
+
+    반환 (targets, reason):
+    - reason is None → 섹션 단위 수정 가능(targets 는 1~MAX 개의 대상 섹션 ID).
+    - reason 문자열 → 전체 재작성으로 fallback해야 함(사유: user_request/parse_*/no_targets/too_many).
+
+    자동 수정 대상은 critical/major 이슈의 target_section_id 만(중복 제거). minor 는 이후 Polish 로 넘어간다.
+    """
+    if (state.get("user_input") or {}).get("revision_request"):
+        return [], "user_request"          # 자유형 사용자 수정요청은 전체 재작성으로 처리
+    parsed = sections.parse_sections(state.get("draft", "") or "")
+    if not parsed["valid"]:
+        return [], f"parse_{parsed['reason']}"   # 파서 실패·구조 이상 → 전체 재작성
+    issues = (state.get("review_result") or {}).get("issues") or []
+    targets: list[str] = []
+    for it in issues:
+        if isinstance(it, dict) and it.get("severity") in ("critical", "major"):
+            sid = it.get("target_section_id")
+            if sid in sections.KNOWN_IDS and sid not in targets:
+                targets.append(sid)
+    if not targets:
+        return [], "no_targets"            # 구조화된 자동 수정 대상 없음 → 전체 재작성(안전)
+    if len(targets) > MAX_REVISED_SECTIONS:
+        return [], "too_many"              # 대상 과다(>MAX) → 전체 재작성
+    return targets, None
+
+
+def _neighbors(parsed: dict, sid: str) -> tuple[str | None, str | None]:
+    """대상 섹션의 앞뒤 섹션 ID(문맥 요약용)."""
+    order = parsed.get("order", [])
+    if sid not in order:
+        return None, None
+    i = order.index(sid)
+    return (order[i - 1] if i > 0 else None,
+            order[i + 1] if i + 1 < len(order) else None)
+
+
+def _neighbor_summaries(parsed: dict, sid: str) -> str:
+    """앞뒤 섹션의 짧은 요약(수정 대상 아님, 흐름 유지용)."""
+    prev_id, next_id = _neighbors(parsed, sid)
+    out: list[str] = []
+    for role, nid in (("앞", prev_id), ("뒤", next_id)):
+        if not nid:
+            continue
+        summary = sections.section_body(parsed, nid)[:200].replace("\n", " ").strip()
+        out.append(f"[{role} 섹션 요약] {sections.ID_TO_TITLE.get(nid, nid)}: {summary}")
+    return ("\n".join(out) + "\n\n") if out else ""
+
+
+def _relevant_analysis(state: ProjectState, sid: str) -> str:
+    """대상 섹션과 관련된 분석 결과만 근거로 실어 준다(전체 분석 재전달 금지)."""
+    spec = _SECTION_EVIDENCE.get(sid)
+    if not spec:
+        return ""
+    label, key = spec
+    data = state.get(key) or {}
+    if not data:
+        return ""
+    return f"[{label} 결과(근거)]\n{json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+def _revise_one_section(state: ProjectState, parsed: dict, sid: str,
+                        issues: list[dict], model: str, status: dict) -> str | None:
+    """대상 섹션 하나만 재작성한 새 본문(제목 줄 제외)을 반환. 실패 시 None(→ 전체 fallback)."""
+    original = sections.section_body(parsed, sid)
+    title = sections.ID_TO_TITLE.get(sid, sid)
+    instructions = [it.get("revision_instruction", "") for it in issues
+                    if it.get("revision_instruction")]
+    # 더미/오류 시 원문 보존(구조 유지). 더미는 지시를 주석으로 덧붙여 '보완됨'을 표시.
+    fb_content = original
+    if llm.is_dummy():
+        fb_content = (original + "\n\n> [더미 섹션 보완] " + "; ".join(instructions)).strip()
+    fallback = {"section_id": sid, "content": fb_content}
+
+    user = (
+        f"[프로젝트 기본 정보]\n{json.dumps(state.get('structured_input', {}), ensure_ascii=False)}\n\n"
+        f"[대상 섹션] {title} (section_id: {sid})\n"
+        f"[대상 섹션 현재 본문]\n{original}\n\n"
+        "[이 섹션 개선 지시]\n" + "\n".join(f"- {i}" for i in instructions) + "\n\n"
+        + _relevant_analysis(state, sid)
+        + _neighbor_summaries(parsed, sid)
+        + "위 지시를 반영해 이 섹션 본문만 다시 작성하세요(제목 줄 제외)."
+    )
+    raw = llm.complete_json(SECTION_REVISER_SYSTEM, user, fallback=fallback, model=model, status=status)
+    content = raw.get("content") if isinstance(raw, dict) else None
+    if not isinstance(content, str) or not content.strip():
+        return None
+    return content.strip()
+
+
+def section_revise(state: ProjectState) -> dict:
+    """문제 섹션만 담당 Agent가 보완하는 섹션 단위 수정(로드맵 2-4).
+
+    라우터가 이 노드로 보냈어도, 런타임에 (섹션 재작성 실패·조립 후 구조 손상 등) 문제가 생기면
+    안전하게 전체 재작성(revise)으로 fallback 한다. 미수정 섹션은 원문 byte 그대로 보존된다.
+    """
+    targets, reason = plan_section_revision(state)
+    if reason:                                   # 방어적: 라우터가 걸러도 다시 확인
+        return revise(state, fallback_reason=reason)
+
+    parsed = sections.parse_sections(state.get("draft", ""))
+    issues = (state.get("review_result") or {}).get("issues") or []
+    by_section: dict[str, list[dict]] = {}
+    for it in issues:
+        if isinstance(it, dict) and it.get("target_section_id") in targets:
+            by_section.setdefault(it["target_section_id"], []).append(it)
+
+    model = state.get("model", "")
+    status: dict = {}
+    revised: dict[str, str] = {}
+    for sid in targets:
+        content = _revise_one_section(state, parsed, sid, by_section.get(sid, []), model, status)
+        if content is None:                      # 섹션 생성 실패 → 전체 재작성 fallback
+            return revise(state, fallback_reason="section_gen")
+        revised[sid] = content
+
+    new_md = sections.assemble(parsed, revised)
+    # 조립 후 구조 검사 — 14섹션 유지 못하면 전체 재작성 fallback(안전)
+    if _missing_sections(new_md) or not sections.parse_sections(new_md)["valid"]:
+        return revise(state, fallback_reason="assemble")
+
+    count = state.get("revision_count", 0) + 1
+    mode = llm.mode_label(status, model)
+    titles = ", ".join(sections.ID_TO_TITLE[s] for s in targets)
+    logs = [f"[draft_writer] 섹션 단위 재작성 완료 "
+            f"(revision={count}, {len(targets)}개 섹션: {titles}, {mode})"]
+    return {"final_draft": new_md, "revision_count": count,
+            "revision_strategy": "section", "revised_section_ids": list(targets),
+            "revision_fallback_reason": None, "logs": logs}
 
 
 def polish(state: ProjectState) -> dict:

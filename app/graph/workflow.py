@@ -61,19 +61,32 @@ def _safe(name: str, fn: Callable[[ProjectState], dict]) -> Callable[[ProjectSta
     return wrapped
 
 
-def _needs_revision(state: ProjectState) -> str:
+def _route_revision(state: ProjectState) -> str:
+    """Reviewer 이후 경로 결정(로드맵 2-4):
+
+      수정 필요? ── 아니오 → finalize
+                └─ 예 → 섹션 단위 수정 가능? ── 예 → section_revise
+                                             └─ 아니오 → revise(전체 재작성)
+
+    '수정 필요'는 기존 기준(총점<PASS_SCORE & 재작성 1회 미만) 유지. 섹션 단위 가능 여부는
+    draft_writer.plan_section_revision 이 판정(구조화 이슈·파싱·대상 수). 실제 섹션 수정 중
+    런타임 실패 시엔 section_revise 노드 안에서 다시 full-revise 로 안전하게 fallback 한다.
+    """
     review = state.get("review_result", {})
     score = review.get("total_score", 0)
     already = state.get("revision_count", 0)
-    if already < 1 and score < PASS_SCORE:
-        return "revise"
-    return "finalize"
+    if already >= 1 or score >= PASS_SCORE:
+        return "finalize"
+    _, reason = draft_writer.plan_section_revision(state)
+    return "revise" if reason else "section_revise"
 
 
 def _finalize(state: ProjectState) -> dict:
     """재작성 없이 초안을 최종본으로 확정."""
     logs = ["[finalize] 초안을 최종본으로 확정 (재작성 없음)"]
-    return {"final_draft": state.get("draft", ""), "logs": logs}
+    return {"final_draft": state.get("draft", ""), "logs": logs,
+            "revision_strategy": "none", "revised_section_ids": [],
+            "revision_fallback_reason": None}
 
 
 def _register_nodes(g: StateGraph) -> None:
@@ -89,6 +102,7 @@ def _register_nodes(g: StateGraph) -> None:
     g.add_node("draft", _safe("draft", draft_writer.draft))
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
+    g.add_node("section_revise", _safe("section_revise", draft_writer.section_revise))
     g.add_node("finalize", _safe("finalize", _finalize))
     g.add_node("polish", _safe("polish", draft_writer.polish))
     g.add_node("final_reviewer", _safe("final_reviewer", reviewer.final_reviewer))
@@ -99,8 +113,10 @@ def _add_finish_edges(g: StateGraph) -> None:
     """draft 이후 마무리 구간(직렬·병렬 공통, 동일 순서)."""
     g.add_edge("draft", "reviewer")
     g.add_conditional_edges(
-        "reviewer", _needs_revision, {"revise": "revise", "finalize": "finalize"}
+        "reviewer", _route_revision,
+        {"section_revise": "section_revise", "revise": "revise", "finalize": "finalize"},
     )
+    g.add_edge("section_revise", "polish")
     g.add_edge("revise", "polish")
     g.add_edge("finalize", "polish")
     g.add_edge("polish", "final_reviewer")

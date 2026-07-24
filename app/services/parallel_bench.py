@@ -107,6 +107,20 @@ def run_once(topic: dict, mode: str) -> dict:
         "run_status": state.get("run_status"),
         "timing": state.get("timing") or {},          # 단계별 실행시간(병목 위치)
         "quality": structural_quality(state),
+        # 재작성 계측(로드맵 2-4 PR-7): 섹션 단위 수정이 얼마나 자주·몇 섹션에 적용됐는지.
+        "revision": _revision_metrics(state),
+    }
+
+
+def _revision_metrics(state: dict) -> dict:
+    """실행의 재작성 전략을 벤치 지표로 요약(집계에서 섹션/전체/생략 비율 계산)."""
+    strategy = state.get("revision_strategy", "none")
+    return {
+        "review_decision": "finalize" if strategy == "none" else "revise",
+        "revision_executed": strategy in ("section", "full"),
+        "revision_scope": strategy,                        # none / section / full
+        "revised_sections": len(state.get("revised_section_ids") or []),
+        "fallback_reason": state.get("revision_fallback_reason"),
     }
 
 
@@ -171,6 +185,16 @@ def aggregate(runs: list[dict]) -> dict:
                 sum(r["quality"]["empty_sections"] for r in rows) / n, 2),
             "unique_source_urls_mean": round(
                 sum(r["quality"]["unique_source_urls"] for r in rows) / n, 2),
+            # 재작성 전략 분포(PR-7): 섹션 단위 수정 실행률·범위별 횟수·평균 수정 섹션 수.
+            "revision": {
+                "executed_rate": round(
+                    sum(1 for r in rows if (r.get("revision") or {}).get("revision_executed")) / n, 3),
+                "scope": {sc: sum(1 for r in rows
+                                  if (r.get("revision") or {}).get("revision_scope") == sc)
+                          for sc in ("none", "section", "full")},
+                "revised_sections_mean": round(
+                    sum((r.get("revision") or {}).get("revised_sections", 0) for r in rows) / n, 2),
+            },
             # 단계별 wall time 중앙값(병목 위치) + coverage 중앙값(측정이 전체를 얼마나 설명하는지)
             "stage_ms_median": _stage_medians(rows),
             "timing_coverage_median": _median(

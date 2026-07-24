@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from app.prompts.templates import REVIEWER_SYSTEM
 from app.schemas.state import ProjectState
-from app.services import llm
+from app.services import llm, sections
 
 SECTION_KEYS = [
     "problem_clarity", "market_validity", "solution_specificity",
@@ -19,6 +19,46 @@ SECTION_KEYS = [
 ]
 _LIST_KEYS = ["strengths", "weaknesses", "unsupported_claims", "revision_instructions"]
 _SECTION_MAX = 20
+# 구조화 이슈 심각도(로드맵 2-3). critical/major 는 섹션 단위 자동 수정 대상, minor 는 Polish 로.
+_SEVERITY = {"critical", "major", "minor"}
+
+
+def _validate_issues(raw) -> list[dict]:
+    """Reviewer 의 구조화 이슈를 스키마로 정규화한다(로드맵 2-3 PR-7).
+
+    각 이슈는 `{issue_type, severity, target_section_id, description, revision_instruction}`.
+    - target_section_id 는 14섹션 내부 ID(sections.KNOWN_IDS)만 통과시킨다 → LLM 이 지어낸
+      섹션명·자유 문자열을 걸러 섹션 단위 수정이 항상 유효한 대상 위에서 동작하게 한다.
+    - severity 는 critical/major/minor 만 허용(그 외 → major).
+    - revision_instruction 이 비면 description 으로 대체, 둘 다 비면 이슈를 버린다
+      (실행 가능한 지시가 없는 이슈는 수정 라우팅에 무의미).
+    """
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for it in raw:
+        if not isinstance(it, dict):
+            continue
+        sid = it.get("target_section_id")
+        if sid not in sections.KNOWN_IDS:
+            continue
+        desc = it.get("description") if isinstance(it.get("description"), str) else ""
+        instr = it.get("revision_instruction") if isinstance(it.get("revision_instruction"), str) else ""
+        desc, instr = desc.strip(), instr.strip()
+        instruction = instr or desc
+        if not instruction:
+            continue
+        severity = it.get("severity") if it.get("severity") in _SEVERITY else "major"
+        raw_type = it.get("issue_type")
+        itype = raw_type.strip() if isinstance(raw_type, str) and raw_type.strip() else "general"
+        out.append({
+            "issue_type": itype,
+            "severity": severity,
+            "target_section_id": sid,
+            "description": desc,
+            "revision_instruction": instruction,
+        })
+    return out
 
 
 def _clamp_score(value) -> int:
@@ -52,6 +92,8 @@ def _validate(result: dict, fallback: dict) -> dict:
             out[key] = [s.strip() for s in value if isinstance(s, str) and s.strip()]
         else:
             out[key] = []
+    # 구조화 이슈(로드맵 2-3): 섹션 단위 수정 라우팅의 입력. 없거나 무효면 빈 리스트(→ full revise).
+    out["issues"] = _validate_issues(result.get("issues"))
     return out
 
 
@@ -65,6 +107,16 @@ def _dummy(draft: str) -> dict:
         "revision_instructions": [
             "[더미] 시장분석에 출처 기반 근거를 보강할 것",
             "[더미] 차별성 섹션을 경쟁 대비로 구체화할 것",
+        ],
+        "issues": [
+            {"issue_type": "insufficient_evidence", "severity": "major",
+             "target_section_id": "market_analysis",
+             "description": "[더미] 시장 규모 근거 부족",
+             "revision_instruction": "[더미] 검색 근거로 시장 현황을 구체화할 것"},
+            {"issue_type": "weak_differentiation", "severity": "major",
+             "target_section_id": "differentiation",
+             "description": "[더미] 경쟁 대비 차별점 모호",
+             "revision_instruction": "[더미] 차별성 섹션을 경쟁 대비로 구체화할 것"},
         ],
         "section_scores": section_scores,
     }
