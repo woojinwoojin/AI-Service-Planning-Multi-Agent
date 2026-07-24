@@ -129,10 +129,47 @@ def test_run_stream_emits_node_events_and_done(client):
                 nodes.append(ev["node"])
             elif ev["type"] == "done":
                 result = ev["result"]
+    assert types[0] == "start"                            # SSE 계약: 첫 이벤트는 start
     assert "preprocess" in nodes and "verify" in nodes   # 실제 노드 순차 완료 이벤트
     assert types[-1] == "done"                            # 마지막은 done
     assert result and result["project_id"] > 0            # 결과 포함 + 이력 저장
     assert result["final_draft"]
+
+
+def test_stream_start_event_carries_mode(client):
+    import json
+    first = None
+    with client.stream("POST", "/run/stream",
+                       json={"project_name": "시작", "problem": "P"}) as r:
+        for line in r.iter_lines():
+            if line and line.startswith("data: "):
+                first = json.loads(line[6:])
+                break
+    assert first["type"] == "start"
+    assert first["workflow_mode"] in ("serial", "parallel")
+
+
+def test_stream_error_event_is_unified_and_hides_internals(client, monkeypatch):
+    """스트림 도중 예외 → 통일 error 이벤트(HTTP 오류 봉투와 동일 구조), 내부 상세 미노출."""
+    import json
+
+    def boom_stream(*a, **k):
+        yield {"type": "start", "workflow_mode": "serial"}
+        raise RuntimeError("내부 비밀 스택")
+    monkeypatch.setattr("app.api.routes.run_workflow_stream", boom_stream)
+
+    events = []
+    with client.stream("POST", "/run/stream",
+                       json={"project_name": "터짐", "problem": "P"}) as r:
+        assert r.status_code == 200                        # 스트림 자체는 정상 종료
+        for line in r.iter_lines():
+            if line and line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+    last = events[-1]
+    assert last["type"] == "error"
+    assert last["error"]["code"] == "internal_error" and last["error"]["status"] == 500
+    assert last["message"]                                 # UI 하위호환(ev.message)
+    assert "내부 비밀" not in json.dumps(last, ensure_ascii=False)  # 내부 상세 미노출
 
 
 def test_fallback_reasons_surface_to_api(client, monkeypatch):

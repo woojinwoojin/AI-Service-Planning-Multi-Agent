@@ -2,18 +2,21 @@
 from __future__ import annotations
 
 import json
+import logging
 from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import StreamingResponse
 
 from app.agents import draft_writer
+from app.api.errors import error_payload
 from app.graph.workflow import apply_node_update, rerun_finalizers, run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
+_log = logging.getLogger("app.routes")
 
 
 @router.get("/health")
@@ -107,14 +110,23 @@ def run(payload: ProjectInput) -> RunResult:
     return _result_payload(state, project_id)
 
 
+def _sse(obj: dict) -> str:
+    """SSE 한 프레임(`data: {json}\\n\\n`)으로 직렬화한다."""
+    return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
+
+
 @router.post("/run/stream")
 def run_stream(payload: ProjectInput) -> StreamingResponse:
-    """워크플로를 실행하며 노드 완료를 SSE로 실시간 전송한다(진행 표시·ETA용).
+    """워크플로를 실행하며 진행 상황을 SSE로 실시간 전송한다(진행 표시·ETA용).
 
-    이벤트(각 줄 `data: {json}\\n\\n`):
-      {"type":"node","node":<노드명>,"order":n}  — 노드 하나 완료
-      {"type":"done","result":<RunResult>}        — 완료(결과 포함, 이력 저장됨)
-      {"type":"error","message":...}               — 실행 중 예외
+    이벤트 계약(각 프레임 `data: {json}\\n\\n`, JSON 의 `type` 으로 구분):
+      {"type":"start","workflow_mode":"serial|parallel"}      — 스트림 시작(실행 구조)
+      {"type":"node","node":<노드명>,"order":n}               — 노드 하나 완료(순번)
+      {"type":"done","result":<RunResult>}                    — 완료(결과 포함, 이력 저장됨)
+      {"type":"error","message":<안내>,"error":{code,message,status}}
+                                                              — 실행 중 예외(HTTP 오류 봉투와 동일 구조)
+    - 순서 보장: start → node* → (done | error). 소비자는 모르는 type 을 무시해야 한다(전방 호환).
+    - error 는 내부 예외 상세를 노출하지 않는다(HTTP 500 과 동일 원칙, 상세는 서버 로그).
     """
     def event_stream():
         try:
@@ -123,12 +135,15 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
                     state = ev["state"]
                     state["verification_summary"] = reliability.summary()
                     project_id = store.save_run(state)
-                    payload_out = {"type": "done", "result": _result_payload(state, project_id).model_dump()}
-                    yield f"data: {json.dumps(payload_out, ensure_ascii=False)}\n\n"
+                    yield _sse({"type": "done",
+                                "result": _result_payload(state, project_id).model_dump()})
                 else:
-                    yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
-        except Exception as exc:  # 스트림 도중 실패해도 클라이언트에 사유 전달
-            yield f"data: {json.dumps({'type': 'error', 'message': f'{type(exc).__name__}: {exc}'}, ensure_ascii=False)}\n\n"
+                    yield _sse(ev)
+        except Exception:  # 스트림 도중 실패해도 클라이언트에 통일 형식으로 사유 전달
+            _log.exception("SSE stream failed on /run/stream")
+            err = error_payload(500, "실행 중 오류가 발생했습니다.")
+            # message 는 UI 하위호환(ev.message 소비), error 는 HTTP 오류 봉투와 동일 구조.
+            yield _sse({"type": "error", "message": err["error"]["message"], **err})
 
     return StreamingResponse(
         event_stream(),
