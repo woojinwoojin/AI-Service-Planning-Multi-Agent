@@ -48,11 +48,8 @@ def project_detail(project_id: int) -> dict:
     found = store.get_project(project_id)
     if not found:
         raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다.")
-    # 과거 레코드는 verification_summary 가 없을 수 있으므로 안전 기본값을 채운다
-    # (한계 문구는 실행이 아니라 시스템 성격에 대한 것이라 옛 프로젝트에도 동일하게 표시).
-    state = found.get("state")
-    if isinstance(state, dict) and not state.get("verification_summary"):
-        state["verification_summary"] = reliability.summary()
+    # 옛 기록 정규화(누락 필드 기본값·게이트 소급·verification_summary)는 store.get_project 가
+    # migrate.upgrade_state 로 이미 처리한다(Phase 5). 여기서 별도 보정 불필요.
     return found
 
 
@@ -97,6 +94,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         fallback_reasons=state.get("fallback_reasons", {}),
         workflow_mode=state.get("workflow_mode", "serial"),
         timing=state.get("timing", {}),
+        state_version=state.get("state_version", 0),
     )
 
 
