@@ -45,6 +45,29 @@ def test_summarize_empty_events():
     assert out["stages"] == {} and out["critical_path"] == [] and out["coverage"] is None
 
 
+def test_section_revise_is_bucketed_and_on_path():
+    """PR-7 섹션 단위 수정(section_revise) 시간이 revise_or_finalize 단계로 잡히고 critical_path 에 포함된다.
+
+    section_revise 노드명이 버킷에서 빠지면 그 시간이 어느 stage 에도 안 잡혀 coverage 가 낮아지고
+    병목(재작성 구간)이 리포트에서 사라진다(실측 중 발견한 갭).
+    """
+    events = [
+        timing.event("preprocess", 0, 0),
+        timing.event("research", 0, 100),
+        timing.event("competitor", 100, 200),
+        timing.event("draft", 200, 400),
+        timing.event("reviewer", 400, 450),
+        timing.event("section_revise", 450, 700),      # 섹션 단위 수정(250ms)
+        timing.event("polish", 700, 900),
+        timing.event("final_reviewer", 900, 950),
+        timing.event("verify", 950, 1000),
+    ]
+    t = timing.summarize(events, "serial", wall_time_ms=1000)
+    assert t["stages"]["revise_or_finalize"] == 250.0   # section_revise 시간이 재작성 단계로 잡힘
+    assert "section_revise" in t["critical_path"]       # critical path 에도 포함
+    assert t["coverage"] >= 0.95                         # 재작성 시간이 잡혀 coverage 회복
+
+
 def test_every_core_node_has_one_timing_event(monkeypatch):
     _inject_latency(monkeypatch, 0.2)
     st = run_workflow({"project_name": "t", "problem": "P"}, workflow_mode="serial")
