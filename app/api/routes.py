@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 
 from app.agents import draft_writer
 from app.api.errors import error_payload
+from app.api.errors import responses as error_responses
 from app.graph.workflow import apply_node_update, rerun_finalizers, run_workflow, run_workflow_stream
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
@@ -19,7 +20,7 @@ router = APIRouter()
 _log = logging.getLogger("app.routes")
 
 
-@router.get("/health")
+@router.get("/health", tags=["시스템"], summary="서버 상태")
 def health() -> dict:
     return {
         "status": "ok",
@@ -29,7 +30,7 @@ def health() -> dict:
     }
 
 
-@router.get("/models")
+@router.get("/models", tags=["시스템"], summary="사용 가능 모델 목록")
 def models() -> dict:
     """현재 provider에서 선택 가능한 모델 목록. /run 의 model 필드에 id를 넣어 사용."""
     return {
@@ -39,13 +40,14 @@ def models() -> dict:
     }
 
 
-@router.get("/projects")
+@router.get("/projects", tags=["이력"], summary="프로젝트 이력 목록")
 def projects(limit: int = 50) -> dict:
     """저장된 프로젝트 이력 목록(최신순)."""
     return {"projects": store.list_projects(limit=limit)}
 
 
-@router.get("/projects/{project_id}")
+@router.get("/projects/{project_id}", tags=["이력"], summary="프로젝트 상세",
+            responses=error_responses(404))
 def project_detail(project_id: int) -> dict:
     """저장된 프로젝트 상세(전체 실행 결과)."""
     found = store.get_project(project_id)
@@ -56,7 +58,8 @@ def project_detail(project_id: int) -> dict:
     return found
 
 
-@router.post("/suggest")
+@router.post("/suggest", tags=["입력 보조"], summary="입력 자동완성",
+             responses=error_responses(400))
 def suggest_input(payload: SuggestInput) -> dict:
     """프로젝트명(+메모+기존 입력)으로 '빈 항목만' 초안을 추천(사용자 입력은 보존·문맥 활용)."""
     if not payload.project_name.strip():
@@ -101,7 +104,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
     )
 
 
-@router.post("/run", response_model=RunResult)
+@router.post("/run", response_model=RunResult, tags=["실행"], summary="워크플로 실행(동기)")
 def run(payload: ProjectInput) -> RunResult:
     """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
     state = run_workflow(payload.to_state_input())
@@ -115,7 +118,9 @@ def _sse(obj: dict) -> str:
     return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
 
 
-@router.post("/run/stream")
+@router.post("/run/stream", tags=["실행"], summary="워크플로 실행(SSE 스트리밍)",
+             responses={200: {"description": "SSE 이벤트 스트림 (start → node* → done|error)",
+                              "content": {"text/event-stream": {"schema": {"type": "string"}}}}})
 def run_stream(payload: ProjectInput) -> StreamingResponse:
     """워크플로를 실행하며 진행 상황을 SSE로 실시간 전송한다(진행 표시·ETA용).
 
@@ -152,7 +157,7 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
     )
 
 
-@router.post("/revise")
+@router.post("/revise", tags=["실행"], summary="사용자 수정 반영 재작성(HITL)")
 def revise(payload: ReviseInput) -> dict:
     """Human-in-the-Loop: 사용자의 수정 요청을 현재 기획서에 1회 반영해 재작성.
 
@@ -212,7 +217,7 @@ def revise(payload: ReviseInput) -> dict:
     }
 
 
-@router.post("/export/docx")
+@router.post("/export/docx", tags=["내보내기"], summary="DOCX 내보내기")
 def export_docx(payload: ExportInput) -> Response:
     """기획서 Markdown을 Word(.docx)로 변환해 다운로드 응답으로 반환."""
     data = docx_export.docx_bytes(reliability.append_disclaimer(payload.markdown))
@@ -226,7 +231,7 @@ def export_docx(payload: ExportInput) -> Response:
     )
 
 
-@router.post("/export/pptx")
+@router.post("/export/pptx", tags=["내보내기"], summary="PPTX 내보내기")
 def export_pptx(payload: ExportInput) -> Response:
     """기획서 Markdown을 PowerPoint(.pptx)로 변환해 다운로드 응답으로 반환."""
     md = reliability.append_disclaimer(payload.markdown)
@@ -241,7 +246,7 @@ def export_pptx(payload: ExportInput) -> Response:
     )
 
 
-@router.post("/run/save")
+@router.post("/run/save", tags=["실행"], summary="실행 + 산출물(.md/.docx/.pptx/.json) 저장")
 def run_and_save(payload: ProjectInput) -> dict:
     """워크플로 실행 후 최종 기획서(.md/.docx/.pptx)와 전체 실행 결과(.json)를 저장."""
     state = run_workflow(payload.to_state_input())
