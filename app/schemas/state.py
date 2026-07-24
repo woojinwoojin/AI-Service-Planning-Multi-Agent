@@ -40,6 +40,8 @@ class ProjectState(TypedDict, total=False):
     revision_fallback_reason: str    # full 로 fallback한 사유(user_request/parse_*/no_targets/too_many/section_gen/assemble)
     polish_applied: bool             # 조건부 Polish(PR-8): 일관성 편집을 실제로 수행했는지
     polish_skip_reason: str          # Polish 생략 사유(내용 이슈만·구조 정상 등). 실행 시 None
+    best_version: str                # 채택한 최종본: draft(초안) / revised(재작성본) — Phase 4
+    reverted_from_revision: bool     # 재작성본이 초안보다 나빠 초안으로 되돌렸는지
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
@@ -136,6 +138,8 @@ class RunResult(BaseModel):
     revision_fallback_reason: str | None = None                # full 로 fallback한 사유
     polish_applied: bool = True                                # 조건부 Polish(PR-8) 수행 여부
     polish_skip_reason: str | None = None                      # Polish 생략 사유(실행 시 None)
+    best_version: str = "revised"                              # 채택한 최종본: draft/revised (Phase 4)
+    reverted_from_revision: bool = False                       # 재작성본→초안 되돌림 여부
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
