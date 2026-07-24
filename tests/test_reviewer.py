@@ -88,3 +88,32 @@ def test_dummy_has_valid_structured_issues():
         assert it["target_section_id"] in sections.KNOWN_IDS
         assert it["severity"] in {"critical", "major", "minor"}
         assert it["revision_instruction"]
+
+
+# ── Phase 4: Writer/Reviewer 모델 분리 ─────────────────────────────────────
+
+def test_reviewer_model_falls_back_to_writer_model():
+    assert reviewer._reviewer_model({"model": "gpt-4o-mini"}) == "gpt-4o-mini"
+    assert reviewer._reviewer_model({"model": "m", "reviewer_model": ""}) == "m"
+
+
+def test_reviewer_model_overrides_when_set():
+    assert reviewer._reviewer_model({"model": "writer-m", "reviewer_model": "judge-m"}) == "judge-m"
+
+
+def test_reviewer_uses_reviewer_model(monkeypatch):
+    """reviewer_model 이 지정되면 심사 LLM 호출에 그 모델이 쓰인다(작성 모델 아님)."""
+    seen: dict = {}
+    monkeypatch.setattr(reviewer.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(reviewer.llm, "complete_json",
+                        lambda *a, **k: seen.__setitem__("model", k.get("model")) or _scores(15))
+    out = reviewer.reviewer({"draft": "본문", "model": "writer-m", "reviewer_model": "judge-m", "logs": []})
+    assert seen["model"] == "judge-m"                         # 심판 모델로 채점
+    assert "심판 모델 분리" in out["logs"][-1]                 # 분리 사실 로그 표기
+
+
+def test_reviewer_no_split_note_when_same(monkeypatch):
+    monkeypatch.setattr(reviewer.llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(reviewer.llm, "complete_json", lambda *a, **k: _scores(15))
+    out = reviewer.reviewer({"draft": "본문", "model": "m", "logs": []})
+    assert "심판 모델 분리" not in out["logs"][-1]             # 분리 안 했으면 표기 없음

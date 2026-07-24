@@ -161,6 +161,7 @@ def revise(payload: ReviseInput) -> dict:
         "user_input": {**base.get("user_input", {}),
                        "revision_request": payload.revision_request},
         "model": payload.model or base.get("model", ""),
+        "reviewer_model": base.get("reviewer_model", ""),  # 원 실행의 심판 모델 분리 설정 유지(Phase 4)
         "revision_count": base.get("revision_count", 0),  # 누적(매 수정마다 0으로 초기화하지 않음)
         "logs": [],
         "timing_events": [],   # 이번 재작성 구간만 계측(옛 실행 이벤트 이어받지 않음)

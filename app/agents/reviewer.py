@@ -133,12 +133,28 @@ def _review(draft: str, model: str) -> tuple[dict, dict]:
     return _validate(raw, fallback), status
 
 
+def _reviewer_model(state: ProjectState) -> str:
+    """심판(Reviewer) 모델. 지정되면 작성자 모델과 분리해 '자기 채점 편향'을 완화한다(로드맵 Phase 4).
+
+    미지정이면 작성 모델(state['model'])로 폴백하므로 기존 동작과 동일하다(회귀 없음).
+    소스: state['reviewer_model'](API reviewer_model 필드 또는 env REVIEWER_MODEL, _prepare_run 에서 주입).
+    """
+    return (state.get("reviewer_model") or "").strip() or state.get("model", "")
+
+
+def _split_note(state: ProjectState) -> str:
+    """작성 모델과 다른 심판 모델을 썼을 때 로그에 '심판 분리' 표기(관측성)."""
+    rm = (state.get("reviewer_model") or "").strip()
+    return " · 심판 모델 분리" if rm and rm != (state.get("model") or "").strip() else ""
+
+
 def reviewer(state: ProjectState) -> dict:
     """초안 평가. review_result(재작성 판단용)와 initial_review_result(기록용)에 저장."""
-    result, status = _review(state.get("draft", ""), state.get("model", ""))
-    mode = llm.mode_label(status, state.get("model", ""))
+    model = _reviewer_model(state)
+    result, status = _review(state.get("draft", ""), model)
+    mode = llm.mode_label(status, model)
     logs = [
-        f"[reviewer] 초안 평가 완료 (총점={result['total_score']}, {mode})"
+        f"[reviewer] 초안 평가 완료 (총점={result['total_score']}, {mode}{_split_note(state)})"
     ]
     return {"review_result": result, "initial_review_result": result, "logs": logs}
 
@@ -149,12 +165,13 @@ def final_reviewer(state: ProjectState) -> dict:
     UI·이력에 표시되는 점수가 '실제로 보여주는 최종 문서'와 일치하도록, 초안 점수와
     별개로 최종본을 다시 채점해 final_review_result에 저장한다. 초안 대비 변화(Δ)도 로그에 남긴다.
     """
-    result, status = _review(state.get("final_draft", "") or state.get("draft", ""), state.get("model", ""))
+    model = _reviewer_model(state)
+    result, status = _review(state.get("final_draft", "") or state.get("draft", ""), model)
     initial = state.get("initial_review_result") or state.get("review_result") or {}
     before = initial.get("total_score")
     delta = f", Δ{result['total_score'] - before:+d} vs 초안" if isinstance(before, int) else ""
-    mode = llm.mode_label(status, state.get("model", ""))
+    mode = llm.mode_label(status, model)
     logs = [
-        f"[final_reviewer] 최종본 재평가 완료 (총점={result['total_score']}{delta}, {mode})"
+        f"[final_reviewer] 최종본 재평가 완료 (총점={result['total_score']}{delta}, {mode}{_split_note(state)})"
     ]
     return {"final_review_result": result, "logs": logs}

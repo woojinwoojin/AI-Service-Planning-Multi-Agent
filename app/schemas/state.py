@@ -15,6 +15,7 @@ class ProjectState(TypedDict, total=False):
 
     user_input: dict
     model: str  # 이번 실행에 사용할 LLM 모델 id(빈 값이면 env 기본값)
+    reviewer_model: str  # 심판(Reviewer) 전용 모델 id — 작성 모델과 분리(자기 채점 편향 완화, Phase 4). 빈 값이면 model 사용
     structured_input: dict
     research_result: dict
     competitor_result: dict
@@ -71,6 +72,8 @@ class ProjectInput(BaseModel):
     problem: str = Field("", description="해결하려는 문제")
     keywords: list[str] = Field(default_factory=list, description="주요 키워드")
     model: str = Field("", description="사용할 LLM 모델 id(빈 값이면 서버 기본값). /models 참고")
+    reviewer_model: str = Field(
+        "", description="심판(Reviewer) 전용 모델 id(빈 값이면 model 과 동일). 작성/심사 모델 분리로 자기 채점 편향 완화")
     # 데모/개발용 장애 주입(임시). 비우면 무영향. 운영에선 사용하지 않는다.
     demo_fail_nodes: list[str] = Field(default_factory=list, description="[데모] 일부러 실패시킬 노드")
     demo_fail_reason: str = Field("", description="[데모] 실패 원인: 혼잡|연결|형식|처리")

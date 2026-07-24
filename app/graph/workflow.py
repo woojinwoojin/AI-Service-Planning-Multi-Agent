@@ -288,6 +288,8 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
     initial: ProjectState = {
         "user_input": user_input,
         "model": (user_input.get("model") or "").strip(),
+        # 심판 모델 분리(Phase 4): 입력 reviewer_model > env REVIEWER_MODEL. 비면 model 사용(reviewer 에서 폴백).
+        "reviewer_model": (user_input.get("reviewer_model") or os.getenv("REVIEWER_MODEL", "") or "").strip(),
         "workflow_mode": workflow_mode,   # 실행 구조(serial/parallel) 기록 — 비교 실험용
         "logs": [],
     }
