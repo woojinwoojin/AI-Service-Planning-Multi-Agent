@@ -2,7 +2,13 @@
 
 > 기준 커밋: `main @ 0319f61` (PR #41~#46 병합 완료)
 > 측정: 실제 LLM(`gpt-4o-mini`) + Tavily · 3주제 × 직렬/병렬 = 6회 · `run_parallel_bench.py --topics 3 --reps 1 --fresh`
-> 상태: PR-1~PR-6 머지 완료. **다음 작업 = PR-7 (섹션 단위 수정).**
+> 상태: PR-1~PR-6 머지 완료. **PR-7 (섹션 단위 수정) 구현 완료** (`feat/pr7-section-revise`, 로드맵 2-3/2-4).
+
+> **✅ PR-7 구현 완료 (2026-07-24)** — 아래 2.1~2.7 전부 구현. 신규 `app/services/sections.py`(14섹션
+> stable ID·파서·조립기, 미수정 섹션 byte 동일), `reviewer` 구조화 issues, `draft_writer.section_revise`
+> +full-revise fallback, `workflow._route_revision` 3분기, state `revision_strategy`·`revised_section_ids`·
+> `revision_fallback_reason`, `parallel_bench` 재작성 계측. 테스트 29건(계획 3절 10항목 커버, E2E 직렬·병렬).
+> 전체 190 passed·ruff 통과. **성능 실측(4절 지표)은 baseline-v1 동일 벤치로 별도 측정 예정**(API 비용).
 
 ---
 
@@ -147,5 +153,5 @@ python run_parallel_bench.py --topics 3 --reps 1 --fresh   # 실제 LLM(유료 ~
 | #44 | 직렬/병렬 비교 도구 | ✅ 머지 |
 | #45 | 병렬 usage·동시성 검증 + 벤치 재현성 | ✅ 머지 |
 | #46 | 단계별 latency 계측 + critical path | ✅ 머지 |
-| **PR-7** | **구조화 리뷰 이슈 기반 섹션 단위 수정** | ⏭ 다음 |
+| **PR-7** | **구조화 리뷰 이슈 기반 섹션 단위 수정** | ✅ 구현(`feat/pr7-section-revise`) |
 | PR-8 | 조건부 Polish | 대기 |

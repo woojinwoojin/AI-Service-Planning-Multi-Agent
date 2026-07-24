@@ -47,3 +47,44 @@ def test_final_reviewer_scores_final_draft_not_initial_draft(monkeypatch):
     monkeypatch.setattr(reviewer.llm, "complete_json", fake)
     reviewer.final_reviewer({"draft": "초안내용", "final_draft": "최종본문서", "logs": []})
     assert "최종본문서" in seen["user"] and "초안내용" not in seen["user"]
+
+
+# ── 로드맵 2-3 PR-7: 구조화 이슈(issues) 정규화 ─────────────────────────────
+
+def test_validate_issues_filters_and_normalizes():
+    raw = {
+        "section_scores": {k: 10 for k in reviewer.SECTION_KEYS},
+        "issues": [
+            {"issue_type": "insufficient_evidence", "severity": "major",
+             "target_section_id": "market_analysis", "revision_instruction": "시장 근거 보강"},
+            {"severity": "weird", "target_section_id": "differentiation",
+             "description": "차별점 모호"},                       # severity 무효→major, instruction=description
+            {"target_section_id": "없는섹션", "revision_instruction": "무시됨"},  # 무효 섹션 → 제외
+            {"target_section_id": "swot"},                        # 지시·설명 없음 → 제외
+            "쓰레기",                                              # dict 아님 → 제외
+        ],
+    }
+    out = reviewer._validate(raw, reviewer._dummy("d"))
+    issues = out["issues"]
+    assert len(issues) == 2
+    assert issues[0]["target_section_id"] == "market_analysis"
+    assert issues[0]["severity"] == "major"
+    assert issues[1]["target_section_id"] == "differentiation"
+    assert issues[1]["severity"] == "major"                       # 무효 severity 정규화
+    assert issues[1]["revision_instruction"] == "차별점 모호"       # description 로 대체
+
+
+def test_validate_issues_defaults_empty_when_missing():
+    raw = {"section_scores": {k: 10 for k in reviewer.SECTION_KEYS}}   # issues 키 없음
+    out = reviewer._validate(raw, reviewer._dummy("d"))
+    assert out["issues"] == []
+
+
+def test_dummy_has_valid_structured_issues():
+    from app.services import sections
+    dummy = reviewer._dummy("draft")
+    assert dummy["issues"]
+    for it in dummy["issues"]:
+        assert it["target_section_id"] in sections.KNOWN_IDS
+        assert it["severity"] in {"critical", "major", "minor"}
+        assert it["revision_instruction"]

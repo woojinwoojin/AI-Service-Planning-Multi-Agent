@@ -34,6 +34,10 @@ class ProjectState(TypedDict, total=False):
     initial_review_result: dict  # 초안 평가(기록용)
     final_draft: str
     revision_count: int
+    # 재작성 전략(로드맵 2-4 PR-7): none(재작성 없음) / section(문제 섹션만 수정) / full(전체 재작성).
+    revision_strategy: str
+    revised_section_ids: list        # section 전략일 때 실제 수정된 섹션 ID(sections.KNOWN_IDS)
+    revision_fallback_reason: str    # full 로 fallback한 사유(user_request/parse_*/no_targets/too_many/section_gen/assemble)
     final_review_result: dict    # 재작성·편집 후 최종본 재평가 (표시 점수)
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
@@ -124,6 +128,9 @@ class RunResult(BaseModel):
     initial_review_result: dict = Field(default_factory=dict)  # 초안 평가
     final_draft: str
     revision_count: int
+    revision_strategy: str = "none"                            # none/section/full (로드맵 2-4)
+    revised_section_ids: list = Field(default_factory=list)    # section 전략 시 수정된 섹션 ID
+    revision_fallback_reason: str | None = None                # full 로 fallback한 사유
     final_review_result: dict = Field(default_factory=dict)    # 최종본 재평가(표시 점수)
     verification_result: dict
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
