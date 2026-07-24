@@ -144,8 +144,13 @@ State 기록:
   문체·중복·가독성 이슈(issue_type/설명에 style 힌트) 있으면 Polish 실행 / 전체 재작성(full)이면 실행 /
   내용 이슈만 + 구조 정상 + 섹션단위·재작성없음이면 **Polish 생략**(문서 전체 재편집 LLM 호출 절감).
   안전 편향(애매하면 실행)·구조 이상 시 실행. `draft_writer._polish_skip_reason`, state `polish_applied`·
-  `polish_skip_reason`, bench `polish_applied_rate`. 실측(polish는 baseline 병렬 ~21s로 현재 최대 단계)은
-  동일 벤치(3주제×2)로 누적 효과 측정 예정.
+  `polish_skip_reason`, bench `polish_applied_rate`.
+  - **✅ 실측(2026-07-24, 3주제×2, gpt-4o-mini)**: Polish 실행률 **직렬 1/6·병렬 0/6**(거의 전부 생략),
+    polish 단계 **21.3s → 0.1ms**. wall 중앙값 PR-7만(병렬 84.0s) → PR-8(병렬 **64.3s**, **−23.5%**).
+    품질 비열등성 유지(14섹션 100%·순서 100%·fallback 0·전부 success, 사실 검증률·근거 연결률 동등).
+  - **누적(baseline-v1 병렬 106.8s → 64.3s ≈ −40%)** — 단, 주제 세트·프롬프트 상이로 완전 A/B 아님(참고치).
+    ⚠️ 한계: 구조 지표는 동등하나 polish 가 하던 '섹션 간 흐름·중복 정리'의 내용 품질 영향은 구조 검사로
+    측정되지 않음 → 필요 시 소규모 블라인드 평가로 확인. polish 생략 후 최대 단계는 다시 analysis_block(병렬 ~16.6s).
 - 필요 시: 본 실험 6주제×2(AB/BA), max_concurrency 실험, UI 병렬 ETA/노드시간 문구, `docs/ARCHITECTURE.md` 최신화.
 
 ## 6. 재현 방법
