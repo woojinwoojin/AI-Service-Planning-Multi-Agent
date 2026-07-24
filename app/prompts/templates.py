@@ -216,7 +216,9 @@ REVIEWER_SYSTEM = """당신은 기획서 심사 Agent입니다.
 - target_section_id 는 아래 목록의 '내부 ID'만 사용합니다(표시 제목·자유 문자열 금지). 목록에 없는 값은 무시됩니다:
 """ + _SECTION_ID_GUIDE + """
 - severity: critical(중대 결함) | major(주요 보완 필요) | minor(사소·문체). 자동 수정은 critical/major 만 대상입니다.
-- issue_type: 짧은 유형 태그(예: insufficient_evidence, logical_inconsistency, vague, unsupported_claim).
+- issue_type: 짧은 유형 태그. 내용 이슈(insufficient_evidence, logical_inconsistency, vague, unsupported_claim)와
+  표현 이슈(중복/문체/가독성/흐름/용어 불일치 → duplication, readability, flow, terminology 등)를 구분해 적습니다
+  (표현 이슈 여부에 따라 시스템이 일관성 편집을 실행/생략합니다).
 - revision_instruction: 그 섹션에서 바로 실행할 구체적 수정 지시 한 문장.
 - 문제가 없으면 issues 는 빈 배열([])로 둡니다. 같은 섹션에 여러 문제가 있으면 이슈를 나눠 적어도 됩니다.
 

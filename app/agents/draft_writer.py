@@ -386,15 +386,61 @@ def section_revise(state: ProjectState) -> dict:
             "revision_fallback_reason": None, "logs": logs}
 
 
+# Polish(일관성 편집)가 실제로 고치는 문제 = 문체·중복·가독성·흐름·용어 통일 등 '표현' 이슈.
+# 이런 힌트가 Reviewer 이슈에 있으면 Polish 를 실행하고, 없으면(내용 이슈만) 생략 후보로 본다(PR-8).
+_STYLE_HINTS = (
+    "문체", "중복", "반복", "가독", "흐름", "연결", "일관", "용어", "표현", "문장",
+    "style", "readability", "flow", "consistency", "duplicat", "redundan",
+    "terminolog", "wording", "tone", "cohesion", "repetit",
+)
+
+
+def _is_style_issue(it: dict) -> bool:
+    """이슈가 문체·중복·가독성 등 'Polish 로 고칠' 표현 이슈인지 판정(보수적 — 애매하면 True)."""
+    if not isinstance(it, dict):
+        return False
+    text = " ".join(str(it.get(k, "")) for k in ("issue_type", "description", "revision_instruction")).lower()
+    return any(h in text for h in _STYLE_HINTS)
+
+
+def _polish_skip_reason(state: ProjectState) -> str | None:
+    """Polish 를 생략할 사유를 반환한다(None 이면 실행) — 조건부 Polish(PR-8).
+
+    - 전체 재작성(full)이면 실행: 문서 전체가 새로 쓰여 섹션 간 일관성 정리 가치가 크다.
+    - 문체·중복·가독성 이슈가 하나라도 있으면 실행.
+    - 최종본이 14섹션 구조를 못 지키면 실행(안전).
+    - 그 외(재작성 없음·섹션 단위 + 내용 이슈만 + 구조 정상)면 **생략**: 대부분의 본문이 이미
+      일관성 규칙을 지킨 초안 그대로이거나 대상 섹션만 바뀌었으므로 전체 편집의 이득이 작다.
+    안전 방향(품질 보존)으로 편향: 애매하면 실행한다.
+    """
+    if state.get("revision_strategy") == "full":
+        return None
+    issues = (state.get("review_result") or {}).get("issues") or []
+    if any(_is_style_issue(it) for it in issues):
+        return None
+    final = state.get("final_draft", "") or state.get("draft", "")
+    if _missing_sections(final):
+        return None
+    return f"내용 이슈만·구조 정상(revision={state.get('revision_strategy', 'none')})"
+
+
 def polish(state: ProjectState) -> dict:
     """완성본의 섹션 간 중복 제거·연결 문장 보강(일관성 편집). 구조·표·참고자료는 유지.
 
     편집기가 URL을 훼손하지 않도록 참고자료는 떼고 본문만 편집한 뒤 다시 붙인다.
     편집 결과가 14섹션을 유지하지 못하면 원본 본문을 그대로 쓴다(안전).
+
+    PR-8(조건부 Polish): 문체·중복 등 표현 이슈가 없고 구조가 정상이면 Polish 를 생략해
+    문서 전체를 다시 편집하는 LLM 호출(실측상 최대 병목 구간)을 아낀다. full-revise fallback 유지.
     """
     text = state.get("final_draft", "") or state.get("draft", "")
     if llm.is_dummy() or not text.strip():
         return {}
+
+    skip = _polish_skip_reason(state)
+    if skip:
+        return {"polish_applied": False, "polish_skip_reason": skip,
+                "logs": [f"[polish] 생략 — {skip}"]}
 
     # 실제 검색 출처 우선. 없으면 편집 전 본문에 있던 참고자료를 보존한다(인용 유실 방지).
     sources = _real_sources(state) or _existing_ref_lines(text)
@@ -410,4 +456,4 @@ def polish(state: ProjectState) -> dict:
 
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[polish] 일관성 편집 완료 ({mode})"]
-    return {"final_draft": final, "logs": logs}
+    return {"final_draft": final, "polish_applied": True, "polish_skip_reason": None, "logs": logs}
