@@ -78,8 +78,9 @@ def summarize(events: list[dict], mode: str, wall_time_ms: float | None = None) 
         stages["draft"] = by_node["draft"]["duration_ms"]
     if "reviewer" in by_node:
         stages["initial_review"] = by_node["reviewer"]["duration_ms"]
-    # revise 또는 finalize(둘 중 실행된 것)
-    for n in ("revise", "finalize"):
+    # 재작성/확정 구간(셋 중 실행된 하나): section_revise(섹션 단위·PR-7) / revise(전체) / finalize(생략).
+    # section_revise 를 빠뜨리면 그 시간이 어느 stage 에도 안 잡혀 coverage 가 낮아지고 병목이 가려진다.
+    for n in ("section_revise", "revise", "finalize"):
         if n in by_node:
             stages["revise_or_finalize"] = by_node[n]["duration_ms"]
             break
@@ -102,7 +103,8 @@ def summarize(events: list[dict], mode: str, wall_time_ms: float | None = None) 
     seq = [n for n in ("preprocess", "research") if n in by_node]
     if analysis:
         seq.append(max(analysis, key=lambda a: a["ended_at_ms"])["node"])
-    for n in ("draft", "reviewer", "revise", "finalize", "polish", "final_reviewer", "verify"):
+    for n in ("draft", "reviewer", "section_revise", "revise", "finalize",
+              "polish", "final_reviewer", "verify"):
         if n in by_node:
             seq.append(n)
 

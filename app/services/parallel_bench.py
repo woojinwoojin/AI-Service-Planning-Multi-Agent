@@ -135,6 +135,13 @@ def _median(values: list[float]) -> float | None:
     return round(statistics.median(nums), 1) if nums else None
 
 
+def _mean_metric(rows: list[dict], key: str) -> float | None:
+    """실행들의 quality[key] 평균(None 제외). Tier 2 지표(사실 검증률·근거 연결률)용."""
+    vals = [(r.get("quality") or {}).get(key) for r in rows]
+    nums = [v for v in vals if isinstance(v, (int, float))]
+    return round(sum(nums) / len(nums), 3) if nums else None
+
+
 def _stage_medians(rows: list[dict]) -> dict:
     """실행들의 단계별 wall time 중앙값. 어느 구간이 병목인지 한눈에 보기 위함."""
     stage_names: list[str] = []
@@ -201,6 +208,9 @@ def aggregate(runs: list[dict]) -> dict:
                 "revised_sections_mean": round(
                     sum((r.get("revision") or {}).get("revised_sections", 0) for r in rows) / n, 2),
             },
+            # 신뢰도 Tier 2 지표 평균(사실 검증률·근거 연결률). 옛 실행엔 없을 수 있어 None 제외 평균.
+            "fact_support_rate_mean": _mean_metric(rows, "fact_support_rate"),
+            "evidence_link_rate_mean": _mean_metric(rows, "evidence_link_rate"),
             # 단계별 wall time 중앙값(병목 위치) + coverage 중앙값(측정이 전체를 얼마나 설명하는지)
             "stage_ms_median": _stage_medians(rows),
             "timing_coverage_median": _median(

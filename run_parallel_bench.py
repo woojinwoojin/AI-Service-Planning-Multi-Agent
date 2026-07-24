@@ -56,10 +56,26 @@ def _table_md(agg: dict) -> str:
         ("평균 빈 섹션 수", s.get("empty_sections_mean"), p.get("empty_sections_mean")),
         ("평균 고유 출처 URL 수", s.get("unique_source_urls_mean"), p.get("unique_source_urls_mean")),
         ("fallback 총계", s.get("fallback_calls_total"), p.get("fallback_calls_total")),
+        # PR-7 재작성 전략: 섹션 단위 수정이 실제로 얼마나 쓰였는지(none/section/full 분포·평균 섹션 수)
+        ("재작성 실행률", _rev(s, "executed_rate"), _rev(p, "executed_rate")),
+        ("재작성 범위(none/section/full)", _rev_scope(s), _rev_scope(p)),
+        ("평균 수정 섹션 수", _rev(s, "revised_sections_mean"), _rev(p, "revised_sections_mean")),
+        # 신뢰도 Tier 2: 사실 주장 검증률·주장별 근거 연결률(완료 게이트 지표)
+        ("사실 검증률(평균)", s.get("fact_support_rate_mean"), p.get("fact_support_rate_mean")),
+        ("근거 연결률(평균)", s.get("evidence_link_rate_mean"), p.get("evidence_link_rate_mean")),
     ]
     lines = ["| 지표 | 직렬 | 병렬 |", "|---|---|---|"]
     lines += [f"| {name} | {sv} | {pv} |" for name, sv, pv in rows]
     return "\n".join(lines)
+
+
+def _rev(mode_agg: dict, key: str):
+    return (mode_agg.get("revision") or {}).get(key)
+
+
+def _rev_scope(mode_agg: dict) -> str:
+    sc = (mode_agg.get("revision") or {}).get("scope") or {}
+    return f"{sc.get('none', 0)}/{sc.get('section', 0)}/{sc.get('full', 0)}"
 
 
 def _stage_table_md(agg: dict) -> str:

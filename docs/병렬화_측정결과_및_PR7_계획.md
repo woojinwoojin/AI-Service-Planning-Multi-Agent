@@ -8,7 +8,13 @@
 > stable ID·파서·조립기, 미수정 섹션 byte 동일), `reviewer` 구조화 issues, `draft_writer.section_revise`
 > +full-revise fallback, `workflow._route_revision` 3분기, state `revision_strategy`·`revised_section_ids`·
 > `revision_fallback_reason`, `parallel_bench` 재작성 계측. 테스트 29건(계획 3절 10항목 커버, E2E 직렬·병렬).
-> 전체 190 passed·ruff 통과. **성능 실측(4절 지표)은 baseline-v1 동일 벤치로 별도 측정 예정**(API 비용).
+> 전체 190 passed·ruff 통과.
+>
+> **✅ 성능 실측 완료 (2026-07-24, 3주제×2, gpt-4o-mini)** — `docs/parallel_bench_result.md`:
+> - **재작성 단계(revise_or_finalize): baseline-v1 전체재작성 24.4s(병렬) → 섹션 단위 8.5s(병렬) ≈ −65%.** 목표(−40%+)를 상회.
+> - 재작성 전략 **section 12/12(100%)**, 평균 수정 섹션 2.7~2.8/14 (전체 재작성 대신 문제 섹션만).
+> - 품질 비열등성: 14섹션 100%·순서 100%·PESTEL 100%·fallback 0·전부 success. wall 병렬 −17.2%(직렬 대비).
+> - ⚠️ **주의(트랙 C)**: baseline-v1(6주제)과 주제 세트·프롬프트(Tier2 verify·reviewer issues)가 달라 **완전한 A/B는 아님** — revise 단계 절감은 강하게 지지되나 절대 wall 비교는 참고치. polish(≈21s)가 이제 최대 단계 → PR-8(조건부 Polish) 후보.
 
 ---
 
