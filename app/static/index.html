@@ -335,6 +335,7 @@ function renderResults(d) {
       ${gateChip}
       ${scoreDelta?`<span class="muted">${scoreDelta.replace(/<[^>]+>/g,"")}</span>`:""}
       <span class="chip">재작성 ${d.revision_count ?? 0}회</span>
+      ${d.reverted_from_revision?`<span class="chip" style="background:#eef1f5;color:#555" title="자동 재작성이 초안보다 점수가 낮아 초안을 최종본으로 채택했습니다">초안 채택(수정 되돌림)</span>`:""}
       <span class="chip" title="사실 주장에 한한 근거 확인 수(추론·제안은 검증 대상 아님)">사실 근거 확인 ${vf.fact_supported ?? vf.supported ?? 0}/${vf.fact_total ?? vf.total ?? 0}</span>
       ${(vf.contradicted||[]).length?`<span class="chip" style="background:#fde2e1;color:#b42318">⚠ 반대 근거 ${vf.contradicted.length}건</span>`:""}
       ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fff3e0;color:#b45309">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}

@@ -16,6 +16,7 @@ _RUN_KEYS = [
     "structured_input", "research_result", "competitor_result", "competitor_sources",
     "customer_result", "swot_result", "business_model_result", "risk_result", "pestel_result",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
+    "best_version", "reverted_from_revision",
     "final_review_result", "verification_result", "verification_summary", "quality_gate",
     "evidence_registry", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",

@@ -89,6 +89,33 @@ def _finalize(state: ProjectState) -> dict:
             "revision_fallback_reason": None}
 
 
+def _select_best(state: ProjectState) -> dict:
+    """재작성본과 초안 중 점수가 높은 쪽을 최종본으로 채택한다(로드맵 Phase 4 '최고 버전 유지').
+
+    자동 재작성이 문서를 오히려 나쁘게 만들 수 있으므로(같은 루브릭으로 채점한) 초안 점수
+    (initial_review_result)와 재작성·편집 후 최종본 점수(final_review_result)를 비교해, 재작성본이
+    더 낮으면 초안을 최종본으로 되돌린다. verify 는 이 노드 뒤에서 '채택된' 문서를 검증한다.
+
+    - 재작성이 없었으면(finalize) 비교 대상이 없어 그대로 둔다.
+    - 되돌릴 때 표시 점수(final_review_result)도 초안 점수로 정정해 화면·게이트가 실제 문서와 맞게 한다.
+    - 수동 /revise(사용자 명시 수정)는 이 노드를 거치지 않는다(사용자 의도 존중).
+    """
+    if state.get("revision_strategy", "none") == "none":
+        return {"best_version": "draft", "reverted_from_revision": False}
+    initial = (state.get("initial_review_result") or {}).get("total_score")
+    final = (state.get("final_review_result") or {}).get("total_score")
+    if not isinstance(initial, int) or not isinstance(final, int) or final >= initial:
+        return {"best_version": "revised", "reverted_from_revision": False}
+    # 재작성본이 초안보다 낮음 → 초안 채택(수정 되돌림)
+    return {
+        "final_draft": state.get("draft", ""),
+        "final_review_result": dict(state.get("initial_review_result") or {}),
+        "best_version": "draft",
+        "reverted_from_revision": True,
+        "logs": [f"[select_best] 재작성본 {final}점 < 초안 {initial}점 → 초안 채택(수정 되돌림)"],
+    }
+
+
 def _register_nodes(g: StateGraph) -> None:
     """모든 노드를 등록한다(직렬·병렬 그래프 공통). 노드 함수·프롬프트는 동일."""
     g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
@@ -106,6 +133,7 @@ def _register_nodes(g: StateGraph) -> None:
     g.add_node("finalize", _safe("finalize", _finalize))
     g.add_node("polish", _safe("polish", draft_writer.polish))
     g.add_node("final_reviewer", _safe("final_reviewer", reviewer.final_reviewer))
+    g.add_node("select_best", _safe("select_best", _select_best))
     g.add_node("verify", _safe("verify", verifier.verify))
 
 
@@ -120,7 +148,8 @@ def _add_finish_edges(g: StateGraph) -> None:
     g.add_edge("revise", "polish")
     g.add_edge("finalize", "polish")
     g.add_edge("polish", "final_reviewer")
-    g.add_edge("final_reviewer", "verify")
+    g.add_edge("final_reviewer", "select_best")   # 재작성본 vs 초안 중 최고 점수 채택(Phase 4)
+    g.add_edge("select_best", "verify")           # 채택된 문서를 검증
     g.add_edge("verify", END)
 
 

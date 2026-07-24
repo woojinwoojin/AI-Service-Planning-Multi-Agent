@@ -82,6 +82,8 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         initial_review_result=state.get("initial_review_result", {}),
         final_draft=state.get("final_draft", ""),
         revision_count=state.get("revision_count", 0),
+        best_version=state.get("best_version", "revised"),
+        reverted_from_revision=state.get("reverted_from_revision", False),
         final_review_result=state.get("final_review_result", {}),
         verification_result=state.get("verification_result", {}),
         verification_summary=state.get("verification_summary") or reliability.summary(),
