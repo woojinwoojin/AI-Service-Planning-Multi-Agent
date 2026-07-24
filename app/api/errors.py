@@ -45,6 +45,20 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+# OpenAPI 에 공통으로 노출할 오류 응답(라우터 include 시 기본값). 개별 라우트는 404/400 등을 추가.
+COMMON_ERROR_RESPONSES: dict = {
+    422: {"model": ErrorResponse, "description": "입력 형식 검증 실패"},
+    500: {"model": ErrorResponse, "description": "서버 내부 오류"},
+}
+
+
+def responses(*status_codes: int) -> dict:
+    """지정한 status code 들에 통일 오류 스키마를 붙인 OpenAPI responses dict 를 만든다."""
+    desc = {400: "잘못된 요청", 404: "리소스 없음", 409: "충돌", 422: "입력 검증 실패",
+            429: "요청 한도 초과", 500: "서버 내부 오류"}
+    return {c: {"model": ErrorResponse, "description": desc.get(c, "오류")} for c in status_codes}
+
+
 def _code_for(status: int) -> str:
     return _CODE_BY_STATUS.get(status, "internal_error" if status >= 500 else "error")
 
