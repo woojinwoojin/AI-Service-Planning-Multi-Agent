@@ -18,10 +18,16 @@ services:
       # 기본은 더미(키 없이 완주). 실제 실행 시 .env 또는 여기서 USE_DUMMY=0 + 키 지정.
       USE_DUMMY: ${USE_DUMMY:-1}
       WORKFLOW_MODE: ${WORKFLOW_MODE:-serial}
-    # 이력(SQLite)·산출물은 컨테이너 밖에 영속화.
+      # 데모 도구(/admin·요청 단위 장애 주입)는 기본 off. 시연 때만 1.
+      ENABLE_DEMO_TOOLS: ${ENABLE_DEMO_TOOLS:-0}
+    # 이력(SQLite)·산출물은 named volume 으로 영속화한다. host bind mount(`./data:/app/data`)를
+    # 쓰면 Linux 에서 host 디렉터리 소유권이 그대로 덮여, 비루트(UID 10001)로 도는 컨테이너가
+    # SQLite·산출물을 쓸 수 없다(/health 는 통과하고 /run 에서만 실패). named volume 은 Docker 가
+    # 이미지의 소유권을 초기화해 주므로 사전 chown 없이 동작한다.
+    # 산출물을 host 에서 직접 보려면 bind mount 로 바꾸고 DEPLOY.md 의 chown 절차를 따른다.
     volumes:
-      - ./data:/app/data
-      - ./outputs:/app/outputs
+      - project-data:/app/data
+      - project-outputs:/app/outputs
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=4).status==200 else 1)"]
       interval: 30s
@@ -29,3 +35,7 @@ services:
       start_period: 15s
       retries: 3
     restart: unless-stopped
+
+volumes:
+  project-data:
+  project-outputs:

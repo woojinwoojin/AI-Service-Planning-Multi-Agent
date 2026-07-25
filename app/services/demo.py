@@ -1,10 +1,13 @@
 """데모/개발용 장애 주입 — 특정 노드를 일부러 실패시켜 '정직한 미완성 안내'(Phase 1)를 시연.
 
-⚠ 임시 도구. 운영 배포 시 제거하거나 비활성 상태로 둔다. 아무 설정도 없으면 완전 무영향(no-op).
+⚠ 임시 도구. 아무 설정도 없으면 완전 무영향(no-op).
 
 두 경로로 설정(둘 다 있으면 요청 설정 우선):
   1) 요청 단위: /run·/run/stream payload의 demo_fail_nodes / demo_fail_reason (UI 토글)
+     → **ENABLE_DEMO_TOOLS=1 일 때만 적용**. 기본(off)에서는 요청에 값이 들어와도 무시한다.
+       공개 배포 서버에서 외부 사용자가 임의 Agent를 실패시키는 것을 막기 위함(운영 안전).
   2) 환경변수:  DEMO_FAIL_NODES=customer,risk   DEMO_FAIL_REASON=혼잡
+     → 서버 운영자가 명시적으로 준 설정이므로 게이트와 무관하게 동작한다.
 원인: 혼잡 | 연결 | 형식 | 처리 (기본 혼잡)
 
 동작: _safe가 노드 진입 시 apply_for_node(state, name)로 '이 노드를 실패시킬 원인'을
@@ -24,6 +27,13 @@ _node_fail: contextvars.ContextVar = contextvars.ContextVar("demo_node_fail", de
 
 VALID_REASONS = {"혼잡", "연결", "형식", "처리"}
 
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def tools_enabled() -> bool:
+    """데모 도구(관리자 페이지·요청 단위 장애 주입) 활성 여부. 기본 off."""
+    return os.getenv("ENABLE_DEMO_TOOLS", "0").strip().lower() in _TRUTHY
+
 
 def _norm_reason(reason: str) -> str:
     reason = (reason or "").strip()
@@ -39,11 +49,17 @@ def _env_targets():
 
 
 def _reason_for(state, node: str) -> str | None:
-    """이 노드를 실패시켜야 하면 원인, 아니면 None. 요청 설정(state) 우선, 없으면 env."""
+    """이 노드를 실패시켜야 하면 원인, 아니면 None. 요청 설정(state) 우선, 없으면 env.
+
+    요청 설정은 ENABLE_DEMO_TOOLS=1 일 때만 읽는다(off면 payload를 조용히 무시).
+    """
     if not node:
         return None
     ui = (state or {}).get("user_input") or {}
-    req_nodes = {str(n).strip() for n in (ui.get("demo_fail_nodes") or []) if str(n).strip()}
+    req_nodes = (
+        {str(n).strip() for n in (ui.get("demo_fail_nodes") or []) if str(n).strip()}
+        if tools_enabled() else set()
+    )
     if req_nodes:
         return _norm_reason(ui.get("demo_fail_reason", "")) if node in req_nodes else None
     env = _env_targets()

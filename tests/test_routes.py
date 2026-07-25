@@ -188,16 +188,25 @@ def test_fallback_reasons_surface_to_api(client, monkeypatch):
     assert "혼잡" in d["fallback_reasons"].values()        # 분류된 원인이 전달됨
 
 
-def test_admin_page_served(client):
-    """관리자·데모 도구 페이지가 /admin 으로 분리 제공된다(메인 UI에서 분리)."""
+def test_admin_page_served_when_demo_tools_enabled(client, monkeypatch):
+    """관리자·데모 도구 페이지는 ENABLE_DEMO_TOOLS=1 일 때 /admin 으로 제공된다."""
+    monkeypatch.setenv("ENABLE_DEMO_TOOLS", "1")
     r = client.get("/admin")
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
     assert "관리자" in r.text and "demo_fail_nodes" in r.text
 
 
-def test_demo_fail_injection_via_payload(client, monkeypatch):
-    """관리자 페이지 데모 토글: demo_fail_nodes로 지정한 노드만 실패해 fallback_reasons에 표면화."""
+def test_admin_page_hidden_by_default(client, monkeypatch):
+    """운영 안전(A-1): 게이트 off(기본)면 /admin 은 존재하지 않는 것처럼 404."""
+    monkeypatch.delenv("ENABLE_DEMO_TOOLS", raising=False)
+    assert client.get("/admin").status_code == 404
+    monkeypatch.setenv("ENABLE_DEMO_TOOLS", "0")
+    assert client.get("/admin").status_code == 404
+
+
+def _fake_llm_ok(monkeypatch):
+    """비대상 노드는 정상 응답하는 가짜 LLM(환경 비의존)."""
     from app.services import llm
 
     class FakeResp:
@@ -206,7 +215,13 @@ def test_demo_fail_injection_via_payload(client, monkeypatch):
 
     monkeypatch.setattr(llm, "is_dummy", lambda: False)          # 실제 모드로 간주
     monkeypatch.setattr(llm, "_get_model", lambda model="": object())  # 환경(키/provider) 비의존
-    monkeypatch.setattr(llm, "_invoke_with_retry", lambda *a, **k: FakeResp())  # 비대상 노드는 정상
+    monkeypatch.setattr(llm, "_invoke_with_retry", lambda *a, **k: FakeResp())
+
+
+def test_demo_fail_injection_via_payload(client, monkeypatch):
+    """관리자 페이지 데모 토글: demo_fail_nodes로 지정한 노드만 실패해 fallback_reasons에 표면화."""
+    monkeypatch.setenv("ENABLE_DEMO_TOOLS", "1")
+    _fake_llm_ok(monkeypatch)
     d = client.post("/run", json={
         "project_name": "데모", "problem": "P",
         "demo_fail_nodes": ["customer", "risk"], "demo_fail_reason": "형식",
@@ -214,3 +229,16 @@ def test_demo_fail_injection_via_payload(client, monkeypatch):
     assert d["fallback_reasons"].get("customer") == "형식"       # 지정 노드만 실패
     assert d["fallback_reasons"].get("risk") == "형식"
     assert "pestel" not in d["fallback_reasons"]                 # 미지정 노드는 정상
+
+
+def test_demo_fail_injection_ignored_when_disabled(client, monkeypatch):
+    """운영 안전(A-1): 게이트 off면 요청의 demo_fail_nodes 를 무시한다(외부 사용자 장애 유발 차단)."""
+    monkeypatch.delenv("ENABLE_DEMO_TOOLS", raising=False)
+    monkeypatch.delenv("DEMO_FAIL_NODES", raising=False)
+    _fake_llm_ok(monkeypatch)
+    d = client.post("/run", json={
+        "project_name": "데모차단", "problem": "P",
+        "demo_fail_nodes": ["customer", "risk"], "demo_fail_reason": "형식",
+    }).json()
+    assert "customer" not in d["fallback_reasons"]               # 주입되지 않음
+    assert "risk" not in d["fallback_reasons"]
