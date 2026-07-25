@@ -8,12 +8,17 @@ CD(build→run→health→smoke)와 로컬 staging 양쪽에서 동일하게 쓴
 사용:
     python scripts/smoke_test.py                       # 기본 http://localhost:8000
     python scripts/smoke_test.py --base http://host:8000 --timeout 60
+    python scripts/smoke_test.py --allow-real          # 실 키 서버 대상(비용 발생 동의)
 
 동작:
     1) /health 가 200 이고 status=="ok"          (기동·라우팅 확인)
-    2) POST /run(더미 입력)이 200 이고 project_id·final_draft 반환   (관통 실행 확인)
-    3) GET /projects 목록에 그 project_id 존재     (이력 저장 확인)
+    2) 대상이 더미 모드인지 확인(dummy_mode==true) — 아니면 중단          (비용 사고 방지)
+    3) POST /run(더미 입력)이 200 이고 project_id·final_draft 반환   (관통 실행 확인)
+    4) GET /projects 목록에 그 project_id 존재     (이력 저장 확인)
 실패 시 사유를 출력하고 종료코드 1(비정상). 서버 기동 대기는 --timeout 초까지 폴링.
+
+/run 은 전체 워크플로를 실제로 실행하므로, 실 키 서버를 대상으로 돌리면 LLM 비용이 발생한다.
+그래서 기본은 더미 모드 서버만 허용하고, 실모드는 --allow-real 로 명시해야 진행한다.
 """
 from __future__ import annotations
 
@@ -42,8 +47,8 @@ def _request(method: str, url: str, payload: dict | None = None, timeout: float 
         return resp.status, (json.loads(body) if body else {})
 
 
-def _wait_healthy(base: str, timeout: float) -> None:
-    """서버가 뜰 때까지 /health 를 폴링한다(컨테이너 start-period 대비)."""
+def _wait_healthy(base: str, timeout: float) -> dict:
+    """서버가 뜰 때까지 /health 를 폴링하고 health 본문을 돌려준다(컨테이너 start-period 대비)."""
     deadline = time.monotonic() + timeout
     last = ""
     while time.monotonic() < deadline:
@@ -51,12 +56,29 @@ def _wait_healthy(base: str, timeout: float) -> None:
             status, body = _request("GET", f"{base}/health", timeout=4)
             if status == 200 and body.get("status") == "ok":
                 print(f"[smoke] health OK — provider={body.get('provider')} dummy={body.get('dummy_mode')}")
-                return
+                return body
             last = f"status={status} body={body}"
         except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
             last = str(exc)
         time.sleep(1.5)
     _fail(f"서버가 {timeout}s 안에 healthy 상태가 되지 않음 (마지막: {last})")
+    return {}   # 도달하지 않음(_fail 이 종료). 타입 명확성용.
+
+
+def _require_dummy(health: dict, allow_real: bool) -> None:
+    """실 키 서버에 /run 을 쏴 비용을 발생시키는 사고를 막는다(기본 더미만 허용)."""
+    if health.get("dummy_mode") is True:
+        return
+    if allow_real:
+        print(f"[smoke] ⚠ 실모드 서버 대상 실행(--allow-real) — provider={health.get('provider')} "
+              "LLM 호출 비용이 발생합니다")
+        return
+    _fail(
+        f"대상 서버가 더미 모드가 아님(dummy_mode={health.get('dummy_mode')!r}, "
+        f"provider={health.get('provider')!r}). 스모크는 /run 으로 전체 워크플로를 실행하므로 "
+        "실 키 서버에서는 LLM 비용이 발생합니다. 더미로 기동(USE_DUMMY=1)하거나, "
+        "비용을 감수하고 진행하려면 --allow-real 을 주세요."
+    )
 
 
 def _fail(msg: str) -> None:
@@ -68,13 +90,18 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="배포 스모크 테스트")
     ap.add_argument("--base", default="http://localhost:8000", help="대상 서버 base URL")
     ap.add_argument("--timeout", type=float, default=60.0, help="기동 대기 최대 초")
+    ap.add_argument("--allow-real", action="store_true",
+                    help="더미가 아닌(실 키) 서버도 허용 — /run 실행에 LLM 비용이 발생함")
     args = ap.parse_args()
     base = args.base.rstrip("/")
 
     # 1) 기동·헬스
-    _wait_healthy(base, args.timeout)
+    health = _wait_healthy(base, args.timeout)
 
-    # 2) 관통 실행(/run) — 더미 모드라 키 없이 완주
+    # 2) 더미 모드 확인 — 실 키 서버 오호출(비용) 방지
+    _require_dummy(health, args.allow_real)
+
+    # 3) 관통 실행(/run) — 더미 모드라 키 없이 완주
     try:
         status, run = _request("POST", f"{base}/run",
                                {"project_name": "스모크", "problem": "P"}, timeout=90)
@@ -89,8 +116,11 @@ def main() -> None:
         _fail("/run 응답에 final_draft 없음")
     print(f"[smoke] run OK — project_id={pid} run_status={run.get('run_status')}")
 
-    # 3) 이력 저장 확인
-    status, projects = _request("GET", f"{base}/projects", timeout=10)
+    # 4) 이력 저장 확인
+    try:
+        status, projects = _request("GET", f"{base}/projects", timeout=10)
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        _fail(f"/projects 요청 실패: {exc}")
     if status != 200:
         _fail(f"/projects 상태코드 {status}")
     ids = [p.get("id") for p in projects.get("projects", [])]

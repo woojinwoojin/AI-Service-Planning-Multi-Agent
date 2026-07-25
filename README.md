@@ -132,7 +132,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 | Method | Endpoint | 설명 |
 |---|---|---|
 | GET | `/` | 최소 UI(입력/결과/최종/이력 4화면) |
-| GET | `/admin` | 관리자·데모 도구(임시) — 특정 Agent를 일부러 실패시켜 정직한 미완성 안내 시연 |
+| GET | `/admin` | 관리자·데모 도구(임시) — 특정 Agent를 일부러 실패시켜 정직한 미완성 안내 시연. **`ENABLE_DEMO_TOOLS=1` 일 때만 제공(기본 404)** |
 | GET | `/health` | 상태 · 더미 여부 · provider · 기본 모델 |
 | GET | `/models` | 현재 provider에서 선택 가능한 모델 목록 |
 | GET | `/projects` | 저장된 프로젝트 이력 목록(최신순) |

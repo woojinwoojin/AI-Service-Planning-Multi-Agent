@@ -7,11 +7,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
 from app.api.errors import COMMON_ERROR_RESPONSES, register_error_handlers
 from app.api.routes import router
+from app.services import demo
 from app.services.migrate import STATE_VERSION
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -48,9 +49,16 @@ def root() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
 
-@app.get("/admin")
+@app.get("/admin", include_in_schema=False)
 def admin() -> FileResponse:
-    """관리자 · 데모 도구(임시): 특정 Agent를 일부러 실패시켜 정직한 미완성 안내를 시연."""
+    """관리자 · 데모 도구(임시): 특정 Agent를 일부러 실패시켜 정직한 미완성 안내를 시연.
+
+    운영 안전: `ENABLE_DEMO_TOOLS=1` 이 아니면 존재하지 않는 것처럼 404 를 준다(기본 off).
+    페이지가 열려도 서버가 요청 단위 장애 주입을 무시하므로(`app/services/demo.py`), 게이트는
+    두 겹이다. 환경변수는 요청마다 읽어 재기동 없이 켜고 끌 수 있다.
+    """
+    if not demo.tools_enabled():
+        raise HTTPException(status_code=404, detail="Not Found")
     return FileResponse(STATIC_DIR / "admin.html")
 
 

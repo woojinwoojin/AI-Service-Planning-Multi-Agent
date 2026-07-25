@@ -53,8 +53,11 @@ jobs:
         if: always()
         run: docker rm -f staging || true
 
-  deploy:
-    name: deploy to staging host (opt-in)
+  deployment-placeholder:
+    # ⚠ 실제 배포가 아니다. 배포 단계가 아직 연결되지 않았음을 알리는 자리표시 잡이며,
+    # 켜면 **의도적으로 실패**한다. 성공으로 끝나면 Actions 요약에 "Staging 배포 성공"처럼
+    # 보여(false green) 배포되지 않은 것을 배포된 것으로 착각하게 되기 때문이다.
+    name: deployment placeholder (NOT a real deploy — fails by design)
     needs: build-and-smoke
     runs-on: ubuntu-latest
     # 확장점: 레지스트리/호스트 시크릿을 갖춘 뒤 repo 변수 STAGING_DEPLOY_ENABLED=true 로 켠다.
@@ -62,11 +65,13 @@ jobs:
     if: ${{ vars.STAGING_DEPLOY_ENABLED == 'true' }}
     environment: staging
     steps:
-      - name: Placeholder — 실제 배포 단계 연결 지점
+      - name: Fail — 실제 배포 단계가 아직 연결되지 않음
         run: |
-          echo "여기에 실제 배포를 연결한다(예):"
+          echo "::error title=배포 미연결::STAGING_DEPLOY_ENABLED=true 인데 실제 배포 단계가 없습니다."
+          echo "이 잡을 실제 배포로 바꾸려면 아래를 연결한다:"
           echo "  1) 레지스트리 로그인(secrets.REGISTRY_TOKEN)"
           echo "  2) docker tag/push (GHCR 또는 사설 레지스트리)"
           echo "  3) 호스트에서 pull & 재기동(compose/ssh/k8s 등)"
           echo "  4) 원격 /health 확인 → 실패 시 이전 이미지로 rollback"
-          echo "현재는 STAGING_DEPLOY_ENABLED 미설정 시 스킵된다(옵트인)."
+          echo "연결 전까지는 STAGING_DEPLOY_ENABLED 를 켜지 말 것(끄면 이 잡은 스킵된다)."
+          exit 1
