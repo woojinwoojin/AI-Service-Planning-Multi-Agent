@@ -17,6 +17,10 @@ _RUN_KEYS = [
     "customer_result", "swot_result", "business_model_result", "risk_result", "pestel_result",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
     "best_version", "reverted_from_revision",
+    # PR-7/8 실행 기록: 섹션 단위 수정 전략·조건부 Polish. 누락 시 저장·재조회에서
+    # migrate 기본값(none/[]/True)으로 복원돼 실제 실행 이력이 왜곡됨(외부 리뷰 P0-1).
+    "revision_strategy", "revised_section_ids", "revision_fallback_reason",
+    "polish_applied", "polish_skip_reason",
     "final_review_result", "verification_result", "verification_summary", "quality_gate",
     "evidence_registry", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",

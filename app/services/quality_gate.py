@@ -78,6 +78,10 @@ def evaluate(state: dict) -> dict:
     final_draft = state.get("final_draft") or state.get("draft") or ""
     structure_valid = sections.parse_sections(final_draft)["valid"]
     coverage = round(_evidence_coverage(state), 3)
+    # 반대 근거(주장과 배치되는 근거)는 근거 충족률과 별개로 출력을 막아야 한다. 충족률만 보면
+    # 5개 중 4 supported·1 contradicted 여도 0.8 을 넘어 통과되는 허점이 있다(외부 리뷰 P1-3).
+    vr = state.get("verification_result") or {}
+    contradicted_count = len(vr.get("contradicted") or [])
 
     checks = {
         "score": score >= SCORE_MIN,
@@ -85,6 +89,7 @@ def evaluate(state: dict) -> dict:
         "major_issues": major <= MAJOR_MAX,
         "structure": structure_valid,
         "evidence": coverage >= EVIDENCE_COVERAGE_MIN,
+        "contradicted_claims": contradicted_count == 0,
     }
     release_ready = all(checks.values())
     return {
@@ -97,6 +102,7 @@ def evaluate(state: dict) -> dict:
             "major_count": major,
             "structure_valid": structure_valid,
             "evidence_coverage": coverage,
+            "contradicted_count": contradicted_count,
         },
         "thresholds": {
             "score_min": SCORE_MIN,

@@ -11,7 +11,13 @@ from fastapi.responses import StreamingResponse
 from app.agents import draft_writer
 from app.api.errors import error_payload
 from app.api.errors import responses as error_responses
-from app.graph.workflow import apply_node_update, rerun_finalizers, run_workflow, run_workflow_stream
+from app.graph.workflow import (
+    _safe,
+    apply_node_update,
+    rerun_finalizers,
+    run_workflow,
+    run_workflow_stream,
+)
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
 from app.services.markdown_export import save_markdown, save_run_json
@@ -85,6 +91,12 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         initial_review_result=state.get("initial_review_result", {}),
         final_draft=state.get("final_draft", ""),
         revision_count=state.get("revision_count", 0),
+        # PR-7/8 실행 기록(섹션 수정 전략·조건부 Polish) — 넘기지 않으면 응답이 항상 기본값(외부 리뷰 P0-1)
+        revision_strategy=state.get("revision_strategy", "none"),
+        revised_section_ids=state.get("revised_section_ids", []),
+        revision_fallback_reason=state.get("revision_fallback_reason"),
+        polish_applied=state.get("polish_applied", False),
+        polish_skip_reason=state.get("polish_skip_reason"),
         best_version=state.get("best_version", "revised"),
         reverted_from_revision=state.get("reverted_from_revision", False),
         final_review_result=state.get("final_review_result", {}),
@@ -187,7 +199,10 @@ def revise(payload: ReviseInput) -> dict:
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
     timing.start()                                 # 단계별 계측 시각 원점
-    apply_node_update(state, draft_writer.revise(state))  # 노드가 자기 로그만 반환 → 누적 병합
+    # 재작성 노드도 _safe 로 감싸 timing event 를 남긴다. 직접 호출하면 가장 큰 비용인 문서
+    # 재작성 시간이 timing_events 에서 빠져 수정 실행의 coverage·단계별 시간이 부정확해진다
+    # (외부 리뷰 P2-7). 이후 rerun_finalizers 도 polish/final_reviewer/verify 를 _safe 로 계측한다.
+    apply_node_update(state, _safe("revise", draft_writer.revise)(state))  # 자기 로그만 반환 → 누적 병합
     # 수정된 최종본을 /run 뒷부분과 동일하게 재처리(polish→재평가→근거검증→품질판정).
     # 옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않도록(외부 리뷰 P0-1).
     rerun_finalizers(state)
@@ -214,6 +229,13 @@ def revise(payload: ReviseInput) -> dict:
         "verification_summary": state.get("verification_summary", {}),
         "run_status": state.get("run_status", "success"),
         "logs": state.get("logs", []),
+        # 수정본과 함께 갱신된 판정·근거·품질도 반환 → 프론트가 옛 값 대신 최신 상태를 반영(외부 리뷰 P0-2)
+        "quality_gate": state.get("quality_gate", {}),
+        "evidence_registry": state.get("evidence_registry", []),
+        "fallback_nodes": state.get("fallback_nodes", []),
+        "fallback_reasons": state.get("fallback_reasons", {}),
+        "revision_strategy": state.get("revision_strategy", "full"),
+        "polish_applied": state.get("polish_applied", False),
     }
 
 

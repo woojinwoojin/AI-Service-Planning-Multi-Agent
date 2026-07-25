@@ -138,7 +138,12 @@ def test_polish_falls_back_when_edit_breaks_structure(monkeypatch):
 def test_polish_noop_in_dummy(monkeypatch):
     dw = draft_writer
     monkeypatch.setattr(dw.llm, "is_dummy", lambda: True)
-    assert dw.polish({"final_draft": "# X 기획서", "logs": []}) == {}
+    # 더미 모드는 편집을 하지 않지만, 빈 dict 대신 '미수행'을 명시해야 migrate 기본값
+    # (polish_applied=True)으로 '수행함' 오기록되는 것을 막는다(외부 리뷰 P2-6).
+    out = dw.polish({"final_draft": "# X 기획서", "logs": []})
+    assert out["polish_applied"] is False
+    assert out["polish_skip_reason"] == "dummy_mode"
+    assert "final_draft" not in out  # 문서는 건드리지 않음
 
 
 # ── PR-8 조건부 Polish ─────────────────────────────────────────────────────
