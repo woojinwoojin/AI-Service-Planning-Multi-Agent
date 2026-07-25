@@ -25,7 +25,7 @@ _RUN_KEYS = [
     "revision_strategy", "revised_section_ids", "revision_fallback_reason",
     "polish_applied", "polish_skip_reason",
     "final_review_result", "verification_result", "verification_summary", "quality_gate",
-    "evidence_registry", "usage", "logs",
+    "evidence_registry", "evidence_gaps", "dynamic_research", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",
     "reviewer_model", "timing", "timing_events", "budget", "state_version",
 ]

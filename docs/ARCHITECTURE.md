@@ -59,16 +59,16 @@
 
 **분석 구간(직렬):**
 ```text
-START → preprocess → research → competitor → customer → pestel → swot
+START → preprocess → research → research_gap → competitor → customer → pestel → swot
       → business_model → risk → draft → [마무리]
 ```
 
 **분석 구간(병렬, `build_parallel_graph`):** Research 이후 독립 4분기를 동시 실행 → Draft 에서 fan-in join.
 ```text
-research ┬→ competitor → swot ┐
-         ├→ customer          ├→ (모두 완료 후 1회) draft → [마무리]
-         ├→ pestel → risk     │
-         └→ business_model ────┘
+research → research_gap ┬→ competitor → swot ┐
+                        ├→ customer          ├→ (모두 완료 후 1회) draft → [마무리]
+                        ├→ pestel → risk     │
+                        └→ business_model ────┘
 ```
 - Agent 입력·프롬프트·결과 구조는 직렬과 **동일**, 실행 순서만 다르다(비열등성 전제). 지연 차이만 병렬화 효과.
 - fan-in: `add_edge(["swot","customer","risk","business_model"], "draft")` — 깊이 다른 분기의 조기/중복 실행 방지.
@@ -94,7 +94,8 @@ draft → reviewer → _route_revision ┬─ finalize ──────┐
 | 노드 | 파일:심볼 | 역할 | 핵심 출력 키 |
 |---|---|---|---|
 | preprocess | `agents/preprocess.py` | 입력 구조화(함수) | `structured_input` |
-| research | `agents/research.py` | 웹검색 grounding + 시장조사 + 근거 방출 | `research_result`·`evidence_registry` |
+| research | `agents/research.py` | 웹검색 grounding + 시장조사 + 근거 방출 + 근거 공백 보고 | `research_result`·`evidence_registry`·`evidence_gaps` |
+| research_gap | `research.py:research_gap` | 보고된 근거 공백에만 추가 검색·보강(2-5) | `research_result`(보강)·`evidence_registry`·`dynamic_research` |
 | competitor | `agents/competitor.py` | 경쟁사 분석(+검색 출처) | `competitor_result`·`competitor_sources`·`evidence_registry` |
 | customer | `agents/customer.py` | 페르소나·Pain·니즈·JTBD | `customer_result` |
 | pestel | `agents/pestel.py` | PESTEL 6요인×4항목 | `pestel_result` |
@@ -125,6 +126,7 @@ user_input · model · reviewer_model            # reviewer_model: 심판 전용
 structured_input · research_result · competitor_result · competitor_sources
 customer_result · swot_result · business_model_result · risk_result · pestel_result
 evidence_registry: Annotated[list, operator.add]   # 통합 근거(2-1), 종료 시 normalize
+evidence_gaps · dynamic_research                   # 근거 공백 보고 / 추가 조사 내역(2-5)
 # 문서·평가
 draft · review_result · initial_review_result
 final_draft · revision_count
@@ -169,6 +171,14 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 - **verifier**(Tier 2): 기획서 주장을 뽑아 ① `claim_type`(fact/inference/proposal) 분류 → ② **사실 주장만** 근거로 판정. `status`=supported/unsupported/contradicted/uncertain(+비-사실 not_applicable), `evidence_ids`로 근거 인용(레지스트리에 없는 id는 필터). 지표: `fact_support_rate`·`evidence_link_rate`·`contradicted` 분리. **URL 원문 접속은 하지 않음**(검색 요약 근거 대조, `verification_scope=search_snippet_only`). `judge_claim`은 단일 주장 판정(GT 평가 재사용).
   - **판정 근거의 범위**(리뷰3 B-1·B-2): 검증 근거는 **레지스트리·검색 스니펫(외부 수집분)만**이고, `research_result`·`competitor_result`는 앞 단계 LLM의 2차 생성물이라 프롬프트에서 '참고 문맥'으로 분리한다(자기확인 차단). `_validate`의 근거 인자는 서로 독립: `valid_ids`(실존 id만 통과 — 레지스트리 없으면 빈 집합이라 지어낸 `ev999`는 전부 제거) / `require_evidence_link`(레지스트리가 있으면 연결 없는 `supported`를 uncertain 강등) / `evidence_available`(근거 텍스트가 전무하면 `supported` 불인정).
 
+### 4.5b 제한된 동적 실행 — `research_gap` (로드맵 2-5)
+"근거가 부족하면 더 찾는다"를 **자유 재량이 아니라 통제된 1스텝**으로 구현한다.
+- **트리거**: Research 가 자기 출력에 `evidence_gaps: [{topic, query}]`(최대 2)로 **스스로 보고한 공백**뿐. 별도 판정 LLM 호출이 없어 감지 비용 0. 보고가 없으면 노드는 아무 것도 하지 않는다(호출 0).
+- **상한**: 추가 검색 `DYNAMIC_MAX_GAP_SEARCHES`(기본 2·`0`=비활성) + 보강 LLM **1회**. 진입 전 `budget.should_skip_call()`로, 실제 호출은 `check_and_reserve()`로 예산에 걸린다(→ 트랙 C).
+- **격리**: `evidence_gaps` 는 `research_result` 밖(state 별도 키)에 둔다 — 조사 결과에 남기면 Draft·분석 프롬프트에 '근거가 부족하다'는 메타가 섞여 문서에 새어든다.
+- **보강 범위**: 새로 확보한 URL(기존 근거와 중복 제외)만 `sources`·`source_objects`·`evidence_registry`(`source_agents=["research_gap"]`)에 추가하고, 문자열 배열 4필드(`industry_trends`·`customer_needs`·`opportunities`·`risks`)에만 **덧붙인다**. 기존 값을 덮지 않으므로 LLM 실패(fallback `{}`)여도 조사 결과가 훼손되지 않는다.
+- **정직 보고**: `dynamic_research{reported, searches[], new_sources, added_findings, applied, skip_reason}`. 생략 사유(`근거 공백 보고 없음`/`비활성`/`더미 모드`/`검색 비활성`/`예산 상한 도달`/`새 근거 없음`)를 남겨, '안 한 것'과 '해서 못 찾은 것'이 구분된다. UI 는 실제로 새 근거가 있었을 때만 칩을 띄운다.
+
 ### 4.6 섹션 단위 수정 (PR-7)
 `sections.py`가 14섹션 stable ID↔제목(단일 원천 `SECTION_SPECS`, `draft_writer.SECTIONS`가 파생)·heading 파서(`parse_sections`)·조립기(`assemble`)를 제공. **미수정 섹션은 원문 raw 그대로 이어붙여 byte 동일**, 참고자료 등 밖 블록 보존. `plan_section_revision`이 라우팅 판정(구조화 issues의 critical/major 대상, `MAX_REVISED_SECTIONS=4` 초과·파싱 실패·자유형 요청이면 전체 재작성). `section_revise`는 대상 섹션 원문+이슈+관련 분석+앞뒤 요약만 입력. 런타임 실패(생성·조립 손상) 시 full-revise fallback(`revision_fallback_reason` 기록).
 
@@ -210,6 +220,7 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 | **17** | **PR-8 조건부 Polish** | polish 생략(21.3s→0.1ms), 품질 손해 없음(블라인드 tie). reviewer 표현 이슈 신호 의존 |
 | **18** | **Phase 4 품질 게이트 + 최고 버전 채택 + 모델 분리** | 출력 가능 여부·미해결 이슈 표면화, 나쁜 재작성 되돌림, 자기 채점 편향 완화 |
 | **19** | **Phase 5 State 버전 + 읽기 시점 정규화** | 옛 프로젝트 재조회 호환(누락 필드·게이트 소급). DDL migration 없음(JSON blob) |
+| **20** | **2-5 제한된 동적 실행(`research_gap`)** | 트리거를 'Agent 가 보고한 근거 공백'으로 한정 + 검색·LLM 상한 + 예산 연동 → 자유 동적 실행의 비용 폭주 없이 근거를 보강. 항상 도는 no-op 노드라 그래프가 갈라지지 않음(대신 노드 1개 상시 추가) |
 
 > ADR-1~12의 상세 배경은 git 이력 및 이전 문서 버전 참조. 자동 재작성 1회 상한(구 ADR-8)은 `_route_revision`의 `revision_count<1`로 유지.
 

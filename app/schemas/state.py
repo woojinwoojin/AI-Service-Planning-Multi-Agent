@@ -25,6 +25,11 @@ class ProjectState(TypedDict, total=False):
     # evidence_id 부여를 거쳐 단일 레지스트리로 확정한다(로드맵 2-1). 각 항목은
     # {evidence_id, source_agents[], queries[], url, title, snippet, source_type, used_by_claims[]}.
     evidence_registry: Annotated[list, operator.add]
+    # 제한된 동적 실행(로드맵 2-5). Research 가 스스로 보고한 근거 공백과, 그에 대해 실제로 무엇을
+    # 했는지(추가 검색·보강·생략 사유)를 분리해 기록한다 — 공백 보고는 research_gap 의 '입력',
+    # dynamic_research 는 그 '결과'. research_result 에 섞으면 뒤 Agent 프롬프트로 새어든다.
+    evidence_gaps: list          # [{topic, query}] — Research 가 보고한 근거 공백(최대 2)
+    dynamic_research: dict       # {reported, searches[], new_sources, added_findings, applied, skip_reason}
     customer_result: dict
     swot_result: dict
     business_model_result: dict
@@ -153,6 +158,8 @@ class RunResult(BaseModel):
     verification_summary: dict = Field(default_factory=dict)   # 검증 범위·한계 문구
     quality_gate: dict = Field(default_factory=dict)           # 출력 가능 여부 게이트(Phase 4)
     evidence_registry: list = Field(default_factory=list)      # 통합 근거 레지스트리(로드맵 2-1)
+    evidence_gaps: list = Field(default_factory=list)          # Research 가 보고한 근거 공백(로드맵 2-5)
+    dynamic_research: dict = Field(default_factory=dict)       # 추가 조사 수행 내역·생략 사유(로드맵 2-5)
     logs: list
     project_id: int = 0  # 저장된 프로젝트 id (이력 조회용)
     usage: dict = Field(default_factory=dict)  # 토큰·비용·지연 관측치
