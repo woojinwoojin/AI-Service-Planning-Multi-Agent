@@ -76,6 +76,26 @@ def test_evidence_coverage_vacuous_when_no_fact_claims():
     assert g["checks"]["evidence"] is True
 
 
+def test_vacuous_evidence_pass_is_surfaced_as_na():
+    """B-4: 사실 주장 0건의 자동 통과를 '검증 없음'으로 표면화한다(하드 실패는 아님)."""
+    g = quality_gate.evaluate(_passing_state(
+        verification_result={"fact_total": 0, "fact_support_rate": 0.0}))
+    assert g["metrics"]["verifiable_claims"] is False
+    assert g["metrics"]["fact_total"] == 0
+    assert g["na_checks"] == ["evidence"]              # 통과했지만 판정 근거 없음
+    assert g["warnings"] and "사실 주장" in g["warnings"][0]
+    assert g["release_ready"] is True                  # 정상일 수 있어 막지는 않는다
+    assert "evidence" not in g["blocking_reasons"]
+
+
+def test_real_evidence_pass_has_no_na_marker():
+    """사실 주장이 실제로 검증된 통과에는 N/A·경고가 붙지 않는다."""
+    g = quality_gate.evaluate(_passing_state())
+    assert g["metrics"]["verifiable_claims"] is True
+    assert g["metrics"]["fact_total"] == 5
+    assert g["na_checks"] == [] and g["warnings"] == []
+
+
 def test_evidence_coverage_zero_when_no_verification():
     g = quality_gate.evaluate(_passing_state(verification_result={}))
     assert g["metrics"]["evidence_coverage"] == 0.0

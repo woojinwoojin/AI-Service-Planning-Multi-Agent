@@ -164,6 +164,7 @@ API 응답은 `RunResult`(pydantic, `api/routes.py:_result_payload`), 이력 저
 - `search.web_search` 히트를 `<검색결과>`로 감싸 프롬프트 근거로 주입(§ADR-12 인젝션 방어). `search.build_source_objects`가 `{title,url,snippet,source_type,content_scope,original_text_extracted}` 객체 생성.
 - **Evidence Registry**(`evidence.py`, 2-1): 분산 근거(`research.source_objects`+`competitor_sources`)를 단일 레지스트리로 통합. 항목 `{evidence_id, source_agents[], queries[], url, title, snippet, source_type, used_by_claims[]}`. `evidence_id`는 URL 최초 등장순 결정론(`ev1…`). 종료 시 `normalize`(URL 중복 제거)·`link_claims`(주장→근거 역인덱스).
 - **verifier**(Tier 2): 기획서 주장을 뽑아 ① `claim_type`(fact/inference/proposal) 분류 → ② **사실 주장만** 근거로 판정. `status`=supported/unsupported/contradicted/uncertain(+비-사실 not_applicable), `evidence_ids`로 근거 인용(레지스트리에 없는 id는 필터). 지표: `fact_support_rate`·`evidence_link_rate`·`contradicted` 분리. **URL 원문 접속은 하지 않음**(검색 요약 근거 대조, `verification_scope=search_snippet_only`). `judge_claim`은 단일 주장 판정(GT 평가 재사용).
+  - **판정 근거의 범위**(리뷰3 B-1·B-2): 검증 근거는 **레지스트리·검색 스니펫(외부 수집분)만**이고, `research_result`·`competitor_result`는 앞 단계 LLM의 2차 생성물이라 프롬프트에서 '참고 문맥'으로 분리한다(자기확인 차단). `_validate`의 근거 인자는 서로 독립: `valid_ids`(실존 id만 통과 — 레지스트리 없으면 빈 집합이라 지어낸 `ev999`는 전부 제거) / `require_evidence_link`(레지스트리가 있으면 연결 없는 `supported`를 uncertain 강등) / `evidence_available`(근거 텍스트가 전무하면 `supported` 불인정).
 
 ### 4.6 섹션 단위 수정 (PR-7)
 `sections.py`가 14섹션 stable ID↔제목(단일 원천 `SECTION_SPECS`, `draft_writer.SECTIONS`가 파생)·heading 파서(`parse_sections`)·조립기(`assemble`)를 제공. **미수정 섹션은 원문 raw 그대로 이어붙여 byte 동일**, 참고자료 등 밖 블록 보존. `plan_section_revision`이 라우팅 판정(구조화 issues의 critical/major 대상, `MAX_REVISED_SECTIONS=4` 초과·파싱 실패·자유형 요청이면 전체 재작성). `section_revise`는 대상 섹션 원문+이슈+관련 분석+앞뒤 요약만 입력. 런타임 실패(생성·조립 손상) 시 full-revise fallback(`revision_fallback_reason` 기록).
@@ -178,7 +179,7 @@ API 응답은 `RunResult`(pydantic, `api/routes.py:_result_payload`), 이력 저
 `_select_best`(final_reviewer→**select_best**→verify): 재작성본(`final_review_result`) < 초안(`initial_review_result`)이면 `final_draft`를 초안으로 되돌리고 표시 점수도 초안 점수로 정정(verify가 뒤에서 채택 문서 검증). 동점·점수 없음·재작성 없음은 유지. 수동 `/revise`는 제외(사용자 의도 존중).
 
 ### 4.10 품질 게이트 & State 버전 (Phase 4·5)
-- **quality_gate**(`quality_gate.py`): `release_ready = 총점≥80 · 치명 이슈 0 · 주요 이슈≤1 · 서식 정상 · 근거 충족률(fact_support_rate)≥0.8`. `blocking_reasons`·`unresolved_issues`(최종본 critical/major)로 무엇을 고칠지 안내. 임계값은 사람 보정 전 잠정값(`thresholds.calibrated=false`). state/응답/UI에 표면화.
+- **quality_gate**(`quality_gate.py`): `release_ready = 총점≥80 · 치명 이슈 0 · 주요 이슈≤1 · 서식 정상 · 근거 충족률(fact_support_rate)≥0.8`. `blocking_reasons`·`unresolved_issues`(최종본 critical/major)로 무엇을 고칠지 안내. 임계값은 사람 보정 전 잠정값(`thresholds.calibrated=false`). state/응답/UI에 표면화. **사실 주장 0건이면 근거 충족률이 공허 충족(1.0)으로 자동 통과**하므로, `metrics.verifiable_claims`·`metrics.fact_total`·`na_checks`·`warnings`로 '검증 통과'와 '검증 대상 없음'을 구분해 보고한다(리뷰3 B-4 — release_ready 는 막지 않음, UI 는 해당 체크를 N/A 로 표시).
 - **State 버전/재조회 정규화**(`migrate.py`, Phase 5): `STATE_VERSION`. SQLite JSON blob이라 DDL migration 대신 **읽기 시점** `upgrade_state`가 옛 기록의 누락 필드에 안전 기본값 주입 + `quality_gate` 소급 계산 + 버전 태깅(멱등). `store.get_project`·`_finalize_run`에서 적용.
 
 ---

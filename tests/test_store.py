@@ -78,3 +78,29 @@ def test_fallback_reasons_and_competitor_sources_persist(tmp_db):
     got = tmp_db.get_project(pid)["state"]
     assert got["fallback_reasons"] == {"customer": "형식", "risk": "혼잡"}
     assert got["competitor_sources"][0]["url"] == "https://comp.io/a"
+
+
+def test_model_and_user_input_persist_in_state(tmp_db):
+    """B-3: model·user_input 이 state 로 저장·복원된다(재조회 후 /revise 가 원 모델·입력 유지)."""
+    state = _state("모델 보존", 80)
+    state["user_input"] = {"project_name": "모델 보존", "problem": "P", "keywords": ["k1"]}
+    pid = tmp_db.save_run(state)
+    got = tmp_db.get_project(pid)["state"]
+    assert got["model"] == "gpt-4o-mini"                       # 서버 기본 모델로 대체되지 않음
+    assert got["user_input"]["problem"] == "P"                 # 최초 입력 문맥 유지
+    assert got["user_input"]["keywords"] == ["k1"]
+
+
+def test_legacy_record_recovers_model_from_column(tmp_db):
+    """B-3: model 을 state 에 안 담던 옛 레코드는 별도 컬럼 값으로 복원한다(하위호환)."""
+    import json
+
+    with tmp_db._conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO projects (project_name, model, total_score, created_at, state_json) "
+            "VALUES (?,?,?,?,?)",
+            ("옛 기록", "claude-sonnet-5", 80, "2026-07-01T00:00:00+00:00",
+             json.dumps({"final_draft": "# 옛 기록 기획서"})),   # state 에 model 없음
+        )
+        pid = int(cur.lastrowid)
+    assert tmp_db.get_project(pid)["state"]["model"] == "claude-sonnet-5"
