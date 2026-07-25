@@ -1,0 +1,31 @@
+# 로컬 Staging 실행 — 로드맵 Phase 8 (main merge → Docker build → 실행 → health check → smoke).
+#
+#   docker compose up --build        # 빌드 후 기동(기본 USE_DUMMY=1 → 키 없이 완주)
+#   python scripts/smoke_test.py     # 헬스+/run 스모크(호스트에서 컨테이너로)
+#
+# 실제 키로 돌리려면 .env 를 채우거나 아래 environment 를 오버라이드한다.
+services:
+  app:
+    build: .
+    image: ai-planning-multiagent:staging
+    ports:
+      - "8000:8000"
+    # .env 가 있으면 로드(없어도 기동 — 아래 기본값으로 더미 실행). 키는 여기/환경에서 주입.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # 기본은 더미(키 없이 완주). 실제 실행 시 .env 또는 여기서 USE_DUMMY=0 + 키 지정.
+      USE_DUMMY: ${USE_DUMMY:-1}
+      WORKFLOW_MODE: ${WORKFLOW_MODE:-serial}
+    # 이력(SQLite)·산출물은 컨테이너 밖에 영속화.
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    restart: unless-stopped

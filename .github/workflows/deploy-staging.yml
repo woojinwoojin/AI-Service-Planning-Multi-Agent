@@ -1,0 +1,72 @@
+name: Staging CD
+
+# 로드맵 v2 Phase 8 — main merge → Docker build → 실행 → health check → smoke test.
+# 실제 호스트 배포는 레지스트리/호스트 시크릿이 필요하므로, 여기서는 '배포 가능한 이미지'가
+# 실제로 뜨고 핵심 계약을 지키는지까지 검증한다(build→run→health→smoke). 호스트로의 push/배포는
+# 아래 deploy 잡의 확장점(옵트인)으로 둔다. 스모크는 더미 모드라 API 키·비용이 필요 없다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: staging-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke:
+    name: build → health → smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build image
+        run: docker build -t ai-planning-multiagent:staging .
+
+      - name: Run container (dummy mode)
+        run: |
+          docker run -d --name staging -p 8000:8000 -e USE_DUMMY=1 \
+            ai-planning-multiagent:staging
+
+      - name: Health check (wait for healthy)
+        run: |
+          for i in $(seq 1 40); do
+            if docker exec staging python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health',timeout=4).status==200 else 1)"; then
+              echo "healthy after ${i} tries"; exit 0
+            fi
+            sleep 2
+          done
+          echo "server did not become healthy"; docker logs staging; exit 1
+
+      - name: Smoke test
+        run: python scripts/smoke_test.py --base http://localhost:8000 --timeout 60
+
+      - name: Container logs (always)
+        if: always()
+        run: docker logs staging || true
+
+      - name: Stop container (always)
+        if: always()
+        run: docker rm -f staging || true
+
+  deploy:
+    name: deploy to staging host (opt-in)
+    needs: build-and-smoke
+    runs-on: ubuntu-latest
+    # 확장점: 레지스트리/호스트 시크릿을 갖춘 뒤 repo 변수 STAGING_DEPLOY_ENABLED=true 로 켠다.
+    # 켜지 않으면 스킵되어, 검증되지 않은 '가짜 배포'가 일어나지 않는다.
+    if: ${{ vars.STAGING_DEPLOY_ENABLED == 'true' }}
+    environment: staging
+    steps:
+      - name: Placeholder — 실제 배포 단계 연결 지점
+        run: |
+          echo "여기에 실제 배포를 연결한다(예):"
+          echo "  1) 레지스트리 로그인(secrets.REGISTRY_TOKEN)"
+          echo "  2) docker tag/push (GHCR 또는 사설 레지스트리)"
+          echo "  3) 호스트에서 pull & 재기동(compose/ssh/k8s 등)"
+          echo "  4) 원격 /health 확인 → 실패 시 이전 이미지로 rollback"
+          echo "현재는 STAGING_DEPLOY_ENABLED 미설정 시 스킵된다(옵트인)."
