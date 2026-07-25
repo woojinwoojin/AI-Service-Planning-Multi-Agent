@@ -284,7 +284,7 @@ function renderResults(d) {
   const frv = d.final_review_result || {};
   const sw = d.swot_result || {}, bm = d.business_model_result || {}, rk = d.risk_result || {}, vf = d.verification_result || {}, cu = d.customer_result || {}, u = d.usage || {}, qg = d.quality_gate || {};
   // 품질 게이트(Phase 4): 출력 가능 여부. checks 별 라벨. release_ready=false면 막은 이유·미해결 이슈 표시.
-  const GATE_LABEL = {score:"점수", critical_issues:"치명 이슈 없음", major_issues:"주요 이슈 한도", structure:"서식 정상", evidence:"근거 충족"};
+  const GATE_LABEL = {score:"점수", critical_issues:"치명 이슈 없음", major_issues:"주요 이슈 한도", structure:"서식 정상", evidence:"근거 충족", contradicted_claims:"반대 근거 없음"};
   const listOf = a => (a&&a.length) ? `<ul class="list">${a.map(x=>`<li>${inline(x)}</li>`).join("")}</ul>` : '<span class="muted">-</span>';
   // 정직한 라벨: unsupported 는 '거짓'이 아니라 '근거 미확인'(원문 미접속). 색도 오류(빨강)가 아닌 주의(주황).
   // Tier 2: contradicted(반대 근거)는 미확인과 구분해 적색, not_applicable(추론·제안=검증 대상 아님)은 회색.
@@ -838,6 +838,15 @@ async function reviseDraft() {
     if (d.usage) lastRun.usage = d.usage;
     if (d.verification_summary) lastRun.verification_summary = d.verification_summary;
     if (d.project_id) lastRun.project_id = d.project_id;
+    // 수정본과 함께 재계산된 판정·품질·계측도 반영 — 문서만 바뀌고 근거 검증 탭·품질 배너가
+    // 수정 전 값으로 남는 문제 방지(외부 리뷰 P0-2)
+    if (d.verification_result) lastRun.verification_result = d.verification_result;
+    if (d.run_status) lastRun.run_status = d.run_status;
+    if (d.timing) lastRun.timing = d.timing;
+    if (d.quality_gate) lastRun.quality_gate = d.quality_gate;
+    if (d.evidence_registry) lastRun.evidence_registry = d.evidence_registry;
+    if (d.fallback_nodes) lastRun.fallback_nodes = d.fallback_nodes;
+    if (d.fallback_reasons) lastRun.fallback_reasons = d.fallback_reasons;
     lastRun.logs = (lastRun.logs||[]).concat(d.logs||[]);
     renderResults(lastRun);
     renderFinal(d.final_draft);

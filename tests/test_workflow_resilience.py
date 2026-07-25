@@ -42,7 +42,9 @@ def test_pipeline_completes_despite_llm_failure(force_real_llm):
     # Phase 4: 품질 게이트가 실행 결과에 표면화된다(release_ready + 항목별 체크)
     gate = state.get("quality_gate") or {}
     assert isinstance(gate.get("release_ready"), bool)
-    assert set(gate.get("checks", {})) == {"score", "critical_issues", "major_issues", "structure", "evidence"}
+    assert set(gate.get("checks", {})) == {
+        "score", "critical_issues", "major_issues", "structure", "evidence", "contradicted_claims",
+    }  # contradicted_claims: 반대 근거가 있으면 출력 차단(외부 리뷰 P1-3)
 
 
 def test_assess_quality_classifies(monkeypatch):

@@ -66,6 +66,11 @@ def _validate(result: dict, fallback: dict, valid_ids: set | None = None) -> dic
                 status = _NOT_APPLICABLE
             basis = c.get("basis") if isinstance(c.get("basis"), str) else ""
             eids = _clean_evidence_ids(c.get("evidence_ids"), valid_ids)
+            # 근거 레지스트리가 있는데 특정 evidence_id 를 지목하지 못한 'supported' 는 자기확인일 수
+            # 있다(LLM 이 근거 없이 지지 판정). 실제 근거 연결이 없으면 uncertain 으로 강등한다
+            # (외부 리뷰 P1-4). 레지스트리가 없는 옛/폴백 경로(valid_ids is None)는 연결을 요구하지 않음.
+            if ctype == "fact" and status == "supported" and valid_ids is not None and not eids:
+                status = "uncertain"
             # claim 에 실행 내 안정 id(c1, c2 …)를 부여 — 근거의 used_by_claims 역연결 키.
             claims.append({"id": f"c{len(claims) + 1}", "claim": claim.strip(),
                            "claim_type": ctype, "status": status,

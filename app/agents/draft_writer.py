@@ -434,8 +434,14 @@ def polish(state: ProjectState) -> dict:
     문서 전체를 다시 편집하는 LLM 호출(실측상 최대 병목 구간)을 아낀다. full-revise fallback 유지.
     """
     text = state.get("final_draft", "") or state.get("draft", "")
-    if llm.is_dummy() or not text.strip():
-        return {}
+    # 실제로 편집을 하지 않았으면 polish_applied=False 를 명시한다. 빈 dict 로 두면 migrate 기본값
+    # (polish_applied=True)이 채워져 '수행함'으로 잘못 기록된다(외부 리뷰 P2-6).
+    if llm.is_dummy():
+        return {"polish_applied": False, "polish_skip_reason": "dummy_mode",
+                "logs": ["[polish] 생략 — 더미 모드"]}
+    if not text.strip():
+        return {"polish_applied": False, "polish_skip_reason": "empty_draft",
+                "logs": ["[polish] 생략 — 빈 문서"]}
 
     skip = _polish_skip_reason(state)
     if skip:

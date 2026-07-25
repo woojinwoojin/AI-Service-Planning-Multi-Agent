@@ -17,7 +17,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import demo, evidence, llm, migrate, quality_gate, timing, tracing, usage
+from app.services import demo, evidence, llm, migrate, quality_gate, sections, timing, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -89,12 +89,33 @@ def _finalize(state: ProjectState) -> dict:
             "revision_fallback_reason": None}
 
 
-def _select_best(state: ProjectState) -> dict:
-    """재작성본과 초안 중 점수가 높은 쪽을 최종본으로 채택한다(로드맵 Phase 4 '최고 버전 유지').
+def _version_quality(review: dict, draft: str) -> dict:
+    """한 버전(초안·재작성본)의 비교용 품질 지표를 뽑는다(_select_best 용).
 
-    자동 재작성이 문서를 오히려 나쁘게 만들 수 있으므로(같은 루브릭으로 채점한) 초안 점수
-    (initial_review_result)와 재작성·편집 후 최종본 점수(final_review_result)를 비교해, 재작성본이
-    더 낮으면 초안을 최종본으로 되돌린다. verify 는 이 노드 뒤에서 '채택된' 문서를 검증한다.
+    verify 는 select_best 뒤에서 실행되므로 이 시점엔 반대근거·근거충족률이 없다. 대신 이미
+    확보된 지표(총점·critical/major 이슈 수·서식 정상 여부)로 회귀를 판정한다.
+    """
+    issues = review.get("issues") or []
+    return {
+        "score": review.get("total_score"),
+        "critical": sum(1 for i in issues if isinstance(i, dict) and i.get("severity") == "critical"),
+        "major": sum(1 for i in issues if isinstance(i, dict) and i.get("severity") == "major"),
+        "structure_valid": sections.parse_sections(draft or "")["valid"],
+    }
+
+
+def _select_best(state: ProjectState) -> dict:
+    """재작성본과 초안 중 '더 나은' 쪽을 최종본으로 채택한다(로드맵 Phase 4 '최고 버전 유지').
+
+    자동 재작성이 문서를 오히려 나쁘게 만들 수 있으므로 같은 루브릭으로 채점한 초안
+    (initial_review_result)과 재작성·편집 후 최종본(final_review_result)을 비교한다. 총점만 보면
+    점수는 같거나 1점 올랐지만 새 critical/major 이슈가 생기거나 서식이 깨진 재작성본을 채택할 수
+    있으므로(외부 리뷰 P1-5), 아래 지표 중 하나라도 나빠지면 회귀로 보고 초안으로 되돌린다.
+      - 총점 하락
+      - critical 이슈 수 증가
+      - major 이슈 수 증가
+      - 서식(14섹션) 정상 → 깨짐
+    verify 는 이 노드 뒤에서 '채택된' 문서를 검증한다.
 
     - 재작성이 없었으면(finalize) 비교 대상이 없어 그대로 둔다.
     - 되돌릴 때 표시 점수(final_review_result)도 초안 점수로 정정해 화면·게이트가 실제 문서와 맞게 한다.
@@ -102,17 +123,28 @@ def _select_best(state: ProjectState) -> dict:
     """
     if state.get("revision_strategy", "none") == "none":
         return {"best_version": "draft", "reverted_from_revision": False}
-    initial = (state.get("initial_review_result") or {}).get("total_score")
-    final = (state.get("final_review_result") or {}).get("total_score")
-    if not isinstance(initial, int) or not isinstance(final, int) or final >= initial:
+    iq = _version_quality(state.get("initial_review_result") or {}, state.get("draft", ""))
+    fq = _version_quality(state.get("final_review_result") or {}, state.get("final_draft", ""))
+    if not isinstance(iq["score"], int) or not isinstance(fq["score"], int):
         return {"best_version": "revised", "reverted_from_revision": False}
-    # 재작성본이 초안보다 낮음 → 초안 채택(수정 되돌림)
+    regressions = []
+    if fq["score"] < iq["score"]:
+        regressions.append(f"총점 {fq['score']}<{iq['score']}")
+    if fq["critical"] > iq["critical"]:
+        regressions.append(f"치명이슈 {iq['critical']}→{fq['critical']}")
+    if fq["major"] > iq["major"]:
+        regressions.append(f"주요이슈 {iq['major']}→{fq['major']}")
+    if iq["structure_valid"] and not fq["structure_valid"]:
+        regressions.append("서식 정상→깨짐")
+    if not regressions:
+        return {"best_version": "revised", "reverted_from_revision": False}
+    # 재작성본이 초안보다 나쁨(위 지표 중 하나라도 회귀) → 초안 채택(수정 되돌림)
     return {
         "final_draft": state.get("draft", ""),
         "final_review_result": dict(state.get("initial_review_result") or {}),
         "best_version": "draft",
         "reverted_from_revision": True,
-        "logs": [f"[select_best] 재작성본 {final}점 < 초안 {initial}점 → 초안 채택(수정 되돌림)"],
+        "logs": [f"[select_best] 재작성본 회귀({', '.join(regressions)}) → 초안 채택(수정 되돌림)"],
     }
 
 

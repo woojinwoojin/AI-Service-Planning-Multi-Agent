@@ -55,13 +55,16 @@ def update_run(project_id: int, state: dict) -> bool:
 
     수정된 결과가 이력에 반영되지 않아 재조회 시 수정 전 문서가 나오던 문제를 막는다.
     총점은 최종본 재평가 점수 우선. 대상 id가 없으면 False.
+
+    사용자가 수정 시 다른 모델을 골랐다면 목록의 model 컬럼도 함께 갱신한다. 갱신하지 않으면
+    이력 목록에 최초 실행 모델이 남아 실제 사용 모델과 어긋난다(외부 리뷰 P2-8).
     """
     total = (state.get("final_review_result") or state.get("review_result") or {}).get("total_score")
     payload = {k: state.get(k) for k in _RUN_KEYS}
     with _conn() as conn:
         cur = conn.execute(
-            "UPDATE projects SET total_score=?, state_json=? WHERE id=?",
-            (total, json.dumps(payload, ensure_ascii=False), project_id),
+            "UPDATE projects SET model=?, total_score=?, state_json=? WHERE id=?",
+            (state.get("model", ""), total, json.dumps(payload, ensure_ascii=False), project_id),
         )
         return cur.rowcount > 0
 
