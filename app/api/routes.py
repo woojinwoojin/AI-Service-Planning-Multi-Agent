@@ -1,11 +1,14 @@
 """FastAPI 라우트 — 입력 API + 워크플로 실행."""
 from __future__ import annotations
 
+import contextvars
 import json
 import logging
+import queue
+import threading
 from urllib.parse import quote
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
 
 from app.agents import draft_writer
@@ -47,8 +50,12 @@ def models() -> dict:
 
 
 @router.get("/projects", tags=["이력"], summary="프로젝트 이력 목록")
-def projects(limit: int = 50) -> dict:
-    """저장된 프로젝트 이력 목록(최신순)."""
+def projects(limit: int = Query(50, ge=1, le=100, description="가져올 최대 건수(1~100)")) -> dict:
+    """저장된 프로젝트 이력 목록(최신순).
+
+    limit 에 경계를 둔다 — 음수/0 은 SQLite 에서 '제한 없음'으로 해석되고, 과도한 값은 큰 응답을
+    만들 수 있다. 범위를 벗어나면 422(통일 오류 형식)로 거절한다.
+    """
     return {"projects": store.list_projects(limit=limit)}
 
 
@@ -131,6 +138,46 @@ def _sse(obj: dict) -> str:
     return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
 
 
+# 이벤트가 없는 구간에 흘리는 SSE comment 주기(초). 노드 하나가 길게 걸리면(초안 작성·Polish 는
+# 10초 이상) 그 사이 아무 바이트도 나가지 않아, 앞단 reverse proxy 가 유휴 연결로 보고 끊을 수 있다.
+_SSE_HEARTBEAT_SEC = 15.0
+
+
+def _with_heartbeat(events, heartbeat_sec: float = _SSE_HEARTBEAT_SEC):
+    """블로킹 생성기를 워커 스레드에서 돌리며, 이벤트 공백 구간에 `None`(하트비트 신호)을 낸다.
+
+    `run_workflow_stream` 은 노드가 끝날 때까지 블로킹하므로, 소비자 쪽에서 주기적으로 무언가를
+    내보내려면 생산과 소비를 분리해야 한다. 워커에는 현재 컨텍스트 복사본을 넘겨(usage·budget·
+    timing contextvar 가 워커 안에서 일관되게 시작·종료되도록) 실행한다. 워커 예외는 소비자
+    스레드에서 다시 raise 해, 기존 오류 이벤트 경로를 그대로 타게 한다.
+    """
+    q: queue.Queue = queue.Queue()
+
+    def worker():
+        try:
+            for ev in events:
+                q.put(("event", ev))
+        except BaseException as exc:   # noqa: BLE001 (소비자 스레드로 그대로 전달)
+            q.put(("error", exc))
+        finally:
+            q.put(("end", None))
+
+    ctx = contextvars.copy_context()
+    threading.Thread(target=ctx.run, args=(worker,), daemon=True).start()
+    while True:
+        try:
+            kind, payload = q.get(timeout=heartbeat_sec)
+        except queue.Empty:
+            yield None                # 이벤트 없음 → 하트비트를 내보낼 시점
+            continue
+        if kind == "event":
+            yield payload
+        elif kind == "error":
+            raise payload
+        else:
+            return
+
+
 @router.post("/run/stream", tags=["실행"], summary="워크플로 실행(SSE 스트리밍)",
              responses={200: {"description": "SSE 이벤트 스트림 (start → node* → done|error)",
                               "content": {"text/event-stream": {"schema": {"type": "string"}}}}})
@@ -143,12 +190,16 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
       {"type":"done","result":<RunResult>}                    — 완료(결과 포함, 이력 저장됨)
       {"type":"error","message":<안내>,"error":{code,message,status}}
                                                               — 실행 중 예외(HTTP 오류 봉투와 동일 구조)
+      `: keep-alive` (data 없는 comment)                      — 유휴 구간 하트비트(소비자는 무시)
     - 순서 보장: start → node* → (done | error). 소비자는 모르는 type 을 무시해야 한다(전방 호환).
     - error 는 내부 예외 상세를 노출하지 않는다(HTTP 500 과 동일 원칙, 상세는 서버 로그).
     """
     def event_stream():
         try:
-            for ev in run_workflow_stream(payload.to_state_input()):
+            for ev in _with_heartbeat(run_workflow_stream(payload.to_state_input())):
+                if ev is None:
+                    yield ": keep-alive\n\n"   # SSE comment — 규격상 소비자가 무시(연결 유지용)
+                    continue
                 if ev.get("type") == "done":
                     state = ev["state"]
                     state["verification_summary"] = reliability.summary()
@@ -170,19 +221,25 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
     )
 
 
-@router.post("/revise", tags=["실행"], summary="사용자 수정 반영 재작성(HITL)")
-def revise(payload: ReviseInput) -> dict:
+@router.post("/revise", response_model=RunResult, tags=["실행"],
+             summary="사용자 수정 반영 재작성(HITL)", responses=error_responses(404))
+def revise(payload: ReviseInput) -> RunResult:
     """Human-in-the-Loop: 사용자의 수정 요청을 현재 기획서에 1회 반영해 재작성.
 
     - project_id가 주어지면 저장된 상태를 기반으로 삼아 근거(research_result·sources)를 유지한다.
+      **없는 id면 404** — 조용히 신규 프로젝트로 저장하면 사용자는 갱신됐다고 오해하고 이력이
+      쪼개진다(외부 리뷰 3차 D-4).
     - 재작성 후 최종본을 다시 채점(final_reviewer)해 표시 점수를 정합하게 맞춘다.
-    - 결과를 이력에 반영(기존 프로젝트는 갱신, 없으면 신규 저장)하고, 관측치·수정횟수를 반환한다.
+    - 결과를 이력에 반영(기존 프로젝트는 갱신, project_id 없으면 신규 저장)하고 반환한다.
+    - 응답은 `/run` 과 같은 `RunResult` 다(외부 리뷰 3차 D-1). 수동 dict 를 조립하면 State 에 새
+      필드가 생길 때마다 수정 응답에서 누락돼, 수정 후 다운로드에 옛 값이 남는다.
     """
     base: dict = {}
     if payload.project_id:
         found = store.get_project(payload.project_id)
-        if found:
-            base = dict(found.get("state") or {})
+        if not found:
+            raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다.")
+        base = dict(found.get("state") or {})
 
     state = {
         **base,
@@ -197,6 +254,9 @@ def revise(payload: ReviseInput) -> dict:
         "logs": [],
         "timing_events": [],   # 이번 재작성 구간만 계측(옛 실행 이벤트 이어받지 않음)
     }
+    # project_id 없이 수정하는 경로(저장된 base 없음)에서도 응답의 프로젝트명이 비지 않게 채운다.
+    if not state.get("structured_input") and payload.project_name.strip():
+        state["structured_input"] = {"project_name": payload.project_name.strip()}
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
     budget.start()                                 # 수정 재작성도 예산·시간 상한 적용(트랙 D)
@@ -221,26 +281,8 @@ def revise(payload: ReviseInput) -> dict:
     else:
         project_id = store.save_run(state)
 
-    return {
-        "project_id": project_id,
-        "final_draft": state.get("final_draft", ""),
-        "revision_count": state.get("revision_count", 0),
-        "final_review_result": state.get("final_review_result", {}),
-        "verification_result": state.get("verification_result", {}),
-        "usage": state.get("usage", {}),
-        "timing": state.get("timing", {}),
-        "verification_summary": state.get("verification_summary", {}),
-        "run_status": state.get("run_status", "success"),
-        "logs": state.get("logs", []),
-        "budget": state.get("budget", {}),          # 수정 실행의 예산 상태(트랙 D)
-        # 수정본과 함께 갱신된 판정·근거·품질도 반환 → 프론트가 옛 값 대신 최신 상태를 반영(외부 리뷰 P0-2)
-        "quality_gate": state.get("quality_gate", {}),
-        "evidence_registry": state.get("evidence_registry", []),
-        "fallback_nodes": state.get("fallback_nodes", []),
-        "fallback_reasons": state.get("fallback_reasons", {}),
-        "revision_strategy": state.get("revision_strategy", "full"),
-        "polish_applied": state.get("polish_applied", False),
-    }
+    # /run 과 같은 변환기를 재사용 → 새 State 필드가 수정 응답에서 누락되지 않는다(D-1).
+    return _result_payload(state, project_id)
 
 
 @router.post("/export/docx", tags=["내보내기"], summary="DOCX 내보내기")

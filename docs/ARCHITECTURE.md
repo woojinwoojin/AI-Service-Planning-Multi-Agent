@@ -141,6 +141,9 @@ state_version                                                       # State 스�
 ```
 
 API 응답은 `RunResult`(pydantic, `api/routes.py:_result_payload`), 이력 저장 키는 `markdown_export._RUN_KEYS`, 재조회 정규화는 `migrate.upgrade_state`가 담당(→ §4.10).
+**`/run`·`/run/stream`·`/revise` 가 모두 같은 `_result_payload`** 를 쓴다(리뷰3 D-1) — `/revise` 가 수동 dict 를 조립하던 동안 새 State 필드(`revision_strategy`·`polish_applied`·`best_version`·`state_version` 등)가 수정 응답에서 빠져, 수정 후 다운로드에 옛 값이 남았다. State 에 필드를 추가할 때 손볼 곳은 `ProjectState`·`RunResult`·`_RUN_KEYS`·`migrate._DEFAULTS` 넷뿐이다.
+
+API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·음수는 SQLite 에서 무제한이 된다), `/revise` 의 `project_id` 가 없으면 신규 저장이 아니라 **404**(이력이 조용히 쪼개지는 것 방지), `/run/stream` 은 이벤트 공백 구간에 `: keep-alive` SSE comment 를 흘린다(`_with_heartbeat` — 블로킹 생성기를 워커 스레드로 옮기고 소비자는 큐를 타임아웃 폴링. 긴 노드 구간에 바이트가 안 나가 reverse proxy 가 끊는 것 방지).
 
 ---
 

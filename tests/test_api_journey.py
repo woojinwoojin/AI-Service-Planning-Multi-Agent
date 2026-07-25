@@ -1,8 +1,12 @@
-"""E2E: 사용자 여정 전 흐름 통합 테스트 (로드맵 Phase 7).
+"""사용자 여정 API 통합 테스트 (로드맵 Phase 7).
 
 입력 자동완성 → 생성 → 이력 재조회 → 사용자 수정(HITL) → 내보내기(DOCX/PPTX/MD/JSON)
 까지를 **한 흐름**으로 검증한다. 개별 라우트 단위 테스트(test_routes.py 등)와 달리, 실제
-사용자가 밟는 순서대로 상태가 화면·이력·산출물에 일관되게 흐르는지 본다.
+사용자가 밟는 순서대로 상태가 응답·이력·산출물에 일관되게 흐르는지 본다.
+
+⚠ 이름 주의(외부 리뷰 3차 D-5): 브라우저 E2E 가 아니라 **FastAPI TestClient 기반 API 통합**
+테스트다(그래서 파일명이 test_api_journey). 프런트엔드(진행 단계 표시·수정 후 메타 반영·오류
+메시지)는 여기서 커버되지 않는다 — 그쪽은 Playwright 등 브라우저 테스트가 필요하다.
 
 - hermetic: 실제 LLM 미호출(dummy), 임시 DB·임시 OUTPUT_DIR — 반복·CI에서 안전.
 - 실행 구조(serial/parallel)는 환경(.env WORKFLOW_MODE)에 의존하므로 값 자체는 단정하지 않는다.
@@ -203,6 +207,100 @@ def test_e2e_stream_run_to_download(client):
 
     # 스트리밍 실행도 이력에 저장되어 재조회된다.
     assert client.get(f"/projects/{done['project_id']}").status_code == 200
+
+
+# ── 외부 리뷰 3차 트랙 D: 응답 모델화 · API 하드닝 · SSE 하트비트 ─────────────────
+
+def test_revise_returns_full_run_result(client, monkeypatch):
+    """D-1: /revise 응답이 /run 과 같은 RunResult — 새 State 필드가 수정 응답에서 누락되지 않는다."""
+    from app.api import routes
+
+    run = client.post("/run", json={"project_name": "응답모델", "problem": "P"}).json()
+    monkeypatch.setattr(routes.draft_writer, "revise", lambda state: {
+        "final_draft": "# 응답모델 기획서\n수정본", "revision_count": 1, "logs": ["[revise] ok"]})
+    rev = client.post("/revise", json={
+        "project_name": "응답모델", "draft": run["final_draft"],
+        "revision_request": "정리", "project_id": run["project_id"]})
+    assert rev.status_code == 200
+    body = rev.json()
+    # /run 응답 키 전체가 그대로 온다(이전 수동 dict 에서 빠져 있던 메타 포함).
+    assert set(body) == set(run)
+    for key in ("revision_strategy", "revised_section_ids", "revision_fallback_reason",
+                "polish_applied", "polish_skip_reason", "best_version",
+                "reverted_from_revision", "failed_nodes", "state_version"):
+        assert key in body, key
+    assert body["state_version"] == run["state_version"]
+    assert "수정본" in body["final_draft"]
+
+
+def test_revise_unknown_project_id_returns_404(client):
+    """D-4: 지정한 project_id 가 없으면 조용히 신규 저장하지 않고 404 (이력 쪼개짐 방지)."""
+    r = client.post("/revise", json={
+        "project_name": "없는프로젝트", "draft": "# x", "revision_request": "정리",
+        "project_id": 999999})
+    assert r.status_code == 404
+    assert r.json()["error"]["code"] == "not_found"
+    assert client.get("/projects").json()["projects"] == []     # 신규 레코드가 생기지 않았다
+
+
+def test_projects_limit_is_bounded(client):
+    """D-4: /projects limit 은 1~100 범위. 벗어나면 422(통일 오류 형식)."""
+    client.post("/run", json={"project_name": "경계", "problem": "P"})
+    assert client.get("/projects?limit=1").status_code == 200
+    assert client.get("/projects?limit=100").status_code == 200
+    for bad in (0, -1, 101):
+        r = client.get(f"/projects?limit={bad}")
+        assert r.status_code == 422, bad
+        assert r.json()["error"]["code"] == "validation_error"
+
+
+def test_sse_stream_emits_heartbeat_when_idle():
+    """D-4: 이벤트 공백 구간에 SSE comment 를 흘려 reverse proxy 유휴 타임아웃을 피한다."""
+    import time
+
+    from app.api import routes
+
+    def slow_events():
+        time.sleep(0.25)                       # 노드 하나가 오래 걸리는 상황
+        yield {"type": "node", "node": "draft", "order": 1}
+
+    out = list(routes._with_heartbeat(slow_events(), heartbeat_sec=0.05))
+    assert None in out                          # 하트비트 신호가 최소 1회
+    assert out[-1] == {"type": "node", "node": "draft", "order": 1}   # 이벤트도 정상 전달
+
+
+def test_sse_heartbeat_propagates_worker_error():
+    """하트비트 래퍼가 워커 예외를 소비자 스레드로 다시 던져 기존 error 이벤트 경로를 유지한다."""
+    from app.api import routes
+
+    def boom_events():
+        yield {"type": "start", "workflow_mode": "serial"}
+        raise RuntimeError("실행 중 폭발")
+
+    got = []
+    with pytest.raises(RuntimeError, match="실행 중 폭발"):
+        for ev in routes._with_heartbeat(boom_events(), heartbeat_sec=0.05):
+            got.append(ev)
+    assert got and got[0]["type"] == "start"
+
+
+def test_sse_stream_tolerates_comment_frames(client):
+    """하트비트 comment 가 섞여도 SSE 소비자는 start→node*→done 계약을 그대로 본다."""
+    types, done = [], None
+    with client.stream("POST", "/run/stream",
+                       json={"project_name": "하트비트", "problem": "P"}) as r:
+        assert r.status_code == 200
+        for line in r.iter_lines():
+            if not line or line.startswith(":"):    # comment 는 무시(규격)
+                continue
+            if not line.startswith("data: "):
+                continue
+            ev = json.loads(line[6:])
+            types.append(ev["type"])
+            if ev["type"] == "done":
+                done = ev["result"]
+    assert types[0] == "start" and types[-1] == "done"
+    assert done["project_id"] > 0
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
