@@ -29,6 +29,8 @@ _DEFAULTS: dict = {
     "reverted_from_revision": False,
     "reviewer_model": "",
     "evidence_registry": [],
+    "evidence_gaps": [],       # 로드맵 2-5(옛 기록엔 없음 → 빈 목록)
+    "dynamic_research": {},
     "workflow_mode": "serial",
     "run_status": "success",
     "failed_nodes": [],

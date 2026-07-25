@@ -111,6 +111,8 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         verification_summary=state.get("verification_summary") or reliability.summary(),
         quality_gate=state.get("quality_gate", {}),
         evidence_registry=state.get("evidence_registry", []),
+        evidence_gaps=state.get("evidence_gaps", []),
+        dynamic_research=state.get("dynamic_research", {}),
         logs=state.get("logs", []),
         usage=state.get("usage", {}),
         run_status=state.get("run_status", "success"),

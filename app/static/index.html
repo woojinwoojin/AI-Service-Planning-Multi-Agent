@@ -369,6 +369,12 @@ function renderResults(d) {
           ${un.length > 3 ? `<span class="muted">외 ${un.length - 3}건 — ‘평가·검증’ 탭 참조</span>` : ""}</div>` : ""}
       </div>`;
   })() : "";
+  // 제한된 동적 실행(2-5): 근거 공백을 보고해 추가 조사를 실제로 한 실행만 표시한다.
+  // (보고가 없어 아무것도 안 한 경우는 표시하지 않는다 — 없는 일을 한 것처럼 보이지 않게.)
+  const dr = d.dynamic_research || {};
+  const dynChip = (dr.new_sources || 0) > 0
+    ? `<span class="chip" style="background:#eef2ff;color:#3730a3" title="Research가 근거 부족으로 보고한 ${esc(String(dr.reported||0))}건에 대해 추가 검색을 수행했습니다(보강 ${esc(String(dr.added_findings||0))}항목)">+ 추가 근거 ${dr.new_sources}건</span>`
+    : "";
   // 항상 보이는 요약 스트립: 실행 품질 배너 + 총점 + 관측치
   const gateChip = (qg && typeof qg.release_ready === "boolean")
       ? (qg.release_ready
@@ -384,6 +390,7 @@ function renderResults(d) {
       <span class="chip" title="사실 주장에 한한 근거 확인 수(추론·제안은 검증 대상 아님)">사실 근거 확인 ${vf.fact_supported ?? vf.supported ?? 0}/${vf.fact_total ?? vf.total ?? 0}</span>
       ${(vf.contradicted||[]).length?`<span class="chip" style="background:#fde2e1;color:#b42318">⚠ 반대 근거 ${vf.contradicted.length}건</span>`:""}
       ${(vf.unsupported||[]).length?`<span class="chip" style="background:#fff3e0;color:#b45309">⚠ 근거 미확인 ${vf.unsupported.length}건</span>`:""}
+      ${dynChip}
     </div>`;
   const tabs = [
     ["market","시장·고객"],["compete","경쟁·SWOT"],["money","수익·리스크"],["pestel","PESTEL"],["eval","평가·검증"],
@@ -720,7 +727,8 @@ function closeCompare() { document.getElementById("comparePanel").classList.add(
 
 // 노드 → [예상 소요(초)] · 진행바·ETA 가중치용(실측 평균 기반, ETA는 실행 중 보정). 사용자 표시는 STAGES.
 const NODE_META = {
-  preprocess:["입력 구조화",0.3], research:["시장조사",7], competitor:["경쟁사 분석",3],
+  preprocess:["입력 구조화",0.3], research:["시장조사",7], research_gap:["추가 근거 조사",1.0],
+  competitor:["경쟁사 분석",3],
   customer:["고객 문제 분석",2], pestel:["PESTEL 분석",7], swot:["SWOT 분석",1.5],
   business_model:["수익모델 설계",1.5], risk:["리스크 분석",2.5], draft:["초안 작성",10],
   reviewer:["초안 평가",2.5], revise:["재작성",13], section_revise:["섹션 단위 수정",8],
@@ -736,8 +744,8 @@ const EXPECTED_TOTAL = Object.entries(NODE_META)
 // (revise ↔ section_revise 택일, finalize, 건너뛸 수 있는 polish)는 제외한다 — 넣으면 정상
 // 실행에서도 단계가 영원히 완료되지 않는다.
 const STAGES = [
-  {label:"근거 수집",           desc:"웹 검색으로 시장·경쟁 근거를 모읍니다", nodes:["preprocess","research","competitor"],
-   required:["preprocess","research","competitor"]},
+  {label:"근거 수집",           desc:"웹 검색으로 시장·경쟁 근거를 모읍니다", nodes:["preprocess","research","research_gap","competitor"],
+   required:["preprocess","research","research_gap","competitor"]},
   {label:"시장·고객·환경 분석", desc:"고객·PESTEL·SWOT·수익모델·리스크를 분석합니다", nodes:["customer","pestel","swot","business_model","risk"],
    required:["customer","pestel","swot","business_model","risk"]},
   {label:"기획서 작성",         desc:"근거를 엮어 14개 섹션 초안을 작성합니다", nodes:["draft"], required:["draft"]},

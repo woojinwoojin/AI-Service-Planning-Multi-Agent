@@ -152,6 +152,10 @@ def _register_nodes(g: StateGraph) -> None:
     """모든 노드를 등록한다(직렬·병렬 그래프 공통). 노드 함수·프롬프트는 동일."""
     g.add_node("preprocess", _safe("preprocess", preprocess.preprocess))
     g.add_node("research", _safe("research", research.research))
+    # 제한된 동적 실행(로드맵 2-5): Research 가 보고한 근거 공백에만 추가 조사. 보고가 없으면
+    # 아무 호출도 하지 않는 no-op 이라 항상 경로에 두고, 실행 여부는 노드 안에서 판단한다
+    # (조건부 edge 로 빼면 직렬·병렬 두 그래프의 fan-out 배선이 갈라지고 진행 표시도 복잡해진다).
+    g.add_node("research_gap", _safe("research_gap", research.research_gap))
     g.add_node("competitor", _safe("competitor", competitor.competitor))
     g.add_node("customer", _safe("customer", customer.customer))
     g.add_node("pestel", _safe("pestel", pestel.pestel))
@@ -191,7 +195,8 @@ def build_serial_graph():
     _register_nodes(g)
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
-    g.add_edge("research", "competitor")
+    g.add_edge("research", "research_gap")   # 2-5: 근거 공백 보고 시에만 추가 조사
+    g.add_edge("research_gap", "competitor")
     g.add_edge("competitor", "customer")
     g.add_edge("customer", "pestel")
     g.add_edge("pestel", "swot")
@@ -218,12 +223,13 @@ def build_parallel_graph():
     _register_nodes(g)
     g.add_edge(START, "preprocess")
     g.add_edge("preprocess", "research")
-    g.add_edge("research", "competitor")
+    g.add_edge("research", "research_gap")   # 2-5: 4분기 fan-out 전에 근거를 확정
+    g.add_edge("research_gap", "competitor")
     g.add_edge("competitor", "swot")
-    g.add_edge("research", "customer")
-    g.add_edge("research", "pestel")
+    g.add_edge("research_gap", "customer")
+    g.add_edge("research_gap", "pestel")
     g.add_edge("pestel", "risk")
-    g.add_edge("research", "business_model")
+    g.add_edge("research_gap", "business_model")
     g.add_edge(["swot", "customer", "risk", "business_model"], "draft")  # fan-in join
     _add_finish_edges(g)
     return g.compile()
