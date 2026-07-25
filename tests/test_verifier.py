@@ -124,6 +124,101 @@ def test_dummy_has_tier2_fields():
     assert d["claims"][0]["claim_type"] == "fact"
 
 
+# ── 외부 리뷰 3차 B-1·B-2: 가짜 evidence_id 차단 · 2차 생성물 자기확인 분리 ──────
+
+def test_invented_evidence_ids_dropped_without_registry():
+    """B-1: 레지스트리가 없으면 LLM 이 지어낸 id(ev999)는 전부 제거된다(근거 연결률 부풀림 방지)."""
+    fb = verifier._dummy("d")
+    raw = {"claims": [
+        {"claim": "A", "claim_type": "fact", "status": "supported", "evidence_ids": ["ev999"]},
+    ]}
+    out = verifier._validate(raw, fb)                  # valid_ids 없음 = 알려진 근거 없음
+    assert out["claims"][0]["evidence_ids"] == []
+    assert out["evidence_linked"] == 0
+    assert out["evidence_link_rate"] == 0.0
+
+
+def test_clean_evidence_ids_treats_none_as_empty():
+    """B-1: valid_ids=None 은 '전부 허용'이 아니라 '알려진 id 없음'이다."""
+    assert verifier._clean_evidence_ids(["ev1", "ev2"], None) == []
+    assert verifier._clean_evidence_ids(["ev1", "ev2"], set()) == []
+    assert verifier._clean_evidence_ids(["ev1", "zz"], {"ev1"}) == ["ev1"]
+
+
+def test_supported_downgraded_when_registry_but_no_link():
+    """레지스트리가 있는데 근거를 지목하지 못한 supported 는 uncertain 으로 강등(P1-4)."""
+    fb = verifier._dummy("d")
+    raw = {"claims": [{"claim": "A", "claim_type": "fact", "status": "supported", "evidence_ids": []}]}
+    out = verifier._validate(raw, fb, {"ev1"}, require_evidence_link=True)
+    assert out["claims"][0]["status"] == "uncertain"
+
+
+def test_supported_downgraded_when_no_evidence_at_all():
+    """B-2: 검증 근거 텍스트가 아예 없으면 supported 를 인정하지 않는다(자기확인 차단)."""
+    fb = verifier._dummy("d")
+    raw = {"claims": [{"claim": "A", "claim_type": "fact", "status": "supported"}]}
+    out = verifier._validate(raw, fb, set(), evidence_available=False)
+    assert out["claims"][0]["status"] == "uncertain"
+    assert out["fact_supported"] == 0
+
+
+def test_snippet_fallback_allows_supported_without_ids():
+    """레지스트리는 없지만 검색 스니펫이 있으면(옛 경로) supported 를 유지한다 — 회귀 방지."""
+    fb = verifier._dummy("d")
+    raw = {"claims": [{"claim": "A", "claim_type": "fact", "status": "supported"}]}
+    out = verifier._validate(raw, fb, set(), require_evidence_link=False, evidence_available=True)
+    assert out["claims"][0]["status"] == "supported"
+
+
+def test_verify_prompt_separates_context_from_evidence(monkeypatch):
+    """B-2: verify 프롬프트가 research/competitor 를 '참고 문맥'으로만 넘기고 근거와 분리한다."""
+    captured = {}
+
+    def fake(system, user, **kw):
+        captured["user"] = user
+        return {"claims": [{"claim": "A", "claim_type": "fact", "status": "supported"}]}
+
+    monkeypatch.setattr(verifier.llm, "complete_json", fake)
+    monkeypatch.setattr(verifier.llm, "mode_label", lambda *a, **k: "테스트")
+    out = verifier.verify({
+        "final_draft": "본문", "research_result": {"market_size": "1조"},
+        "competitor_result": {"note": "경쟁"}, "logs": [],
+    })
+    user = captured["user"]
+    assert "[검증 근거" in user and "[참고 문맥" in user
+    # 2차 생성물은 참고 문맥 뒤에만 등장해야 한다(근거 블록에 섞이지 않음).
+    assert user.index("[참고 문맥") < user.index("1조")
+    assert "수집된 근거 없음" in user                       # 근거가 없다는 사실을 명시
+    # 근거가 하나도 없었으므로 supported 는 인정되지 않는다.
+    assert out["verification_result"]["claims"][0]["status"] == "uncertain"
+
+
+def test_verify_uses_registry_ids_and_requires_link(monkeypatch):
+    """레지스트리가 있으면 유효 id 만 통과하고, 연결 없는 supported 는 강등된다."""
+    from app.services import evidence
+
+    reg = evidence.entries_from("research", "q", [
+        {"url": "https://a", "title": "t", "snippet": "s", "source_type": "news"}])
+
+    monkeypatch.setattr(verifier.llm, "complete_json", lambda *a, **k: {"claims": [
+        {"claim": "A", "claim_type": "fact", "status": "supported", "evidence_ids": ["ev1"]},
+        {"claim": "B", "claim_type": "fact", "status": "supported", "evidence_ids": ["ev404"]},
+    ]})
+    monkeypatch.setattr(verifier.llm, "mode_label", lambda *a, **k: "테스트")
+    res = verifier.verify({"final_draft": "본문", "evidence_registry": reg, "logs": []})["verification_result"]
+    by_claim = {c["claim"]: c for c in res["claims"]}
+    assert by_claim["A"]["status"] == "supported" and by_claim["A"]["evidence_ids"] == ["ev1"]
+    assert by_claim["B"]["evidence_ids"] == []            # 지어낸 id 제거
+    assert by_claim["B"]["status"] == "uncertain"         # 연결 없는 supported 강등
+
+
+def test_verify_prompt_forbids_self_confirmation():
+    """프롬프트가 '2차 생성물을 근거로 쓰지 말라'는 가드레일을 담는다."""
+    from app.prompts import templates
+    assert "자기확인" in templates.VERIFY_SYSTEM
+    assert "[검증 근거]" in templates.VERIFY_SYSTEM
+
+
 def test_verify_prompt_has_tier2_classification():
     from app.prompts import templates
     assert "claim_type" in templates.VERIFY_SYSTEM

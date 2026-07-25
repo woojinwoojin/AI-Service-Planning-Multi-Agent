@@ -30,22 +30,34 @@ _NOT_APPLICABLE = "not_applicable"
 
 
 def _clean_evidence_ids(raw, valid_ids: set | None) -> list[str]:
-    """LLM 이 인용한 evidence_ids 를 정규화한다 — 문자열만·중복 제거·알려진 id 만 남김.
+    """LLM 이 인용한 evidence_ids 를 정규화한다 — 문자열만·중복 제거·'알려진 id'만 남김.
 
-    valid_ids 가 주어지면(레지스트리 존재) 그 안의 id 만 통과시켜, LLM 이 지어낸 id 를 걸러낸다.
+    valid_ids 는 근거 레지스트리에 실제로 존재하는 id 집합이다. 레지스트리가 없으면 빈 집합이며,
+    이때는 모든 id 가 제거된다 — 알려진 근거가 없는데 LLM 이 `ev999` 같은 id 를 지어내 붙이면
+    '근거에 연결됨'으로 집계돼 근거 연결률이 부풀려지기 때문이다(외부 리뷰 3차 B-1).
+    `None` 도 '알려진 id 없음'으로 취급한다(과거의 '전부 허용' 의미를 폐기).
     """
+    allowed = valid_ids or set()
     out: list[str] = []
     for x in raw or []:
         x = x.strip() if isinstance(x, str) else ""
         if not x or x in out:
             continue
-        if valid_ids is not None and x not in valid_ids:
+        if x not in allowed:
             continue
         out.append(x)
     return out
 
 
-def _validate(result: dict, fallback: dict, valid_ids: set | None = None) -> dict:
+def _validate(result: dict, fallback: dict, valid_ids: set | None = None,
+              require_evidence_link: bool = False, evidence_available: bool = True) -> dict:
+    """LLM 판정을 스키마·검증 규칙에 맞게 정규화한다.
+
+    근거 관련 인자는 서로 독립이다(B-1: 예전엔 `valid_ids is None` 하나가 두 뜻을 겸했다).
+      valid_ids            — 레지스트리에 실제 존재하는 evidence_id (없으면 전부 제거)
+      require_evidence_link— supported 사실 주장에 evidence_id 연결을 요구할지(레지스트리가 있을 때)
+      evidence_available   — 검증에 쓸 근거 텍스트가 하나라도 있었는지(없으면 supported 인정 불가)
+    """
     if not isinstance(result, dict):
         return dict(fallback)
     raw = result.get("claims")
@@ -66,11 +78,16 @@ def _validate(result: dict, fallback: dict, valid_ids: set | None = None) -> dic
                 status = _NOT_APPLICABLE
             basis = c.get("basis") if isinstance(c.get("basis"), str) else ""
             eids = _clean_evidence_ids(c.get("evidence_ids"), valid_ids)
-            # 근거 레지스트리가 있는데 특정 evidence_id 를 지목하지 못한 'supported' 는 자기확인일 수
-            # 있다(LLM 이 근거 없이 지지 판정). 실제 근거 연결이 없으면 uncertain 으로 강등한다
-            # (외부 리뷰 P1-4). 레지스트리가 없는 옛/폴백 경로(valid_ids is None)는 연결을 요구하지 않음.
-            if ctype == "fact" and status == "supported" and valid_ids is not None and not eids:
-                status = "uncertain"
+            if ctype == "fact" and status == "supported":
+                # 근거 레지스트리가 있는데 특정 evidence_id 를 지목하지 못한 'supported' 는 자기확인일
+                # 수 있다(LLM 이 근거 없이 지지 판정) → uncertain 으로 강등한다(외부 리뷰 P1-4).
+                if require_evidence_link and not eids:
+                    status = "uncertain"
+                # 검증 근거 텍스트 자체가 없었으면(레지스트리·검색 스니펫 모두 없음) 지지 판정의
+                # 근거가 없다 → uncertain. 앞 단계 LLM 산출물(research/competitor)은 2차 생성물이라
+                # 검증 근거로 쓰지 않는다(B-2 자기확인 차단).
+                elif not evidence_available:
+                    status = "uncertain"
             # claim 에 실행 내 안정 id(c1, c2 …)를 부여 — 근거의 used_by_claims 역연결 키.
             claims.append({"id": f"c{len(claims) + 1}", "claim": claim.strip(),
                            "claim_type": ctype, "status": status,
@@ -130,27 +147,36 @@ def verify(state: ProjectState) -> dict:
     registry = evidence.normalize(state.get("evidence_registry", []) or [])
     if registry:
         evidence_block = evidence.for_prompt(registry)
-        valid_ids: set | None = {e["evidence_id"] for e in registry}
+        valid_ids: set = {e["evidence_id"] for e in registry}
     else:
         comp_sources = state.get("competitor_sources", []) or []
         evidence_block = "\n".join(
             f"- {s.get('title', '')}: {s.get('snippet', '')}"
             for s in comp_sources if isinstance(s, dict)
         )
-        valid_ids = None
+        valid_ids = set()   # 알려진 id 가 없으므로 LLM 이 지어낸 id 는 모두 제거(B-1)
 
+    # 검증 근거는 '외부에서 수집한 것'(레지스트리·검색 스니펫)만이다. research/competitor 는
+    # 앞 단계 LLM 이 만든 2차 생성물이라 근거로 쓰면 자기확인이 되므로, 아래에서 '참고 문맥'으로만
+    # 넘긴다(B-2). 근거가 하나도 없으면 supported 를 인정하지 않는다(_validate 가 강등).
+    evidence_available = bool(evidence_block.strip())
     user = (
-        "아래 기획서의 사실성 주장을 근거와 대조해 검증하세요.\n"
+        "아래 기획서의 사실성 주장을 '검증 근거'와 대조해 검증하세요.\n"
         f"[기획서]\n{draft}\n\n"
-        f"[근거: 시장조사 결과]\n{json.dumps(research, ensure_ascii=False)}\n\n"
-        f"[근거: 경쟁사 분석]\n{json.dumps(competitor, ensure_ascii=False)}\n\n"
-        "[근거 출처 목록 — 각 주장을 뒷받침하는 출처의 evidence_id 를 evidence_ids 에 적으세요]\n"
-        f"{evidence_block}"
+        "[검증 근거 — 판정은 오직 이 목록만을 기준으로 합니다. 각 주장을 뒷받침하는 출처의 "
+        "evidence_id 를 evidence_ids 에 적으세요]\n"
+        f"{evidence_block or '(수집된 근거 없음 — 사실 주장을 supported 로 판정할 수 없습니다)'}\n\n"
+        "[참고 문맥 — 앞 단계 Agent 가 생성한 분석 결과입니다. 주장의 의미를 이해하는 데만 쓰고 "
+        "판정 근거로는 쓰지 마세요(검증 대상과 같은 LLM 이 만든 2차 생성물입니다)]\n"
+        f"- 시장조사 분석: {json.dumps(research, ensure_ascii=False)}\n"
+        f"- 경쟁사 분석: {json.dumps(competitor, ensure_ascii=False)}"
     )
     status: dict = {}
     raw = llm.complete_json(VERIFY_SYSTEM, user, fallback=fallback,
                             model=state.get("model", ""), status=status)
-    result = _validate(raw, fallback, valid_ids)
+    result = _validate(raw, fallback, valid_ids,
+                       require_evidence_link=bool(registry),
+                       evidence_available=evidence_available)
 
     mode = llm.mode_label(status, state.get("model", ""))
     contra = len(result.get("contradicted", []))
@@ -173,15 +199,18 @@ def judge_claim(claim: str, evidence_registry: list | None = None, model: str = 
     reg = evidence.normalize(evidence_registry or [])
     if reg:
         block = evidence.for_prompt(reg)
-        valid_ids: set | None = {e["evidence_id"] for e in reg}
+        valid_ids: set = {e["evidence_id"] for e in reg}
     else:
-        block, valid_ids = "", None
+        block, valid_ids = "", set()
     user = (
         "아래 '단일 주장' 하나만 검증하세요. claims 에는 이 주장 1개만 담습니다.\n"
         f"[주장]\n{claim}\n\n"
-        "[근거 출처 목록 — 이 주장을 뒷받침하는 출처의 evidence_id 를 evidence_ids 에 적으세요]\n"
-        f"{block}"
+        "[검증 근거 — 판정은 오직 이 목록만을 기준으로 합니다. 이 주장을 뒷받침하는 출처의 "
+        "evidence_id 를 evidence_ids 에 적으세요]\n"
+        f"{block or '(수집된 근거 없음 — supported 로 판정할 수 없습니다)'}"
     )
     fb = _dummy(claim)
     raw = llm.complete_json(VERIFY_SYSTEM, user, fallback=fb, model=model)
-    return _validate(raw, fb, valid_ids)["claims"][0]
+    return _validate(raw, fb, valid_ids,
+                     require_evidence_link=bool(reg),
+                     evidence_available=bool(block.strip()))["claims"][0]

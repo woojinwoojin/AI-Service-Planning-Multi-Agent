@@ -338,15 +338,17 @@ function renderResults(d) {
   })();
   // 가치 중심 품질 배너(Phase 6): "출력 가능 여부"와 "추가 확인 필요 항목"을 결과 최상단에 노출.
   // (세부 항목별 체크는 '평가·검증' 탭의 게이트 섹션에 유지 — 여기는 한눈 요약)
+  // 판정 근거가 없어 자동 통과한 항목(예: 검증 가능한 사실 주장 0건)은 통과 배너에서도 밝힌다.
+  const gateWarn = (qg.warnings || []).map(w => `<div style="margin-top:6px">⚠ ${esc(w)}</div>`).join("");
   const gateBanner = (qg && typeof qg.release_ready === "boolean") ? (() => {
     if (qg.release_ready)
-      return `<div style="padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#e6f4ea;color:#1e7a34;font-size:13px"><b>✓ 출력 가능</b> — 품질 검토 기준(점수·근거·서식·이슈)을 충족했습니다.</div>`;
+      return `<div style="padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#e6f4ea;color:#1e7a34;font-size:13px"><b>✓ 출력 가능</b> — 품질 검토 기준(점수·근거·서식·이슈)을 충족했습니다.${gateWarn}</div>`;
     const reasons = (qg.blocking_reasons || []).map(r => GATE_LABEL[r] || r).join(" · ");
     const un = qg.unresolved_issues || [];
     const items = un.slice(0, 3).map(i =>
       `<li>${badge(i.severity === "critical" ? "contradicted" : "unsupported")} <b>${esc(i.section_title || "")}</b> — ${inline(i.instruction || "")}</li>`).join("");
     return `<div style="padding:10px 14px;border-radius:8px;margin-bottom:10px;background:#fef3c7;color:#92400e;font-size:13px">
-        <b>⚠ 보완 필요</b>${reasons ? ` — 미충족: ${esc(reasons)}` : ""}
+        <b>⚠ 보완 필요</b>${reasons ? ` — 미충족: ${esc(reasons)}` : ""}${gateWarn}
         ${un.length ? `<div style="margin-top:6px;color:var(--ink)"><b>추가 확인 필요 항목</b>
           <ul class="list" style="margin:4px 0 0">${items}</ul>
           ${un.length > 3 ? `<span class="muted">외 ${un.length - 3}건 — ‘평가·검증’ 탭 참조</span>` : ""}</div>` : ""}
@@ -472,8 +474,15 @@ function renderResults(d) {
   </div>`;
 
   // 품질 게이트 상세: 통과/미통과 + 항목별 체크 + 미해결 이슈(사용자가 무엇을 고칠지)
-  const gateChecks = qg.checks ? Object.entries(qg.checks).map(([k,ok])=>
-      `<span class="chip" style="background:${ok?'#e6f4ea':'#fef3c7'};color:${ok?'#1e7a34':'#92400e'}">${ok?'✓':'⚠'} ${GATE_LABEL[k]||k}</span>`).join(" ") : "";
+  // 통과(✓)·미충족(⚠)과 별개로, 판정 근거가 없어 자동 통과한 항목은 'N/A(검증 대상 없음)'로 구분한다.
+  const naChecks = qg.na_checks || [];
+  const gateChecks = qg.checks ? Object.entries(qg.checks).map(([k,ok])=>{
+      const na = ok && naChecks.includes(k);
+      const bg = na ? '#eef1f5' : (ok ? '#e6f4ea' : '#fef3c7');
+      const fg = na ? '#555' : (ok ? '#1e7a34' : '#92400e');
+      const tip = na ? ' title="검증 대상이 없어 자동 통과 — 검증을 통과한 것이 아닙니다"' : '';
+      return `<span class="chip" style="background:${bg};color:${fg}"${tip}>${na?'– ':(ok?'✓ ':'⚠ ')}${GATE_LABEL[k]||k}${na?' (N/A)':''}</span>`;
+    }).join(" ") : "";
   const unresolved = qg.unresolved_issues || [];
   const unresolvedHtml = unresolved.length
       ? `<div class="subh">미해결 이슈 <span class="muted" style="font-weight:400">(최종본 기준, 보완 권장)</span></div>`

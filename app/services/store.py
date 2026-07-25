@@ -88,5 +88,10 @@ def get_project(project_id: int) -> dict | None:
         return None
     d = dict(row)
     # 재조회 시 옛 기록을 현재 스키마로 정규화(누락 필드 안전 기본값 + 게이트 소급, Phase 5).
-    d["state"] = migrate.upgrade_state(json.loads(d.pop("state_json")))
+    state = migrate.upgrade_state(json.loads(d.pop("state_json")))
+    # 옛 기록 호환(B-3): model 을 state 에 담기 전에 저장된 레코드는 별도 컬럼에만 값이 있다.
+    # state 에 되돌려 넣지 않으면 재조회 후 /revise 가 서버 기본 모델로 실행된다.
+    if isinstance(state, dict) and not state.get("model"):
+        state["model"] = d.get("model") or ""
+    d["state"] = state
     return d

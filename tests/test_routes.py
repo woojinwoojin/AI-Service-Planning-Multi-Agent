@@ -188,6 +188,26 @@ def test_fallback_reasons_surface_to_api(client, monkeypatch):
     assert "혼잡" in d["fallback_reasons"].values()        # 분류된 원인이 전달됨
 
 
+def test_revise_keeps_original_model_after_reload(client, monkeypatch):
+    """B-3: 재조회 후 /revise 는 원 실행 모델을 유지한다(모델 미지정 시 서버 기본값으로 바뀌지 않음)."""
+    from app.api import routes
+
+    run = client.post("/run", json={"project_name": "모델유지", "problem": "P",
+                                    "model": "gpt-4o-mini"}).json()
+    seen = {}
+
+    def capture(state):
+        seen["model"] = state.get("model")
+        seen["problem"] = (state.get("user_input") or {}).get("problem")
+        return {"final_draft": "# 모델유지 기획서\n수정본", "revision_count": 1}
+
+    monkeypatch.setattr(routes.draft_writer, "revise", capture)
+    client.post("/revise", json={"project_id": run["project_id"], "draft": run["final_draft"],
+                                 "revision_request": "더 구체적으로"})
+    assert seen["model"] == "gpt-4o-mini"      # 저장된 state 에서 복원(_RUN_KEYS 에 model 포함)
+    assert seen["problem"] == "P"              # 최초 입력 문맥도 유지(user_input 저장)
+
+
 def test_admin_page_served_when_demo_tools_enabled(client, monkeypatch):
     """관리자·데모 도구 페이지는 ENABLE_DEMO_TOOLS=1 일 때 /admin 으로 제공된다."""
     monkeypatch.setenv("ENABLE_DEMO_TOOLS", "1")

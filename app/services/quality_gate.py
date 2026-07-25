@@ -13,7 +13,8 @@
 - 점수·이슈는 **최종본 재평가(final_review_result)** 기준(초안 아님) — 실제 보여줄 문서의 상태.
 - structure_valid: 최종본이 고정 서식 14섹션을 지키는지.
 - evidence_coverage: 사실 주장 중 근거로 뒷받침된 비율(verifier.fact_support_rate). 검증할 사실
-  주장이 없으면 공허 충족(1.0).
+  주장이 없으면 공허 충족(1.0) — 이때는 '검증된 것'이 아니라 '검증할 것이 없었음'이므로
+  `na_checks`·`warnings`·`metrics.verifiable_claims` 로 구분해 정직하게 노출한다(외부 리뷰 3차 B-4).
 - 미통과 시 **막은 이유(blocking_reasons)** 와 **미해결 이슈(unresolved_issues)** 를 함께 실어,
   사용자가 무엇을 고쳐야 하는지 알 수 있게 한다(완료 게이트: unresolved issue 를 UI 계약에 포함).
 
@@ -82,6 +83,11 @@ def evaluate(state: dict) -> dict:
     # 5개 중 4 supported·1 contradicted 여도 0.8 을 넘어 통과되는 허점이 있다(외부 리뷰 P1-3).
     vr = state.get("verification_result") or {}
     contradicted_count = len(vr.get("contradicted") or [])
+    # 검증 가능한 사실 주장 수. 0이면 근거 충족률이 '공허 충족'(1.0)으로 게이트를 자동 통과한다
+    # — verifier 가 모든 문장을 inference/proposal 로 분류해도 그렇다. 사실 주장이 없는 기획서도
+    # 정상일 수 있어 하드 실패로 두지 않고, '검증 없이 통과'임을 별도로 표면화한다(B-4).
+    fact_total = int(vr.get("fact_total") or 0)
+    verifiable_claims = bool(vr) and fact_total > 0
 
     checks = {
         "score": score >= SCORE_MIN,
@@ -92,10 +98,21 @@ def evaluate(state: dict) -> dict:
         "contradicted_claims": contradicted_count == 0,
     }
     release_ready = all(checks.values())
+    # 판정 근거가 없어 자동 통과한 항목(N/A). '통과'와 '검증할 것이 없었음'을 구분해 보고한다.
+    na_checks = ["evidence"] if not verifiable_claims else []
+    warnings = []
+    if not verifiable_claims:
+        warnings.append(
+            "검증 가능한 사실 주장이 0건이어서 근거 충족률 검사가 적용되지 않았습니다"
+            "(검증을 통과한 것이 아니라 검증 대상이 없었음)."
+        )
     return {
         "release_ready": release_ready,
         "checks": checks,
         "blocking_reasons": [k for k, ok in checks.items() if not ok],
+        # 통과했지만 판정 근거가 없던 항목·사람이 읽을 경고(정직 보고). release_ready 는 바꾸지 않는다.
+        "na_checks": na_checks,
+        "warnings": warnings,
         "metrics": {
             "score": score,
             "critical_count": critical,
@@ -103,6 +120,9 @@ def evaluate(state: dict) -> dict:
             "structure_valid": structure_valid,
             "evidence_coverage": coverage,
             "contradicted_count": contradicted_count,
+            # 검증 대상(사실 주장) 유무 — evidence_coverage 를 해석할 때 반드시 같이 봐야 한다.
+            "fact_total": fact_total,
+            "verifiable_claims": verifiable_claims,
         },
         "thresholds": {
             "score_min": SCORE_MIN,

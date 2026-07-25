@@ -13,6 +13,9 @@ OUTPUT_DIR = Path("outputs")
 
 # 실행 결과 JSON에 담을 State 키 (Agent별 산출물 전체)
 _RUN_KEYS = [
+    # 실행 입력·모델: 재조회 후 /revise 하면 이 값들이 다음 실행의 근거가 된다. 빠지면 최초 입력
+    # 문맥과 사용 모델이 유실돼, 수정이 서버 기본 모델로 실행된다(외부 리뷰 3차 B-3).
+    "user_input", "model",
     "structured_input", "research_result", "competitor_result", "competitor_sources",
     "customer_result", "swot_result", "business_model_result", "risk_result", "pestel_result",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
