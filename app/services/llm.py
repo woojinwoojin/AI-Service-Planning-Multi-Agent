@@ -53,11 +53,19 @@ def _invoke_with_retry(chat, system: str, user: str, attempts: int = 2):
     8일 차: 관통 중 일시적 LLM 오류(레이트리밋/네트워크)가 파이프라인 전체를
     중단시키지 않도록, 호출부(complete_*)가 이 예외를 잡아 fallback으로 넘어간다.
 
+    예산(리뷰 3차 C-2): **매 시도마다** `chat.invoke` 직전에 예산을 원자적으로 승인받는다.
+    재시도도 provider 로 실제로 나가는 호출이므로 상한을 따로 소비해야 하고, 병렬 Agent 가
+    동시에 통과해 상한을 넘기지 않도록 판정·예약이 lock 안에서 함께 일어난다. 승인되지 않으면
+    재시도하지 않고 즉시 '예산' 사유의 LLMError 로 fallback 경로에 넘긴다.
+
     관측성(Langfuse): 콜백은 run_workflow가 GRAPH.invoke에 실어주며, LangChain의
     config 전파로 이 chat.invoke까지 자동으로 내려온다(여기서 별도 배선 불필요).
     """
     last_err: Exception | None = None
     for _ in range(attempts):
+        if not budget.check_and_reserve():
+            _warn("예산 상한 도달 → 호출 시도 생략(fallback)")
+            raise LLMError("예산 상한 도달", reason="예산")
         try:
             return chat.invoke([("system", system), ("human", user)])
         except Exception as exc:  # provider별 예외 종류가 다양하므로 광범위하게 잡는다
