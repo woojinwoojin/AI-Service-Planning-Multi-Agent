@@ -405,21 +405,46 @@ function renderResults(d) {
       + vf.claims.map(c=>`<tr><td>${inline(c.claim)}</td><td>${ctypeChip(c.claim_type)}</td><td>${badge(c.status)}</td><td>${inline(c.basis)}</td></tr>`).join("")
       + "</tbody></table>" : '<span class="muted">-</span>';
 
-  // 검색으로 '확인된 출처'(source_objects)만 유형별로 집계·표시한다. 문서의 '참고자료'(LLM이
-  // 적은 항목 포함)와는 개수가 다를 수 있어 용어를 분리한다. 유형은 '권위성 힌트'일 뿐 신뢰도 아님.
+  // 주요 근거 출처: 통합 근거 레지스트리(evidence_registry)를 '기획서 주장을 뒷받침한 정도
+  // (used_by_claims)' 순으로 정렬해 상단에 노출한다. 검색으로 '확인된 출처'만 담기며(LLM이 지어낸
+  // 참고자료 문자열 제외), 유형은 '권위성 힌트'일 뿐 신뢰도는 아니다. 레지스트리가 없는 옛 기록은
+  // research 의 source_objects 로 폴백해 회귀 없이 동작한다.
   const SRC_TYPE_LABELS = {government:"정부·공공기관",academic:"학술·연구기관",corporate:"기업 공식자료",news:"언론",community:"블로그·커뮤니티",unknown:"기타"};
-  const srcObjs = r.source_objects || [];
-  const srcCounts = {};
-  srcObjs.forEach(s => { const t = s.source_type||"unknown"; srcCounts[t] = (srcCounts[t]||0)+1; });
+  const AGENT_LABELS = {research:"시장조사",competitor:"경쟁사"};
   const srcOrder = ["government","academic","news","corporate","community","unknown"];
-  const srcChips = srcOrder.filter(t=>srcCounts[t]).map(t=>`<span class="chip">${SRC_TYPE_LABELS[t]} ${srcCounts[t]}</span>`).join(" ");
   const escAttr = s => esc(s).replace(/"/g,"&quot;");
-  const srcList = srcObjs.map(s=>`<li><a href="${escAttr(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title||s.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[s.source_type||"unknown"]}</span></li>`).join("");
-  const sourcesBlock = srcObjs.length
-    ? `<div class="sec"><h4>검색으로 확인된 출처 ${srcObjs.length}건 <span class="muted" style="font-weight:400;font-size:12px">· 검색 요약 기준, URL 원문 사실 검증은 하지 않음</span></h4>
-        <div style="margin:8px 0">${srcChips}</div>
-        <ul class="list">${srcList}</ul></div>`
-    : "";
+  const typeChips = counts => srcOrder.filter(t=>counts[t]).map(t=>`<span class="chip">${SRC_TYPE_LABELS[t]} ${counts[t]}</span>`).join(" ");
+  const reg = (d.evidence_registry || []).filter(e => e && e.url);
+  let sourcesBlock = "";
+  if (reg.length) {
+    // used_by_claims(이 출처를 인용한 주장 수) 내림차순 → '주요' 출처가 위로. 동수는 원래 순서 유지.
+    const sorted = reg.map((e,i)=>[e,i]).sort((a,b)=>((b[0].used_by_claims||[]).length-(a[0].used_by_claims||[]).length)||(a[1]-b[1])).map(x=>x[0]);
+    const counts = {};
+    reg.forEach(e => { const t=e.source_type||"unknown"; counts[t]=(counts[t]||0)+1; });
+    const citedTotal = reg.filter(e=>(e.used_by_claims||[]).length).length;
+    const items = sorted.map(e=>{
+      const nClaims = (e.used_by_claims||[]).length;
+      const cited = nClaims ? ` <span class="chip" style="background:#e6f4ea;color:#1e7a34">${nClaims}개 주장 근거</span>` : "";
+      const agents = (e.source_agents||[]).map(a=>AGENT_LABELS[a]||a).join("·");
+      const agentStr = agents ? `<span class="muted"> · ${agents}</span>` : "";
+      return `<li><a href="${escAttr(safeUrl(e.url))}" target="_blank" rel="noopener noreferrer">${esc(e.title||e.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[e.source_type||"unknown"]}</span>${agentStr}${cited}</li>`;
+    }).join("");
+    sourcesBlock = `<div class="sec"><h4>주요 근거 출처 ${reg.length}건 <span class="muted" style="font-weight:400;font-size:12px">· 검색 요약 기준, URL 원문 사실 검증은 하지 않음</span></h4>
+        <div class="muted" style="font-size:12px;margin-bottom:6px">기획서 주장을 뒷받침한 순으로 정렬${citedTotal?` · ${citedTotal}건이 1개 이상 주장에 인용됨`:""}. 유형은 권위성 힌트일 뿐 신뢰도는 아닙니다.</div>
+        <div style="margin:8px 0">${typeChips(counts)}</div>
+        <ul class="list">${items}</ul></div>`;
+  } else {
+    // 폴백: 통합 레지스트리가 없는 옛 기록 — research 의 source_objects 로 종전과 동일하게 표시.
+    const srcObjs = r.source_objects || [];
+    const counts = {};
+    srcObjs.forEach(s => { const t=s.source_type||"unknown"; counts[t]=(counts[t]||0)+1; });
+    const srcList = srcObjs.map(s=>`<li><a href="${escAttr(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title||s.url)}</a> <span class="muted">· ${SRC_TYPE_LABELS[s.source_type||"unknown"]}</span></li>`).join("");
+    sourcesBlock = srcObjs.length
+      ? `<div class="sec"><h4>검색으로 확인된 출처 ${srcObjs.length}건 <span class="muted" style="font-weight:400;font-size:12px">· 검색 요약 기준, URL 원문 사실 검증은 하지 않음</span></h4>
+          <div style="margin:8px 0">${typeChips(counts)}</div>
+          <ul class="list">${srcList}</ul></div>`
+      : "";
+  }
 
   const panelMarket = `<div class="tabpanel active" id="tp-market">
     ${researchBlock}
