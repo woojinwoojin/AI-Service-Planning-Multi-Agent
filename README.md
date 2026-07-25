@@ -135,10 +135,10 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 | GET | `/admin` | 관리자·데모 도구(임시) — 특정 Agent를 일부러 실패시켜 정직한 미완성 안내 시연. **`ENABLE_DEMO_TOOLS=1` 일 때만 제공(기본 404)** |
 | GET | `/health` | 상태 · 더미 여부 · provider · 기본 모델 |
 | GET | `/models` | 현재 provider에서 선택 가능한 모델 목록 |
-| GET | `/projects` | 저장된 프로젝트 이력 목록(최신순) |
+| GET | `/projects` | 저장된 프로젝트 이력 목록(최신순). `limit`은 1~100(기본 50) |
 | GET | `/projects/{id}` | 저장된 프로젝트 상세(전체 실행 결과) |
 | POST | `/run` | 아이디어 입력 → 전체 워크플로 실행, Agent별 결과 + 관측치 + 실행 품질(run_status) 반환 (이력 자동 저장) |
-| POST | `/revise` | Human-in-the-Loop 수동 수정요청 반영 재작성. `project_id`를 주면 저장된 상태를 근거로 삼아 이력을 갱신하고, 수정횟수·관측치·재평가 점수를 반환 |
+| POST | `/revise` | Human-in-the-Loop 수동 수정요청 반영 재작성. `project_id`를 주면 저장된 상태를 근거로 삼아 이력을 갱신(없는 id면 404). 응답은 `/run`과 동일한 `RunResult` |
 | POST | `/run/save` | 실행 후 `.md` + `.json` + `.docx` + `.pptx` 저장 |
 | POST | `/export/docx` | 기획서 Markdown → Word(.docx) 다운로드 |
 | POST | `/export/pptx` | 기획서 Markdown → PowerPoint(.pptx) 다운로드 |

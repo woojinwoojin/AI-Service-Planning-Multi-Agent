@@ -102,7 +102,15 @@
 
 ---
 
-## D. 프런트 / API 정합성
+## D. 프런트 / API 정합성 — ✅ 구현 완료 (2026-07-25)
+
+> 구현 시 판단 2건: ① D-1 은 `ReviseResult` 신설 대신 `_result_payload()` 재사용(응답이 `/run` 과
+> 동일한 `RunResult`) → 프런트는 응답 전체를 `lastRun` 에 spread 하면 되므로 필드별 반영 누락이
+> 구조적으로 사라진다. ② D-3 ① 의 고정 문구는 입력 화면 힌트까지 중립 문구로 바꾸고(실행 전에는
+> 실행 구조를 알 수 없다) SSE `start` 수신 시 직렬/병렬 문구·ETA 로 갱신한다. D-5 의 선택 항목
+> (Playwright 브라우저 테스트)은 하지 않았다 — 파일명·docstring 에 커버 범위를 명시해 오해를
+> 없애는 데까지만.
+
 
 ### D-1. `/revise` 응답 모델화 (누락 메타 근본 해결)
 - **문제**: `/run`은 `RunResult`, `/revise`는 수동 dict → 신규 State 필드 추가 시 누락 쉬움. 실제로 `revision_strategy`·`revised_section_ids`·`revision_fallback_reason`·`polish_applied`·`polish_skip_reason`·`best_version`·`reverted_from_revision`·`failed_nodes`·`state_version`가 응답/`lastRun`에 미반영 → 수정 후 JSON 다운로드에 옛 값 잔존.
