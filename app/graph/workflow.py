@@ -17,7 +17,7 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import demo, evidence, llm, migrate, quality_gate, sections, timing, tracing, usage
+from app.services import budget, demo, evidence, llm, migrate, quality_gate, sections, timing, tracing, usage
 from app.agents import (
     business_model,
     competitor,
@@ -327,6 +327,7 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
         "logs": [],
     }
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
+    budget.start()                      # 실행별 예산·시간 상한 활성화(env 기준, 트랙 D)
     timing.start()                      # 단계별 계측의 시각 원점
     idea = (user_input.get("project_name") or user_input.get("description") or "planning-run")
     trace_name = str(idea)[:80]
@@ -353,6 +354,7 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
     _finalize_evidence(state)           # 근거 레지스트리 확정 + 주장-근거 연결(로드맵 2-1/2-1b)
     state["usage"] = usage.summary()    # 총 토큰·추정 비용·지연 집계
+    state["budget"] = budget.status()   # 예산·시간 상한 대비 소비·초과·강제 여부(트랙 D)
     state["timing"] = timing.summarize(  # 단계별 wall time·critical path·coverage
         state.get("timing_events", []), state.get("workflow_mode", "serial"),
         state["usage"].get("wall_time_ms"))

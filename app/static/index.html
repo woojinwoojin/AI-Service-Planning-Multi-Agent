@@ -299,6 +299,7 @@ function renderResults(d) {
     연결:"연결 문제로 완성하지 못했습니다. 다시 생성하세요.",
     형식:"결과 형식이 올바르지 않았습니다. 다시 생성하세요.",
     처리:"처리 중 문제가 발생했습니다. 다시 생성하세요.",
+    예산:"실행 예산(호출·비용·시간) 상한에 도달해 이 단계를 생략했습니다. 상한을 높이거나 다시 생성하세요.",
   };
   const notice = (label, reason) => `<div class="notice">⚠ <b>'${esc(label)}'</b>을(를) 완성하지 못했어요<br><span>${esc(REASON_MSG[reason]||REASON_MSG["처리"])}</span></div>`;
   const secOr = (node, label, content) => reasons[node] ? notice(label, reasons[node]) : content;
@@ -319,8 +320,12 @@ function renderResults(d) {
   const scoreChips = Object.entries(ss).map(([k,v])=>`<span class="chip">${k} ${v}</span>`).join("");
   const scoreDelta = (frv.total_score!=null && initScore!=null)
     ? ` <span class="muted">(초안 ${initScore} → 최종 ${frv.total_score}, ${frv.total_score-initScore>=0?"+":""}${frv.total_score-initScore})</span>` : "";
+  const bgt = d.budget || {};
+  const budgetChip = bgt.enforced
+    ? `<span class="chip" style="background:#fde8d7;color:#b45309" title="실행 예산 상한 도달: ${esc((bgt.exceeded||[]).join('·')||'상한')}. 이후 호출을 생략했습니다.">예산 상한 도달${(bgt.exceeded||[]).length?` (${esc(bgt.exceeded.join('·'))})`:""}</span>`
+    : "";
   const usageRow = u.calls
-    ? `<div class="scores"><span class="chip">LLM 호출 ${u.calls}</span><span class="chip">토큰 ${(u.total_tokens||0).toLocaleString()}</span><span class="chip">~$${(u.est_cost_usd??0).toFixed(4)}</span><span class="chip" title="실제 대기시간(wall time)">${(((u.wall_time_ms ?? u.latency_ms)||0)/1000).toFixed(1)}s</span>${u.fallback_calls?`<span class="chip" style="background:#fde8d7;color:#b45309">fallback ${u.fallback_calls}</span>`:""}</div>`
+    ? `<div class="scores"><span class="chip">LLM 호출 ${u.calls}</span><span class="chip">토큰 ${(u.total_tokens||0).toLocaleString()}</span><span class="chip">~$${(u.est_cost_usd??0).toFixed(4)}</span><span class="chip" title="실제 대기시간(wall time)">${(((u.wall_time_ms ?? u.latency_ms)||0)/1000).toFixed(1)}s</span>${u.fallback_calls?`<span class="chip" style="background:#fde8d7;color:#b45309">fallback ${u.fallback_calls}</span>`:""}${budgetChip}</div>`
     : "";
   // 실행 품질 배너(item 9): fallback/더미/실패를 정직하게 표면화
   const st = d.run_status || "success";
@@ -507,7 +512,7 @@ function renderFinal(md) {
   // 작성 단계(초안/재작성/편집)가 미완성이면 문서 상단에 정직한 안내를 덧붙인다
   const reasons = (lastRun && lastRun.fallback_reasons) || {};
   const writeReason = reasons.draft || reasons.revise || reasons.polish;
-  const REASON_MSG = {혼잡:"AI 서버가 혼잡합니다. 잠시 후 다시 생성하세요.", 연결:"연결 문제로 완성하지 못했습니다. 다시 생성하세요.", 형식:"결과 형식이 올바르지 않았습니다. 다시 생성하세요.", 처리:"처리 중 문제가 발생했습니다. 다시 생성하세요."};
+  const REASON_MSG = {혼잡:"AI 서버가 혼잡합니다. 잠시 후 다시 생성하세요.", 연결:"연결 문제로 완성하지 못했습니다. 다시 생성하세요.", 형식:"결과 형식이 올바르지 않았습니다. 다시 생성하세요.", 처리:"처리 중 문제가 발생했습니다. 다시 생성하세요.", 예산:"실행 예산 상한에 도달해 이 단계를 생략했습니다."};
   const head = writeReason
     ? `<div class="notice" style="margin-bottom:14px">⚠ <b>기획서 본문</b>을 완전히 생성하지 못했어요<br><span>${esc(REASON_MSG[writeReason]||REASON_MSG["처리"])}</span></div>`
     : "";
@@ -868,6 +873,7 @@ async function reviseDraft() {
     if (d.verification_result) lastRun.verification_result = d.verification_result;
     if (d.run_status) lastRun.run_status = d.run_status;
     if (d.timing) lastRun.timing = d.timing;
+    if (d.budget) lastRun.budget = d.budget;
     if (d.quality_gate) lastRun.quality_gate = d.quality_gate;
     if (d.evidence_registry) lastRun.evidence_registry = d.evidence_registry;
     if (d.fallback_nodes) lastRun.fallback_nodes = d.fallback_nodes;

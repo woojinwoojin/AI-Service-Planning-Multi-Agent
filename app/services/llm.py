@@ -16,7 +16,7 @@ import time
 
 from dotenv import load_dotenv
 
-from app.services import demo, usage
+from app.services import budget, demo, usage
 
 load_dotenv()
 
@@ -213,6 +213,10 @@ def complete_text(system: str, user: str, *, fallback: str = "", model: str = ""
     """
     if is_dummy():
         return fallback
+    if budget.should_skip_call():   # 예산 상한 도달 → 이후 호출 생략(관통은 fallback 으로 유지, 트랙 D)
+        _warn("예산 상한 도달 → 이후 호출 생략(fallback)")
+        _flag(status, "예산")
+        return fallback
     try:
         chat = _get_model(model)
         resp = _timed_invoke(chat, system, user, model)
@@ -233,6 +237,10 @@ def complete_json(system: str, user: str, *, fallback: dict, model: str = "",
     fallback으로 넘어가면 status['fallback']=True 로 알린다.
     """
     if is_dummy():
+        return fallback
+    if budget.should_skip_call():   # 예산 상한 도달 → 이후 호출 생략(관통은 fallback 으로 유지, 트랙 D)
+        _warn("예산 상한 도달 → 이후 호출 생략(fallback)")
+        _flag(status, "예산")
         return fallback
     try:
         chat = _get_model(model)
