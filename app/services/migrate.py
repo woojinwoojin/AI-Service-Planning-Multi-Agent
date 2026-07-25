@@ -35,6 +35,7 @@ _DEFAULTS: dict = {
     "fallback_nodes": [],
     "fallback_reasons": {},
     "timing": {},
+    "budget": {},
 }
 
 

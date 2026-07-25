@@ -24,7 +24,7 @@ _RUN_KEYS = [
     "final_review_result", "verification_result", "verification_summary", "quality_gate",
     "evidence_registry", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",
-    "reviewer_model", "timing", "timing_events", "state_version",
+    "reviewer_model", "timing", "timing_events", "budget", "state_version",
 ]
 
 

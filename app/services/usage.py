@@ -49,6 +49,18 @@ def _cost(model: str, inp: int, out: int) -> float:
     return (inp * pin + out * pout) / 1_000_000
 
 
+def live_spend() -> dict:
+    """집계 확정(summary) 전, 지금까지의 실행 소비를 실시간 조회한다(예산 가드용, budget 서비스).
+
+    반환: {calls, est_cost_usd, wall_time_ms}. start() 전이면(=_t0 없음) 0 으로 본다.
+    """
+    calls = _calls.get() or []
+    cost = round(sum(_cost(c["model"], c["input_tokens"], c["output_tokens"]) for c in calls), 6)
+    t0 = _t0.get()
+    wall_ms = round((time.perf_counter() - t0) * 1000, 1) if t0 is not None else 0.0
+    return {"calls": len(calls), "est_cost_usd": cost, "wall_time_ms": wall_ms}
+
+
 def summary() -> dict:
     """이번 실행의 집계: 호출 수·토큰·추정 비용(USD)·지연·fallback 수.
 

@@ -54,6 +54,7 @@ class ProjectState(TypedDict, total=False):
     timing_events: Annotated[list, operator.add]  # [{node, started_at_ms, ended_at_ms, duration_ms}]
     timing: dict  # timing_events 집계(단계별 wall time·critical path·coverage)
     usage: dict  # 토큰·추정 비용·지연 관측치(실행 종료 시 집계해 기록)
+    budget: dict  # 예산·시간 상한 대비 소비·초과·강제 여부(트랙 D)
     workflow_mode: str   # 실행 구조: serial / parallel (병렬화 비교 실험 태깅용)
     run_status: str      # success / degraded / failed (실행 품질)
     failed_nodes: list   # 예외로 건너뛴 노드
@@ -157,4 +158,5 @@ class RunResult(BaseModel):
     fallback_reasons: dict = Field(default_factory=dict)  # {노드: 원인} 사용자 안내용
     workflow_mode: str = "serial"                  # 실행 구조: serial/parallel
     timing: dict = Field(default_factory=dict)     # 단계별 실행시간·critical path·coverage
+    budget: dict = Field(default_factory=dict)      # 예산·시간 상한 대비 소비·초과·강제 여부(트랙 D)
     state_version: int = 0                          # State 스키마 버전(Phase 5, 옛 기록 재조회 호환)

@@ -19,7 +19,7 @@ from app.graph.workflow import (
     run_workflow_stream,
 )
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
-from app.services import docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
+from app.services import budget, docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -112,6 +112,7 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         fallback_reasons=state.get("fallback_reasons", {}),
         workflow_mode=state.get("workflow_mode", "serial"),
         timing=state.get("timing", {}),
+        budget=state.get("budget", {}),
         state_version=state.get("state_version", 0),
     )
 
@@ -198,6 +199,7 @@ def revise(payload: ReviseInput) -> dict:
     }
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
+    budget.start()                                 # 수정 재작성도 예산·시간 상한 적용(트랙 D)
     timing.start()                                 # 단계별 계측 시각 원점
     # 재작성 노드도 _safe 로 감싸 timing event 를 남긴다. 직접 호출하면 가장 큰 비용인 문서
     # 재작성 시간이 timing_events 에서 빠져 수정 실행의 coverage·단계별 시간이 부정확해진다
@@ -207,6 +209,7 @@ def revise(payload: ReviseInput) -> dict:
     # 옛 문서의 verification_result·run_status 가 수정본과 함께 남지 않도록(외부 리뷰 P0-1).
     rerun_finalizers(state)
     state["usage"] = usage.summary()
+    state["budget"] = budget.status()              # 수정 실행의 예산 상태도 표면화(트랙 D)
     state["timing"] = timing.summarize(state.get("timing_events", []),
                                        state.get("workflow_mode", "serial"),
                                        state["usage"].get("wall_time_ms"))
@@ -229,6 +232,7 @@ def revise(payload: ReviseInput) -> dict:
         "verification_summary": state.get("verification_summary", {}),
         "run_status": state.get("run_status", "success"),
         "logs": state.get("logs", []),
+        "budget": state.get("budget", {}),          # 수정 실행의 예산 상태(트랙 D)
         # 수정본과 함께 갱신된 판정·근거·품질도 반환 → 프론트가 옛 값 대신 최신 상태를 반영(외부 리뷰 P0-2)
         "quality_gate": state.get("quality_gate", {}),
         "evidence_registry": state.get("evidence_registry", []),
