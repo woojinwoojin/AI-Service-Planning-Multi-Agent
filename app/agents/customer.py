@@ -41,7 +41,8 @@ def _dummy(si: dict) -> dict:
 
 
 def customer(state: ProjectState) -> dict:
-    research = state.get("research_result", {})
+    # 앞 Agent(Research) 결과는 selector 로 읽는다(로드맵 2-2 PR 5c-2) — ARTIFACT_READ_MODE 를 따른다.
+    research = artifact.read(state, "research_analysis")
     si = state.get("structured_input", {})
     fallback = _dummy(si)
     user = (
