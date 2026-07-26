@@ -1,7 +1,10 @@
 name: CI
 
-# 로드맵 v2 · 상시 트랙 A — PR/main push마다 lint + test.
+# 로드맵 v2 · 상시 트랙 A — PR/main push마다 lint + test + 보안·이미지 검증.
 # 테스트는 실제 LLM을 호출하지 않으므로(conftest.py) API 키 없이 결정론적으로 돈다.
+#
+# 잡 이름(name:)은 브랜치 보호의 required status check 이름으로 그대로 쓰인다.
+# 이름을 바꾸면 브랜치 보호 설정도 함께 갱신해야 한다(안 하면 없어진 체크를 영원히 기다린다).
 on:
   push:
     branches: [main]
@@ -25,6 +28,8 @@ jobs:
       OPENAI_API_KEY: ""
       ANTHROPIC_API_KEY: ""
       TAVILY_API_KEY: ""
+      # 실행 구조를 CI에서 고정(러너 환경에 .env가 없어 기본값이지만 명시해 둔다).
+      WORKFLOW_MODE: serial
     steps:
       - uses: actions/checkout@v5
 
@@ -39,10 +44,70 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install ruff==0.15.20
+          pip install ruff==0.15.20 pytest-cov==7.1.0
 
       - name: Ruff (lint)
         run: ruff check .
 
-      - name: Pytest
-        run: pytest -q
+      # 커버리지 하한: 2026-07-26 실측 96%(app/ 전체, 320 tests) 기준으로 90%를 바닥으로 둔다.
+      # 여유 6%p는 플랫폼(Linux/Windows) 분기 차이와 신규 코드용. 하한을 올릴 땐 실측 후에.
+      - name: Pytest (+ coverage floor)
+        run: pytest -q --cov=app --cov-report=term-missing --cov-fail-under=90
+
+  secret-scan:
+    name: secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # 전체 이력을 봐야 '커밋했다가 지운' 비밀도 잡힌다(기본 얕은 클론은 커밋 1개만 본다).
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # 서드파티 액션 대신 공식 릴리스 바이너리를 버전 고정해 직접 실행한다
+      # (액션 의존·라이선스 조건 없이 동작이 명시적이다).
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks version
+
+      # --redact: 탐지된 값이 CI 로그에 그대로 찍히지 않게 한다(로그도 공개된다).
+      - name: Scan git history
+        run: ./gitleaks git . --redact --no-banner
+
+  deps-audit:
+    name: dependency audit (pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install pip-audit
+        run: python -m pip install --upgrade pip pip-audit
+
+      # 알려진 취약점이 있으면 종료 코드가 0이 아니다(= 게이트).
+      # 고칠 수 없는 상류 취약점 때문에 막히면 `--ignore-vuln GHSA-xxxx` 를 사유와 함께 추가한다.
+      - name: Audit requirements.txt
+        run: pip-audit -r requirements.txt --progress-spinner off
+
+  docker-build:
+    name: docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      # PR 시점엔 '이미지가 빌드되는가'까지만 본다. run→health→smoke 는 main 머지 후
+      # Staging CD(deploy-staging.yml)가 수행한다. 이 잡이 없으면 Dockerfile·requirements
+      # 깨짐을 머지 후에야 알게 된다.
+      - name: Build image
+        run: docker build -t ai-planning-multiagent:ci .
