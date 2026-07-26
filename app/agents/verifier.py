@@ -13,8 +13,16 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import VERIFY_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import evidence, llm
+
+
+def _content(state: ProjectState, artifact_type: str) -> dict:
+    """Agent 산출물을 읽는 단일 창구(로드맵 2-2 PR 5). ARTIFACT_READ_MODE 를 따른다."""
+    legacy_key = artifact.SPEC_BY_TYPE[artifact_type]["legacy_key"]
+    data = artifact.get_artifact_content(state, artifact_type, legacy_key)
+    return data if isinstance(data, dict) else {}
 
 # 사실 주장의 근거 판정값(로드맵 Tier 2). contradicted(반대 근거)를 unsupported(근거 미확인)와 분리한다.
 #   supported   = 수집된 검색 근거에서 확인됨
@@ -137,8 +145,9 @@ def _dummy(_: str) -> dict:
 
 def verify(state: ProjectState) -> dict:
     draft = state.get("final_draft", "") or state.get("draft", "")
-    research = state.get("research_result", {})
-    competitor = state.get("competitor_result", {})
+    # 분석 문맥(검증 근거가 아니다 — 근거는 아래 Evidence Registry 스니펫뿐, 외부 리뷰 B-2).
+    research = _content(state, "research_analysis")
+    competitor = _content(state, "competitor_analysis")
     fallback = _dummy(draft)
 
     # 통합 근거 레지스트리를 evidence_id 와 함께 제시 → LLM 이 주장별로 어떤 근거가 뒷받침하는지

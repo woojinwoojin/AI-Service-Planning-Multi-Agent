@@ -270,7 +270,35 @@ def merge_artifacts(left: list, right: list) -> list:
 > `reconcile` 이 파생본을 매번 갱신하는 성질(규칙 ③)도 그 경로에서 여전히 필요하다.
 > 그 회귀를 지키는 테스트를 옛 기록 맥락으로 옮겨 두었다.
 
-### PR 5. Artifact Selector 도입 — 위험도 5/10
+### PR 5. Artifact Selector 도입 — 위험도 5/10 — ✅ 완료(백엔드 소비자)
+
+> **PR 1~4 는 전부 추가형이라 읽는 쪽을 건드리지 않았다. 여기서 처음 읽기 경로가 바뀐다.**
+>
+> **전환한 소비자**: `draft_writer`(초안 7개 결과 · 섹션 수정 근거 `_relevant_analysis` ·
+> 참고자료 폴백 `_real_sources`) · `verifier`(research·competitor 분석 문맥).
+> **남은 것은 표시 계층**(`routes.py`·내보내기·UI) — 이들은 State 를 그대로 직렬화해 보여줄 뿐
+> 문서 내용을 만들지 않으므로 뒤로 미뤘다.
+>
+> **모드**: `legacy`(기본·전환 전과 동일) / `prefer_artifact`(Artifact 우선, 없으면 폴백) /
+> `artifact_only`(폴백 없음). 알 수 없는 값·오타는 **가장 안전한 `legacy`** 로 떨어진다 —
+> 오타가 조용히 Artifact 경로를 켜면 안 된다.
+> `_SECTION_EVIDENCE` 는 평면 키 대신 **Artifact 유형**을 들고, 평면 키는 명세에서 얻는다
+> (두 곳에 적으면 한쪽만 고쳐 어긋난다).
+>
+> **핵심 검증 — 세 모드에서 산출물이 같은가**
+> 더미 실행 6조합(serial·parallel × 3모드) 전부 `final_draft` + `verification_result` 의
+> SHA-256 이 **동일**(`2cce7b78d329739f`), `artifact_parity ok` 전부 True.
+> **`artifact_only` 까지 통과했다 = Artifact 만으로 파이프라인이 돈다.**
+>
+> **⚠️ 이 동일성 검증의 한계(정직 표기)**: 더미 모드에서 초안은 `_dummy_draft(si, research,
+> pestel)` 로 만들어지므로 **research·pestel 만 산출물에 실제로 반영**된다. 나머지 5개
+> (competitor·customer·swot·business_model·risk)는 프롬프트에만 들어가고 더미 LLM 이 무시하므로,
+> 6조합 해시 동일성만으로는 그 5개의 읽기 경로가 검증되지 않는다. 그래서 **프롬프트 문자열을
+> 직접 확인하는 테스트**(`_generate`·`complete_json` 을 가로채 Artifact 값이 들어갔는지)를 함께
+> 두었다. 실 LLM 기준 동일성은 미측정.
+>
+> **rollback**: `ARTIFACT_READ_MODE=legacy` 로 되돌리면 코드 변경 없이 즉시 기존 경로.
+> 기본값이 `legacy` 이므로 **이 PR 자체는 동작을 바꾸지 않는다**(전환은 별도 결정).
 
 소비자가 State 키를 직접 읽는 대신 selector를 쓴다.
 

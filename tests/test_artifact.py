@@ -196,13 +196,21 @@ def test_owner_agents_are_graph_node_names():
 
 # ---- selector ----
 
-def test_find_artifact_and_content_prefers_artifact():
+def test_find_artifact_locates_by_type():
+    st = _state()
+    st["artifacts"] = artifact.build_artifacts_from_legacy(st)
+    found = artifact.find_artifact(st, "research_analysis")
+    assert found is not None and found["artifact_id"] == "artifact-research"
+    assert artifact.find_artifact(st, "없는유형") is None
+
+
+def test_content_reads_artifact_in_prefer_mode():
+    """모드별 동작 상세는 test_artifact_read_mode.py — 여기서는 selector 배선만 확인."""
     st = _state()
     st["artifacts"] = artifact.build_artifacts_from_legacy(st)
     st["artifacts"][0]["content"] = {"market_overview": "Artifact 쪽 값"}
-    found = artifact.find_artifact(st, "research_analysis")
-    assert found is not None and found["artifact_id"] == "artifact-research"
-    got = artifact.get_artifact_content(st, "research_analysis", "research_result")
+    got = artifact.get_artifact_content(st, "research_analysis", "research_result",
+                                        mode=artifact.READ_PREFER_ARTIFACT)
     assert got == {"market_overview": "Artifact 쪽 값"}
 
 
@@ -210,7 +218,8 @@ def test_get_artifact_content_falls_back_to_legacy_key():
     """Artifact 가 아직 없는 옛 프로젝트에서도 그대로 동작해야 한다(회귀 0)."""
     st = _state()  # artifacts 없음
     assert artifact.find_artifact(st, "research_analysis") is None
-    got = artifact.get_artifact_content(st, "research_analysis", "research_result")
+    got = artifact.get_artifact_content(st, "research_analysis", "research_result",
+                                        mode=artifact.READ_PREFER_ARTIFACT)
     assert got == st["research_result"]
 
 
@@ -221,7 +230,8 @@ def test_get_artifact_content_falls_back_when_artifact_empty():
         if a["artifact_type"] == "research_analysis":
             a["content"] = {}
     assert artifact.get_artifact_content(
-        st, "research_analysis", "research_result") == st["research_result"]
+        st, "research_analysis", "research_result",
+        mode=artifact.READ_PREFER_ARTIFACT) == st["research_result"]
 
 
 def test_selector_safe_on_missing_state():
