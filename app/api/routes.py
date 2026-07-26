@@ -21,6 +21,7 @@ from app.graph.workflow import (
     run_workflow,
     run_workflow_stream,
 )
+from app.schemas import artifact
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import budget, docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
 from app.services.markdown_export import save_markdown, save_run_json
@@ -31,11 +32,17 @@ _log = logging.getLogger("app.routes")
 
 @router.get("/health", tags=["시스템"], summary="서버 상태")
 def health() -> dict:
+    # artifact_read_mode: 설정값은 프로세스 시작 시 확정되므로(.env 는 import 때 1회 로드)
+    # '지금 이 서버가 어느 읽기 경로로 도는지'를 여기서 확인할 수 있어야 한다.
+    # invalid=True 면 값이 있는데 못 알아들어 legacy 로 떨어진 것(오타 신호).
+    read = artifact.read_mode_info()
     return {
         "status": "ok",
         "dummy_mode": llm.is_dummy(),
         "provider": llm.current_provider(),
         "default_model": llm.default_model(),
+        "artifact_read_mode": read["mode"],
+        "artifact_read_mode_invalid": read["invalid"],
     }
 
 
