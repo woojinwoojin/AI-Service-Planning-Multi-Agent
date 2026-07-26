@@ -6,5 +6,9 @@ venv/
 outputs/
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 .claude/settings.local.json
 data/
