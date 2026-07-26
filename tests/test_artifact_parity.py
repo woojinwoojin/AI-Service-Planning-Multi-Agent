@@ -180,11 +180,34 @@ def test_parity_is_persisted_and_reloaded(monkeypatch, tmp_path):
 
 
 def test_revise_recomputes_parity(monkeypatch):
+    """정상 /revise 후에도 판정이 다시 계산되고 통과해야 한다."""
     _dummy(monkeypatch)
     state = run_workflow({"project_name": "수정", "problem": "P"})
-    state["research_result"] = {"market_overview": "수정 후"}
+    state["artifact_parity"] = {"ok": False, "stale": True}   # 옛 판정이 남아 있다면
     workflow.rerun_finalizers(state)
-    assert state["artifact_parity"]["ok"]        # 재생성됐으므로 다시 일치
+    assert state["artifact_parity"]["ok"] and "stale" not in state["artifact_parity"]
+
+
+def test_dual_write_divergence_is_reported_not_hidden(monkeypatch):
+    """Dual Write 된 Agent 의 Artifact 와 평면 결과가 어긋나면 **덮어 감추지 않고 보고**한다.
+
+    Agent 가 쓴 값이 생산 경로의 사실이므로 파생본으로 되돌리지 않는다. 대신 불일치를
+    표면화해 사람이 원인을 보게 한다 — 조용히 맞춰버리면 정합성 검사가 무의미해진다.
+    """
+    _dummy(monkeypatch)
+    state = run_workflow({"project_name": "발산", "problem": "P"})
+    assert state["artifact_parity"]["ok"]
+    # 어떤 운영 경로도 하지 않는 조작(평면 키만 직접 변경)으로 인위적 발산을 만든다.
+    state["research_result"] = {"market_overview": "평면 키만 바뀜"}
+    workflow.rerun_finalizers(state)
+    r = state["artifact_parity"]
+    assert not r["ok"]
+    assert _reasons(r) == {"content_mismatch"}
+    assert r["mismatched"][0]["artifact_id"] == "artifact-research"
+    # Agent 가 쓴 값이 그대로 남아 있다(파생본으로 되돌리지 않음).
+    arts = {a["artifact_type"]: a for a in state["artifacts"]}
+    assert arts["research_analysis"]["content"] != {"market_overview": "평면 키만 바뀜"}
+    assert arts["research_analysis"]["metadata"]["source"] == artifact.SOURCE_AGENT
 
 
 # ---- 옛 기록 소급 ----

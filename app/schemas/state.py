@@ -9,6 +9,8 @@ from typing import Annotated, TypedDict
 
 from pydantic import BaseModel, Field
 
+from app.schemas import artifact
+
 
 class ProjectState(TypedDict, total=False):
     """전체 workflow가 공유하는 단일 State."""
@@ -36,10 +38,12 @@ class ProjectState(TypedDict, total=False):
     risk_result: dict
     pestel_result: dict
     # Artifact Contract v1(로드맵 2-2). 위 7개 평면 결과 키를 **대체하지 않고** 같은 내용을 표준
-    # 봉투로 병행 기록한다(Strangler 전환 — 소비자는 아직 평면 키를 읽는다). 실행 종료 시
-    # artifact.build_artifacts_from_legacy 로 파생 생성하므로 노드가 직접 쓰지 않는다 →
-    # 지금은 reducer 가 필요 없다(Agent 별 Dual Write 를 시작하는 PR 4 에서 전용 reducer 도입).
-    artifacts: list
+    # 봉투로 병행 기록한다(Strangler 전환 — 소비자는 아직 평면 키를 읽는다).
+    # reducer 는 `operator.add` 가 아니라 `merge_artifacts`(artifact_id 기준 나중 것이 이김)다 —
+    # 한 Agent 가 두 번 방출하거나(research → research_gap 보강본) 재실행되면 단순 누적은
+    # 같은 Artifact 를 중복시킨다. 아직 Dual Write 안 된 Agent 는 실행 종료 시
+    # artifact.reconcile 이 평면 결과에서 파생해 메운다.
+    artifacts: Annotated[list, artifact.merge_artifacts]
     # Shadow Artifact 자기점검 결과(2-2 PR 3): {expected, generated, matched, mismatched[], ok}.
     # 어긋나도 실행을 실패시키지 않고 여기와 로그로만 표면화한다 — 아직 아무도 소비하지 않는
     # 그림자 구조 때문에 멀쩡한 실행을 죽이는 편이 손해가 크다. 소비 전환(PR 5)의 진입 조건.

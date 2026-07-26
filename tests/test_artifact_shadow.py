@@ -90,15 +90,28 @@ def test_finalize_artifacts_is_idempotent(monkeypatch):
 
 # ---- 수동 수정(/revise) ----
 
-def test_rerun_finalizers_regenerates_artifacts(monkeypatch):
-    """수정 후에도 Artifact 가 최신 결과를 반영해야 한다(옛 값 잔존 금지)."""
+def test_rerun_finalizers_keeps_artifacts_consistent(monkeypatch):
+    """정상 /revise 후에도 Artifact 는 평면 결과와 일치해야 한다.
+
+    실제 /revise 는 draft·final_draft 만 바꾸고 Agent 결과 키는 건드리지 않는다
+    (평면 결과를 쓰는 곳은 research·research_gap·competitor 세 군데뿐).
+    """
     _dummy(monkeypatch)
     state = run_workflow({"project_name": "수정", "problem": "P"})
-    state["research_result"] = {"market_overview": "수정 후 값"}
+    workflow.rerun_finalizers(state)
+    _assert_parity(state)
+    assert state["artifact_parity"]["ok"]
+
+
+def test_non_dual_write_agent_artifact_follows_legacy(monkeypatch):
+    """아직 Dual Write 안 된 Agent 는 평면 결과에서 파생되므로 원본을 따라간다."""
+    _dummy(monkeypatch)
+    state = run_workflow({"project_name": "파생", "problem": "P"})
+    state["swot_result"] = {"strengths": ["나중에 바뀐 값"]}
     workflow.rerun_finalizers(state)
     arts = {a["artifact_type"]: a for a in state["artifacts"]}
-    assert arts["research_analysis"]["content"] == {"market_overview": "수정 후 값"}
-    _assert_parity(state)
+    assert arts["swot_analysis"]["content"] == {"strengths": ["나중에 바뀐 값"]}
+    assert arts["swot_analysis"]["metadata"]["source"] == artifact.SOURCE_LEGACY
 
 
 # ---- 저장·재조회 ----

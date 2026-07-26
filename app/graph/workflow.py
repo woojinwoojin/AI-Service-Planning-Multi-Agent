@@ -298,6 +298,11 @@ def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     """
     merged = {k: list(state.get(k) or []) + list(update[k] or [])
               for k in ("logs", "timing_events", "evidence_registry") if k in update}
+    # artifacts 는 단순 이어붙이기가 아니라 artifact_id 기준 병합이다(그래프 안 reducer 와 동일 규칙).
+    # 여기서 concat 하면 같은 Artifact 가 중복돼 정합성 검사가 duplicate_id 로 잡는다.
+    if "artifacts" in update:
+        merged["artifacts"] = artifact.merge_artifacts(state.get("artifacts") or [],
+                                                       update["artifacts"] or [])
     state.update(update)
     state.update(merged)   # reducer-list 필드는 덮어쓰기 대신 누적으로 교정
     return state
@@ -371,11 +376,16 @@ def _finalize_artifacts(state: ProjectState) -> None:
 
     LLM·검색 호출 없는 순수 변환이다.
 
-    생성 직후 `artifact.check_parity` 로 자기점검한다(PR 3). **어긋나도 실행을 실패시키지
+    `artifact.reconcile` 은 (a) 아직 Dual Write 안 된 Agent 를 평면 결과에서 파생해 메우고,
+    (b) Agent 가 직접 쓴 Artifact 로 덮고, (c) `evidence_ids`·`status` 를 **이 시점 값으로 재확정**
+    한다. (c)가 필요한 이유는 Agent 실행 시점에는 evidence_id(normalize 전)도 실행 결말
+    (failed/fallback)도 알 수 없기 때문이다.
+
+    확정 직후 `artifact.check_parity` 로 자기점검한다(PR 3). **어긋나도 실행을 실패시키지
     않는다** — 아직 아무도 쓰지 않는 그림자 구조 때문에 멀쩡한 실행을 죽이면 손해가 더 크다.
     대신 `artifact_parity` 와 로그로 표면화해 테스트·사람이 먼저 발견하게 한다.
     """
-    state["artifacts"] = artifact.build_artifacts_from_legacy(state)
+    state["artifacts"] = artifact.reconcile(state)
     parity = artifact.check_parity(state)
     state["artifact_parity"] = parity
     if not parity["ok"]:

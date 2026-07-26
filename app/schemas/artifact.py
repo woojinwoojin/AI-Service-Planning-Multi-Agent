@@ -211,9 +211,99 @@ def build_artifacts_from_legacy(state: dict) -> list[Artifact]:
             "depends_on": list(spec["depends_on"]),
             "target_sections": list(spec["target_sections"]),
             "status": _status_for(state, spec["owner_agent"], legacy_key),
-            "metadata": {"legacy_key": legacy_key},
+            "metadata": {"legacy_key": legacy_key, "source": SOURCE_LEGACY},
         })
     return artifacts
+
+
+# ---- Dual Write (로드맵 2-2 PR 4) ----
+
+# Artifact 를 누가 썼는지. 이행 진행도를 눈으로 확인하는 용도이기도 하다.
+SOURCE_AGENT = "agent"            # Agent 가 직접 작성(Dual Write 완료)
+SOURCE_LEGACY = "legacy_derived"  # 아직 평면 결과에서 파생
+
+
+def make_artifact(artifact_type: str, content: dict | str) -> Artifact:
+    """Agent 가 자기 산출물을 Artifact 봉투로 감싼다(Dual Write 용).
+
+    **`evidence_ids` 와 `status` 는 여기서 채우지 않는다.** Agent 가 실행되는 시점에는
+    둘 다 알 수 없기 때문이다:
+      - `evidence_id` 는 실행 종료 시 `evidence.normalize()` 가 URL 최초 등장 순서로 부여한다.
+        노드 안에서 임의로 매기면 최종 id 와 어긋난다.
+      - `failed_nodes`·`fallback_nodes` 는 `_assess_quality`(finalize)가 로그를 보고 정한다.
+    둘 다 `reconcile()` 이 실행 종료 시점 값으로 확정한다.
+    """
+    spec = SPEC_BY_TYPE[artifact_type]
+    return {
+        "artifact_id": spec["artifact_id"],
+        "artifact_type": spec["artifact_type"],
+        "owner_agent": spec["owner_agent"],
+        "schema_version": ARTIFACT_SCHEMA_VERSION,
+        "content": deepcopy(content) if isinstance(content, (dict, str)) else {},
+        "evidence_ids": [],                       # reconcile 이 확정
+        "depends_on": list(spec["depends_on"]),
+        "target_sections": list(spec["target_sections"]),
+        "status": STATUS_COMPLETE,                # reconcile 이 확정
+        "metadata": {"legacy_key": spec["legacy_key"], "source": SOURCE_AGENT},
+    }
+
+
+def merge_artifacts(left: list, right: list) -> list[Artifact]:
+    """State reducer — 같은 `artifact_id` 는 **나중 것(right)이 이긴다**.
+
+    단순 `operator.add` 를 쓰면 안 된다. 한 Agent 가 두 번 방출하거나(예: `research` 뒤
+    `research_gap` 이 보강본을 다시 내보내는 2-5 경로) 재실행되면 같은 Artifact 가 **중복**되기
+    때문이다. id 기준 덮어쓰기라 마지막 값이 남는다.
+
+    출력 순서는 `LEGACY_ARTIFACT_SPECS`(위상 순서)로 고정하고, 명세에 없는 것은 첫 등장 순서로
+    뒤에 붙인다 — 병렬 분기의 도착 순서에 결과가 흔들리면 안 되기 때문(결정성).
+    """
+    by_id: dict[str, Artifact] = {}
+    extra_order: list[str] = []
+    for a in [*(left or []), *(right or [])]:
+        if not isinstance(a, dict):
+            continue
+        aid = a.get("artifact_id") or ""
+        if aid not in by_id and aid not in set(ARTIFACT_IDS):
+            extra_order.append(aid)
+        by_id[aid] = a
+    ordered = [by_id[aid] for aid in ARTIFACT_IDS if aid in by_id]
+    ordered += [by_id[aid] for aid in extra_order if aid in by_id]
+    return ordered
+
+
+def reconcile(state: dict) -> list[Artifact]:
+    """실행 종료 시 Artifact 목록을 확정한다(로드맵 2-2 PR 2~4 공통 경로).
+
+    1) 평면 결과에서 7개를 파생(아직 Dual Write 안 된 Agent 를 메운다)
+    2) **Agent 가 직접 쓴 Artifact 로 덮어쓴다** — 생산 경로가 우선이다
+    3) `evidence_ids` 와 `status` 는 **누가 썼든 여기서 다시 확정**한다.
+       Agent 는 실행 시점에 둘 다 알 수 없다(`make_artifact` 주석 참고). 이 재확정이 없으면
+       Dual Write 로 옮긴 Agent 만 근거 연결이 비고 status 가 틀리는 회귀가 생긴다.
+
+    2)에서 살리는 것은 **`source=agent` 인 것과 명세 밖 항목뿐**이다. 이전 실행에서 파생된
+    (`source=legacy_derived`) 항목까지 살리면 평면 결과가 바뀌어도 옛 파생본이 계속 이겨
+    영원히 갱신되지 않는다 — 파생본은 평면 키의 사본일 뿐이므로 매번 다시 만든다.
+    """
+    if not isinstance(state, dict):
+        return []
+    existing = [a for a in (state.get("artifacts") or []) if isinstance(a, dict)]
+    keep = [a for a in existing
+            if (a.get("metadata") or {}).get("source") == SOURCE_AGENT
+            or a.get("artifact_type") not in SPEC_BY_TYPE]
+    merged = merge_artifacts(build_artifacts_from_legacy(state), keep)
+    registry = state.get("evidence_registry") or []
+    out: list[Artifact] = []
+    for a in merged:
+        spec = SPEC_BY_TYPE.get(a.get("artifact_type") or "")
+        if spec is None:          # 명세 밖 Artifact 는 손대지 않는다(정합성 검사가 잡는다)
+            out.append(a)
+            continue
+        item = dict(a)
+        item["evidence_ids"] = evidence_ids_for(registry, spec["evidence_agents"])
+        item["status"] = _status_for(state, spec["owner_agent"], spec["legacy_key"])
+        out.append(item)  # type: ignore[arg-type]
+    return out
 
 
 # ---- 정합성 검증 (로드맵 2-2 PR 3) ----

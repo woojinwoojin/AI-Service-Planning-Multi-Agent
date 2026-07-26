@@ -17,6 +17,7 @@ import json
 import os
 
 from app.prompts.templates import RESEARCH_GAP_SYSTEM, RESEARCH_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import budget, evidence, llm, search
 
@@ -184,8 +185,11 @@ def research(state: ProjectState) -> dict:
     # 실제 검색 출처를 통합 근거 레지스트리에도 방출한다(로드맵 2-1). reducer 로 누적되고
     # 실행 종료 시 evidence.normalize()가 URL 중복 제거·evidence_id 부여를 한다.
     registry = evidence.entries_from("research", query, result["source_objects"])
+    # Dual Write(로드맵 2-2 PR 4): 평면 결과와 **같은 내용**을 표준 Artifact 봉투로도 방출한다.
+    # 소비자는 아직 research_result 를 읽으므로 동작 변화는 없고, 생산 경로만 먼저 옮긴다.
     return {"research_result": result, "evidence_registry": registry,
-            "evidence_gaps": gaps, "logs": logs}
+            "evidence_gaps": gaps, "logs": logs,
+            "artifacts": [artifact.make_artifact("research_analysis", result)]}
 
 
 # ── 제한된 동적 실행 (로드맵 2-5) ────────────────────────────────────────────────
@@ -302,5 +306,9 @@ def research_gap(state: ProjectState) -> dict:
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[research_gap] 추가 조사 완료 ({mode}, 검색 {len(meta['searches'])}건 · "
             f"새 근거 {len(new_objs)}건 · 보강 {added}항목)"]
+    # research_gap 은 research_result 를 **갱신**하므로 Artifact 도 다시 방출해야 한다.
+    # 안 하면 research 가 쓴 보강 전 Artifact 가 남아 정합성 검사가 content_mismatch 로 잡는다.
+    # reducer 가 artifact_id 기준으로 나중 것을 채택하므로 이 보강본이 최종이 된다.
     return {"research_result": merged, "evidence_registry": registry,
-            "dynamic_research": meta, "logs": logs}
+            "dynamic_research": meta, "logs": logs,
+            "artifacts": [artifact.make_artifact("research_analysis", merged)]}
