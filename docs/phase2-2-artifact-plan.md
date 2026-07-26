@@ -287,8 +287,20 @@ def merge_artifacts(left: list, right: list) -> list:
 >
 > **핵심 검증 — 세 모드에서 산출물이 같은가**
 > 더미 실행 6조합(serial·parallel × 3모드) 전부 `final_draft` + `verification_result` 의
-> SHA-256 이 **동일**(`2cce7b78d329739f`), `artifact_parity ok` 전부 True.
-> **`artifact_only` 까지 통과했다 = Artifact 만으로 파이프라인이 돈다.**
+> SHA-256 **접두 16자리가 동일**(`2cce7b78d329739f`), `artifact_parity ok` 전부 True.
+>
+> **⚠️ 범위 정정(2026-07-26)**: 초기 서술 "`artifact_only` 까지 통과했다 = Artifact 만으로
+> 파이프라인이 돈다"는 **과장이었다.** 정확히는 —
+> **`artifact_only` 모드에서 문서 생성(draft_writer)·검증(verifier)의 핵심 소비 경로가
+> 평면 키 폴백 없이 정상 동작함을 확인**한 것이다.
+> 아직 평면 키를 직접 읽는 곳이 남아 있다:
+> - **Agent 간 읽기 7곳** — `competitor:57`·`customer:44`·`pestel:55`·`swot:29-30`·
+>   `business_model:39`·`risk:48-49`·`research(_gap):226,283` (뒤 Agent 가 앞 Agent 결과를 읽는 경로)
+> - **표시 계층** — `routes._result_payload:89-95`, `parallel_bench:69`
+>
+> 즉 `artifact_only` 가 통과한 데에는 **이 경로들이 selector 를 아예 타지 않는다**는 사정도
+> 있다. 평면 키를 지우면 파이프라인은 멈춘다. **`prefer_artifact` 전환 전에 Agent 간 읽기를
+> 먼저 옮겨야 한다** — 지금 상태로 수집한 폴백 지표는 실제 준비도를 과대평가한다.
 >
 > **⚠️ 이 동일성 검증의 한계(정직 표기)**: 더미 모드에서 초안은 `_dummy_draft(si, research,
 > pestel)` 로 만들어지므로 **research·pestel 만 산출물에 실제로 반영**된다. 나머지 5개
@@ -297,8 +309,23 @@ def merge_artifacts(left: list, right: list) -> list:
 > 직접 확인하는 테스트**(`_generate`·`complete_json` 을 가로채 Artifact 값이 들어갔는지)를 함께
 > 두었다. 실 LLM 기준 동일성은 미측정.
 >
-> **rollback**: `ARTIFACT_READ_MODE=legacy` 로 되돌리면 코드 변경 없이 즉시 기존 경로.
+> **rollback**: `ARTIFACT_READ_MODE=legacy` 로 바꾼 뒤 **애플리케이션을 재시작하면** 코드 변경
+> 없이 기존 읽기 경로로 복귀한다. '즉시'가 아니다 — `.env` 는 `load_dotenv()` 가 모듈 import
+> 시 1회만 읽으므로 실행 중인 프로세스에는 반영되지 않는다(`llm.py:21` 등).
+> 현재 서버가 어느 모드로 도는지는 **`/health` 의 `artifact_read_mode`** 로 확인한다.
 > 기본값이 `legacy` 이므로 **이 PR 자체는 동작을 바꾸지 않는다**(전환은 별도 결정).
+>
+> **관측성(PR 5b)**: 잘못된 모드 값은 `legacy` 로 떨어지되 **조용히 넘어가지 않는다** —
+> warning 로그 + `/health.artifact_read_mode_invalid` + 실행 로그·`state["artifact_read"]`
+> 에 원본 값과 폴백 여부를 남긴다. 오타(`prefer_artifcat`)를 무시만 하면 운영자는 Artifact
+> 모드로 믿는데 실제로는 평면 키를 계속 읽는다.
+> `prefer_artifact` 폴백도 **사유별로 구분**한다(`missing` / `empty` / `failed`) — Artifact 가
+> 있는데 비었거나 실패한 건 단순 미생성이 아니라 실제 오류일 수 있어서, 조용히 평면 키로
+> 떨어지면 그 오류가 묻힌다. `artifact_only` 에서는 폴백 대신 `ArtifactUnavailable` 로
+> **명시적 실패**한다(빈 dict 로 계속 돌리면 검증 모드의 의미가 없다).
+> `state["artifact_read"]` = `{mode, raw, invalid, expected, usable, unusable[]}` —
+> 전환 전에 '얼마나 폴백이 날지' 미리 보는 지표. 단 **finalize 시점 스냅샷이지 런타임
+> 카운터가 아니다**(실제 폴백 횟수를 세지는 않는다).
 
 소비자가 State 키를 직접 읽는 대신 selector를 쓴다.
 

@@ -386,6 +386,13 @@ def _finalize_artifacts(state: ProjectState) -> None:
     대신 `artifact_parity` 와 로그로 표면화해 테스트·사람이 먼저 발견하게 한다.
     """
     state["artifacts"] = artifact.reconcile(state)
+    # 읽기 모드·Artifact 가용성 스냅샷(2-2 PR 5b). prefer_artifact 로 전환하기 전에
+    # '얼마나 폴백이 날지'를 미리 보고, 잘못된 모드 설정도 실행 기록으로 남긴다.
+    read = artifact.read_status(state)
+    state["artifact_read"] = read
+    if read["invalid"]:
+        state.setdefault("logs", []).append(
+            f"[artifact] ARTIFACT_READ_MODE={read['raw']!r} 를 알 수 없어 {read['mode']} 로 동작")
     parity = artifact.check_parity(state)
     state["artifact_parity"] = parity
     if not parity["ok"]:

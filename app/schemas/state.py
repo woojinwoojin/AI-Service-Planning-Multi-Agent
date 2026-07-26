@@ -48,6 +48,10 @@ class ProjectState(TypedDict, total=False):
     # 어긋나도 실행을 실패시키지 않고 여기와 로그로만 표면화한다 — 아직 아무도 소비하지 않는
     # 그림자 구조 때문에 멀쩡한 실행을 죽이는 편이 손해가 크다. 소비 전환(PR 5)의 진입 조건.
     artifact_parity: dict
+    # 읽기 모드·Artifact 가용성 스냅샷(2-2 PR 5b): {mode, raw, invalid, expected, usable, unusable[]}.
+    # prefer_artifact 전환 전에 '얼마나 평면 키로 떨어질지'를 미리 보는 지표이자,
+    # 잘못된 ARTIFACT_READ_MODE 설정이 조용히 넘어가지 않게 하는 기록.
+    artifact_read: dict
     draft: str
     review_result: dict          # 재작성 판단에 쓰는 초안 평가 (= initial_review_result)
     initial_review_result: dict  # 초안 평가(기록용)

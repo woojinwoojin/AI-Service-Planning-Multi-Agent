@@ -76,12 +76,34 @@ def test_prefer_artifact_falls_back_when_missing():
     assert got == {"src": "평면"}
 
 
-def test_artifact_only_does_not_fall_back():
-    """폴백이 없어야 '정말 Artifact 만으로 도는지' 확인할 수 있다."""
-    got = artifact.get_artifact_content({"research_result": {"src": "평면"}},
-                                        "research_analysis", "research_result",
-                                        mode=artifact.READ_ARTIFACT_ONLY)
-    assert got == {}
+def test_artifact_only_fails_explicitly_instead_of_falling_back():
+    """검증 모드이므로 빈 dict 로 계속 돌리지 않고 **명시적으로 실패**해야 한다.
+
+    조용히 {} 를 넘기면 '평면 키 없이도 도는가'라는 질문 자체에 답할 수 없게 된다.
+    """
+    with pytest.raises(artifact.ArtifactUnavailable) as e:
+        artifact.get_artifact_content({"research_result": {"src": "평면"}},
+                                      "research_analysis", "research_result",
+                                      mode=artifact.READ_ARTIFACT_ONLY)
+    assert "missing" in str(e.value)
+
+
+@pytest.mark.parametrize(("bad", "reason"), [
+    ({"content": {}}, "empty"),
+    ({"content": {"x": 1}, "status": artifact.STATUS_FAILED}, "failed"),
+])
+def test_unusable_artifact_is_distinguished_from_missing(bad, reason):
+    """'없음'과 '있는데 못 씀'은 다르다 — 후자는 실제 오류일 수 있어 사유를 남겨야 한다."""
+    a = {**artifact.make_artifact("research_analysis", {"x": 1}), **bad}
+    st = {"research_result": {"src": "평면"}, "artifacts": [a]}
+    # prefer_artifact: 폴백하되 사유가 남는다
+    assert artifact.get_artifact_content(st, "research_analysis", "research_result",
+                                         mode=artifact.READ_PREFER_ARTIFACT) == {"src": "평면"}
+    # artifact_only: 폴백 없이 실패, 사유 포함
+    with pytest.raises(artifact.ArtifactUnavailable) as e:
+        artifact.get_artifact_content(st, "research_analysis", "research_result",
+                                      mode=artifact.READ_ARTIFACT_ONLY)
+    assert reason in str(e.value)
 
 
 def test_selector_honors_env_when_mode_arg_omitted(monkeypatch):
@@ -181,11 +203,115 @@ def test_section_revision_evidence_reads_through_selector(monkeypatch):
     assert "아티팩트쪽" in block and "평면쪽" not in block
 
 
-def test_no_consumer_reads_flat_result_keys_directly():
-    """전환한 소비자에 평면 키 직접 참조가 남아 있으면 모드 전환이 반쪽이 된다."""
+# ---- 관측성 (PR 5b) ----
+
+def test_invalid_mode_is_reported_not_just_swallowed(monkeypatch, caplog):
+    """오타를 조용히 무시하면 운영자는 Artifact 모드로 믿는데 실제로는 평면 키를 읽는다."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, "prefer_artifcat")
+    info = artifact.read_mode_info()
+    assert info == {"mode": artifact.READ_LEGACY, "raw": "prefer_artifcat", "invalid": True}
+    with caplog.at_level("WARNING", logger="app.artifact"):
+        assert artifact.read_mode() == artifact.READ_LEGACY
+    assert "prefer_artifcat" in caplog.text
+
+
+def test_unset_mode_is_not_flagged_invalid(monkeypatch):
+    """미설정은 정상(기본값 사용) — 오타와 구분해야 경고가 의미를 갖는다."""
+    monkeypatch.delenv(artifact.READ_MODE_ENV, raising=False)
+    assert artifact.read_mode_info() == {"mode": artifact.READ_LEGACY, "raw": "", "invalid": False}
+
+
+def test_read_status_reports_usable_artifacts(monkeypatch):
+    monkeypatch.delenv(artifact.READ_MODE_ENV, raising=False)
+    st = {"artifacts": [artifact.make_artifact(s["artifact_type"], {"x": 1})
+                        for s in artifact.LEGACY_ARTIFACT_SPECS]}
+    r = artifact.read_status(st)
+    assert r["mode"] == artifact.READ_LEGACY and r["invalid"] is False
+    assert r["expected"] == 7 and r["usable"] == 7 and r["unusable"] == []
+
+
+def test_read_status_lists_unusable_with_reasons(monkeypatch):
+    """전환 전에 '얼마나 폴백이 날지' 미리 보는 지표."""
+    monkeypatch.delenv(artifact.READ_MODE_ENV, raising=False)
+    arts = [artifact.make_artifact(s["artifact_type"], {"x": 1})
+            for s in artifact.LEGACY_ARTIFACT_SPECS]
+    arts[0]["content"] = {}                                  # empty
+    arts[1]["status"] = artifact.STATUS_FAILED               # failed
+    r = artifact.read_status({"artifacts": arts[:-1]})       # 마지막 하나는 missing
+    assert r["usable"] == 4
+    assert {u["reason"] for u in r["unusable"]} == {"empty", "failed", "missing"}
+
+
+def test_run_records_read_status(monkeypatch):
+    _dummy(monkeypatch)
+    monkeypatch.delenv(artifact.READ_MODE_ENV, raising=False)
+    state = run_workflow({"project_name": "관측", "problem": "P"})
+    r = state["artifact_read"]
+    assert r["mode"] == artifact.READ_LEGACY and r["usable"] == 7 and r["unusable"] == []
+
+
+def test_run_logs_invalid_mode(monkeypatch):
+    """실행 기록만 봐도 잘못된 설정으로 돌았음을 알 수 있어야 한다."""
+    _dummy(monkeypatch)
+    monkeypatch.setenv(artifact.READ_MODE_ENV, "artifact_onlyy")
+    state = run_workflow({"project_name": "오타", "problem": "P"})
+    assert state["artifact_read"]["invalid"] is True
+    assert state["artifact_read"]["raw"] == "artifact_onlyy"
+    assert any("ARTIFACT_READ_MODE" in ln for ln in state["logs"])
+
+
+def test_health_exposes_read_mode(monkeypatch):
+    """설정은 시작 시 확정되므로 '지금 이 서버가 어느 경로로 도는지'를 볼 수 있어야 한다."""
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_PREFER_ARTIFACT)
+    body = TestClient(app).get("/health").json()
+    assert body["artifact_read_mode"] == artifact.READ_PREFER_ARTIFACT
+    assert body["artifact_read_mode_invalid"] is False
+
+    monkeypatch.setenv(artifact.READ_MODE_ENV, "틀린값")
+    body = TestClient(app).get("/health").json()
+    assert body["artifact_read_mode"] == artifact.READ_LEGACY
+    assert body["artifact_read_mode_invalid"] is True
+
+
+def test_converted_consumers_have_no_direct_flat_key_reads():
+    """**전환한 소비자에 한해** 평면 키 직접 참조가 남지 않았는지 확인한다.
+
+    ⚠️ 보조 수단이다. 문자열 대조라 별칭·주석에 취약하고, 무엇보다 **여기 나열한 모듈만**
+    본다 — 아래 `test_unconverted_readers_are_known` 이 '아직 안 옮긴 곳'을 따로 고정한다.
+    (실제로 이 테스트는 draft_writer·verifier 만 보던 탓에 Agent 간 읽기 7곳을 통과시켰다.)
+    """
     from pathlib import Path
 
     for mod in (draft_writer, verifier):
         src = Path(mod.__file__).read_text(encoding="utf-8")
         for spec in artifact.LEGACY_ARTIFACT_SPECS:
             assert f'state.get("{spec["legacy_key"]}"' not in src, (mod.__name__, spec["legacy_key"])
+
+
+def test_unconverted_readers_are_known():
+    """아직 selector 를 타지 않는 곳을 **명시적으로 고정**한다.
+
+    이 목록이 있어야 `artifact_only` 통과의 범위를 정직하게 말할 수 있다 — 이 경로들은
+    selector 를 아예 타지 않으므로 모드를 바꿔도 영향을 받지 않는다.
+    목록이 줄면(=전환이 진행되면) 이 테스트를 함께 갱신한다. 늘어나면 실패한다.
+    """
+    import re
+    from pathlib import Path
+
+    root = Path(draft_writer.__file__).parents[2]
+    keys = "|".join(s["legacy_key"] for s in artifact.LEGACY_ARTIFACT_SPECS)
+    pattern = re.compile(rf'state\.get\("({keys})"|\["({keys})"\]')
+    found = {p.relative_to(root).as_posix() for p in root.joinpath("app").rglob("*.py")
+             if pattern.search(p.read_text(encoding="utf-8"))}
+    assert found == {
+        # Agent 간 읽기 — 뒤 Agent 가 앞 Agent 결과를 읽는 경로(전환 예정)
+        "app/agents/competitor.py", "app/agents/customer.py", "app/agents/pestel.py",
+        "app/agents/swot.py", "app/agents/business_model.py", "app/agents/risk.py",
+        "app/agents/research.py",
+        # 표시·집계 계층 — 문서 내용을 만들지 않으므로 뒤로 미룸
+        "app/api/routes.py", "app/services/parallel_bench.py",
+    }, found

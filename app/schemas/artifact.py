@@ -32,9 +32,12 @@ PR 2, 정합성 검증은 PR 3, Agent별 Dual Write는 PR 4다. 상세: `docs/ph
 """
 from __future__ import annotations
 
+import logging
 import os
 from copy import deepcopy
 from typing import TypedDict
+
+_log = logging.getLogger("app.artifact")
 
 # 봉투 자체의 버전. content 내부 스키마 버전이 아니다(그건 Agent별로 다르다).
 ARTIFACT_SCHEMA_VERSION = 1
@@ -403,14 +406,62 @@ def find_artifact(state: dict, artifact_type: str) -> Artifact | None:
     return None
 
 
+class ArtifactUnavailable(RuntimeError):
+    """`artifact_only` 모드에서 쓸 수 있는 Artifact 가 없을 때. 다른 모드에서는 발생하지 않는다.
+
+    이 모드는 '평면 키 없이도 정말 도는가'를 확인하는 **검증용**이다. 없는 Artifact 를 빈
+    dict 로 넘겨 파이프라인을 계속 돌리면 확인 자체가 무의미해지므로 명시적으로 실패시킨다.
+    """
+
+
+def read_mode_info() -> dict:
+    """`ARTIFACT_READ_MODE` 를 해석하고 **원본 값과 폴백 여부까지** 알려준다.
+
+    알 수 없는 값·미설정이면 가장 안전한 `legacy` 로 떨어지되, **조용히 넘어가지 않는다.**
+    `ARTIFACT_READ_MODE=prefer_artifcat` 같은 오타를 무시만 하면 운영자는 Artifact 모드로
+    돌고 있다고 믿는데 실제로는 계속 평면 키를 읽는다 — 알아차릴 방법이 없는 게 문제다.
+    그래서 원본(`raw`)과 폴백 여부(`invalid`)를 함께 돌려주고, 호출부가 로그·`/health`·
+    실행 State 에 노출한다.
+    """
+    raw = os.getenv(READ_MODE_ENV, "") or ""
+    normalized = raw.strip().lower()
+    if normalized in READ_MODES:
+        return {"mode": normalized, "raw": raw, "invalid": False}
+    # 미설정은 정상(기본값 사용). 값이 있는데 못 알아들은 경우만 invalid.
+    return {"mode": READ_LEGACY, "raw": raw, "invalid": bool(normalized)}
+
+
 def read_mode() -> str:
-    """`ARTIFACT_READ_MODE` 를 읽는다. 알 수 없는 값·미설정이면 가장 안전한 `legacy`.
+    """현재 읽기 모드. 알 수 없는 값·미설정이면 `legacy`.
 
     이 값 하나가 **rollback 장치**다. 전환 후 문제가 생기면 코드를 되돌리지 않고
-    `ARTIFACT_READ_MODE=legacy` 로만 바꾸면 즉시 기존 경로로 돌아간다.
+    `ARTIFACT_READ_MODE=legacy` 로 바꾼 뒤 **애플리케이션을 재시작**하면 기존 경로로
+    복귀한다(‘즉시’가 아니다 — `.env` 는 `load_dotenv()` 가 모듈 import 시 1회만 읽는다).
     """
-    mode = (os.getenv(READ_MODE_ENV, "") or "").strip().lower()
-    return mode if mode in READ_MODES else READ_LEGACY
+    info = read_mode_info()
+    if info["invalid"]:
+        _log.warning(
+            "%s=%r 를 알 수 없어 %s 로 동작합니다(오타 확인). 유효값: %s",
+            READ_MODE_ENV, info["raw"], READ_LEGACY, ", ".join(READ_MODES))
+    return info["mode"]
+
+
+def _usable_content(state: dict, artifact_type: str):
+    """Artifact 에서 쓸 수 있는 content 를 꺼낸다. 못 쓰면 `(None, 사유)`.
+
+    '없음'과 '있는데 못 씀'을 구분한다 — 후자는 단순 미생성이 아니라 Agent 오류·직렬화
+    실패·status=failed 같은 **실제 문제**일 수 있어서, 조용히 평면 키로 떨어지면 그 문제가
+    숨는다.
+    """
+    a = find_artifact(state, artifact_type)
+    if not isinstance(a, dict):
+        return None, "missing"
+    if a.get("status") == STATUS_FAILED:
+        return None, "failed"
+    content = a.get("content")
+    if not content:
+        return None, "empty"
+    return content, None
 
 
 def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
@@ -419,22 +470,50 @@ def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
 
     모드(`ARTIFACT_READ_MODE`, 인자로 덮어쓸 수 있음):
       - `legacy`(기본)   평면 키만 읽는다 — 전환 전과 **완전히 동일한 동작**
-      - `prefer_artifact` Artifact 우선, 비었거나 없으면 평면 키로 폴백
-      - `artifact_only`   Artifact 만 읽는다(폴백 없음). 평면 키 제거 직전 단계에서
-                          '정말 Artifact 만으로 도는지' 확인하는 용도
+      - `prefer_artifact` Artifact 우선, 못 쓰면 평면 키로 폴백(사유를 로그로 남긴다)
+      - `artifact_only`   Artifact 만 읽는다. 못 쓰면 `ArtifactUnavailable` 로 **명시적 실패**
 
     소비자를 이 함수로 옮겨 두면 기본값(`legacy`)에서는 아무것도 바뀌지 않고,
-    준비가 됐을 때 **환경변수만으로** 읽기 경로를 통째로 전환·되돌릴 수 있다.
+    준비가 됐을 때 **환경변수만으로**(+재시작) 읽기 경로를 통째로 전환·되돌릴 수 있다.
     """
     if not isinstance(state, dict):
         return {}
     m = mode if mode in READ_MODES else read_mode()
     if m == READ_LEGACY:
         return state.get(legacy_key) or {}
-    a = find_artifact(state, artifact_type)
-    content = a.get("content") if isinstance(a, dict) else None
+    content, reason = _usable_content(state, artifact_type)
     if content:
         return content
     if m == READ_ARTIFACT_ONLY:
-        return {}
+        raise ArtifactUnavailable(f"{artifact_type}: Artifact 를 쓸 수 없음({reason})")
+    # prefer_artifact 폴백 — 조용히 넘어가면 Artifact 쪽 오류가 묻힌다.
+    _log.warning("Artifact %s 를 쓸 수 없어 평면 키 %s 로 폴백합니다(사유: %s)",
+                 artifact_type, legacy_key, reason)
     return state.get(legacy_key) or {}
+
+
+def read_status(state: dict) -> dict:
+    """실행 종료 시점의 읽기 모드·Artifact 가용성 스냅샷(관측용).
+
+    `prefer_artifact` 로 전환하기 전에 **얼마나 폴백이 날지**를 미리 보는 용도다.
+    `unusable` 이 비어 있어야 전환해도 평면 키에 기대지 않는다.
+
+    ⚠️ 런타임 카운터가 아니라 **finalize 시점 스냅샷**이다. Agent 는 Artifact 를 추가만
+    하므로 실행 중 가용성이 줄지는 않지만, '실제로 몇 번 폴백했는지'를 세지는 않는다
+    (실 전환 단계에서 호출 단위 계측이 필요하면 usage·budget 처럼 별도로 붙인다).
+    """
+    info = read_mode_info()
+    unusable: list[dict] = []
+    for spec in LEGACY_ARTIFACT_SPECS:
+        content, reason = _usable_content(state if isinstance(state, dict) else {},
+                                          spec["artifact_type"])
+        if not content:
+            unusable.append({"artifact_id": spec["artifact_id"], "reason": reason})
+    return {
+        "mode": info["mode"],
+        "raw": info["raw"],
+        "invalid": info["invalid"],
+        "expected": len(LEGACY_ARTIFACT_SPECS),
+        "usable": len(LEGACY_ARTIFACT_SPECS) - len(unusable),
+        "unusable": unusable,
+    }
