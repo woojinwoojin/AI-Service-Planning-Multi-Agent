@@ -303,6 +303,10 @@ def merge_artifacts(left: list, right: list) -> list:
 > 있다. 평면 키를 지우면 파이프라인은 멈춘다. **`prefer_artifact` 전환 전에 Agent 간 읽기를
 > 먼저 옮겨야 한다** — 지금 상태로 수집한 폴백 지표는 실제 준비도를 과대평가한다.
 >
+> **→ 해소됨(PR 5c-1~5c-3)**: Agent 간 읽기 7곳 전부 전환 완료. 이제 `artifact_only` 통과는
+> 분석 파이프라인 전체에 대한 진술이다. 단 **표시 계층은 여전히 평면 키를 읽으며, 이는 의도된
+> 것**이다(외부 API 호환). 실 LLM 기준 검증과 런타임 폴백 계측은 아직 남아 있다.
+>
 > **⚠️ 이 동일성 검증의 한계(정직 표기)**: 더미 모드에서 초안은 `_dummy_draft(si, research,
 > pestel)` 로 만들어지므로 **research·pestel 만 산출물에 실제로 반영**된다. 나머지 5개
 > (competitor·customer·swot·business_model·risk)는 프롬프트에만 들어가고 더미 LLM 이 무시하므로,
@@ -355,7 +359,11 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 |---|---|---|---|
 | 5c-1 | `research_gap` → research | 1개 (자기 갱신) | ✅ 완료 |
 | 5c-2 | `competitor`·`customer`·`pestel`·`business_model` → research | 1개 | ✅ 완료 |
-| 5c-3 | `swot` → research+competitor · `risk` → research+pestel | 2개 | 예정 |
+| 5c-3 | `swot` → research+competitor · `risk` → research+pestel | 2개 | ✅ 완료 |
+
+**→ PR 5c 완료: Agent 간 읽기 7곳 전부 전환.** 문서 내용을 만드는 경로에는 평면 키 직접
+읽기가 남지 않았고, 남은 것은 표시·집계 계층(`routes.py`·`parallel_bench.py`)뿐이다 —
+이들은 외부 호환용 평면 필드를 그대로 제공해야 하므로 전환 대상이 아니다.
 
 > **5c-1 (`feat/artifact-read-research-gap`)**: `research_gap` 이 보강 대상인 기존 조사 결과를
 > selector 로 읽는다. 이 경로를 **가장 먼저** 옮기는 이유는 `research_gap` 이 Research 결과를
@@ -404,6 +412,26 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 >
 > **남은 것**: `swot`·`risk` 2개(복수 의존) → 5c-3. 이 둘이 끝나야 `depends_on` 선언이 실제
 > 런타임 입력 관계와 일치하는지 처음으로 직접 검증된다.
+
+> **5c-3 (`feat/artifact-read-multi-dep`)**: 의존이 **2개**인 `swot`(research+competitor)·
+> `risk`(research+pestel)를 전환. Agent 간 읽기 7곳이 이로써 전부 selector 를 탄다.
+>
+> **이 묶음의 고유한 가치 — `depends_on` 이 선언에서 검증된 사실로 바뀐다.**
+> 지금까지 `depends_on` 은 코드를 읽고 사람이 적은 값이었다(`artifact.py` 설계 메모).
+> 이제 모든 Agent 간 읽기가 `artifact.read` 를 지나므로 **호출을 기록해 선언과 대조**할 수
+> 있다 — `test_declared_depends_on_matches_actual_runtime_reads` 가 6개 Agent 각각에 대해
+> `{읽은 유형} == set(depends_on)` 을 확인한다. 어긋나면 **PR 6(선택적 Agent 재실행)이 잘못된
+> Agent 를 재실행**하므로, PR 6 의 전제조건을 여기서 확보한 셈이다.
+>
+> **검증(11건 추가)**: 두 의존이 **둘 다** Artifact 쪽에서 오는가(2모드×2Agent) / legacy 에서는
+> 둘 다 평면 키인가 / 평면 키 없이 Artifact 둘만으로 동작하는가 / **의존 하나만 빠져도**
+> LLM 호출 전에 `ArtifactUnavailable` 인가(조용히 진행하면 '경쟁사 분석을 안 보고 만든 SWOT'이
+> 정상 산출물처럼 저장된다) / depends_on ↔ 런타임 읽기 일치.
+>
+> 481 passed(470 → +11), ruff clean. 기본 모드 `legacy` 이므로 동작 변화 없음.
+>
+> **다음**: PR 5d(런타임 폴백 계측 + 비교 항목 확대) → 옛 v2 프로젝트·`/revise` 검증 →
+> 실 LLM 1~2주제 소규모 검증 → Staging 에서 `prefer_artifact` 적용.
 
 ### PR 6. 제한적 동적 실행과 연결 — 위험도 6/10
 

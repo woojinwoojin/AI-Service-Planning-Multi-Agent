@@ -45,8 +45,10 @@ def _dummy(_: dict) -> dict:
 
 
 def risk(state: ProjectState) -> dict:
-    research = state.get("research_result", {})
-    pestel = state.get("pestel_result", {})
+    # 앞 Agent 결과는 selector 로 읽는다(로드맵 2-2 PR 5c-3). 의존 2개(research + pestel) —
+    # 명세의 depends_on 과 실제 읽는 유형이 일치하는지 테스트로 고정된다.
+    research = artifact.read(state, "research_analysis")
+    pestel = artifact.read(state, "pestel_analysis")
     fallback = _dummy(research)
     user = (
         "아래 결과를 근거로 리스크 분석을 수행하세요.\n"

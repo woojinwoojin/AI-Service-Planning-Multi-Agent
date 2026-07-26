@@ -26,8 +26,11 @@ def _dummy(_: dict) -> dict:
 
 
 def swot(state: ProjectState) -> dict:
-    research = state.get("research_result", {})
-    comp = state.get("competitor_result", {})
+    # 앞 Agent 결과는 selector 로 읽는다(로드맵 2-2 PR 5c-3). **의존이 2개인 첫 전환**이므로,
+    # 여기서 읽는 유형 집합이 명세의 depends_on(artifact-research + artifact-competitor)과
+    # 일치하는지가 테스트로 고정된다. 기본 모드 legacy 에서는 평면 키를 그대로 읽는다.
+    research = artifact.read(state, "research_analysis")
+    comp = artifact.read(state, "competitor_analysis")
     fallback = _dummy(research)
     user = (
         "아래 결과를 근거로 SWOT 분석을 수행하세요.\n"

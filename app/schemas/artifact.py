@@ -22,6 +22,9 @@ PR 2, 정합성 검증은 PR 3, Agent별 Dual Write는 PR 4다. 상세: `docs/ph
 - `depends_on`은 상상이 아니라 **각 Agent 노드가 실제로 읽는 State 키**에서 도출했다
   (`competitor.py`·`customer.py`·`pestel.py`가 research를, `swot.py`가 research+competitor를,
   `business_model.py`가 research를, `risk.py`가 research+pestel을 읽는다).
+  **PR 5c 이후로는 선언이 아니라 검증된 사실이다** — Agent 간 읽기가 전부 `read()`를 지나므로,
+  `test_declared_depends_on_matches_actual_runtime_reads`가 호출을 기록해 이 선언과 대조한다.
+  (어긋나면 PR 6의 선택적 재실행이 **잘못된 Agent를 재실행**하므로 중요하다.)
 - `owner_agent`는 **LangGraph 노드 이름과 정확히 일치**한다(`workflow.py`의 `add_node`).
   덕분에 `failed_nodes`·`fallback_nodes`와 그대로 대조해 `status`를 유도할 수 있다.
 - **근거를 직접 확보하는 Agent는 research·competitor 둘뿐**이다(나머지는 검색하지 않는다).
