@@ -221,7 +221,7 @@ def merge_artifacts(left: list, right: list) -> list:
 **한 PR에서 7개를 다 바꾸지 않는다:**
 1. Research · Competitor (Evidence Registry와 직접 연결 → 먼저) — ✅ 완료
 2. Customer · PESTEL — ✅ 완료
-3. SWOT · Risk · Business Model
+3. SWOT · Risk · Business Model — ✅ 완료 (**PR 4 전체 완료**)
 
 > **1묶음(Research·Competitor) 구현 시 드러난 것 3건 — 나머지 묶음에도 그대로 적용된다**
 >
@@ -257,6 +257,18 @@ def merge_artifacts(left: list, right: list) -> list:
 > **검증**: serial·parallel 모두 7개·중복 0·`parity 7/7 ok`,
 > `source=agent` 4건(research·competitor·customer·pestel) / `legacy_derived` 3건
 > (swot·risk·business_model). 399 passed, coverage 96.17%.
+>
+> **3묶음(SWOT·Risk·Business Model) — PR 4 전체 완료**: 규칙 ②는 여기서도 해당 없음
+> (세 결과 키를 쓰는 곳도 각자 한 군데뿐). **`depends_on` 이 2개인 첫 사례** —
+> `artifact-swot`=[research, competitor], `artifact-risk`=[research, pestel].
+> 정합성 검사가 `missing_dependency` 없이 통과하는지까지 확인했다.
+> **검증**: serial·parallel 모두 7개·중복 0·`parity 7/7 ok`·**`source=agent` 7/7**
+> (파생본 0). 404 passed, coverage 96.14%.
+>
+> **파생 경로의 위치가 바뀌었다**: 신규 실행에는 파생본이 더 이상 없다. `build_artifacts_from_legacy`
+> 는 이제 **옛 기록(v2) 재조회 전용 폴백**이다. 다만 삭제하지 않는다 — v2 기록은 계속 열리고,
+> `reconcile` 이 파생본을 매번 갱신하는 성질(규칙 ③)도 그 경로에서 여전히 필요하다.
+> 그 회귀를 지키는 테스트를 옛 기록 맥락으로 옮겨 두었다.
 
 ### PR 5. Artifact Selector 도입 — 위험도 5/10
 

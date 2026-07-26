@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import BIZMODEL_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm
 
@@ -49,4 +50,7 @@ def business_model(state: ProjectState) -> dict:
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[business_model] 수익모델 설계 완료 ({mode})"]
-    return {"business_model_result": result, "logs": logs}
+    # Dual Write(로드맵 2-2 PR 4, 3묶음): 평면 결과와 같은 내용을 표준 Artifact 봉투로도 방출.
+    # 이 묶음으로 7개 Agent 전부가 Artifact 를 직접 쓴다(파생 폴백은 옛 기록용으로만 남는다).
+    return {"business_model_result": result, "logs": logs,
+            "artifacts": [artifact.make_artifact("business_model_analysis", result)]}

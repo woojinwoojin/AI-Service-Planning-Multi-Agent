@@ -103,14 +103,20 @@ def test_rerun_finalizers_keeps_artifacts_consistent(monkeypatch):
     assert state["artifact_parity"]["ok"]
 
 
-def test_non_dual_write_agent_artifact_follows_legacy(monkeypatch):
-    """아직 Dual Write 안 된 Agent 는 평면 결과에서 파생되므로 원본을 따라간다."""
-    _dummy(monkeypatch)
-    state = run_workflow({"project_name": "파생", "problem": "P"})
-    state["swot_result"] = {"strengths": ["나중에 바뀐 값"]}
-    workflow.rerun_finalizers(state)
-    arts = {a["artifact_type"]: a for a in state["artifacts"]}
-    assert arts["swot_analysis"]["content"] == {"strengths": ["나중에 바뀐 값"]}
+def test_legacy_derived_artifacts_refresh_from_flat_keys():
+    """파생 Artifact 는 평면 키의 사본이므로 **매번 다시 만들어져야** 한다.
+
+    3묶음 완료로 7개 Agent 가 모두 Dual Write 를 하므로 신규 실행에는 파생본이 없다.
+    하지만 옛 기록(v2)을 재조회하면 `migrate` 가 파생본을 만들고, 그 뒤 `/revise` 를 타면
+    `reconcile` 을 다시 거친다. 이때 파생본이 갱신되지 않으면 옛 값이 영원히 남는다
+    (실제로 `reconcile` 을 '기존 것이 이긴다'로 짰다가 이 회귀를 냈다).
+    """
+    old = migrate.upgrade_state({"swot_result": {"strengths": ["옛 값"]}})
+    assert all(a["metadata"]["source"] == artifact.SOURCE_LEGACY for a in old["artifacts"])
+
+    old["swot_result"] = {"strengths": ["새 값"]}
+    arts = {a["artifact_type"]: a for a in artifact.reconcile(old)}
+    assert arts["swot_analysis"]["content"] == {"strengths": ["새 값"]}
     assert arts["swot_analysis"]["metadata"]["source"] == artifact.SOURCE_LEGACY
 
 
