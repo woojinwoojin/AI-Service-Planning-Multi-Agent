@@ -31,6 +31,7 @@ from app.agents import (
     swot,
     verifier,
 )
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 
 # 이 점수 이상이면 재작성 생략
@@ -318,6 +319,7 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
     _finalize_evidence(state)   # 재작성 후에도 주장-근거 연결(used_by_claims) 재계산
     state.update(_assess_quality(state))
     state["quality_gate"] = quality_gate.evaluate(state)  # 수정본에 대해 품질 게이트 재판정
+    _finalize_artifacts(state)    # 수정 후에도 Artifact 를 최신 결과로 재생성(로드맵 2-2)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
 
@@ -355,6 +357,23 @@ def _finalize_evidence(state: ProjectState) -> None:
     state["evidence_registry"] = evidence.link_claims(reg, claims)
 
 
+def _finalize_artifacts(state: ProjectState) -> None:
+    """Agent 결과를 표준 Artifact 봉투로 병행 기록한다(로드맵 2-2 PR 2, Shadow 단계).
+
+    **기존 7개 평면 결과 키는 그대로 두고** 같은 내용을 파생 생성만 한다 — 이 시점의 소비자는
+    아직 전부 평면 키를 읽으므로 동작 변화가 없다(읽기 경로 전환은 PR 5).
+
+    호출 위치가 중요하다. 반드시 다음 **뒤에** 와야 한다:
+      - `_finalize_evidence`  → 그래야 evidence_id 가 확정돼 Artifact 가 실제 id 를 참조한다
+      - `_assess_quality`     → 그래야 failed_nodes·fallback_nodes 로 status 를 정할 수 있다
+    그리고 `migrate.upgrade_state` **앞에** 와야 한다(upgrade 는 비어 있을 때만 채우므로,
+    여기서 먼저 최신 결과로 재생성해 두면 옛 값이 남지 않는다).
+
+    LLM·검색 호출 없는 순수 변환이다.
+    """
+    state["artifacts"] = artifact.build_artifacts_from_legacy(state)
+
+
 def _finalize_run(state: ProjectState) -> ProjectState:
     """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
@@ -366,6 +385,7 @@ def _finalize_run(state: ProjectState) -> ProjectState:
         state["usage"].get("wall_time_ms"))
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     state["quality_gate"] = quality_gate.evaluate(state)  # 출력 가능 여부 게이트(로드맵 Phase 4)
+    _finalize_artifacts(state)    # Agent 결과를 표준 Artifact 봉투로 병행 기록(로드맵 2-2)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
 
