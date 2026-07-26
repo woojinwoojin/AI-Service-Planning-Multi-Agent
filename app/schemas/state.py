@@ -40,6 +40,10 @@ class ProjectState(TypedDict, total=False):
     # artifact.build_artifacts_from_legacy 로 파생 생성하므로 노드가 직접 쓰지 않는다 →
     # 지금은 reducer 가 필요 없다(Agent 별 Dual Write 를 시작하는 PR 4 에서 전용 reducer 도입).
     artifacts: list
+    # Shadow Artifact 자기점검 결과(2-2 PR 3): {expected, generated, matched, mismatched[], ok}.
+    # 어긋나도 실행을 실패시키지 않고 여기와 로그로만 표면화한다 — 아직 아무도 소비하지 않는
+    # 그림자 구조 때문에 멀쩡한 실행을 죽이는 편이 손해가 크다. 소비 전환(PR 5)의 진입 조건.
+    artifact_parity: dict
     draft: str
     review_result: dict          # 재작성 판단에 쓰는 초안 평가 (= initial_review_result)
     initial_review_result: dict  # 초안 평가(기록용)
