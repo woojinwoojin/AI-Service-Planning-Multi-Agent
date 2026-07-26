@@ -11,16 +11,15 @@ from __future__ import annotations
 
 import pytest
 
-from app.agents import competitor, customer, pestel, research
+from app.agents import business_model, competitor, customer, pestel, research, risk, swot
 from app.graph import workflow
 from app.graph.workflow import run_workflow
 from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm, search
 
-# 2묶음까지 옮긴 Agent. 나머지 3개(swot·risk·business_model)는 아직 파생이다.
-DUAL_WRITTEN = {"research_analysis", "competitor_analysis",
-                "customer_analysis", "pestel_analysis"}
+# 3묶음까지 완료 — 7개 Agent 전부가 Artifact 를 직접 쓴다.
+DUAL_WRITTEN = {s["artifact_type"] for s in artifact.LEGACY_ARTIFACT_SPECS}
 
 
 def _dummy(monkeypatch):
@@ -86,21 +85,52 @@ def test_agents_emit_artifact_in_node_return(monkeypatch):
     assert out2["artifacts"][0]["content"] == out2["competitor_result"]
 
 
-@pytest.mark.parametrize(("node", "artifact_id", "legacy_key"), [
-    (customer.customer, "artifact-customer", "customer_result"),
-    (pestel.pestel, "artifact-pestel", "pestel_result"),
+@pytest.mark.parametrize(("node", "artifact_id", "legacy_key", "deps"), [
+    (customer.customer, "artifact-customer", "customer_result", ["artifact-research"]),
+    (pestel.pestel, "artifact-pestel", "pestel_result", ["artifact-research"]),
+    (swot.swot, "artifact-swot", "swot_result",
+     ["artifact-research", "artifact-competitor"]),
+    (risk.risk, "artifact-risk", "risk_result",
+     ["artifact-research", "artifact-pestel"]),
+    (business_model.business_model, "artifact-business-model",
+     "business_model_result", ["artifact-research"]),
 ])
-def test_bundle2_nodes_emit_artifact(monkeypatch, node, artifact_id, legacy_key):
-    """2묶음(Customer·PESTEL) — 둘 다 research 만 의존하고 자체 검색이 없다."""
+def test_analysis_nodes_emit_artifact(monkeypatch, node, artifact_id, legacy_key, deps):
+    """2·3묶음 — 자체 검색이 없는 분석 Agent 들. swot·risk 는 depends_on 이 2개다."""
     _dummy(monkeypatch)
     st: ProjectState = {"structured_input": {"project_name": "P", "target_user": "U"},
-                        "research_result": {"customer_needs": ["니즈"]}}
+                        "research_result": {"customer_needs": ["니즈"]},
+                        "competitor_result": {"positioning": "니치"},
+                        "pestel_result": {"political": {"content": "규제"}}}
     out = node(st)
     assert [a["artifact_id"] for a in out["artifacts"]] == [artifact_id]
     a = out["artifacts"][0]
     assert a["content"] == out[legacy_key]
-    assert a["depends_on"] == ["artifact-research"]   # 코드에서 도출한 의존
+    assert a["depends_on"] == deps                    # 코드에서 도출한 의존
     assert a["evidence_ids"] == []                    # 자체 검색 없음 + finalize 가 확정
+
+
+def test_all_seven_agents_are_dual_written(monkeypatch):
+    """3묶음 완료 지점 — 파생 폴백에 의존하는 Agent 가 하나도 남지 않아야 한다."""
+    _dummy(monkeypatch)
+    state = run_workflow({"project_name": "완료", "problem": "P"})
+    sources = {a["metadata"]["source"] for a in state["artifacts"]}
+    assert sources == {artifact.SOURCE_AGENT}
+    assert len(state["artifacts"]) == 7 and state["artifact_parity"]["ok"]
+
+
+def test_multi_dependency_artifacts_resolve(monkeypatch):
+    """depends_on 이 2개인 swot·risk 의 의존 대상이 실제로 존재해야 한다."""
+    _dummy(monkeypatch)
+    state = run_workflow({"project_name": "의존", "problem": "P"})
+    arts = _by_type(state)
+    ids = {a["artifact_id"] for a in state["artifacts"]}
+    assert arts["swot_analysis"]["depends_on"] == ["artifact-research", "artifact-competitor"]
+    assert arts["risk_analysis"]["depends_on"] == ["artifact-research", "artifact-pestel"]
+    for t in ("swot_analysis", "risk_analysis"):
+        assert set(arts[t]["depends_on"]) <= ids, t
+    # 정합성 검사도 missing_dependency 없이 통과한다.
+    assert state["artifact_parity"]["ok"]
 
 
 # ---- 2) reducer: 중복 없이 마지막이 남는가 ----

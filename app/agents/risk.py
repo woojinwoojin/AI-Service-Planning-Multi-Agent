@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import RISK_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm
 
@@ -58,4 +59,7 @@ def risk(state: ProjectState) -> dict:
     result = _validate(raw, fallback)
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[risk] 리스크 분석 완료 ({mode}, {len(result['risks'])}건)"]
-    return {"risk_result": result, "logs": logs}
+    # Dual Write(로드맵 2-2 PR 4, 3묶음): 평면 결과와 같은 내용을 표준 Artifact 봉투로도 방출.
+    # depends_on 은 research + pestel 2개(위 두 결과를 실제로 읽는다) — 명세가 자동으로 싣는다.
+    return {"risk_result": result, "logs": logs,
+            "artifacts": [artifact.make_artifact("risk_analysis", result)]}

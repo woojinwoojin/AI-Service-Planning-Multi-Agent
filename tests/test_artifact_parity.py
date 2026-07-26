@@ -141,19 +141,13 @@ def test_empty_and_invalid_state_are_reported_not_crashed():
 def test_run_surfaces_parity_and_does_not_fail_on_mismatch(monkeypatch):
     """정합성이 깨져도 실행은 완주해야 한다 — 계획서 원칙."""
     _dummy(monkeypatch)
-    # 생성기가 고장나 Artifact 를 3개만 만드는 상황을 흉내낸다.
-    monkeypatch.setattr(artifact, "build_artifacts_from_legacy",
-                        lambda s: artifact.LEGACY_ARTIFACT_SPECS and
-                        [{"artifact_id": spec["artifact_id"], "artifact_type": spec["artifact_type"],
-                          "content": s.get(spec["legacy_key"]) or {}, "depends_on": [],
-                          "evidence_ids": [], "metadata": {"legacy_key": spec["legacy_key"]}}
-                         for spec in artifact.LEGACY_ARTIFACT_SPECS[:3]])
+    # 확정 단계(reconcile)가 고장나 일부만 남기는 상황을 흉내낸다.
+    real = artifact.reconcile
+    monkeypatch.setattr(artifact, "reconcile", lambda s: real(s)[:3])
     state = run_workflow({"project_name": "비실패", "problem": "P"})
     # 정합성은 깨졌다고 보고하되…
-    # (개수는 Dual Write 로 옮긴 Agent 수에 따라 달라지므로 '7개 미만'으로만 본다 —
-    #  묶음이 늘 때마다 숫자를 고치게 만들면 테스트가 의미 없이 깨진다.)
     assert not state["artifact_parity"]["ok"]
-    assert state["artifact_parity"]["generated"] < 7
+    assert state["artifact_parity"]["generated"] == 3
     assert "missing_artifact" in {m["reason"] for m in state["artifact_parity"]["mismatched"]}
     # …실행 자체는 완주하고 결과물도 그대로 나온다.
     assert state["run_status"] in ("success", "degraded")
