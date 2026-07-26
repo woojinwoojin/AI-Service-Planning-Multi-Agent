@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import COMPETITOR_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import evidence, llm, search
 
@@ -96,5 +97,9 @@ def competitor(state: ProjectState) -> dict:
     # 경쟁사 검색 출처도 통합 근거 레지스트리로 방출한다(로드맵 2-1) — Research 출처와 함께
     # 하나의 목록으로 합쳐진다(같은 URL 이면 source_agents 에 competitor 가 추가됨).
     registry = evidence.entries_from("competitor", query, sources)
+    # Dual Write(로드맵 2-2 PR 4): 평면 결과와 **같은 내용**을 표준 Artifact 봉투로도 방출한다.
+    # 병렬 분기에서 다른 Agent 와 동시에 도착해도 merge_artifacts reducer 가 artifact_id 로
+    # 병합하므로 유실·중복이 없다.
     return {"competitor_result": result, "competitor_sources": sources,
-            "evidence_registry": registry, "logs": logs}
+            "evidence_registry": registry, "logs": logs,
+            "artifacts": [artifact.make_artifact("competitor_analysis", result)]}

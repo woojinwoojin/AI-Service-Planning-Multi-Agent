@@ -219,9 +219,34 @@ def merge_artifacts(left: list, right: list) -> list:
 ```
 
 **한 PR에서 7개를 다 바꾸지 않는다:**
-1. Research · Competitor (Evidence Registry와 직접 연결 → 먼저)
+1. Research · Competitor (Evidence Registry와 직접 연결 → 먼저) — ✅ 완료
 2. Customer · PESTEL
 3. SWOT · Risk · Business Model
+
+> **1묶음(Research·Competitor) 구현 시 드러난 것 3건 — 나머지 묶음에도 그대로 적용된다**
+>
+> ① **Agent 는 `evidence_ids` 도 `status` 도 알 수 없다.** `evidence_id` 는 실행 종료 시
+> `evidence.normalize()` 가 URL 최초 등장 순서로 부여하고, `failed`/`fallback` 은
+> `_assess_quality` 가 로그를 보고 정한다. 그래서 `make_artifact` 는 둘을 비워 두고
+> **`reconcile()` 이 finalize 시점 값으로 재확정**한다. 이게 없으면 *옮긴 Agent 만* 근거 연결이
+> 비고 status 가 틀리는 회귀가 생긴다.
+>
+> ② **`research_gap`(2-5)이 `research_result` 를 갱신하므로 Artifact 도 재방출해야 한다.**
+> `research` 가 쓴 보강 전 봉투가 남으면 정합성 검사가 `content_mismatch` 로 잡는다.
+> reducer 가 나중 것을 채택하므로 보강본이 최종이 된다. **한 노드가 다른 노드의 결과 키를
+> 갱신하는 경로가 있으면 그 노드도 Dual Write 대상이다.**
+>
+> ③ **`reconcile` 에서 살리는 것은 `source=agent` 뿐이다.** 처음엔 "기존 Artifact 가 이긴다"로
+> 짰다가, 이전 실행에서 **파생된** 항목까지 살아남아 평면 결과가 바뀌어도 옛 파생본이 계속
+> 이기는 버그를 테스트가 잡았다. 파생본은 평면 키의 사본일 뿐이므로 매번 다시 만든다.
+>
+> **발산 시 태도**: Dual Write 된 Agent 의 Artifact 와 평면 결과가 어긋나면 **파생본으로 덮어
+> 감추지 않고 `content_mismatch` 로 보고**한다. 조용히 맞춰버리면 정합성 검사가 무의미해진다
+> (검사기가 항상 통과를 뱉게 된다).
+>
+> **검증**: 더미 serial·parallel 모두 Artifact 7개·중복 0·`parity 7/7 ok`,
+> `source=agent` 는 research·competitor 2건·나머지 5건은 `legacy_derived`.
+> 395 passed, coverage 96.13%. API 응답 무변경.
 
 ### PR 5. Artifact Selector 도입 — 위험도 5/10
 
