@@ -20,17 +20,6 @@ from app.schemas.state import ProjectState
 from app.services import evidence, llm, sections
 
 
-def _content(state: ProjectState, artifact_type: str) -> dict:
-    """Agent 산출물을 읽는 단일 창구(로드맵 2-2 PR 5).
-
-    `ARTIFACT_READ_MODE` 를 따른다 — 기본 `legacy` 에서는 평면 키를 그대로 읽으므로
-    전환 전과 동작이 같다. 평면 키 이름은 명세가 알고 있으니 호출부에 적지 않는다.
-    """
-    legacy_key = artifact.SPEC_BY_TYPE[artifact_type]["legacy_key"]
-    data = artifact.get_artifact_content(state, artifact_type, legacy_key)
-    return data if isinstance(data, dict) else {}
-
-
 # 실제 LLM은 종종 기획서 전체를 ```markdown ... ``` 로 감싸서 반환한다.
 # 최종 .md 산출물에 코드펜스가 남지 않도록, 문서 전체를 감싼 펜스만 벗긴다.
 _WRAPPING_FENCE = re.compile(r"^\s*```(?:markdown|md)?\s*\n(.*?)\n```\s*$", re.DOTALL)
@@ -66,8 +55,8 @@ def _real_sources(state: ProjectState) -> list[str]:
     if reg:
         objs = evidence.normalize(reg)  # URL 중복 제거 + 안정 id(제목/URL 보존)
     else:
-        research = _content(state, "research_analysis")
-        objs = list((research or {}).get("source_objects") or []) if isinstance(research, dict) else []
+        research = artifact.read(state, "research_analysis")
+        objs = list(research.get("source_objects") or [])
         objs += list(state.get("competitor_sources") or [])
     seen: set[str] = set()
     lines: list[str] = []
@@ -181,13 +170,13 @@ def draft(state: ProjectState) -> dict:
     # Agent 산출물은 selector 를 통해 읽는다(로드맵 2-2 PR 5). 기본 모드 legacy 에서는
     # 평면 키를 그대로 읽으므로 전환 전과 동작이 같고, ARTIFACT_READ_MODE 만 바꾸면
     # Artifact 기반 읽기로 통째로 넘어가거나 되돌릴 수 있다.
-    research = _content(state, "research_analysis")
-    pestel = _content(state, "pestel_analysis")
-    comp = _content(state, "competitor_analysis")
-    cust = _content(state, "customer_analysis")
-    swot = _content(state, "swot_analysis")
-    bizmodel = _content(state, "business_model_analysis")
-    risks = _content(state, "risk_analysis")
+    research = artifact.read(state, "research_analysis")
+    pestel = artifact.read(state, "pestel_analysis")
+    comp = artifact.read(state, "competitor_analysis")
+    cust = artifact.read(state, "customer_analysis")
+    swot = artifact.read(state, "swot_analysis")
+    bizmodel = artifact.read(state, "business_model_analysis")
+    risks = artifact.read(state, "risk_analysis")
     fallback = _dummy_draft(si, research, pestel)
 
     user = (
@@ -329,7 +318,7 @@ def _relevant_analysis(state: ProjectState, sid: str) -> str:
     if not spec:
         return ""
     label, artifact_type = spec
-    data = _content(state, artifact_type)
+    data = artifact.read(state, artifact_type)
     if not data:
         return ""
     return f"[{label} 결과(근거)]\n{json.dumps(data, ensure_ascii=False)}\n\n"

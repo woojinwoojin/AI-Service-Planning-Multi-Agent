@@ -220,10 +220,13 @@ def _skip_reason(gaps: list[dict]) -> str | None:
     return None
 
 
-def _known_urls(state: ProjectState) -> set[str]:
-    """이미 확보한 근거 URL — 추가 검색이 같은 출처를 다시 세지 않게 한다."""
-    urls = {str(o.get("url") or "") for o in
-            ((state.get("research_result") or {}).get("source_objects") or [])}
+def _known_urls(state: ProjectState, research: dict) -> set[str]:
+    """이미 확보한 근거 URL — 추가 검색이 같은 출처를 다시 세지 않게 한다.
+
+    조사 결과는 호출부가 selector 로 이미 읽은 것을 받는다(같은 실행에서 두 번 읽으면
+    prefer_artifact 폴백 경고도 두 번 난다).
+    """
+    urls = {str(o.get("url") or "") for o in (research.get("source_objects") or [])}
     urls |= {str(e.get("url") or "") for e in (state.get("evidence_registry") or [])}
     urls |= {str(s.get("url") or "") for s in (state.get("competitor_sources") or [])
              if isinstance(s, dict)}
@@ -263,6 +266,11 @@ def research_gap(state: ProjectState) -> dict:
         meta["skip_reason"] = skip
         return {"dynamic_research": meta, "logs": [f"[research_gap] 추가 조사 생략 ({skip})"]}
 
+    # 앞 Agent(Research) 결과는 selector 로 읽는다(로드맵 2-2 PR 5c). 기본 모드 legacy 에서는
+    # 평면 키를 그대로 읽으므로 전환 전과 동작이 같다. **검색보다 먼저** 읽는 이유는
+    # artifact_only 에서 Artifact 가 없으면 검색·LLM 비용을 쓰기 전에 실패해야 하기 때문이다.
+    research = artifact.read(state, "research_analysis")
+
     # 1) 보고된 공백에 대해서만 검색(상한 안에서)
     hits: list[dict] = []
     for gap in gaps[:_max_gap_searches()]:
@@ -272,7 +280,8 @@ def research_gap(state: ProjectState) -> dict:
                                  "hits": len(found), "state": st.get("state")})
         hits.extend(found)
 
-    new_objs = [o for o in search.build_source_objects(hits) if o["url"] not in _known_urls(state)]
+    known = _known_urls(state, research)
+    new_objs = [o for o in search.build_source_objects(hits) if o["url"] not in known]
     meta["new_sources"] = len(new_objs)
     if not new_objs:
         meta["skip_reason"] = "새 근거 없음"
@@ -280,7 +289,7 @@ def research_gap(state: ProjectState) -> dict:
                 "logs": [f"[research_gap] 추가 검색 {len(meta['searches'])}건 → 새 근거 없음"]}
 
     # 2) 새 근거로 확인되는 내용만 뽑아 조사 결과에 덧붙인다(LLM 1회, 추가 생성 금지 프롬프트)
-    result = dict(state.get("research_result") or {})
+    result = dict(research)
     topics = ", ".join(g["topic"] for g in gaps[:_max_gap_searches()])
     user = (
         f"[근거가 부족하다고 보고된 항목]\n{topics}\n\n"
