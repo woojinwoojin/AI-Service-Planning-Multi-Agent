@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import CUSTOMER_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm
 
@@ -56,4 +57,7 @@ def customer(state: ProjectState) -> dict:
     logs = [
         f"[customer] 고객 문제 분석 완료 ({mode}, pain {len(result['pain_points'])}건)"
     ]
-    return {"customer_result": result, "logs": logs}
+    # Dual Write(로드맵 2-2 PR 4, 2묶음): 평면 결과와 같은 내용을 표준 Artifact 봉투로도 방출.
+    # evidence_ids·status 는 실행 시점에 알 수 없어 비운 채로 두고 artifact.reconcile 이 확정한다.
+    return {"customer_result": result, "logs": logs,
+            "artifacts": [artifact.make_artifact("customer_analysis", result)]}

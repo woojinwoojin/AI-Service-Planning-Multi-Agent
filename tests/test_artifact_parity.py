@@ -150,8 +150,11 @@ def test_run_surfaces_parity_and_does_not_fail_on_mismatch(monkeypatch):
                          for spec in artifact.LEGACY_ARTIFACT_SPECS[:3]])
     state = run_workflow({"project_name": "비실패", "problem": "P"})
     # 정합성은 깨졌다고 보고하되…
+    # (개수는 Dual Write 로 옮긴 Agent 수에 따라 달라지므로 '7개 미만'으로만 본다 —
+    #  묶음이 늘 때마다 숫자를 고치게 만들면 테스트가 의미 없이 깨진다.)
     assert not state["artifact_parity"]["ok"]
-    assert state["artifact_parity"]["generated"] == 3
+    assert state["artifact_parity"]["generated"] < 7
+    assert "missing_artifact" in {m["reason"] for m in state["artifact_parity"]["mismatched"]}
     # …실행 자체는 완주하고 결과물도 그대로 나온다.
     assert state["run_status"] in ("success", "degraded")
     assert state["final_draft"]
