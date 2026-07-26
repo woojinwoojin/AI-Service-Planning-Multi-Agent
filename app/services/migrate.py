@@ -14,9 +14,11 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from app.schemas import artifact
 from app.services import quality_gate, reliability
 
-STATE_VERSION = 2  # v1=초기, v2=문서재생성/신뢰도/게이트 필드 추가(2026-07-24 세션)
+# v1=초기, v2=문서재생성/신뢰도/게이트 필드 추가(2026-07-24), v3=Artifact Contract 병행 기록(2-2 PR 2)
+STATE_VERSION = 3
 
 # 재조회 시 없으면 채울 안전 기본값(가변 값은 매번 deepcopy 해 공유 참조 방지).
 _DEFAULTS: dict = {
@@ -54,5 +56,11 @@ def upgrade_state(state: dict) -> dict:
     # 품질 게이트: 옛 기록엔 없으므로 저장된 점수·검증·최종본으로 재계산해 채운다(Phase 4 지표 소급).
     if not state.get("quality_gate"):
         state["quality_gate"] = quality_gate.evaluate(state)
+    # v2→v3: Artifact Contract(2-2). 옛 기록엔 artifacts 가 없으므로 저장된 평면 결과 키에서
+    # 파생 생성한다. LLM·검색 호출이 없는 순수 변환이라 재조회가 느려지거나 비용이 들지 않는다.
+    # 이미 있으면 덮어쓰지 않는다 — Agent 가 직접 쓴 Artifact(PR 4)를 legacy 파생본으로
+    # 되돌려 버리면 안 되기 때문. 새 실행의 재생성은 workflow._finalize_artifacts 가 담당한다.
+    if not state.get("artifacts"):
+        state["artifacts"] = artifact.build_artifacts_from_legacy(state)
     state["state_version"] = STATE_VERSION
     return state

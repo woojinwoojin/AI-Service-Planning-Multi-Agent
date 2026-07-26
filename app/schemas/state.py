@@ -35,6 +35,11 @@ class ProjectState(TypedDict, total=False):
     business_model_result: dict
     risk_result: dict
     pestel_result: dict
+    # Artifact Contract v1(로드맵 2-2). 위 7개 평면 결과 키를 **대체하지 않고** 같은 내용을 표준
+    # 봉투로 병행 기록한다(Strangler 전환 — 소비자는 아직 평면 키를 읽는다). 실행 종료 시
+    # artifact.build_artifacts_from_legacy 로 파생 생성하므로 노드가 직접 쓰지 않는다 →
+    # 지금은 reducer 가 필요 없다(Agent 별 Dual Write 를 시작하는 PR 4 에서 전용 reducer 도입).
+    artifacts: list
     draft: str
     review_result: dict          # 재작성 판단에 쓰는 초안 평가 (= initial_review_result)
     initial_review_result: dict  # 초안 평가(기록용)

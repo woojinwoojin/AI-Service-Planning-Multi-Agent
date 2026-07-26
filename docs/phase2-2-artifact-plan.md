@@ -100,7 +100,7 @@ class Artifact(TypedDict):
 각 묶음은 **별도 PR**, main 기준 브랜치, 커밋→PR→머지 후 다음 묶음(**스택 금지** — 이 저장소는
 같은 사고를 2번 겪었다).
 
-### PR 1. Artifact 타입과 변환기만 추가 — 위험도 2/10
+### PR 1. Artifact 타입과 변환기만 추가 — 위험도 2/10 — ✅ 완료 (PR #96)
 
 - `app/schemas/artifact.py` 추가(타입·`LEGACY_ARTIFACT_SPECS`·`build_artifacts_from_legacy`·selector)
 - **기존 State·API·UI는 전혀 변경하지 않음** — 아무도 호출하지 않는 순수 모듈
@@ -108,7 +108,32 @@ class Artifact(TypedDict):
 **완료 기준**: 기존 State를 넣으면 7개 Artifact가 결정적으로 생성됨 / 기존 코드 동작 변화 없음 /
 LLM·검색 호출 추가 없음 / 기존 테스트 결과 변화 없음.
 
-### PR 2. Shadow Artifact 생성 — 위험도 3/10
+### PR 2. Shadow Artifact 생성 — 위험도 3/10 — ✅ 완료
+
+> **구현 시 판단 2건**
+> ① **생성 지점을 `migrate` 가 아니라 `workflow._finalize_artifacts` 로 분리**했다. `migrate.upgrade_state`
+> 는 "비어 있을 때만 채우는" 멱등 정규화라, 거기서만 만들면 재작성(`/revise`) 후 **옛 Artifact 가
+> 그대로 남는다**. 그래서 신규 실행·`/revise` 는 `_finalize_artifacts` 가 **매번 재생성**하고,
+> `migrate` 는 **옛 기록(v2) 재조회 때만** 채운다. `migrate` 쪽을 `setdefault` 로 둔 또 다른 이유는
+> PR 4에서 **Agent 가 직접 쓴 Artifact 를 legacy 파생본으로 되돌리지 않기** 위해서다.
+> ② **`_RUN_KEYS` 에 넣어 실제로 저장**한다. 지금은 평면 결과에서 파생되므로 재조회 시 재생성만
+> 해도 되지만, PR 4의 Agent 작성 Artifact 는 파생으로 복원할 수 없다. 여기 빠지면 저장 때 사라진
+> 뒤 읽을 때 조용히 legacy 파생본으로 덮인다 — 이 저장소가 `_RUN_KEYS` 누락으로 **이미 두 번 겪은
+> 유실 유형**(외부 리뷰 P0-1·B-3)이라 지금 함께 넣었다.
+>
+> **실측(더미 1건, `USE_DUMMY=1`)**
+> - 저장 JSON: 17,499 → 22,677 bytes = **+5,178 bytes(+29.6%)**
+> - `build_artifacts_from_legacy` 1회: **0.042 ms**(n=200 평균) — 기준(50ms 또는 wall 1%) 대비 무시 가능.
+>   더미 전체 실행 wall 1,549ms의 **0.003%**.
+> - 크기 증가는 7개 결과를 그대로 한 벌 더 쓰기 때문이다. 더미 실행은 Agent 결과가 짧은
+>   placeholder 라 실제 실행에서의 비율은 다를 수 있다(측정값은 더미 기준임을 명시).
+>
+> **호출 순서 제약**: `_finalize_evidence`(evidence_id 확정) → `_assess_quality`(failed/fallback 확정)
+> → **`_finalize_artifacts`** → `migrate.upgrade_state`. 앞의 둘보다 먼저 부르면 근거 참조와 status 가
+> 비거나 틀린다.
+>
+> **API 응답은 바뀌지 않았다** — `RunResult` 에 `artifacts` 를 넣지 않았으므로 `/run`·`/revise` 응답은
+> 그대로다(소비자 전환은 PR 5). JSON 다운로드에는 `artifacts` 키가 **추가**되며 기존 키는 전부 그대로다.
 
 워크플로 종료 시 기존 결과로부터 파생 생성:
 
