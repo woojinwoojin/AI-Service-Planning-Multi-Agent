@@ -22,7 +22,7 @@ _RUN_KEYS = [
     # 저장해 둔다 — PR 4 에서 Agent 가 직접 쓴 Artifact 는 파생으로 복원할 수 없고, 여기 빠지면
     # 저장 때 사라진 뒤 읽을 때 legacy 파생본으로 조용히 덮인다(이 저장소가 _RUN_KEYS 누락으로
     # 이미 두 번 겪은 유실 유형 — 외부 리뷰 P0-1·B-3). 더미 1건 기준 저장 JSON +29.6%(+5.2KB).
-    "artifacts",
+    "artifacts", "artifact_parity",
     "draft", "review_result", "initial_review_result", "final_draft", "revision_count",
     "best_version", "reverted_from_revision",
     # PR-7/8 실행 기록: 섹션 단위 수정 전략·조건부 Polish. 누락 시 저장·재조회에서

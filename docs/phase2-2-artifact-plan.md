@@ -159,7 +159,28 @@ def upgrade_v2_to_v3(state: dict) -> dict:
 **완료 기준**: v2 프로젝트를 열면 Artifact 자동 생성 / 신규 저장 후 재조회 시 유지 /
 `/run`·`/revise`·JSON 다운로드 결과가 기존과 동일 / 평면 키와 Artifact content가 7개 모두 일치.
 
-### PR 3. Artifact 정합성 검증 — 위험도 2/10
+### PR 3. Artifact 정합성 검증 — 위험도 2/10 — ✅ 완료
+
+> **구현**: `artifact.check_parity(state)` → `{expected, generated, matched, mismatched[], ok}`.
+> `mismatched` 항목은 `{artifact_id, reason, detail}` 이며 reason 6종 —
+> `content_mismatch`(가장 중요) · `missing_artifact` · `unknown_artifact` · `duplicate_id` ·
+> `missing_dependency` · `unknown_evidence_id`.
+> `workflow._finalize_artifacts` 가 생성 직후 호출해 `state["artifact_parity"]` 로 표면화하고,
+> 어긋나면 `[artifact] 정합성 불일치 N건 (matched x/7): reasons` 로그를 남긴다.
+> **실행은 실패시키지 않는다.** `migrate` 는 옛 기록(v2) 재조회 때 판정을 소급해 채운다 —
+> '옛 기록이라 판정이 없음'과 '판정했는데 통과'를 구분하기 위해.
+>
+> **테스트 태도**: 통과 경로만 보면 항상 `ok=True` 를 뱉는 검사기도 통과한다. 그래서 reason
+> 6종을 **각각 일부러 깨뜨려** 실제로 잡히는지 확인했다(18건).
+>
+> **실측(더미 1건)**
+> - 더미 전체 흐름 `matched = 7/7`, `ok = True`
+> - `build_artifacts_from_legacy` 0.042ms + `check_parity` **0.005ms** = **0.047ms**(n=200 평균)
+>   → 완료 기준 "wall time 증가가 사실상 없음" 충족(더미 wall 약 1.5s 의 0.003%)
+> - `artifact_parity` 자체 저장 크기 **75 bytes**. 저장 JSON 총 증가는 PR 2·3 합쳐 **+30.5%**
+>   (대부분 PR 2 의 artifacts content 몫)
+> - serial↔parallel 동일 집합은 PR 2 테스트(`test_artifact_shadow.py`)에서 이미 고정됨
+> - v2→v3 마이그레이션 반복 실행 결과 불변(멱등) 확인
 
 Shadow 결과가 기존 결과와 같은지 자동 검사한다.
 

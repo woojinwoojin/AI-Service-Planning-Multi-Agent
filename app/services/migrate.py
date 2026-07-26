@@ -62,5 +62,9 @@ def upgrade_state(state: dict) -> dict:
     # 되돌려 버리면 안 되기 때문. 새 실행의 재생성은 workflow._finalize_artifacts 가 담당한다.
     if not state.get("artifacts"):
         state["artifacts"] = artifact.build_artifacts_from_legacy(state)
+    # 정합성 자기점검(2-2 PR 3)도 옛 기록에 소급한다 — 저장 당시 없던 판정을 재조회 시 채워야
+    # '옛 기록이라 판정이 없음'과 '판정했는데 통과'를 구분할 수 있다.
+    if not state.get("artifact_parity"):
+        state["artifact_parity"] = artifact.check_parity(state)
     state["state_version"] = STATE_VERSION
     return state

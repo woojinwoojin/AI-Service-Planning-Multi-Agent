@@ -370,8 +370,20 @@ def _finalize_artifacts(state: ProjectState) -> None:
     여기서 먼저 최신 결과로 재생성해 두면 옛 값이 남지 않는다).
 
     LLM·검색 호출 없는 순수 변환이다.
+
+    생성 직후 `artifact.check_parity` 로 자기점검한다(PR 3). **어긋나도 실행을 실패시키지
+    않는다** — 아직 아무도 쓰지 않는 그림자 구조 때문에 멀쩡한 실행을 죽이면 손해가 더 크다.
+    대신 `artifact_parity` 와 로그로 표면화해 테스트·사람이 먼저 발견하게 한다.
     """
     state["artifacts"] = artifact.build_artifacts_from_legacy(state)
+    parity = artifact.check_parity(state)
+    state["artifact_parity"] = parity
+    if not parity["ok"]:
+        # 조용히 넘어가면 '검증했는데 통과'와 '검증 자체가 깨짐'을 구분할 수 없다.
+        reasons = ", ".join(sorted({m["reason"] for m in parity["mismatched"]}))
+        state.setdefault("logs", []).append(
+            f"[artifact] 정합성 불일치 {len(parity['mismatched'])}건 "
+            f"(matched {parity['matched']}/{parity['expected']}): {reasons}")
 
 
 def _finalize_run(state: ProjectState) -> ProjectState:

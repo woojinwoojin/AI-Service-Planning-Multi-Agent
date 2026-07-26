@@ -216,6 +216,83 @@ def build_artifacts_from_legacy(state: dict) -> list[Artifact]:
     return artifacts
 
 
+# ---- 정합성 검증 (로드맵 2-2 PR 3) ----
+
+def check_parity(state: dict) -> dict:
+    """Shadow Artifact 가 기존 평면 결과와 어긋나지 않는지 검사한다(읽기 전용).
+
+    Artifact 를 **실제로 소비하기 전에**(PR 5) 병행 기록이 믿을 만한지 먼저 확인하기 위한
+    자기점검이다. 반환:
+
+        {"expected": 7, "generated": 7, "matched": 7, "mismatched": [{...}], "ok": True}
+
+    `mismatched` 항목은 `{"artifact_id", "reason", "detail"}`. reason 종류:
+      - `missing_artifact`     명세에 있는 Artifact 가 생성되지 않음
+      - `unknown_artifact`     명세에 없는 Artifact 가 섞여 있음
+      - `duplicate_id`         같은 artifact_id 가 두 번 이상
+      - `content_mismatch`     평면 결과 키와 내용이 다름(가장 중요한 검사)
+      - `missing_dependency`   depends_on 이 존재하지 않는 Artifact 를 가리킴
+      - `unknown_evidence_id`  Evidence Registry 에 없는 근거를 참조
+
+    **판정이 깨져도 실행을 실패시키지 않는다.** 여기서 하드 실패시키면 아직 아무도 쓰지 않는
+    그림자 구조 때문에 멀쩡한 실행이 죽는다. 대신 State·로그로 표면화해 테스트와 사람이
+    먼저 발견하게 한다(2-5의 `dynamic_research` 가 '안 한 것 vs 해서 못 찾은 것'을 구분해
+    표면화한 것과 같은 태도).
+    """
+    expected = len(LEGACY_ARTIFACT_SPECS)
+    if not isinstance(state, dict):
+        return {"expected": expected, "generated": 0, "matched": 0,
+                "mismatched": [{"artifact_id": "", "reason": "missing_artifact",
+                                "detail": "state 가 dict 가 아님"}], "ok": False}
+
+    artifacts = [a for a in (state.get("artifacts") or []) if isinstance(a, dict)]
+    mismatched: list[dict] = []
+
+    def bad(artifact_id: str, reason: str, detail: str = "") -> None:
+        mismatched.append({"artifact_id": artifact_id, "reason": reason, "detail": detail})
+
+    by_id: dict[str, dict] = {}
+    for a in artifacts:
+        aid = a.get("artifact_id") or ""
+        if aid in by_id:
+            bad(aid, "duplicate_id", "같은 artifact_id 가 두 번 이상 있음")
+            continue
+        by_id[aid] = a
+        if aid not in set(ARTIFACT_IDS):
+            bad(aid, "unknown_artifact", f"명세에 없는 artifact_id: {aid}")
+
+    known_evidence = {e.get("evidence_id") for e in (state.get("evidence_registry") or [])
+                      if isinstance(e, dict) and e.get("evidence_id")}
+
+    matched = 0
+    for spec in LEGACY_ARTIFACT_SPECS:
+        aid = spec["artifact_id"]
+        a = by_id.get(aid)
+        if a is None:
+            bad(aid, "missing_artifact", f"{spec['legacy_key']} 에 대응하는 Artifact 없음")
+            continue
+
+        ok = True
+        # 가장 중요한 검사 — 병행 기록이 원본과 같은가.
+        legacy_value = state.get(spec["legacy_key"]) or {}
+        if a.get("content") != legacy_value:
+            bad(aid, "content_mismatch", f"{spec['legacy_key']} 와 content 불일치")
+            ok = False
+        for dep in a.get("depends_on") or []:
+            if dep not in by_id:
+                bad(aid, "missing_dependency", f"의존 대상 없음: {dep}")
+                ok = False
+        for eid in a.get("evidence_ids") or []:
+            if eid not in known_evidence:
+                bad(aid, "unknown_evidence_id", f"레지스트리에 없는 근거: {eid}")
+                ok = False
+        if ok:
+            matched += 1
+
+    return {"expected": expected, "generated": len(artifacts), "matched": matched,
+            "mismatched": mismatched, "ok": not mismatched and matched == expected}
+
+
 # ---- selector (소비자용) ----
 
 def find_artifact(state: dict, artifact_type: str) -> Artifact | None:
