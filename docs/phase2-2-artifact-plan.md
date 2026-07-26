@@ -296,6 +296,7 @@ def merge_artifacts(left: list, right: list) -> list:
 > 아직 평면 키를 직접 읽는 곳이 남아 있다:
 > - **Agent 간 읽기 7곳** — `competitor:57`·`customer:44`·`pestel:55`·`swot:29-30`·
 >   `business_model:39`·`risk:48-49`·`research(_gap):226,283` (뒤 Agent 가 앞 Agent 결과를 읽는 경로)
+>   → 이 7곳을 **PR 5c** 에서 세 묶음으로 옮긴다. `research(_gap)` 은 5c-1 에서 전환 완료.
 > - **표시 계층** — `routes._result_payload:89-95`, `parallel_bench:69`
 >
 > 즉 `artifact_only` 가 통과한 데에는 **이 경로들이 selector 를 아예 타지 않는다**는 사정도
@@ -342,6 +343,43 @@ def get_artifact_content(state: dict, artifact_type: str, legacy_key: str) -> di
 
 `draft_writer.py` 는 **7개 결과를 모두 소비**하므로 첫 전환의 영향이 가장 크다.
 **반드시 feature flag 아래에서** 전환한다.
+
+### PR 5c. Agent 간 읽기 전환 — 위험도 4~5/10 — 🔄 진행 중(3묶음)
+
+PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽어 자기 프롬프트를 만드는
+경로)을 옮긴다. 이 경로는 표시용이 아니라 **문서 내용을 결정하는 데이터 경로**이므로, 여기까지
+옮겨야 `artifact_only` 통과가 분석 파이프라인 전체에 대해 의미를 갖는다. 한 PR 에서 7개 파일을
+동시에 바꾸지 않고 **의존 관계가 단순한 쪽부터** 세 묶음으로 나눈다.
+
+| 묶음 | 대상 | 의존 | 상태 |
+|---|---|---|---|
+| 5c-1 | `research_gap` → research | 1개 (자기 갱신) | ✅ 완료 |
+| 5c-2 | `competitor`·`customer`·`pestel`·`business_model` → research | 1개 | 예정 |
+| 5c-3 | `swot` → research+competitor · `risk` → research+pestel | 2개 | 예정 |
+
+> **5c-1 (`feat/artifact-read-research-gap`)**: `research_gap` 이 보강 대상인 기존 조사 결과를
+> selector 로 읽는다. 이 경로를 **가장 먼저** 옮기는 이유는 `research_gap` 이 Research 결과를
+> *갱신*하기 때문이다 — 뒤 Agent 들이 읽어야 하는 것은 보강 **후**의 Artifact 이므로, 이 노드가
+> 안정되지 않으면 5c-2/5c-3 전환이 보강 전 값을 읽을 위험이 있다.
+>
+> 읽기는 **검색·LLM 호출보다 먼저** 한다 — `artifact_only` 에서 Artifact 가 없으면 비용을 쓰기
+> 전에 `ArtifactUnavailable` 로 실패해야 한다. 생략 경로(공백 보고 없음·더미·예산 초과)는
+> Artifact 를 읽지 않아 불필요한 실패를 만들지 않는다. 조사 결과를 실행당 **한 번만** 읽어
+> `_known_urls` 에 넘긴다(두 번 읽으면 `prefer_artifact` 폴백 경고도 두 번 난다).
+>
+> 소비자가 3곳으로 늘어 읽기 창구를 `artifact.read(state, artifact_type)` 로 공용화했다
+> (draft_writer·verifier 의 사설 `_content` 를 대체). 평면 키 이름이 호출부에 나타나지 않아
+> 명세와 어긋날 여지가 없다.
+>
+> **검증**: 평면·Artifact 에 서로 다른 값을 넣고 세 모드에서 보강이 **모드에 맞는 쪽 위에**
+> 쌓이는지 / 중복 URL 판정도 selector 를 타는지 / 평면 키가 **아예 없어도** `artifact_only` 로
+> 완주하며 기존·신규 근거가 모두 남는지 / 보강본이 평면 키와 Artifact 에 **같은 내용**으로
+> 나가는지(Dual Write 유지) / Artifact 없는 `artifact_only` 에서 검색·LLM 호출 0회로 실패하는지.
+> 테스트 7건 추가(443 passed), ruff clean. 기본 모드가 `legacy` 라 **이 PR 도 동작을 바꾸지 않는다.**
+>
+> **아직 남은 것(정직 표기)**: 5c-2/5c-3 의 6개 Agent 는 여전히 평면 키를 직접 읽는다.
+> `test_unconverted_readers_are_known` 이 그 목록을 고정하고 있어, 전환이 진행되면 목록이 줄고
+> 새 직접 읽기가 생기면 실패한다.
 
 ### PR 6. 제한적 동적 실행과 연결 — 위험도 6/10
 

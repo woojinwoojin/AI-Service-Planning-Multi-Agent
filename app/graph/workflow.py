@@ -363,10 +363,11 @@ def _finalize_evidence(state: ProjectState) -> None:
 
 
 def _finalize_artifacts(state: ProjectState) -> None:
-    """Agent 결과를 표준 Artifact 봉투로 병행 기록한다(로드맵 2-2 PR 2, Shadow 단계).
+    """Agent 결과를 표준 Artifact 봉투로 병행 기록한다(로드맵 2-2 PR 2~5c).
 
-    **기존 7개 평면 결과 키는 그대로 두고** 같은 내용을 파생 생성만 한다 — 이 시점의 소비자는
-    아직 전부 평면 키를 읽으므로 동작 변화가 없다(읽기 경로 전환은 PR 5).
+    **기존 7개 평면 결과 키는 그대로 두고** 같은 내용을 병행 기록한다(Strangler 전환 — 평면
+    키 삭제는 이 단계의 목표가 아니다). 읽는 쪽은 `ARTIFACT_READ_MODE` 에 달려 있고 기본값이
+    `legacy` 라, 전환된 소비자(draft·verify·research_gap)도 기본 설정에서는 평면 키를 읽는다.
 
     호출 위치가 중요하다. 반드시 다음 **뒤에** 와야 한다:
       - `_finalize_evidence`  → 그래야 evidence_id 가 확정돼 Artifact 가 실제 id 를 참조한다
@@ -382,8 +383,9 @@ def _finalize_artifacts(state: ProjectState) -> None:
     (failed/fallback)도 알 수 없기 때문이다.
 
     확정 직후 `artifact.check_parity` 로 자기점검한다(PR 3). **어긋나도 실행을 실패시키지
-    않는다** — 아직 아무도 쓰지 않는 그림자 구조 때문에 멀쩡한 실행을 죽이면 손해가 더 크다.
-    대신 `artifact_parity` 와 로그로 표면화해 테스트·사람이 먼저 발견하게 한다.
+    않는다** — 기본 모드(`legacy`)에서는 아무도 Artifact 를 읽지 않으므로, 이미 완주한 실행을
+    병행 기록의 불일치로 죽이면 손해가 더 크다. 대신 `artifact_parity` 와 로그로 표면화해
+    테스트·사람이 먼저 발견하게 한다(`prefer_artifact` 전환 판단의 근거이기도 하다).
     """
     state["artifacts"] = artifact.reconcile(state)
     # 읽기 모드·Artifact 가용성 스냅샷(2-2 PR 5b). prefer_artifact 로 전환하기 전에

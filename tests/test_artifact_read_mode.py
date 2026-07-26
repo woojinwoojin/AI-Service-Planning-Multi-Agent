@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.agents import draft_writer, verifier
+from app.agents import draft_writer, research, verifier
 from app.graph.workflow import run_workflow
 from app.schemas import artifact
 from app.schemas.state import ProjectState
@@ -203,6 +203,111 @@ def test_section_revision_evidence_reads_through_selector(monkeypatch):
     assert "아티팩트쪽" in block and "평면쪽" not in block
 
 
+# ---- Agent 간 읽기: research_gap → research (PR 5c-1) ----
+#
+# 여기서 처음으로 **Agent 가 앞 Agent 의 결과를 읽는 경로**가 selector 를 탄다. 앞선 전환
+# (draft·verify)은 문서를 쓰거나 검증하는 쪽이었고, 이 경로는 다음 Agent 의 입력 데이터를
+# 만든다 — 그래서 '읽은 값이 실제로 결과에 반영되는가'까지 확인한다.
+
+@pytest.fixture
+def gap_mode(monkeypatch):
+    """research_gap 이 실제로 도는 조건(실 모드·검색 활성). 외부 호출은 테스트가 대체한다."""
+    from app.services import budget, search
+
+    monkeypatch.delenv("DYNAMIC_MAX_GAP_SEARCHES", raising=False)
+    budget.reset()
+    monkeypatch.setattr(llm, "is_dummy", lambda: False)
+    monkeypatch.setattr(search, "search_enabled", lambda: True)
+    monkeypatch.setattr(llm, "mode_label", lambda *a, **k: "테스트")
+    return monkeypatch
+
+
+def _research_content(marker: str, url: str = "https://known") -> dict:
+    return {"industry_trends": [marker], "customer_needs": [], "opportunities": [], "risks": [],
+            "sources": [f"{marker} 출처"], "source_objects": [{"url": url, "title": marker}]}
+
+
+def _gap_state(*, flat: dict | None = None, art: dict | None = None) -> dict:
+    state: dict = {"evidence_gaps": [{"topic": "시장 규모", "query": "시장 규모"}]}
+    if flat is not None:
+        state["research_result"] = flat
+    if art is not None:
+        state["artifacts"] = [artifact.make_artifact("research_analysis", art)]
+    return state
+
+
+def _one_new_hit(mp, url: str = "https://new"):
+    from app.services import search
+
+    mp.setattr(search, "web_search", lambda q, **k: [{"url": url, "title": "새 보고서",
+                                                     "content": "검색 요약문"}])
+
+
+@pytest.mark.parametrize(("mode", "expected"), [
+    (artifact.READ_LEGACY, "평면"),
+    (artifact.READ_PREFER_ARTIFACT, "아티팩트"),
+    (artifact.READ_ARTIFACT_ONLY, "아티팩트"),
+])
+def test_research_gap_merges_onto_the_mode_selected_base(gap_mode, mode, expected):
+    """평면·Artifact 에 다른 값을 넣고, 보강 결과가 **모드에 맞는 쪽 위에** 쌓이는지 본다."""
+    gap_mode.setenv(artifact.READ_MODE_ENV, mode)
+    _one_new_hit(gap_mode)
+    gap_mode.setattr(llm, "complete_json", lambda *a, **k: {"industry_trends": ["새 트렌드"]})
+
+    out = research.research_gap(_gap_state(flat=_research_content("평면"),
+                                           art=_research_content("아티팩트")))
+    assert out["research_result"]["industry_trends"] == [expected, "새 트렌드"]
+    # 보강본은 평면 키와 Artifact 양쪽에 같은 내용으로 나가야 한다(Dual Write 유지).
+    assert out["artifacts"][0]["content"] == out["research_result"]
+
+
+def test_research_gap_dedupes_against_artifact_urls(gap_mode):
+    """중복 URL 판정도 selector 를 타야 한다 — 안 그러면 이미 가진 근거를 '새 근거'로 센다."""
+    gap_mode.setenv(artifact.READ_MODE_ENV, artifact.READ_PREFER_ARTIFACT)
+    _one_new_hit(gap_mode, "https://only-in-artifact")
+    gap_mode.setattr(llm, "complete_json", lambda *a, **k: pytest.fail("LLM 호출 불필요"))
+
+    out = research.research_gap(_gap_state(
+        flat=_research_content("평면", url="https://only-in-flat"),
+        art=_research_content("아티팩트", url="https://only-in-artifact")))
+    assert out["dynamic_research"]["skip_reason"] == "새 근거 없음"
+    assert out["dynamic_research"]["new_sources"] == 0
+
+
+def test_research_gap_runs_without_flat_key_in_artifact_only(gap_mode):
+    """평면 키가 아예 없어도 Artifact 만으로 보강이 완주하는가(전환의 실질 성공 기준)."""
+    gap_mode.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    _one_new_hit(gap_mode)
+    gap_mode.setattr(llm, "complete_json", lambda *a, **k: {"opportunities": ["새 기회"]})
+
+    out = research.research_gap(_gap_state(art=_research_content("아티팩트")))
+    rr = out["research_result"]
+    assert rr["industry_trends"] == ["아티팩트"] and rr["opportunities"] == ["새 기회"]
+    # 기존 근거와 새 근거가 모두 남는다(유실 없음)
+    assert [o["url"] for o in rr["source_objects"]] == ["https://known", "https://new"]
+    assert any("https://new" in s for s in rr["sources"])
+    assert [e["url"] for e in out["evidence_registry"]] == ["https://new"]
+
+
+def test_research_gap_fails_before_spending_calls_when_artifact_missing(gap_mode):
+    """artifact_only 에서 Artifact 가 없으면 **검색·LLM 비용을 쓰기 전에** 실패해야 한다."""
+    from app.services import search
+
+    gap_mode.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    gap_mode.setattr(search, "web_search", lambda *a, **k: pytest.fail("검색해서는 안 된다"))
+    gap_mode.setattr(llm, "complete_json", lambda *a, **k: pytest.fail("LLM 호출해서는 안 된다"))
+
+    with pytest.raises(artifact.ArtifactUnavailable):
+        research.research_gap(_gap_state(flat=_research_content("평면")))
+
+
+def test_research_gap_skip_path_does_not_require_artifact(gap_mode):
+    """생략 경로(공백 보고 없음)는 Artifact 를 읽지 않는다 — 필요 없는 실패를 만들지 않는다."""
+    gap_mode.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    out = research.research_gap({"evidence_gaps": []})
+    assert out["dynamic_research"]["skip_reason"] == "근거 공백 보고 없음"
+
+
 # ---- 관측성 (PR 5b) ----
 
 def test_invalid_mode_is_reported_not_just_swallowed(monkeypatch, caplog):
@@ -286,7 +391,7 @@ def test_converted_consumers_have_no_direct_flat_key_reads():
     """
     from pathlib import Path
 
-    for mod in (draft_writer, verifier):
+    for mod in (draft_writer, verifier, research):
         src = Path(mod.__file__).read_text(encoding="utf-8")
         for spec in artifact.LEGACY_ARTIFACT_SPECS:
             assert f'state.get("{spec["legacy_key"]}"' not in src, (mod.__name__, spec["legacy_key"])
@@ -308,10 +413,11 @@ def test_unconverted_readers_are_known():
     found = {p.relative_to(root).as_posix() for p in root.joinpath("app").rglob("*.py")
              if pattern.search(p.read_text(encoding="utf-8"))}
     assert found == {
-        # Agent 간 읽기 — 뒤 Agent 가 앞 Agent 결과를 읽는 경로(전환 예정)
+        # Agent 간 읽기 — 뒤 Agent 가 앞 Agent 결과를 읽는 경로.
+        # research.py(research_gap → research)는 PR 5c-1 에서 전환됨.
+        # 남은 6개는 PR 5c-2(research 단일 의존 4개)·5c-3(swot·risk 복수 의존)에서 전환한다.
         "app/agents/competitor.py", "app/agents/customer.py", "app/agents/pestel.py",
         "app/agents/swot.py", "app/agents/business_model.py", "app/agents/risk.py",
-        "app/agents/research.py",
         # 표시·집계 계층 — 문서 내용을 만들지 않으므로 뒤로 미룸
         "app/api/routes.py", "app/services/parallel_bench.py",
     }, found

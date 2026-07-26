@@ -492,6 +492,19 @@ def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
     return state.get(legacy_key) or {}
 
 
+def read(state: dict, artifact_type: str) -> dict:
+    """소비자가 쓰는 짧은 형태 — 유형만 주면 평면 키는 명세에서 찾아 쓴다.
+
+    `get_artifact_content` 은 legacy_key 를 인자로 받는데, 소비자마다 그 이름을 적어 두면
+    평면 키가 두 곳(명세·호출부)에 존재해 어긋날 수 있다. 유형 하나만 받아 명세에서 꺼내면
+    호출부에는 평면 키가 아예 나타나지 않는다. 결과가 dict 가 아니면(옛 기록의 문자열 등)
+    빈 dict — 소비자는 전부 dict 를 기대한다.
+    """
+    spec = SPEC_BY_TYPE[artifact_type]
+    data = get_artifact_content(state, artifact_type, spec["legacy_key"])
+    return data if isinstance(data, dict) else {}
+
+
 def read_status(state: dict) -> dict:
     """실행 종료 시점의 읽기 모드·Artifact 가용성 스냅샷(관측용).
 
