@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 
 from app.prompts.templates import PESTEL_SYSTEM
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm
 
@@ -66,4 +67,7 @@ def pestel(state: ProjectState) -> dict:
 
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[pestel] PESTEL 분석 완료 ({mode})"]
-    return {"pestel_result": result, "logs": logs}
+    # Dual Write(로드맵 2-2 PR 4, 2묶음): 평면 결과와 같은 내용을 표준 Artifact 봉투로도 방출.
+    # evidence_ids·status 는 실행 시점에 알 수 없어 비운 채로 두고 artifact.reconcile 이 확정한다.
+    return {"pestel_result": result, "logs": logs,
+            "artifacts": [artifact.make_artifact("pestel_analysis", result)]}

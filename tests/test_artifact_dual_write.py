@@ -11,14 +11,16 @@ from __future__ import annotations
 
 import pytest
 
-from app.agents import competitor, research
+from app.agents import competitor, customer, pestel, research
 from app.graph import workflow
 from app.graph.workflow import run_workflow
 from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import llm, search
 
-DUAL_WRITTEN = {"research_analysis", "competitor_analysis"}
+# 2묶음까지 옮긴 Agent. 나머지 3개(swot·risk·business_model)는 아직 파생이다.
+DUAL_WRITTEN = {"research_analysis", "competitor_analysis",
+                "customer_analysis", "pestel_analysis"}
 
 
 def _dummy(monkeypatch):
@@ -42,13 +44,31 @@ def test_dual_written_agents_are_marked_agent_source(monkeypatch, mode):
         assert a["metadata"]["source"] == expected, t
 
 
-def test_dual_write_content_equals_legacy_key(monkeypatch):
+@pytest.mark.parametrize("mode", ["serial", "parallel"])
+def test_dual_write_content_equals_legacy_key(monkeypatch, mode):
     """Dual Write 의 성공 기준 — Agent 가 쓴 봉투 내용이 평면 결과와 같아야 한다."""
     _dummy(monkeypatch)
-    state = run_workflow({"project_name": "일치", "problem": "P"})
+    state = run_workflow({"project_name": "일치", "problem": "P"}, workflow_mode=mode)
     arts = _by_type(state)
-    assert arts["research_analysis"]["content"] == state["research_result"]
-    assert arts["competitor_analysis"]["content"] == state["competitor_result"]
+    for t in DUAL_WRITTEN:
+        legacy_key = artifact.SPEC_BY_TYPE[t]["legacy_key"]
+        assert arts[t]["content"] == state[legacy_key], t
+    assert state["artifact_parity"]["ok"]
+
+
+def test_concurrent_branches_each_write_exactly_once(monkeypatch):
+    """병렬 fan-out: competitor·customer·pestel 이 **동시에** Artifact 를 방출한다.
+
+    이 셋은 research_gap 이후 서로 다른 분기에서 동시에 실행된다(workflow 병렬 그래프).
+    reducer 가 잘못되면 여기서 유실되거나 중복된다.
+    """
+    _dummy(monkeypatch)
+    state = run_workflow({"project_name": "동시", "problem": "P"}, workflow_mode="parallel")
+    ids = [a["artifact_id"] for a in state["artifacts"]]
+    assert len(ids) == len(set(ids)) == 7          # 유실·중복 없음
+    arts = _by_type(state)
+    for t in ("competitor_analysis", "customer_analysis", "pestel_analysis"):
+        assert arts[t]["metadata"]["source"] == artifact.SOURCE_AGENT, t
     assert state["artifact_parity"]["ok"]
 
 
@@ -64,6 +84,23 @@ def test_agents_emit_artifact_in_node_return(monkeypatch):
     out2 = competitor.competitor(st2)
     assert [a["artifact_id"] for a in out2["artifacts"]] == ["artifact-competitor"]
     assert out2["artifacts"][0]["content"] == out2["competitor_result"]
+
+
+@pytest.mark.parametrize(("node", "artifact_id", "legacy_key"), [
+    (customer.customer, "artifact-customer", "customer_result"),
+    (pestel.pestel, "artifact-pestel", "pestel_result"),
+])
+def test_bundle2_nodes_emit_artifact(monkeypatch, node, artifact_id, legacy_key):
+    """2묶음(Customer·PESTEL) — 둘 다 research 만 의존하고 자체 검색이 없다."""
+    _dummy(monkeypatch)
+    st: ProjectState = {"structured_input": {"project_name": "P", "target_user": "U"},
+                        "research_result": {"customer_needs": ["니즈"]}}
+    out = node(st)
+    assert [a["artifact_id"] for a in out["artifacts"]] == [artifact_id]
+    a = out["artifacts"][0]
+    assert a["content"] == out[legacy_key]
+    assert a["depends_on"] == ["artifact-research"]   # 코드에서 도출한 의존
+    assert a["evidence_ids"] == []                    # 자체 검색 없음 + finalize 가 확정
 
 
 # ---- 2) reducer: 중복 없이 마지막이 남는가 ----

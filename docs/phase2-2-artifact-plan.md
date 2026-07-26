@@ -220,7 +220,7 @@ def merge_artifacts(left: list, right: list) -> list:
 
 **한 PR에서 7개를 다 바꾸지 않는다:**
 1. Research · Competitor (Evidence Registry와 직접 연결 → 먼저) — ✅ 완료
-2. Customer · PESTEL
+2. Customer · PESTEL — ✅ 완료
 3. SWOT · Risk · Business Model
 
 > **1묶음(Research·Competitor) 구현 시 드러난 것 3건 — 나머지 묶음에도 그대로 적용된다**
@@ -244,9 +244,19 @@ def merge_artifacts(left: list, right: list) -> list:
 > 감추지 않고 `content_mismatch` 로 보고**한다. 조용히 맞춰버리면 정합성 검사가 무의미해진다
 > (검사기가 항상 통과를 뱉게 된다).
 >
-> **검증**: 더미 serial·parallel 모두 Artifact 7개·중복 0·`parity 7/7 ok`,
+> **1묶음 검증**: 더미 serial·parallel 모두 Artifact 7개·중복 0·`parity 7/7 ok`,
 > `source=agent` 는 research·competitor 2건·나머지 5건은 `legacy_derived`.
 > 395 passed, coverage 96.13%. API 응답 무변경.
+>
+> **2묶음(Customer·PESTEL)**: 규칙 ②는 해당 없음 — 두 결과 키를 쓰는 곳은 각자 한 군데뿐이고
+> 자체 검색도 없다(`evidence_agents=[]`). 규칙 ①·③만 적용된다.
+> **여기서 처음으로 reducer 가 실제 동시 방출을 받는다** — 병렬 그래프에서 `competitor`·
+> `customer`·`pestel` 은 `research_gap` 이후 **서로 다른 분기에서 동시에** 실행된다
+> (`add_edge` 기준: research_gap → competitor·customer·pestel·business_model 4분기).
+> 1묶음의 두 Agent 는 순차 구간(research)·단일 분기(competitor)라 진짜 동시성이 없었다.
+> **검증**: serial·parallel 모두 7개·중복 0·`parity 7/7 ok`,
+> `source=agent` 4건(research·competitor·customer·pestel) / `legacy_derived` 3건
+> (swot·risk·business_model). 399 passed, coverage 96.17%.
 
 ### PR 5. Artifact Selector 도입 — 위험도 5/10
 
