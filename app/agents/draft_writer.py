@@ -15,8 +15,21 @@ from app.prompts.templates import (
     REVISER_SYSTEM,
     SECTION_REVISER_SYSTEM,
 )
+from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import evidence, llm, sections
+
+
+def _content(state: ProjectState, artifact_type: str) -> dict:
+    """Agent 산출물을 읽는 단일 창구(로드맵 2-2 PR 5).
+
+    `ARTIFACT_READ_MODE` 를 따른다 — 기본 `legacy` 에서는 평면 키를 그대로 읽으므로
+    전환 전과 동작이 같다. 평면 키 이름은 명세가 알고 있으니 호출부에 적지 않는다.
+    """
+    legacy_key = artifact.SPEC_BY_TYPE[artifact_type]["legacy_key"]
+    data = artifact.get_artifact_content(state, artifact_type, legacy_key)
+    return data if isinstance(data, dict) else {}
+
 
 # 실제 LLM은 종종 기획서 전체를 ```markdown ... ``` 로 감싸서 반환한다.
 # 최종 .md 산출물에 코드펜스가 남지 않도록, 문서 전체를 감싼 펜스만 벗긴다.
@@ -53,7 +66,8 @@ def _real_sources(state: ProjectState) -> list[str]:
     if reg:
         objs = evidence.normalize(reg)  # URL 중복 제거 + 안정 id(제목/URL 보존)
     else:
-        objs = list((state.get("research_result") or {}).get("source_objects") or [])
+        research = _content(state, "research_analysis")
+        objs = list((research or {}).get("source_objects") or []) if isinstance(research, dict) else []
         objs += list(state.get("competitor_sources") or [])
     seen: set[str] = set()
     lines: list[str] = []
@@ -164,13 +178,16 @@ def _dummy_draft(si: dict, research: dict, pestel: dict) -> str:
 
 def draft(state: ProjectState) -> dict:
     si = state.get("structured_input", {})
-    research = state.get("research_result", {})
-    pestel = state.get("pestel_result", {})
-    comp = state.get("competitor_result", {})
-    cust = state.get("customer_result", {})
-    swot = state.get("swot_result", {})
-    bizmodel = state.get("business_model_result", {})
-    risks = state.get("risk_result", {})
+    # Agent 산출물은 selector 를 통해 읽는다(로드맵 2-2 PR 5). 기본 모드 legacy 에서는
+    # 평면 키를 그대로 읽으므로 전환 전과 동작이 같고, ARTIFACT_READ_MODE 만 바꾸면
+    # Artifact 기반 읽기로 통째로 넘어가거나 되돌릴 수 있다.
+    research = _content(state, "research_analysis")
+    pestel = _content(state, "pestel_analysis")
+    comp = _content(state, "competitor_analysis")
+    cust = _content(state, "customer_analysis")
+    swot = _content(state, "swot_analysis")
+    bizmodel = _content(state, "business_model_analysis")
+    risks = _content(state, "risk_analysis")
     fallback = _dummy_draft(si, research, pestel)
 
     user = (
@@ -242,15 +259,17 @@ MAX_REVISED_SECTIONS = 4  # 자동 섹션 단위 수정 대상 상한. 초과하
 
 # 섹션 ID → (근거 라벨, state 키). 섹션 단위 수정 시 그 섹션과 관련된 분석 결과만 프롬프트에 실어
 # 입력 토큰을 줄인다(전체 기획서·전체 분석 재전달 금지).
+# 섹션 → (표시 라벨, Artifact 유형). 평면 키는 명세(artifact.SPEC_BY_TYPE)가 알고 있으므로
+# 여기 중복해 적지 않는다 — 두 곳에 적으면 한쪽만 고쳐 어긋난다.
 _SECTION_EVIDENCE: dict[str, tuple[str, str]] = {
-    "problem": ("고객 문제", "customer_result"),
-    "target_user": ("고객 문제", "customer_result"),
-    "market_analysis": ("시장조사", "research_result"),
-    "pestel": ("PESTEL", "pestel_result"),
-    "swot": ("SWOT", "swot_result"),
-    "differentiation": ("경쟁사 분석", "competitor_result"),
-    "revenue_model": ("비즈니스 모델", "business_model_result"),
-    "risk": ("리스크", "risk_result"),
+    "problem": ("고객 문제", "customer_analysis"),
+    "target_user": ("고객 문제", "customer_analysis"),
+    "market_analysis": ("시장조사", "research_analysis"),
+    "pestel": ("PESTEL", "pestel_analysis"),
+    "swot": ("SWOT", "swot_analysis"),
+    "differentiation": ("경쟁사 분석", "competitor_analysis"),
+    "revenue_model": ("비즈니스 모델", "business_model_analysis"),
+    "risk": ("리스크", "risk_analysis"),
 }
 
 
@@ -309,8 +328,8 @@ def _relevant_analysis(state: ProjectState, sid: str) -> str:
     spec = _SECTION_EVIDENCE.get(sid)
     if not spec:
         return ""
-    label, key = spec
-    data = state.get(key) or {}
+    label, artifact_type = spec
+    data = _content(state, artifact_type)
     if not data:
         return ""
     return f"[{label} 결과(근거)]\n{json.dumps(data, ensure_ascii=False)}\n\n"

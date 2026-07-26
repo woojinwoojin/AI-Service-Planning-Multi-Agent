@@ -32,11 +32,19 @@ PR 2, 정합성 검증은 PR 3, Agent별 Dual Write는 PR 4다. 상세: `docs/ph
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import TypedDict
 
 # 봉투 자체의 버전. content 내부 스키마 버전이 아니다(그건 Agent별로 다르다).
 ARTIFACT_SCHEMA_VERSION = 1
+
+# 읽기 모드(로드맵 2-2 PR 5). 기본은 legacy — 전환 전과 동작이 완전히 같다.
+READ_MODE_ENV = "ARTIFACT_READ_MODE"
+READ_LEGACY = "legacy"                  # 평면 키만
+READ_PREFER_ARTIFACT = "prefer_artifact"  # Artifact 우선, 없으면 평면 키
+READ_ARTIFACT_ONLY = "artifact_only"    # Artifact 만(폴백 없음)
+READ_MODES = (READ_LEGACY, READ_PREFER_ARTIFACT, READ_ARTIFACT_ONLY)
 
 # status 값 — owner 노드의 실행 결말을 그대로 옮긴다.
 STATUS_COMPLETE = "complete"    # 정상 산출
@@ -395,17 +403,38 @@ def find_artifact(state: dict, artifact_type: str) -> Artifact | None:
     return None
 
 
-def get_artifact_content(state: dict, artifact_type: str, legacy_key: str) -> dict | str:
-    """Artifact 우선으로 내용을 읽되, 없으면 기존 평면 키로 폴백한다.
+def read_mode() -> str:
+    """`ARTIFACT_READ_MODE` 를 읽는다. 알 수 없는 값·미설정이면 가장 안전한 `legacy`.
 
-    Artifact 가 아직 생성되지 않은 옛 프로젝트·PR 2 이전 State 에서도 그대로 동작한다
-    (= 소비자를 미리 옮겨둬도 회귀가 없다). 읽기 모드 전환(`ARTIFACT_READ_MODE`)은 PR 5.
+    이 값 하나가 **rollback 장치**다. 전환 후 문제가 생기면 코드를 되돌리지 않고
+    `ARTIFACT_READ_MODE=legacy` 로만 바꾸면 즉시 기존 경로로 돌아간다.
     """
-    a = find_artifact(state, artifact_type)
-    if a is not None:
-        content = a.get("content")
-        if content:
-            return content
+    mode = (os.getenv(READ_MODE_ENV, "") or "").strip().lower()
+    return mode if mode in READ_MODES else READ_LEGACY
+
+
+def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
+                         mode: str | None = None) -> dict | str:
+    """소비자가 Agent 산출물을 읽는 **단일 창구**(로드맵 2-2 PR 5).
+
+    모드(`ARTIFACT_READ_MODE`, 인자로 덮어쓸 수 있음):
+      - `legacy`(기본)   평면 키만 읽는다 — 전환 전과 **완전히 동일한 동작**
+      - `prefer_artifact` Artifact 우선, 비었거나 없으면 평면 키로 폴백
+      - `artifact_only`   Artifact 만 읽는다(폴백 없음). 평면 키 제거 직전 단계에서
+                          '정말 Artifact 만으로 도는지' 확인하는 용도
+
+    소비자를 이 함수로 옮겨 두면 기본값(`legacy`)에서는 아무것도 바뀌지 않고,
+    준비가 됐을 때 **환경변수만으로** 읽기 경로를 통째로 전환·되돌릴 수 있다.
+    """
     if not isinstance(state, dict):
+        return {}
+    m = mode if mode in READ_MODES else read_mode()
+    if m == READ_LEGACY:
+        return state.get(legacy_key) or {}
+    a = find_artifact(state, artifact_type)
+    content = a.get("content") if isinstance(a, dict) else None
+    if content:
+        return content
+    if m == READ_ARTIFACT_ONLY:
         return {}
     return state.get(legacy_key) or {}
