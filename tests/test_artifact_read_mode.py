@@ -12,7 +12,15 @@ from __future__ import annotations
 
 import pytest
 
-from app.agents import draft_writer, research, verifier
+from app.agents import (
+    business_model,
+    competitor,
+    customer,
+    draft_writer,
+    pestel,
+    research,
+    verifier,
+)
 from app.graph.workflow import run_workflow
 from app.schemas import artifact
 from app.schemas.state import ProjectState
@@ -142,9 +150,13 @@ def test_all_read_modes_produce_identical_output(monkeypatch, workflow_mode):
         assert outs[m]["artifact_parity"]["ok"], m
 
 
+@pytest.mark.parametrize("workflow_mode", ["serial", "parallel"])
 @pytest.mark.parametrize("mode", MODES)
-def test_run_completes_in_every_mode(monkeypatch, mode):
-    state = _run(monkeypatch, mode)
+def test_run_completes_in_every_mode(monkeypatch, mode, workflow_mode):
+    """병렬도 함께 본다 — 분석 4분기는 fan-out 뒤에서 앞 Agent 결과를 읽으므로(PR 5c-2),
+    Artifact 가 fan-out 경계를 넘어 보이지 않으면 `artifact_only` 에서 노드가 실패한다.
+    """
+    state = _run(monkeypatch, mode, workflow_mode)
     assert state["final_draft"] and state["run_status"] in ("success", "degraded")
     assert not state["failed_nodes"]
 
@@ -308,6 +320,94 @@ def test_research_gap_skip_path_does_not_require_artifact(gap_mode):
     assert out["dynamic_research"]["skip_reason"] == "근거 공백 보고 없음"
 
 
+# ---- Agent 간 읽기: research 단일 의존 4개 (PR 5c-2) ----
+#
+# **최종 문서 해시만으로는 이 4개 경로가 검증되지 않는다.** 더미 초안은
+# `_dummy_draft(si, research, pestel)` 로 만들어져 competitor·customer·business_model 의
+# 결과는 산출물에 반영되지 않는다. 그래서 각 Agent 의 **프롬프트를 직접 가로채** Artifact
+# 내용이 실제 입력으로 들어갔는지 본다.
+
+_RESEARCH_DEPENDENTS = [
+    pytest.param(competitor.competitor, id="competitor"),
+    pytest.param(customer.customer, id="customer"),
+    pytest.param(pestel.pestel, id="pestel"),
+    pytest.param(business_model.business_model, id="business_model"),
+]
+
+
+@pytest.fixture
+def captured_prompt(monkeypatch):
+    """Agent 의 LLM 입력을 가로채 담아 둔다. is_dummy 는 competitor 의 웹검색을 막기 위함."""
+    monkeypatch.setattr(llm, "is_dummy", lambda: True)
+    seen: dict = {}
+
+    def _capture(system, user, **kwargs):
+        seen["user"] = user
+        return {}                      # 각 Agent 의 _validate 가 중립값으로 처리한다
+
+    monkeypatch.setattr(llm, "complete_json", _capture)
+    return seen
+
+
+def _research_state(*, flat: dict | None, art: dict | None) -> ProjectState:
+    state: ProjectState = {"structured_input": {"project_name": "P"}}
+    if flat is not None:
+        state["research_result"] = flat
+    if art is not None:
+        state["artifacts"] = [artifact.make_artifact("research_analysis", art)]
+    return state
+
+
+@pytest.mark.parametrize("agent_fn", _RESEARCH_DEPENDENTS)
+@pytest.mark.parametrize(("mode", "expected", "absent"), [
+    (artifact.READ_LEGACY, "평면쪽", "아티팩트쪽"),
+    (artifact.READ_PREFER_ARTIFACT, "아티팩트쪽", "평면쪽"),
+    (artifact.READ_ARTIFACT_ONLY, "아티팩트쪽", "평면쪽"),
+])
+def test_research_dependents_read_through_selector(monkeypatch, captured_prompt, agent_fn,
+                                                   mode, expected, absent):
+    """평면·Artifact 에 다른 값을 넣고, **모드에 맞는 쪽**이 프롬프트에 들어가는지 본다."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, mode)
+    agent_fn(_research_state(flat={"market_overview": "평면쪽"},
+                             art={"market_overview": "아티팩트쪽"}))
+    assert expected in captured_prompt["user"]
+    assert absent not in captured_prompt["user"]
+
+
+@pytest.mark.parametrize("agent_fn", _RESEARCH_DEPENDENTS)
+def test_research_dependents_run_without_flat_key(monkeypatch, captured_prompt, agent_fn):
+    """평면 키가 아예 없어도 Artifact 만으로 동작하는가(전환의 실질 성공 기준)."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    agent_fn(_research_state(flat=None, art={"market_overview": "아티팩트쪽"}))
+    assert "아티팩트쪽" in captured_prompt["user"]
+
+
+@pytest.mark.parametrize("agent_fn", _RESEARCH_DEPENDENTS)
+def test_research_dependents_fail_explicitly_when_artifact_missing(monkeypatch, captured_prompt,
+                                                                  agent_fn):
+    """artifact_only 에서 의존 Artifact 가 없으면 빈 dict 로 조용히 진행하지 않는다.
+
+    조용히 넘어가면 '근거 없이 만든 분석'이 정상 산출물처럼 저장된다.
+    """
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    with pytest.raises(artifact.ArtifactUnavailable):
+        agent_fn(_research_state(flat={"market_overview": "평면쪽"}, art=None))
+    assert "user" not in captured_prompt          # LLM 호출 전에 실패
+
+
+@pytest.mark.parametrize("agent_fn", _RESEARCH_DEPENDENTS)
+def test_research_dependents_do_not_consume_failed_artifact(monkeypatch, captured_prompt, agent_fn):
+    """status=failed 인 Artifact 를 정상값처럼 소비하지 않는다(사유가 남거나 실패한다)."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    art = artifact.make_artifact("research_analysis", {"market_overview": "아티팩트쪽"})
+    art["status"] = artifact.STATUS_FAILED
+    state: ProjectState = {"structured_input": {"project_name": "P"},
+                           "research_result": {"market_overview": "평면쪽"}, "artifacts": [art]}
+    with pytest.raises(artifact.ArtifactUnavailable) as e:
+        agent_fn(state)
+    assert "failed" in str(e.value)
+
+
 # ---- 관측성 (PR 5b) ----
 
 def test_invalid_mode_is_reported_not_just_swallowed(monkeypatch, caplog):
@@ -391,7 +491,8 @@ def test_converted_consumers_have_no_direct_flat_key_reads():
     """
     from pathlib import Path
 
-    for mod in (draft_writer, verifier, research):
+    for mod in (draft_writer, verifier, research,
+                competitor, customer, pestel, business_model):
         src = Path(mod.__file__).read_text(encoding="utf-8")
         for spec in artifact.LEGACY_ARTIFACT_SPECS:
             assert f'state.get("{spec["legacy_key"]}"' not in src, (mod.__name__, spec["legacy_key"])
@@ -414,10 +515,10 @@ def test_unconverted_readers_are_known():
              if pattern.search(p.read_text(encoding="utf-8"))}
     assert found == {
         # Agent 간 읽기 — 뒤 Agent 가 앞 Agent 결과를 읽는 경로.
-        # research.py(research_gap → research)는 PR 5c-1 에서 전환됨.
-        # 남은 6개는 PR 5c-2(research 단일 의존 4개)·5c-3(swot·risk 복수 의존)에서 전환한다.
-        "app/agents/competitor.py", "app/agents/customer.py", "app/agents/pestel.py",
-        "app/agents/swot.py", "app/agents/business_model.py", "app/agents/risk.py",
+        # 전환 완료: research.py(5c-1) · competitor·customer·pestel·business_model(5c-2).
+        # 남은 것은 **복수 의존** 2개뿐 — PR 5c-3 에서 전환한다
+        # (swot → research+competitor, risk → research+pestel).
+        "app/agents/swot.py", "app/agents/risk.py",
         # 표시·집계 계층 — 문서 내용을 만들지 않으므로 뒤로 미룸
         "app/api/routes.py", "app/services/parallel_bench.py",
     }, found

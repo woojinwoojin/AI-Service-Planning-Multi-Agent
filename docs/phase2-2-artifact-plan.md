@@ -354,7 +354,7 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 | 묶음 | 대상 | 의존 | 상태 |
 |---|---|---|---|
 | 5c-1 | `research_gap` → research | 1개 (자기 갱신) | ✅ 완료 |
-| 5c-2 | `competitor`·`customer`·`pestel`·`business_model` → research | 1개 | 예정 |
+| 5c-2 | `competitor`·`customer`·`pestel`·`business_model` → research | 1개 | ✅ 완료 |
 | 5c-3 | `swot` → research+competitor · `risk` → research+pestel | 2개 | 예정 |
 
 > **5c-1 (`feat/artifact-read-research-gap`)**: `research_gap` 이 보강 대상인 기존 조사 결과를
@@ -380,6 +380,30 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 > **아직 남은 것(정직 표기)**: 5c-2/5c-3 의 6개 Agent 는 여전히 평면 키를 직접 읽는다.
 > `test_unconverted_readers_are_known` 이 그 목록을 고정하고 있어, 전환이 진행되면 목록이 줄고
 > 새 직접 읽기가 생기면 실패한다.
+
+> **5c-2 (`feat/artifact-read-analysis-agents`)**: Research 하나만 의존하는 4개 Agent
+> (`competitor`·`customer`·`pestel`·`business_model`)를 `artifact.read` 로 옮겼다. 각 1줄.
+>
+> **읽는 값은 보강 *후* 조사 결과다** — `research_gap` 이 직렬·병렬 두 그래프 모두에서 fan-out
+> **앞**에 있다(`workflow.py:199,227-233`). 5c-1 을 먼저 한 이유가 여기서 실현된다.
+>
+> **검증 — 최종 문서 해시로는 이 4개 경로가 검증되지 않는다.** 더미 초안은
+> `_dummy_draft(si, research, pestel)` 로 만들어져 competitor·customer·business_model 의 결과는
+> 산출물에 반영되지 않는다(PR 5 의 한계 표기와 같은 이유). 그래서 **각 Agent 의 LLM 프롬프트를
+> 직접 가로채** 확인한다:
+> - 평면·Artifact 에 다른 값 → 세 모드에서 **모드에 맞는 쪽**이 프롬프트에 들어간다(4×3=12건)
+> - 평면 키가 **아예 없어도** Artifact 만으로 동작한다(4건)
+> - `artifact_only` 에서 의존 Artifact 가 없으면 **LLM 호출 전에** `ArtifactUnavailable`(4건)
+> - `status=failed` Artifact 를 정상값처럼 소비하지 않는다(4건)
+>
+> 여기에 더미 관통 실행을 **serial·parallel × 3모드 6조합**으로 확장해
+> `failed_nodes` 가 비는지 본다 — 병렬에서 Artifact 가 fan-out 경계를 넘어 보이지 않으면
+> `artifact_only` 에서 4개 노드가 실패하므로, 이 조합이 fan-out 가시성의 실증이다.
+>
+> 테스트 27건 추가(470 passed), ruff clean. 기본 모드 `legacy` 이므로 동작 변화 없음.
+>
+> **남은 것**: `swot`·`risk` 2개(복수 의존) → 5c-3. 이 둘이 끝나야 `depends_on` 선언이 실제
+> 런타임 입력 관계와 일치하는지 처음으로 직접 검증된다.
 
 ### PR 6. 제한적 동적 실행과 연결 — 위험도 6/10
 

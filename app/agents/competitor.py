@@ -54,7 +54,10 @@ def _dummy(research: dict) -> dict:
 
 
 def competitor(state: ProjectState) -> dict:
-    research = state.get("research_result", {})
+    # 앞 Agent(Research) 결과는 selector 로 읽는다(로드맵 2-2 PR 5c-2). 기본 모드 legacy 에서는
+    # 평면 키를 그대로 읽으므로 전환 전과 동작이 같다. research_gap 이 fan-out 앞에 있어
+    # 여기서 읽는 것은 **보강 후** 조사 결과다(두 그래프 모두).
+    research = artifact.read(state, "research_analysis")
     si = state.get("structured_input", {})
     fallback = _dummy(research)
 
