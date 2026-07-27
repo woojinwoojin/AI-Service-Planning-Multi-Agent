@@ -202,36 +202,59 @@ pytest -q
 
 배포 경로는 두 가지입니다. 자세한 배경은 [`DEPLOY.md`](DEPLOY.md) 참고.
 
-### A. 승인형 CD — GitHub Actions (권장)
+### A. 수동 트리거형 CD — GitHub Actions
 
 `.github/workflows/deploy-cloudrun.yml` — **`workflow_dispatch` 로만 돌아갑니다**(push 자동 배포
 없음). 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이 사람의
 확인 없이 바뀌기 때문입니다.
 
-흐름: **게이트(ruff + pytest) → 승인 대기 → GCP 인증 → Cloud Run 새 Revision → 원격 `/health` 확인**
+흐름: **게이트(ruff + pytest) → GCP 인증(WIF) → Cloud Run 새 Revision → 원격 `/health` 확인**
 게이트가 실패하면 배포 잡은 시작하지 않고, `concurrency` 로 배포가 겹치지 않습니다.
+
+> ⚠️ **아직 '승인형'이 아닙니다.** `environment: production` 선언만으로는 승인 절차가 생기지
+> 않습니다. 아래 3번(Required reviewers)을 설정해야 승인 대기가 걸립니다.
+>
+> | 단계 | 정확한 명칭 |
+> |---|---|
+> | **지금** | 수동 트리거형 Cloud Run 배포 워크플로 |
+> | Required reviewers 설정 후 | 승인형 Cloud Run CD |
+> | 실제 dispatch 성공 후 | **검증된** 승인형 Cloud Run CD |
 
 **사전 설정(저장소 관리자, 1회):**
 
-1. **Secrets** (Settings → Secrets and variables → Actions)
+1. **Secrets** (Settings → Secrets and variables → Actions) — 셋 다 필요합니다
    | 이름 | 용도 |
    |---|---|
    | `GCP_PROJECT` | GCP 프로젝트 ID |
-   | `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF 공급자 리소스 이름 (권장 — 장기 키를 저장소에 두지 않음) |
+   | `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF 공급자 리소스 이름 |
    | `GCP_SERVICE_ACCOUNT` | WIF 로 가장할 서비스 계정 이메일 |
-   | `GCP_SA_KEY` | *(WIF 대신)* 서비스 계정 키 JSON — 폴백. 유출 시 회수가 어려워 WIF 를 권합니다 |
+
+   **인증은 WIF 하나만 지원합니다.** 서비스 계정 키(JSON) 폴백을 두지 않은 이유는 장기
+   크리덴셜을 저장소에 두면 유출 시 회수가 어렵고, 검증하지 못한 분기를 늘리지 않기 위해서입니다.
+
+   WIF 설정(예시 — 프로젝트·풀 이름은 환경에 맞게):
+   ```bash
+   gcloud iam workload-identity-pools create github --location=global
+   gcloud iam workload-identity-pools providers create-oidc github-actions \
+     --location=global --workload-identity-pool=github \
+     --issuer-uri=https://token.actions.githubusercontent.com \
+     --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository \
+     --attribute-condition="assertion.repository=='<OWNER>/<REPO>'"
+   # 출력된 provider 리소스 이름을 GCP_WORKLOAD_IDENTITY_PROVIDER 에 넣습니다
+   ```
 2. **Secret Manager** 에 `OPENAI_API_KEY`·`TAVILY_API_KEY` 생성(`scripts/deploy_cloudrun.sh` 가 만들어 줍니다)
 3. **승인 게이트**: Settings → Environments → `production` 생성 → **Required reviewers** 지정.
-   ⚠️ 이 설정이 없으면 워크플로는 승인 없이 바로 배포됩니다 — 워크플로 파일만으로는 승인을
-   강제할 수 없습니다.
+   ⚠️ 이 설정이 없으면 승인 없이 바로 배포됩니다. 비공개 저장소는 **요금제에 따라 Required
+   reviewers 를 못 쓸 수 있으니** 공개 여부와 플랜도 확인하세요.
 4. 서비스 계정 권한: `roles/run.admin` · `roles/cloudbuild.builds.editor` ·
    `roles/iam.serviceAccountUser` · `roles/secretmanager.secretAccessor`
 
-**실행**: Actions → *Cloud Run 배포 (승인형)* → Run workflow → `confirm` 에 **`deploy`** 입력
+**실행**: Actions → *Cloud Run 배포 (수동 트리거)* → Run workflow → `confirm` 에 **`deploy`** 입력
 (오타 배포 방지). `dummy_mode` 를 켜면 `USE_DUMMY=1` 로 올려 키 없이 화면·계약만 확인합니다.
 
-> ⚠️ **이 워크플로는 아직 실제로 실행해 검증하지 않았습니다.** 시크릿·WIF 설정 전에는 인증
-> 단계에서 명확한 메시지와 함께 실패합니다(가짜 성공을 만들지 않습니다).
+> ⚠️ **이 워크플로는 아직 실제로 실행해 검증하지 않았습니다.** 시크릿·WIF 설정 전에는 설정 확인
+> 단계에서 명확한 메시지와 함께 실패합니다(가짜 성공을 만들지 않습니다). 검증 전까지는
+> "구성했다"까지만 말하고 "동작한다"고 하지 않습니다.
 
 ### B. 수동 스크립트 (검증된 경로)
 
@@ -324,7 +347,7 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 근거 일치성 검증 · Reviewer 평가와 섹션 단위 보완 · 최고 버전 채택 · 출력 가능 여부 게이트 ·
 **KOSENA 방법론 산출물 7종 + 준수 자체점검 28항목 + AI 활용 로그** · DOCX/PPTX/MD/JSON 산출 ·
 이력 저장·재조회 · 관측성(토큰·비용·지연·stage) · 예산 상한 · 공개 배포 상한 ·
-**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 + **Actions 승인형 CD** — 워크플로는 있으나 실제 실행은 미검증).
+**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 = 검증된 경로, + **Actions 수동 트리거형 배포 워크플로** — 구성했으나 실제 실행 미검증이며 Required reviewers 설정 전에는 승인형이 아님).
 
 > 초기 구상에서 **RAG·로그인은 여전히 제외**입니다(범위 관리). CI/CD 는 처음엔 제외했다가
 > 이후 CI(4게이트)와 Staging 파이프라인을 추가했습니다 — 아래 '향후'에 남은 부분을 적었습니다.
@@ -334,7 +357,7 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 - **사실 검증은 검색 요약 기준**입니다. URL 원문의 사실성은 재검증하지 않습니다.
   `unsupported` 는 '거짓'이 아니라 '현재 근거에서 확인하지 못함'입니다.
 - **출처 검사는 실행 전체 기준**입니다. KOSENA 산출물의 항목별 근거 연결은 미구현입니다.
-- **본문 분량이 요건(A4 30~50쪽) 미달**입니다(약 11.9쪽). 분량을 위한 분량은 넣지 않았습니다 —
+- **본문 분량이 요건(A4 30~50쪽) 미달**입니다(약 12.2쪽). 분량을 위한 분량은 넣지 않았습니다 —
   근거는 [`docs/kosena-compliance.md`](docs/kosena-compliance.md)에 있습니다.
 - **이력은 비영속**입니다(SQLite 파일 → 컨테이너 재시작 시 소실).
 - **인터뷰·설문 등 1차 자료는 만들 수 없습니다.** 지어내지 않고 **가설임을 명시**하며,
@@ -343,5 +366,5 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 
 ### 향후 후보
 
-승인형 CD 의 실제 실행 검증 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
+배포 워크플로의 Required reviewers 설정 + 실제 실행 검증 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
 사람 기획서 기준선 보정 · 관측성 per-Agent 분해. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.
