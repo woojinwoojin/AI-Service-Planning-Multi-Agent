@@ -19,6 +19,8 @@ from app.agents import (
     draft_writer,
     pestel,
     research,
+    risk,
+    swot,
     verifier,
 )
 from app.graph.workflow import run_workflow
@@ -408,6 +410,121 @@ def test_research_dependents_do_not_consume_failed_artifact(monkeypatch, capture
     assert "failed" in str(e.value)
 
 
+# ---- Agent 간 읽기: 복수 의존 2개 (PR 5c-3) ----
+#
+# `swot`(research+competitor)·`risk`(research+pestel)는 의존이 **2개**다. 여기서 처음으로
+# 명세의 `depends_on` 이 실제 런타임 입력 관계와 일치하는지를 직접 검증할 수 있다 —
+# 지금까지 `depends_on` 은 '코드를 읽고 사람이 적은' 값이었다.
+
+_MULTI_DEP = [
+    pytest.param(swot.swot, "competitor_analysis", "competitor_result", id="swot"),
+    pytest.param(risk.risk, "pestel_analysis", "pestel_result", id="risk"),
+]
+
+
+def _two_dep_state(*, second_type: str, second_key: str,
+                   flat: bool = True, art: bool = True, drop_second_art: bool = False) -> ProjectState:
+    """research + 두 번째 의존을 평면·Artifact 양쪽에 서로 다른 값으로 넣는다."""
+    state: ProjectState = {"structured_input": {"project_name": "P"}}
+    if flat:
+        state["research_result"] = {"market_overview": "평면-research"}
+        state[second_key] = {"note": "평면-second"}
+    if art:
+        arts = [artifact.make_artifact("research_analysis", {"market_overview": "아티팩트-research"})]
+        if not drop_second_art:
+            arts.append(artifact.make_artifact(second_type, {"note": "아티팩트-second"}))
+        state["artifacts"] = arts
+    return state
+
+
+@pytest.mark.parametrize(("agent_fn", "second_type", "second_key"), _MULTI_DEP)
+@pytest.mark.parametrize("mode", [artifact.READ_PREFER_ARTIFACT, artifact.READ_ARTIFACT_ONLY])
+def test_multi_dep_reads_both_dependencies_through_selector(monkeypatch, captured_prompt,
+                                                            agent_fn, second_type, second_key, mode):
+    """의존 **둘 다** Artifact 쪽에서 와야 한다 — 하나만 전환되면 여기서 잡힌다."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, mode)
+    agent_fn(_two_dep_state(second_type=second_type, second_key=second_key))
+    user = captured_prompt["user"]
+    assert "아티팩트-research" in user and "아티팩트-second" in user
+    assert "평면-research" not in user and "평면-second" not in user
+
+
+@pytest.mark.parametrize(("agent_fn", "second_type", "second_key"), _MULTI_DEP)
+def test_multi_dep_legacy_mode_still_reads_flat_keys(monkeypatch, captured_prompt,
+                                                     agent_fn, second_type, second_key):
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_LEGACY)
+    agent_fn(_two_dep_state(second_type=second_type, second_key=second_key))
+    user = captured_prompt["user"]
+    assert "평면-research" in user and "평면-second" in user
+    assert "아티팩트" not in user
+
+
+@pytest.mark.parametrize(("agent_fn", "second_type", "second_key"), _MULTI_DEP)
+def test_multi_dep_runs_without_flat_keys(monkeypatch, captured_prompt,
+                                          agent_fn, second_type, second_key):
+    """평면 키가 아예 없어도 Artifact 둘만으로 동작하는가."""
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    agent_fn(_two_dep_state(second_type=second_type, second_key=second_key, flat=False))
+    assert "아티팩트-research" in captured_prompt["user"]
+    assert "아티팩트-second" in captured_prompt["user"]
+
+
+@pytest.mark.parametrize(("agent_fn", "second_type", "second_key"), _MULTI_DEP)
+def test_multi_dep_fails_when_one_dependency_is_missing(monkeypatch, captured_prompt,
+                                                        agent_fn, second_type, second_key):
+    """**의존 하나만** 빠져도 명시적으로 실패해야 한다.
+
+    research 는 있고 두 번째 의존만 없는 상황 — 조용히 빈 dict 로 진행하면 '경쟁사 분석을
+    안 보고 만든 SWOT'이 정상 산출물처럼 저장된다.
+    """
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+    with pytest.raises(artifact.ArtifactUnavailable) as e:
+        agent_fn(_two_dep_state(second_type=second_type, second_key=second_key,
+                                drop_second_art=True))
+    assert second_type in str(e.value) and "missing" in str(e.value)
+    assert "user" not in captured_prompt          # LLM 호출 전에 실패
+
+
+# ---- depends_on 선언 ↔ 실제 런타임 읽기 ----
+
+_DEPENDENT_AGENTS = {
+    "competitor": competitor.competitor,
+    "customer": customer.customer,
+    "pestel": pestel.pestel,
+    "swot": swot.swot,
+    "business_model": business_model.business_model,
+    "risk": risk.risk,
+}
+
+
+def test_declared_depends_on_matches_actual_runtime_reads(monkeypatch):
+    """명세의 `depends_on` 이 **실제로 읽는 Artifact** 와 정확히 일치하는지 확인한다.
+
+    지금까지 `depends_on` 은 코드를 읽고 사람이 적은 선언이었다(artifact.py 설계 메모 참조).
+    Agent 간 읽기가 전부 `artifact.read` 를 지나게 된 지금은, 호출을 기록해 선언과 대조할 수
+    있다 — 선언이 실제와 어긋나면 PR 6(선택적 Agent 재실행)이 **잘못된 Agent를 재실행**한다.
+    """
+    monkeypatch.setattr(llm, "is_dummy", lambda: True)
+    monkeypatch.setattr(llm, "complete_json", lambda *a, **k: {})
+    real_read = artifact.read
+    id_by_type = {s["artifact_type"]: s["artifact_id"] for s in artifact.LEGACY_ARTIFACT_SPECS}
+    spec_by_owner = {s["owner_agent"]: s for s in artifact.LEGACY_ARTIFACT_SPECS}
+    # 모든 의존이 채워진 상태(무엇을 읽는지만 보므로 content 는 최소)
+    state: ProjectState = {
+        "structured_input": {"project_name": "P"},
+        "artifacts": [artifact.make_artifact(s["artifact_type"], {"x": 1})
+                      for s in artifact.LEGACY_ARTIFACT_SPECS],
+    }
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_ARTIFACT_ONLY)
+
+    for owner, fn in _DEPENDENT_AGENTS.items():
+        seen: list[str] = []
+        monkeypatch.setattr(artifact, "read",
+                            lambda st, t, _s=seen: (_s.append(t), real_read(st, t))[1])
+        fn(state)
+        assert {id_by_type[t] for t in seen} == set(spec_by_owner[owner]["depends_on"]), owner
+
+
 # ---- 관측성 (PR 5b) ----
 
 def test_invalid_mode_is_reported_not_just_swallowed(monkeypatch, caplog):
@@ -492,7 +609,7 @@ def test_converted_consumers_have_no_direct_flat_key_reads():
     from pathlib import Path
 
     for mod in (draft_writer, verifier, research,
-                competitor, customer, pestel, business_model):
+                competitor, customer, pestel, business_model, swot, risk):
         src = Path(mod.__file__).read_text(encoding="utf-8")
         for spec in artifact.LEGACY_ARTIFACT_SPECS:
             assert f'state.get("{spec["legacy_key"]}"' not in src, (mod.__name__, spec["legacy_key"])
@@ -514,11 +631,9 @@ def test_unconverted_readers_are_known():
     found = {p.relative_to(root).as_posix() for p in root.joinpath("app").rglob("*.py")
              if pattern.search(p.read_text(encoding="utf-8"))}
     assert found == {
-        # Agent 간 읽기 — 뒤 Agent 가 앞 Agent 결과를 읽는 경로.
-        # 전환 완료: research.py(5c-1) · competitor·customer·pestel·business_model(5c-2).
-        # 남은 것은 **복수 의존** 2개뿐 — PR 5c-3 에서 전환한다
-        # (swot → research+competitor, risk → research+pestel).
-        "app/agents/swot.py", "app/agents/risk.py",
-        # 표시·집계 계층 — 문서 내용을 만들지 않으므로 뒤로 미룸
+        # ✅ Agent 간 읽기 7곳 전부 전환 완료(5c-1 research · 5c-2 단일 의존 4개 ·
+        #    5c-3 복수 의존 swot·risk). 이제 문서 내용을 만드는 경로에는 평면 키 직접 읽기가 없다.
+        # 남은 것은 **표시·집계 계층** — State 를 그대로 직렬화해 보여줄 뿐 문서 내용을
+        # 만들지 않으므로 뒤로 미뤘다(평면 키는 외부 호환용으로 계속 제공한다).
         "app/api/routes.py", "app/services/parallel_bench.py",
     }, found
