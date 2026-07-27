@@ -172,6 +172,9 @@ def test_all_read_modes_produce_identical_output(monkeypatch, workflow_mode):
         # Artifact 쪽 내용도 같아야 한다 — 평면 결과만 같고 봉투가 다르면 다음 소비자가 갈린다.
         assert _contents(outs[m]) == _contents(base), m
         assert outs[m]["artifact_parity"]["ok"], m
+        # 읽는 **방식**만 바꾸는 작업이므로 호출 수가 늘면 그 자체로 실패다
+        # (selector 를 잘못 끼워 앞 Agent 를 다시 부르는 식의 회귀를 잡는다).
+        assert outs[m]["usage"]["calls"] == base["usage"]["calls"], m
 
 
 def _contents(state: dict) -> dict:
