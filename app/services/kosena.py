@@ -27,9 +27,12 @@ from __future__ import annotations
 
 from app.schemas import artifact
 
-# 본문 분량 추정용. A4 1쪽에 한글 본문이 대략 이 정도 들어간다고 본다(표·제목 포함 보수적 추정).
-# 정확한 페이지 수는 렌더러가 정하므로 이 값은 **추정치**이고, 판정도 그렇게 표기한다.
-_CHARS_PER_PAGE = 1500
+# 본문 분량 추정용 — **줄 수 기준**이다. 글자 수로 세면 표가 많은 문서에서 크게 빗나간다:
+# 표 한 행은 글자 수가 적어도 렌더링에서는 한 줄을 온전히 차지한다(실측한 KOSENA 산출물은
+# 494줄 중 183줄이 표 행이었고, 글자 기준 8.1쪽 vs 줄 기준 11.0쪽으로 갈렸다).
+# A4·11pt·1.15 줄간격에서 대략 45줄/쪽. 정확한 페이지 수는 렌더러가 정하므로 **추정치**이고,
+# 판정 문구에도 '추정'이라고 밝힌다.
+_LINES_PER_PAGE = 45
 
 # 제출 형식(p4): 본문 A4 30~50쪽 · 발표 15~20쪽
 DOC_PAGES_MIN, DOC_PAGES_MAX = 30, 50
@@ -309,21 +312,39 @@ def _c_ai_log(c):
     return MISSING, f"전용 로그 없음(재료: artifacts {_n(c['state'].get('artifacts'))}건·logs 존재)"
 
 
+def _submission_doc(c) -> str:
+    """평가 대상이 되는 **제출 본문**.
+
+    KOSENA 가 요구하는 본문은 7종 산출물 문서(`kosena_plan`)다. 기존 14섹션 기획서는 그 안에
+    참고로 포함되는 일부이므로, KOSENA 문서가 없을 때만 대신 본다. 분량·표기 검사가 서로 다른
+    문서를 보면 판정이 어긋난다.
+    """
+    return c["state"].get("kosena_plan") or c["draft"]
+
+
 def _c_hypothesis_labeling(c):
     """정량 주장을 1차 자료로 뒷받침할 수 없으면 **가설임을 명시**해야 한다(p4·p20).
 
     이 프로젝트는 인터뷰·설문을 수행하지 않으므로 '충족'이 아니라 **정직한 표기**가 정답이다.
     """
     marks = ("가설", "추정", "미검증", "인터뷰로 검증되지 않")
-    return (OK, "가설·추정 표기 있음") if any(m in c["draft"] for m in marks) \
+    return (OK, "가설·추정 표기 있음") if any(m in _submission_doc(c) for m in marks) \
         else (MISSING, "가설/추정임을 밝히는 문구가 본문에 없음")
 
 
 def _c_doc_length(c):
-    pages = round(len(c["draft"]) / _CHARS_PER_PAGE, 1)
+    """제출 본문의 분량(p4: A4 30~50쪽).
+
+    `missing`/`partial` 은 **문서 존재 여부**로 가른다. 반올림한 쪽수로 가르면 1줄짜리 문서가
+    0.0쪽 → '없음'으로 보고돼, '문서가 없다'와 '있는데 짧다'가 뭉개진다.
+    """
+    doc = _submission_doc(c)
+    if not doc.strip():
+        return MISSING, "제출 본문이 생성되지 않음"
+    pages = round(len(doc.splitlines()) / _LINES_PER_PAGE, 1)
     if DOC_PAGES_MIN <= pages <= DOC_PAGES_MAX:
         return OK, f"약 {pages}쪽(추정)"
-    return (PARTIAL if pages else MISSING), f"약 {pages}쪽(추정) — {DOC_PAGES_MIN}~{DOC_PAGES_MAX}쪽 필요"
+    return PARTIAL, f"약 {pages}쪽(추정) — {DOC_PAGES_MIN}~{DOC_PAGES_MAX}쪽 필요"
 
 
 # 요구사항 명세 — 순서는 PDF 모듈 순. `page` 는 근거 쪽수(원문 대조용).

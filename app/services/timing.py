@@ -21,7 +21,7 @@ _origin: contextvars.ContextVar = contextvars.ContextVar("timing_origin", defaul
 ANALYSIS_NODES = ("competitor", "customer", "pestel", "swot", "business_model", "risk")
 # KOSENA M1 구간(체크포인트 3) — 분석 블록과 draft 사이의 **순차** 2노드.
 # 병렬 실행에서도 순차라 span 이 아니라 duration 합이 맞다.
-KOSENA_NODES = ("kosena_industry", "kosena_model")
+KOSENA_NODES = ("kosena_industry", "kosena_model", "kosena_research", "kosena_roadmap")
 
 
 def start() -> None:

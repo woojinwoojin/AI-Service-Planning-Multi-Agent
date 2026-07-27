@@ -18,10 +18,12 @@ from collections.abc import Callable
 from langgraph.graph import END, START, StateGraph
 
 from app.services import (
+    ai_log,
     budget,
     demo,
     evidence,
     kosena,
+    kosena_doc,
     llm,
     migrate,
     quality_gate,
@@ -37,6 +39,8 @@ from app.agents import (
     draft_writer,
     kosena_industry,
     kosena_model,
+    kosena_research,
+    kosena_roadmap,
     pestel,
     preprocess,
     research,
@@ -182,6 +186,8 @@ def _register_nodes(g: StateGraph) -> None:
     # industry → model 순서는 필수 — HMW 가 KSF 를 입력으로 쓴다(p9).
     g.add_node("kosena_industry", _safe("kosena_industry", kosena_industry.kosena_industry))
     g.add_node("kosena_model", _safe("kosena_model", kosena_model.kosena_model))
+    g.add_node("kosena_research", _safe("kosena_research", kosena_research.kosena_research))
+    g.add_node("kosena_roadmap", _safe("kosena_roadmap", kosena_roadmap.kosena_roadmap))
     g.add_node("draft", _safe("draft", draft_writer.draft))
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
@@ -224,7 +230,11 @@ def build_serial_graph():
     g.add_edge("business_model", "risk")
     g.add_edge("risk", "kosena_industry")       # KOSENA M1(체크포인트 3)
     g.add_edge("kosena_industry", "kosena_model")
-    g.add_edge("kosena_model", "draft")
+    # M2·M3 는 앞 결과를 이어받아야 일관성이 생긴다 — VPC 고객 프로필은 페르소나·CJM 에서,
+    # Solution·UVP 는 Lean Canvas 에서 온다(평가표가 '블록 간 일관성'·'VPC Fit'을 본다).
+    g.add_edge("kosena_model", "kosena_research")
+    g.add_edge("kosena_research", "kosena_roadmap")
+    g.add_edge("kosena_roadmap", "draft")
     _add_finish_edges(g)
     return g.compile()
 
@@ -255,7 +265,11 @@ def build_parallel_graph():
     # fan-in join → KOSENA M1 은 네 분기 결과를 **모두** 입력으로 쓰므로 합류 지점에 붙인다.
     g.add_edge(["swot", "customer", "risk", "business_model"], "kosena_industry")
     g.add_edge("kosena_industry", "kosena_model")
-    g.add_edge("kosena_model", "draft")
+    # M2·M3 는 앞 결과를 이어받아야 일관성이 생긴다 — VPC 고객 프로필은 페르소나·CJM 에서,
+    # Solution·UVP 는 Lean Canvas 에서 온다(평가표가 '블록 간 일관성'·'VPC Fit'을 본다).
+    g.add_edge("kosena_model", "kosena_research")
+    g.add_edge("kosena_research", "kosena_roadmap")
+    g.add_edge("kosena_roadmap", "draft")
     _add_finish_edges(g)
     return g.compile()
 
@@ -445,6 +459,15 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     # KOSENA 방법론 준수 판정(체크포인트 3). **반드시 _finalize_artifacts 뒤**에 온다 —
     # 검사가 Artifact 를 selector 로 읽으므로, 확정 전이면 빈 값을 보고 전부 미충족으로 판정한다.
     # 미충족이어도 실행을 실패시키지 않는다(quality_gate·check_parity 와 같은 태도).
+    # AI 활용 로그(체크포인트 3, p4) — Artifact 메타데이터·reviewer 판정·select_best 를
+    # 재사용하므로 새 계측이 없다. kosena_compliance **앞**에 와야 검사가 이 로그를 본다.
+    state["ai_usage_log"] = ai_log.build(state)
+    # KOSENA 7종 산출물 문서·발표자료(p5). 기존 14섹션 기획서는 **그대로 두고** 별도로 조립한다
+    # — 재구성하면 sections 왕복 불변식·section_revise·quality_gate 가 함께 깨진다.
+    # 내보내기는 markdown 을 받는 기존 익스포터를 그대로 쓴다(새 익스포터 불필요).
+    state["kosena_plan"] = kosena_doc.build(state)
+    state["kosena_deck"] = kosena_doc.build_deck(state)
+    # 준수 판정은 **문서 조립 뒤**에 온다 — 분량·가설 표기를 조립된 본문에서 재기 때문이다.
     state["kosena_compliance"] = kosena.evaluate(state)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state

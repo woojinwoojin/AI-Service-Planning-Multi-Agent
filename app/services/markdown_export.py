@@ -30,8 +30,9 @@ _RUN_KEYS = [
     "revision_strategy", "revised_section_ids", "revision_fallback_reason",
     "polish_applied", "polish_skip_reason",
     "final_review_result", "verification_result", "verification_summary", "quality_gate",
-    # KOSENA 준수 판정·산출물(체크포인트 3). 저장해야 재조회·제출본에서 준수 현황을 볼 수 있다.
-    "kosena", "kosena_compliance",
+    # KOSENA 준수 판정·산출물·AI 활용 로그(체크포인트 3).
+    # 저장해야 재조회·제출본에서 준수 현황과 AI 검증 과정을 볼 수 있다.
+    "kosena", "kosena_compliance", "ai_usage_log", "kosena_plan", "kosena_deck",
     "evidence_registry", "evidence_gaps", "dynamic_research", "usage", "logs",
     "run_status", "failed_nodes", "fallback_nodes", "fallback_reasons", "workflow_mode",
     "reviewer_model", "timing", "timing_events", "budget", "state_version",

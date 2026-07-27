@@ -165,16 +165,22 @@ def test_e2e_revise_with_new_model_updates_history_model(client):
 
 
 def test_e2e_run_and_save_writes_all_artifacts(client, outputs_tmp):
-    """/run/save 가 MD·JSON·DOCX·PPTX 산출물을 실제로 파일로 남긴다(내보내기 전 흐름)."""
+    """/run/save 가 MD·JSON·DOCX·PPTX 산출물을 실제로 파일로 남긴다(내보내기 전 흐름).
+
+    KOSENA 대응(체크포인트 3) 이후로는 **KOSENA 본문·발표자료·AI 활용 로그**가 더해진다 —
+    제출 형식이 본문/발표/AI 로그로 나뉘기 때문(PDF p4). 기존 4종은 그대로 남아야 한다.
+    """
     r = client.post("/run/save", json={"project_name": "저장물", "problem": "P"}).json()
 
-    for key in ("saved_md", "saved_json", "saved_docx", "saved_pptx"):
+    for key in ("saved_md", "saved_json", "saved_docx", "saved_pptx",
+                "saved_kosena_md", "saved_kosena_docx", "saved_kosena_pptx", "saved_ai_log_md"):
         p = Path(r[key])
-        assert p.exists() and p.stat().st_size > 0             # 4종 산출물 생성됨
+        assert p.exists() and p.stat().st_size > 0, key
 
-    # MD 에는 한계 문구가 부착돼 있다.
-    md = (outputs_tmp / _only_md(outputs_tmp)).read_text(encoding="utf-8")
+    # MD 에는 한계 문구가 부착돼 있다(KOSENA 본문에도 동일하게).
+    md = Path(r["saved_md"]).read_text(encoding="utf-8")
     assert reliability._MARKER in md
+    assert reliability._MARKER in Path(r["saved_kosena_md"]).read_text(encoding="utf-8")
 
     # 실행 JSON 에는 PR-7/8 실행 기록이 보존된다(_RUN_KEYS 확장, P0-1).
     saved = json.loads(Path(r["saved_json"]).read_text(encoding="utf-8"))
