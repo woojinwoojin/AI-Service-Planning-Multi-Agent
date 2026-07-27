@@ -1,18 +1,24 @@
-name: Cloud Run 배포 (승인형)
+name: Cloud Run 배포 (수동 트리거)
 
-# **사람이 버튼을 눌러야만 도는 승인형 CD.** push 트리거를 일부러 두지 않았다 —
+# **사람이 버튼을 눌러야만 도는 수동 트리거 배포.** push 트리거를 일부러 두지 않았다 —
 # 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이
 # 사람의 확인 없이 바뀐다.
 #
 # 흐름: 게이트(ruff + pytest) → GCP 인증 → Cloud Run 새 Revision → 원격 /health 확인.
 # 게이트가 실패하면 배포 잡은 아예 시작하지 않는다(`needs`).
 #
-# **GitHub Environment `production` 을 쓴다.** 저장소 설정에서 그 환경에 Required reviewers 를
-# 걸면 이 잡이 승인 대기로 멈춘다 — 워크플로 파일만으로는 승인을 강제할 수 없으므로,
-# 진짜 '승인형'으로 만들려면 그 설정이 필요하다(README 배포 절차에 적어 뒀다).
+# ⚠️ **이름을 '승인형'이라고 하지 않은 이유.** `environment: production` 을 선언하는 것만으로는
+# 승인 절차가 생기지 않는다. 저장소 설정 → Environments → production 에 **Required reviewers**
+# 보호 규칙을 걸어야 그 잡이 승인 대기로 멈춘다. 그래서 단계별 정확한 명칭은 이렇다:
+#
+#   지금                        : 수동 트리거형 Cloud Run 배포 워크플로
+#   Required reviewers 설정 후  : 승인형 Cloud Run CD
+#   실제 dispatch 성공 후       : 검증된 승인형 Cloud Run CD
+#
+# (비공개 저장소는 요금제에 따라 Required reviewers 를 못 쓸 수 있으니 플랜도 확인해야 한다.)
 #
 # ⚠️ 이 워크플로는 **아직 실제로 실행해 검증하지 않았다.** 시크릿·WIF 설정은 저장소 관리자만
-# 할 수 있고, 그 전에는 인증 단계에서 명확한 메시지와 함께 실패한다(가짜 성공을 만들지 않는다).
+# 할 수 있고, 그 전에는 설정 확인 단계에서 명확한 메시지와 함께 실패한다(가짜 성공을 만들지 않는다).
 
 on:
   workflow_dispatch:
@@ -81,41 +87,37 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # 시크릿이 비었는지 확인은 `run:` 안에서 한다. **`if:` 에서는 secrets 를 볼 수 없다** —
+      # GitHub 의 컨텍스트 가용성 표에 `steps[*].if` 용 컨텍스트로 `secrets` 가 없어서, 조건이
+      # 의도대로 평가되지 않는다(처음 이 파일을 쓸 때 `if: ${{ secrets.X != '' }}` 로 인증 단계를
+      # 갈랐는데, 그러면 **두 인증 단계가 모두 건너뛰어지고** 크레덴셜 없이 배포를 시도한다).
+      # 시크릿을 조건으로 쓰려면 job 의 `env:` 로 옮겨 `env.X` 를 봐야 한다. 지금은 인증 방식을
+      # 하나로 고정했으므로 조건 자체가 필요 없다.
       - name: 설정 확인 — 없는 값으로 배포를 시도하지 않는다
         env:
           PROJECT: ${{ secrets.GCP_PROJECT }}
           WIF: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           SA: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          KEY: ${{ secrets.GCP_SA_KEY }}
         run: |
           missing=0
-          if [ -z "$PROJECT" ]; then echo "::error title=시크릿 없음::GCP_PROJECT"; missing=1; fi
-          # 인증은 WIF(권장) 또는 서비스 계정 키 중 하나면 된다.
-          if [ -z "$WIF$KEY" ]; then
-            echo "::error title=인증 미설정::GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT(권장) 또는 GCP_SA_KEY 가 필요하다."
-            missing=1
-          fi
-          if [ -n "$WIF" ] && [ -z "$SA" ]; then
-            echo "::error title=인증 불완전::WIF 를 쓰면 GCP_SERVICE_ACCOUNT 도 필요하다."
-            missing=1
-          fi
-          [ "$missing" = "1" ] && { echo "설정 절차는 README '배포 절차' 참고."; exit 1; }
+          for pair in "GCP_PROJECT:$PROJECT" "GCP_WORKLOAD_IDENTITY_PROVIDER:$WIF" "GCP_SERVICE_ACCOUNT:$SA"; do
+            name="${pair%%:*}"; value="${pair#*:}"
+            if [ -z "$value" ]; then echo "::error title=시크릿 없음::$name"; missing=1; fi
+          done
+          [ "$missing" = "1" ] && { echo "설정 절차는 README '7-1 배포 절차' 참고."; exit 1; }
           echo "설정 확인 완료"
 
-      # 키 없는 인증(권장) — 장기 크리덴셜을 저장소에 두지 않는다.
+      # **인증은 Workload Identity Federation 하나만 지원한다.**
+      # 서비스 계정 키(JSON) 폴백을 두지 않은 이유는 두 가지다:
+      #   1) 장기 크리덴셜을 저장소에 두면 유출 시 회수가 어렵다.
+      #   2) 검증할 수 없는 분기를 늘리지 않는다 — 이 워크플로 자체가 아직 실행 검증 전이고,
+      #      두 경로 중 어느 쪽도 돌려보지 못한 상태에서 갈래를 두면 실패 지점만 늘어난다.
+      # 수동 배포가 필요하면 이미 검증된 `scripts/deploy_cloudrun.sh` 경로가 있다.
       - name: GCP 인증 (Workload Identity Federation)
-        if: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      # 폴백 — WIF 를 아직 설정하지 못한 경우. 키가 유출되면 회수가 어려우니 WIF 를 권한다.
-      - name: GCP 인증 (서비스 계정 키 — 폴백)
-        if: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER == '' && secrets.GCP_SA_KEY != '' }}
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
