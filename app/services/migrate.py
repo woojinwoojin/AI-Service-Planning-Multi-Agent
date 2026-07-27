@@ -15,7 +15,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 from app.schemas import artifact
-from app.services import quality_gate, reliability
+from app.services import kosena, quality_gate, reliability
 
 # v1=초기, v2=문서재생성/신뢰도/게이트 필드 추가(2026-07-24), v3=Artifact Contract 병행 기록(2-2 PR 2)
 STATE_VERSION = 3
@@ -66,5 +66,10 @@ def upgrade_state(state: dict) -> dict:
     # '옛 기록이라 판정이 없음'과 '판정했는데 통과'를 구분할 수 있다.
     if not state.get("artifact_parity"):
         state["artifact_parity"] = artifact.check_parity(state)
+    # KOSENA 준수 판정(체크포인트 3)도 옛 기록에 소급한다 — quality_gate 와 같은 이유로,
+    # '옛 기록이라 판정이 없음'과 '판정했는데 미충족'을 구분할 수 있어야 한다.
+    # artifacts 를 채운 **뒤에** 계산해야 selector 가 제대로 읽는다(위 순서 의존).
+    if not state.get("kosena_compliance"):
+        state["kosena_compliance"] = kosena.evaluate(state)
     state["state_version"] = STATE_VERSION
     return state

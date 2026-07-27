@@ -71,6 +71,12 @@ class ProjectState(TypedDict, total=False):
     verification_result: dict
     verification_summary: dict   # 검증 범위·한계 문구(UI·내보내기·JSON 공통)
     quality_gate: dict           # 출력 가능 여부 게이트(release_ready·checks·미해결 이슈, Phase 4)
+    # KOSENA 방법론 준수 판정(체크포인트 3): {total, ok, partial, missing, checks[], unmet[]}.
+    # 미충족이어도 실행을 막지 않고 표면화만 한다 — 무엇이 빠졌는지 아는 것이 평가에서 중요하다.
+    kosena_compliance: dict
+    # KOSENA 전용 산출물(Porter·Lean Canvas·CJM·TAM/SAM/SOM·VPC·MOSCOW·Epic-Story 등).
+    # 아직 생성 Agent 가 없어 비어 있으며, kosena_compliance 가 그 사실을 그대로 보고한다.
+    kosena: dict
     # logs 는 reducer 필드: 병렬 노드가 동시에 로그를 추가해도 유실·충돌 없이 이어붙는다.
     # 각 노드는 '자기 새 로그만' 반환하고(operator.add 로 누적), 기존 전체 로그를 다시 반환하지 않는다.
     logs: Annotated[list, operator.add]  # 실행 로그 / 진행 상태 표시용
