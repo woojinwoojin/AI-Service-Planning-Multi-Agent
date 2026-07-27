@@ -132,8 +132,43 @@ python scripts/smoke_test.py --allow-real       # 실 키 서버 대상(비용 �
 ```bash
 gcloud auth login
 gcloud config set project "$GCP_PROJECT"
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com secretmanager.googleapis.com
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
+                       secretmanager.googleapis.com artifactregistry.googleapis.com
 ```
+
+**IAM — 이걸 빼면 반드시 막힌다(2026-07-27 실제로 둘 다 겪음).** 최근 GCP 프로젝트는
+Compute 기본 서비스 계정에 아래 권한이 **기본으로 붙어 있지 않다.**
+
+```bash
+PROJNUM="$(gcloud projects describe "$GCP_PROJECT" --format='value(projectNumber)')"
+SA="serviceAccount:${PROJNUM}-compute@developer.gserviceaccount.com"
+
+# ① 빌드용 — 없으면 소스 zip 을 못 읽어 403 으로 배포 실패
+gcloud projects add-iam-policy-binding "$GCP_PROJECT" \
+  --member="$SA" --role=roles/cloudbuild.builds.builder --condition=None
+
+# ② 런타임용 — 없으면 빌드는 성공하는데 컨테이너가 키를 못 읽는다(발견이 늦는 유형)
+for s in OPENAI_API_KEY TAVILY_API_KEY; do
+  gcloud secrets add-iam-policy-binding "$s" \
+    --member="$SA" --role=roles/secretmanager.secretAccessor --project "$GCP_PROJECT"
+done
+```
+
+> ②는 시크릿을 먼저 만든 뒤에 걸어야 한다 — `deploy_cloudrun.sh --secrets` 로 시크릿만
+> 생성한 다음 위 루프를 돌리고, 그 뒤에 본 배포를 하면 순서가 맞는다.
+
+### 컨테이너는 `PORT` 를 존중해야 한다
+
+Cloud Run 은 자기가 정한 포트(기본 **8080**)를 `PORT` 환경변수로 주입하고 **그 포트만**
+헬스체크한다. 이미지가 포트를 고정하면 앱이 정상 기동해도
+`container failed to start and listen on PORT` 로 배포가 실패한다(로그에는
+`Uvicorn running on http://0.0.0.0:8000` 과 `Application startup complete` 이 멀쩡히 찍힌다).
+
+`Dockerfile` 은 `CMD ["sh","-c","exec uvicorn ... --port ${PORT:-8000}"]` 로 이를 따른다.
+기본값이 8000 이라 `docker compose`·로컬 실행은 그대로다.
+
+> ⚠️ **CI 의 `docker build` 잡은 이걸 못 잡는다** — 빌드만 하고 컨테이너를 띄우지 않기
+> 때문이다. 로컬 Docker 데몬이 없으면 배포해 봐야 드러난다.
 
 ### 배포
 
