@@ -340,6 +340,7 @@ def _prepare_run(user_input: dict, workflow_mode: str = "serial"):
         "logs": [],
     }
     usage.start()                       # 이번 실행의 토큰·지연 관측 시작
+    artifact.reads_start()              # Artifact 읽기·폴백 계측 시작(2-2 PR 5d)
     budget.start()                      # 실행별 예산·시간 상한 활성화(env 기준, 트랙 D)
     timing.start()                      # 단계별 계측의 시각 원점
     idea = (user_input.get("project_name") or user_input.get("description") or "planning-run")

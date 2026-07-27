@@ -268,6 +268,7 @@ def revise(payload: ReviseInput) -> RunResult:
         state["structured_input"] = {"project_name": payload.project_name.strip()}
 
     usage.start()                                  # 수정 재작성의 토큰·비용도 관측
+    artifact.reads_start()                         # 섹션 수정도 selector 를 타므로 함께 계측(2-2 PR 5d)
     budget.start()                                 # 수정 재작성도 예산·시간 상한 적용(트랙 D)
     timing.start()                                 # 단계별 계측 시각 원점
     # 재작성 노드도 _safe 로 감싸 timing event 를 남긴다. 직접 호출하면 가장 큰 비용인 문서

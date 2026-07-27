@@ -136,20 +136,91 @@ def _run(monkeypatch, mode: str, workflow_mode: str = "serial") -> dict:
                          "problem": "p", "keywords": ["k"]}, workflow_mode=workflow_mode)
 
 
+# 모드를 바꿔도 **달라져서는 안 되는** State 키(PR 5d 비교 항목 확대).
+#
+# PR 5 때는 `final_draft`·`verification_result` 만 봤는데, 그것만으로는 부족하다 —
+# 더미 초안은 `_dummy_draft(si, research, pestel)` 로 만들어져 **competitor·customer·swot·
+# business_model·risk 의 결과가 최종 문서에 반영되지 않는다.** 그 5개 Agent 가 모드에 따라
+# 다른 입력을 읽어 다른 결과를 내도 최종 문서 해시는 그대로다.
+# 그래서 **7개 분석 결과 자체**를 직접 비교한다 — 이러면 문서에 안 실리는 Agent 도 커버된다.
+_MODE_INVARIANT_KEYS = [
+    *[s["legacy_key"] for s in artifact.LEGACY_ARTIFACT_SPECS],   # 7개 분석 결과(핵심 확대분)
+    "draft", "final_draft",                                       # 문서
+    "review_result", "initial_review_result", "final_review_result",
+    "verification_result", "quality_gate",                        # 평가·검증·게이트
+    "sources", "source_objects", "evidence_registry", "evidence_gaps",  # 근거 계열
+    "revision_strategy", "revised_section_ids", "revision_fallback_reason",
+    "run_status", "failed_nodes", "fallback_nodes",               # 실행 결말
+]
+
+
 @pytest.mark.parametrize("workflow_mode", ["serial", "parallel"])
 def test_all_read_modes_produce_identical_output(monkeypatch, workflow_mode):
-    """세 모드의 최종 기획서·검증 결과가 **완전히 같아야** 한다.
+    """세 모드의 산출물이 **완전히 같아야** 한다.
 
     다르면 Artifact 가 평면 결과를 제대로 대신하지 못한다는 뜻이므로
     prefer_artifact 로 넘기면 안 된다는 신호다.
+
+    비교 대상은 최종 문서만이 아니라 `_MODE_INVARIANT_KEYS` 전체 + Artifact content 다
+    (PR 5d 에서 확대 — 이유는 위 상수 주석 참고).
     """
     outs = {m: _run(monkeypatch, m, workflow_mode) for m in MODES}
     base = outs[artifact.READ_LEGACY]
     for m in MODES[1:]:
-        assert outs[m]["draft"] == base["draft"], m
-        assert outs[m]["final_draft"] == base["final_draft"], m
-        assert outs[m]["verification_result"] == base["verification_result"], m
+        for key in _MODE_INVARIANT_KEYS:
+            assert outs[m].get(key) == base.get(key), (m, key)
+        # Artifact 쪽 내용도 같아야 한다 — 평면 결과만 같고 봉투가 다르면 다음 소비자가 갈린다.
+        assert _contents(outs[m]) == _contents(base), m
         assert outs[m]["artifact_parity"]["ok"], m
+        # 읽는 **방식**만 바꾸는 작업이므로 호출 수가 늘면 그 자체로 실패다
+        # (selector 를 잘못 끼워 앞 Agent 를 다시 부르는 식의 회귀를 잡는다).
+        assert outs[m]["usage"]["calls"] == base["usage"]["calls"], m
+
+
+def _contents(state: dict) -> dict:
+    return {a["artifact_type"]: a["content"] for a in state["artifacts"]}
+
+
+# 원본을 **import 시점에** 붙잡아 둔다. 헬퍼 안에서 `llm.complete_json` 을 그때그때 읽으면
+# 한 테스트에서 두 번째 실행이 첫 번째 래퍼를 감싸 첫 실행의 기록에 프롬프트가 섞인다.
+_REAL_COMPLETE_JSON = llm.complete_json
+_REAL_COMPLETE_TEXT = llm.complete_text
+
+
+def _run_capturing_prompts(monkeypatch, mode: str, workflow_mode: str) -> list[str]:
+    """실행 전체의 LLM user 프롬프트를 순서 무관하게 모은다(정렬)."""
+    seen: list[str] = []
+
+    def cap(real):
+        def _wrapped(system, user, *a, **k):
+            seen.append(user)
+            return real(system, user, *a, **k)
+        return _wrapped
+
+    monkeypatch.setattr(llm, "complete_json", cap(_REAL_COMPLETE_JSON))
+    monkeypatch.setattr(llm, "complete_text", cap(_REAL_COMPLETE_TEXT))
+    _run(monkeypatch, mode, workflow_mode)
+    return sorted(seen)          # 병렬은 도착 순서가 흔들리므로 정렬해 비교
+
+
+@pytest.mark.parametrize("workflow_mode", ["serial", "parallel"])
+def test_every_agent_receives_identical_input_in_every_mode(monkeypatch, workflow_mode):
+    """**모든 Agent 가 세 모드에서 똑같은 입력을 받는가** — 산출물 비교의 공백을 메운다.
+
+    산출물만 비교하면 더미 모드에서 대부분 공허하다. `_dummy()` 가 앞 Agent 결과를 실제로
+    쓰는 Agent 는 `competitor` 뿐이고(나머지 5개는 입력을 무시한 고정값을 낸다), 최종 문서는
+    research·pestel 만 반영한다. 즉 어떤 Agent 가 `artifact_only` 에서 빈 값을 읽어도
+    산출물 해시는 그대로일 수 있다.
+
+    프롬프트를 직접 대조하면 이 구멍이 닫힌다 — 프롬프트에는 읽어 온 값이 그대로 직렬화돼
+    들어가므로, 모드가 달라 다른 값을 읽으면 **반드시** 다르다. 5c-2/5c-3 이 Agent 단위로
+    하던 가로채기를, 여기서는 손으로 만든 State 가 아니라 **관통 실행**에 대해 한다.
+    """
+    prompts = {m: _run_capturing_prompts(monkeypatch, m, workflow_mode) for m in MODES}
+    base = prompts[artifact.READ_LEGACY]
+    assert base, "프롬프트가 하나도 안 잡혔다면 이 테스트는 아무것도 검증하지 못한다"
+    for m in MODES[1:]:
+        assert prompts[m] == base, m
 
 
 @pytest.mark.parametrize("workflow_mode", ["serial", "parallel"])
@@ -597,6 +668,151 @@ def test_health_exposes_read_mode(monkeypatch):
     body = TestClient(app).get("/health").json()
     assert body["artifact_read_mode"] == artifact.READ_LEGACY
     assert body["artifact_read_mode_invalid"] is True
+
+
+# ---- 런타임 읽기 계측 (PR 5d) ----
+#
+# read_status 의 스냅샷은 '끝난 시점에 쓸 수 있었나'만 답한다. 전환 판단에 필요한 건
+# '실제로 몇 번 읽었고 몇 번 떨어졌나'다 — 아무도 안 읽는 Artifact 도, 10번 읽히는
+# Artifact 도 스냅샷에서는 똑같이 usable 1 로 보인다.
+
+def _mixed_state() -> dict:
+    """research 는 정상, competitor 는 비었고, customer 는 아예 없는 상태."""
+    arts = [artifact.make_artifact("research_analysis", {"ok": 1}),
+            artifact.make_artifact("competitor_analysis", {})]          # empty
+    return {"research_result": {"flat": 1}, "competitor_result": {"flat": 2},
+            "customer_result": {"flat": 3}, "artifacts": arts}
+
+
+_MIXED_TYPES = ["research_analysis", "competitor_analysis", "customer_analysis"]
+
+
+def _reads_over(state: dict, mode: str, types=None) -> dict:
+    """주어진 모드로 여러 번 읽고 집계를 돌려준다(artifact_only 의 실패도 계속 진행)."""
+    artifact.reads_start()
+    for t in types or _MIXED_TYPES:
+        try:
+            artifact.get_artifact_content(state, t, artifact.SPEC_BY_TYPE[t]["legacy_key"],
+                                          mode=mode)
+        except artifact.ArtifactUnavailable:
+            pass
+    return artifact.reads_summary()
+
+
+def test_unmeasured_is_not_reported_as_zero_fallbacks():
+    """`reads_start()` 없이 부른 집계는 **0 이 아니라 '측정 안 함'** 이어야 한다.
+
+    0 으로 보이면 계측을 안 걸어 둔 실행을 '폴백 한 번도 없었다'로 읽는다 — 근거 없는 안심.
+    """
+    artifact._reads.set(None)
+    s = artifact.reads_summary()
+    assert s["measured"] is False and s["total"] == 0 and s["by_type"] == []
+
+
+def test_runtime_counter_separates_artifact_reads_from_fallbacks():
+    s = _reads_over(_mixed_state(), artifact.READ_PREFER_ARTIFACT)
+    assert s["measured"] is True and s["total"] == 3
+    assert s["from_artifact"] == 1 and s["from_legacy"] == 2
+    assert s["fallbacks"] == 2 and s["fallback_reasons"] == {"empty": 1, "missing": 1}
+
+
+def test_artifact_only_failures_are_counted_not_lost():
+    """던지고 끝내면 '몇 번 못 읽었는지'가 기록에 남지 않는다."""
+    s = _reads_over(_mixed_state(), artifact.READ_ARTIFACT_ONLY)
+    assert s["total"] == 3 and s["from_artifact"] == 1
+    assert s["fallbacks"] == 2 and s["fallback_reasons"] == {"empty": 1, "missing": 1}
+
+
+def test_legacy_mode_measures_would_be_fallbacks_without_switching():
+    """legacy 로 도는 동안에도 '전환하면 몇 번 떨어질지'를 잰다 — 값은 그대로 평면 키.
+
+    이게 없으면 준비도를 알려고 운영 트래픽을 실제로 prefer_artifact 로 넘겨 봐야 한다.
+    """
+    st = _mixed_state()
+    s = _reads_over(st, artifact.READ_LEGACY)
+    assert s["from_artifact"] == 0 and s["fallbacks"] == 0        # 실제 폴백은 아니다
+    assert s["shadow_fallbacks"] == 2
+    assert s["shadow_reasons"] == {"empty": 1, "missing": 1}
+    # 그러면서 반환값은 legacy 그대로여야 한다(계측이 동작을 바꾸면 안 된다).
+    assert artifact.get_artifact_content(st, "research_analysis", "research_result",
+                                         mode=artifact.READ_LEGACY) == {"flat": 1}
+
+
+def test_shadow_measurement_predicts_actual_fallbacks_after_switching():
+    """legacy 의 shadow 가 곧 prefer_artifact 의 실제 폴백이어야 예측 지표로 쓸 수 있다."""
+    st = _mixed_state()
+    shadow = _reads_over(st, artifact.READ_LEGACY)
+    actual = _reads_over(st, artifact.READ_PREFER_ARTIFACT)
+    assert shadow["shadow_fallbacks"] == actual["fallbacks"]
+    assert shadow["shadow_reasons"] == actual["fallback_reasons"]
+
+
+def test_by_type_shows_which_artifacts_are_actually_read():
+    """스냅샷은 못 하는 구분 — 아무도 안 읽은 유형과 여러 번 읽힌 유형."""
+    s = _reads_over(_mixed_state(), artifact.READ_PREFER_ARTIFACT,
+                    types=["research_analysis", "research_analysis", "customer_analysis"])
+    by_type = {r["artifact_type"]: r for r in s["by_type"]}
+    assert set(by_type) == {"research_analysis", "customer_analysis"}   # 안 읽은 5개는 없음
+    assert by_type["research_analysis"]["reads"] == 2
+    assert by_type["research_analysis"]["from_artifact"] == 2
+    assert by_type["customer_analysis"]["fallbacks"] == 1
+
+
+@pytest.mark.parametrize("workflow_mode", ["serial", "parallel"])
+@pytest.mark.parametrize("mode", MODES)
+def test_run_records_runtime_reads(monkeypatch, mode, workflow_mode):
+    """관통 실행이 읽기를 실제로 센다. **병렬도 함께 본다** — 분석 4분기는 fan-out 뒤
+    별도 스레드에서 도는데, contextvar 가 그 경계를 넘지 못하면 그쪽 읽기가 통째로 누락돼
+    '폴백 0'이 실제보다 좋아 보인다.
+    """
+    r = _run(monkeypatch, mode, workflow_mode)["artifact_read"]["runtime"]
+    assert r["measured"] is True
+    assert r["total"] >= len(artifact.LEGACY_ARTIFACT_SPECS)   # 최소한 7유형은 읽힌다
+    assert {t["artifact_type"] for t in r["by_type"]} == {s["artifact_type"]
+                                                          for s in artifact.LEGACY_ARTIFACT_SPECS}
+    if mode == artifact.READ_LEGACY:
+        assert r["from_artifact"] == 0 and r["shadow_fallbacks"] == 0
+    else:
+        assert r["from_artifact"] == r["total"] and r["fallbacks"] == 0
+
+
+def test_parallel_fanout_reads_are_not_lost(monkeypatch):
+    """직렬·병렬의 읽기 건수가 같아야 한다 — 다르면 한쪽이 계측에서 새고 있다."""
+    serial = _run(monkeypatch, artifact.READ_PREFER_ARTIFACT, "serial")["artifact_read"]["runtime"]
+    par = _run(monkeypatch, artifact.READ_PREFER_ARTIFACT, "parallel")["artifact_read"]["runtime"]
+    assert par["total"] == serial["total"]
+    assert {(t["artifact_type"], t["reads"]) for t in par["by_type"]} == \
+           {(t["artifact_type"], t["reads"]) for t in serial["by_type"]}
+
+
+def test_revise_measures_its_own_reads_not_the_previous_runs(tmp_path, monkeypatch):
+    """`/revise` 도 selector 를 타므로 함께 센다. 단 **직전 `/run` 의 카운트를 이어받으면 안 된다.**
+
+    계측을 요청마다 초기화하지 않으면 수정 실행의 폴백률이 원 실행 값에 섞여, 수정 경로만의
+    준비도를 볼 수 없다.
+    """
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.services import store
+
+    _dummy(monkeypatch)
+    monkeypatch.setattr(store, "DB_PATH", tmp_path / "projects.db")
+    monkeypatch.setenv(artifact.READ_MODE_ENV, artifact.READ_PREFER_ARTIFACT)
+    client = TestClient(app)
+
+    run = client.post("/run", json={"project_name": "수정계측", "problem": "P"}).json()
+    run_reads = client.get(f"/projects/{run['project_id']}").json()[
+        "state"]["artifact_read"]["runtime"]
+
+    client.post("/revise", json={"project_name": "수정계측", "draft": run["final_draft"],
+                                 "revision_request": "톤 정리", "project_id": run["project_id"]})
+    rev_reads = client.get(f"/projects/{run['project_id']}").json()[
+        "state"]["artifact_read"]["runtime"]
+
+    assert run_reads["measured"] and rev_reads["measured"]
+    assert 0 < rev_reads["total"] < run_reads["total"]     # 수정 구간만 셈(누적 아님)
+    assert rev_reads["fallbacks"] == 0
 
 
 def test_converted_consumers_have_no_direct_flat_key_reads():
