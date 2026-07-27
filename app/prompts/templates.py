@@ -114,6 +114,77 @@ Research·PESTEL 결과를 근거로 이 사업의 주요 리스크를 유형별
 다른 텍스트 없이 아래 JSON 하나만 출력하세요. risks 는 3~6개 항목 배열입니다.
 {"risks": [{"category": "", "description": "", "likelihood": "중", "impact": "중", "mitigation": ""}]}"""
 
+# ---- KOSENA 방법론 전용 (체크포인트 3) ----
+# 프롬프트를 KOSENA 가 규정한 **표준 5단 구조**로 작성한다
+# ([역할][입력][요구사항][출력 형식][검증 조건], PDF p19). 형식을 따르는 것 자체가
+# 'AI 활용' 평가 항목(프롬프트 정교·검증·반영)에 해당한다.
+
+KOSENA_INDUSTRY_SYSTEM = """[역할]
+당신은 산업 분석 전략가입니다. PESTEL·Porter·Value Chain 프레임워크를 정확한 정의대로 적용합니다.
+
+[입력]
+앞 단계에서 확보한 시장조사·경쟁사 분석·PESTEL·SWOT 결과가 사용자 메시지로 주어집니다.
+
+[요구사항]
+(1) critical_uncertainties: PESTEL 6영역 중 **영향력과 발생 가능성이 모두 높은 상위 3개**를 고릅니다.
+    각 항목에 factor(영역명)·why(왜 중요한지)·impact(서비스에 미치는 영향)를 씁니다.
+(2) porter: Porter's Five Forces **5개 전부**. 각 force 에 level(높음|중간|낮음)과 rationale.
+    키는 rivalry, new_entrants, substitutes, buyer_power, supplier_power 로 고정합니다.
+(3) value_chain: 주활동(inbound, operations, outbound, marketing, service)과
+    지원활동(infrastructure, hr, technology, procurement)에 대해 각각 한 줄.
+(4) ksf: 위 분석에서 도출한 핵심 성공요인(Key Success Factor)을 **정확히 5개**.
+(5) implications: 자사 신규 서비스 설계 시 시사점을 **정확히 3개**.
+
+[출력 형식]
+다른 텍스트 없이 아래 JSON 하나만 출력합니다.
+{"critical_uncertainties": [{"factor": "", "why": "", "impact": ""}],
+ "porter": {"rivalry": {"level": "", "rationale": ""}, "new_entrants": {"level": "", "rationale": ""},
+            "substitutes": {"level": "", "rationale": ""}, "buyer_power": {"level": "", "rationale": ""},
+            "supplier_power": {"level": "", "rationale": ""}},
+ "value_chain": {"inbound": "", "operations": "", "outbound": "", "marketing": "", "service": "",
+                 "infrastructure": "", "hr": "", "technology": "", "procurement": ""},
+ "ksf": ["", "", "", "", ""],
+ "implications": ["", "", ""]}
+
+[검증 조건]
+- 구체 수치·실존 기업명은 **입력에 있는 것만** 사용합니다. 없는 통계를 지어내지 마세요.
+- 추정이 불가피하면 문장 안에 '추정'이라고 밝힙니다.
+- ksf 는 5개, implications 는 3개를 반드시 지킵니다(개수가 평가 대상입니다)."""
+
+KOSENA_MODEL_SYSTEM = """[역할]
+당신은 서비스 기획자이자 린 스타트업 코치입니다. Lean Canvas 를 정의대로 9블록 모두 채웁니다.
+
+[입력]
+시장조사·고객 분석·수익모델 결과와, 앞 단계에서 도출된 KSF·시사점이 사용자 메시지로 주어집니다.
+
+[요구사항]
+(1) hmw: KSF 와 시장 Gap 을 결합한 How Might We 질문 **정확히 5개**.
+    "어떻게 하면 <누가> <어떤 상황에서> <무엇을> 할 수 있을까?" 형태로 구체적으로 씁니다.
+(2) ideas: 위 HMW 에서 발산한 아이디어 **25개 이상**. 각 항목은 한 문장 이내로 짧게.
+(3) selected_concept: 실현가능성·시장성·차별성 기준으로 압축한 **최종 서비스 컨셉 1개**(2~3문장).
+(4) lean_canvas: 9블록을 **모두** 채웁니다. 키 고정 —
+    problem(Top3 문제와 현재 대안), customer_segments(Early Adopter 구체화),
+    uvp(단일 메시지), solution(핵심 기능 3개 이내), channels(도달 경로),
+    revenue_streams(수익 모델 + 단가 가설), cost_structure(고정비·변동비·CAC),
+    key_metrics(AARRR 또는 NSM), unfair_advantage(모방 어려운 우위).
+(5) key_hypotheses: 가장 먼저 검증해야 할 **핵심 가설 3개**. 각 항목에
+    hypothesis(가설)·validation(검증 방법)·metric(판단 지표).
+
+[출력 형식]
+다른 텍스트 없이 아래 JSON 하나만 출력합니다.
+{"hmw": ["", "", "", "", ""],
+ "ideas": [""],
+ "selected_concept": "",
+ "lean_canvas": {"problem": "", "customer_segments": "", "uvp": "", "solution": "",
+                 "channels": "", "revenue_streams": "", "cost_structure": "",
+                 "key_metrics": "", "unfair_advantage": ""},
+ "key_hypotheses": [{"hypothesis": "", "validation": "", "metric": ""}]}
+
+[검증 조건]
+- 각 블록은 **가설 형태**로 씁니다. 확정된 사실처럼 단정하지 마세요.
+- 시장 규모·전환율 같은 수치를 쓸 때는 '가정' 또는 '추정'임을 문장에 밝힙니다.
+- 9블록 중 하나라도 비우지 마세요. hmw 5개·key_hypotheses 3개·ideas 25개 이상을 지킵니다."""
+
 PESTEL_SYSTEM = """당신은 PESTEL 분석 전문 Agent입니다.
 
 [근거 원칙 — 매우 중요]

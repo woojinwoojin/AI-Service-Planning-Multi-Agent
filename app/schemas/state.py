@@ -12,6 +12,16 @@ from pydantic import BaseModel, Field
 from app.schemas import artifact
 
 
+def merge_kosena(left: dict, right: dict) -> dict:
+    """KOSENA 산출물 reducer — 노드마다 **자기 키만** 반환하므로 얕은 병합으로 충분하다.
+
+    `kosena_industry`(Porter·KSF…)와 `kosena_model`(Lean Canvas·HMW…)이 같은 `kosena` 키에
+    쓰기 때문에 reducer 가 없으면 나중 노드가 앞 노드 결과를 통째로 덮어쓴다
+    (`artifacts` 가 `operator.add` 를 쓸 수 없었던 것과 같은 종류의 문제).
+    """
+    return {**(left or {}), **(right or {})}
+
+
 class ProjectState(TypedDict, total=False):
     """전체 workflow가 공유하는 단일 State."""
 
@@ -74,9 +84,11 @@ class ProjectState(TypedDict, total=False):
     # KOSENA 방법론 준수 판정(체크포인트 3): {total, ok, partial, missing, checks[], unmet[]}.
     # 미충족이어도 실행을 막지 않고 표면화만 한다 — 무엇이 빠졌는지 아는 것이 평가에서 중요하다.
     kosena_compliance: dict
-    # KOSENA 전용 산출물(Porter·Lean Canvas·CJM·TAM/SAM/SOM·VPC·MOSCOW·Epic-Story 등).
-    # 아직 생성 Agent 가 없어 비어 있으며, kosena_compliance 가 그 사실을 그대로 보고한다.
-    kosena: dict
+    # KOSENA 전용 산출물(Porter·Value Chain·KSF·HMW·Lean Canvas 등). 여러 KOSENA 노드가
+    # 각자 자기 키만 반환하므로 **얕은 병합 reducer**를 쓴다(없으면 뒤 노드가 앞 것을 덮는다).
+    # 아직 없는 항목(CJM·TAM/SAM/SOM·VPC·MOSCOW·Epic-Story·와이어프레임)은 비어 있고,
+    # kosena_compliance 가 그 사실을 항목 단위로 보고한다.
+    kosena: Annotated[dict, merge_kosena]
     # logs 는 reducer 필드: 병렬 노드가 동시에 로그를 추가해도 유실·충돌 없이 이어붙는다.
     # 각 노드는 '자기 새 로그만' 반환하고(operator.add 로 누적), 기존 전체 로그를 다시 반환하지 않는다.
     logs: Annotated[list, operator.add]  # 실행 로그 / 진행 상태 표시용

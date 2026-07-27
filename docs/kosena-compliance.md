@@ -17,31 +17,44 @@ MVP/Epic-Story-AC/와이어프레임을 **직접** 본다.
 
 ## 현재 판정 (더미 실행 기준)
 
-**28개 요구항목 중 충족 1 · 부분 6 · 미충족 21.**
+**28개 요구항목 중 충족 9 · 부분 3 · 미충족 16.** (KOSENA M1 Agent 도입 후)
 
-| 모듈 | 충족 | 부분 | 미충족 |
-|---|---|---|---|
-| M1 산업·서비스 분석과 비즈니스 모델 | 1 | 2 | 5 |
-| M2 데이터 기반 서비스 기획 | 0 | 3 | 7 |
-| M3 개발 로드맵 | 0 | 0 | 6 |
-| 공통(출처·AI 로그·분량) | 0 | 1 | 3 |
+| 모듈 | 충족 | 부분 | 미충족 | 상태 |
+|---|---|---|---|---|
+| M1 산업·서비스 분석과 비즈니스 모델 | **8** | 0 | 0 | ✅ **전부 충족** |
+| M2 데이터 기반 서비스 기획 | 0 | 3 | 7 | 생성 계층 미구현 |
+| M3 개발 로드맵 | 0 | 0 | 6 | 생성 계층 미구현 |
+| 공통(출처·AI 로그·분량) | 1 | 0 | 3 | 출처는 실 LLM 에서 충족 |
 
 > 실 LLM 실행에서는 **출처 명시**가 충족으로 바뀐다(더미는 웹검색을 하지 않는다).
+
+**이력**: 검사 도입 시점 1/28 → M1 Agent 2개(`kosena_industry`·`kosena_model`) 도입 후 9/28.
+같은 검사가 진척을 그대로 보고하므로, 남은 항목이 곧 다음 작업 목록이다.
 
 ## 항목별 매핑
 
 ### M1 — 산업·서비스 분석과 비즈니스 모델 설계
 
-| KOSENA 요구 | 쪽 | 현재 | 비고 |
+| KOSENA 요구 | 쪽 | 현재 | 담당 |
 |---|---|---|---|
-| PESTEL 6영역 | p7 | ✅ | `pestel` Agent 가 6요인 × 4항목 생성 |
-| Critical Uncertainties **Top 3** | p7 | 🟡 | 6영역은 있으나 영향력·가능성 상위 3개 **선별이 없음** |
-| Porter / SWOT / Value Chain 중 **2개 이상** | p8 | 🟡 | **SWOT 만** 있음 |
-| KSF **5개** | p8 | ❌ | |
-| 설계 시사점 **3가지** | p8 | ❌ | |
-| HMW **5개** · 아이디어 **25+** → 3 → 1 | p9 | ❌ | |
-| Lean Canvas **9블록** | p10 | ❌ | 재료는 `business_model` 의 3항목뿐(Revenue·Cost·Metrics). **Problem·Customer Segment·UVP·Solution·Channels·Unfair Advantage 6블록은 재료 자체가 없다** |
-| 핵심 가설 **3개** + 검증 계획 | p10 | ❌ | |
+| PESTEL 6영역 | p7 | ✅ | `pestel` Agent |
+| Critical Uncertainties **Top 3** | p7 | ✅ | `kosena_industry` |
+| Porter / SWOT / Value Chain 중 **2개 이상** | p8 | ✅ | `kosena_industry`(Porter·Value Chain) + 기존 SWOT |
+| KSF **5개** | p8 | ✅ | `kosena_industry` |
+| 설계 시사점 **3가지** | p8 | ✅ | `kosena_industry` |
+| HMW **5개** · 아이디어 **25+** → 3 → 1 | p9 | ✅ | `kosena_model` |
+| Lean Canvas **9블록** | p10 | ✅ | `kosena_model` — 6블록은 재료가 없어 **새 분석**으로 생성 |
+| 핵심 가설 **3개** + 검증 계획 | p10 | ✅ | `kosena_model` |
+
+> **구현 메모**: 두 Agent 는 PDF p7 의 체인(PESTEL → Porter → SWOT → KSF)을 그대로 따르며
+> 앞 단계 결과를 `artifact.read`(selector)로 읽는다. `kosena_industry` → `kosena_model` 순서는
+> 필수다 — HMW 가 **KSF + 시장 Gap** 을 결합해 만들어져야 하기 때문(p9).
+>
+> **모자란 개수를 지어내 채우지 않는다.** KSF 가 4개면 4개로 두고 검사가 '부분 충족'을 말하게
+> 한다 — 빈 문자열로 5개를 맞추면 검사만 통과하고 문서엔 빈칸이 남는 최악의 결과가 된다.
+>
+> 프롬프트는 KOSENA 가 규정한 **표준 5단 구조**([역할][입력][요구사항][출력 형식][검증 조건],
+> p19)로 작성했다 — 형식 준수 자체가 'AI 활용' 평가 항목이다.
 
 ### M2 — 데이터 기반 전략적 서비스 기획
 

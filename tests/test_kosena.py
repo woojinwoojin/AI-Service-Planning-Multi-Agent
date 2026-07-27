@@ -204,9 +204,12 @@ def test_run_records_kosena_compliance(monkeypatch):
     state = run_workflow({"project_name": "KOSENA", "problem": "P"})
     r = state["kosena_compliance"]
     assert r["total"] == len(kosena.REQUIREMENTS)
-    # 현재 파이프라인은 PESTEL 만 온전히 충족한다 — 이 사실이 리포트에 그대로 나와야 한다.
     assert _by_id(r, "pestel_6")["status"] == kosena.OK
-    assert _by_id(r, "lean_canvas_9")["status"] == kosena.MISSING
+    # KOSENA M1 Agent 도입 후 Lean Canvas 는 충족으로 바뀐다(같은 검사가 진척을 그대로 보고).
+    assert _by_id(r, "lean_canvas_9")["status"] == kosena.OK
+    # 반면 M2·M3 는 아직 생성 계층이 없어 미충족이어야 한다 — 검사가 조용히 다 통과시키면 안 된다.
+    assert _by_id(r, "cjm")["status"] == kosena.MISSING
+    assert _by_id(r, "epic_story_ac")["status"] == kosena.MISSING
 
 
 def test_old_record_gets_compliance_on_read(tmp_path, monkeypatch):
