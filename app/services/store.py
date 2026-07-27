@@ -34,6 +34,19 @@ def _conn() -> sqlite3.Connection:
     return conn
 
 
+def _payload(state: dict) -> dict:
+    """저장할 State 부분집합. **없는 키는 넣지 않는다**(None 으로 채우지 않는다).
+
+    `{k: state.get(k) for k in _RUN_KEYS}` 로 만들면 State 에 아예 없던 키가 `None` 값으로
+    저장된다. 그러면 재조회 쪽의 `state.get("user_input", {})` 같은 코드가 기본값이 아니라
+    **`None` 을 받아** `{**None}` → TypeError 로 500 이 난다(`/revise`·`_result_payload`).
+    키를 빼 두면 그 기본값 코드가 의도대로 동작하고, `migrate.upgrade_state` 의 기본값 주입도
+    그대로 걸린다. 명시적으로 `None` 인 값(`revision_fallback_reason` 등)은 키가 있으므로
+    지금처럼 저장된다 — 정상 실행 기록의 저장 내용은 바뀌지 않는다.
+    """
+    return {k: state[k] for k in _RUN_KEYS if k in state}
+
+
 def save_run(state: dict) -> int:
     """실행 상태를 저장하고 새 프로젝트 id를 반환."""
     si = state.get("structured_input") or {}
@@ -41,7 +54,7 @@ def save_run(state: dict) -> int:
     # 이력의 총점은 실제 최종 문서 점수(final_review_result) 우선, 없으면 초안 점수로 대체
     total = (state.get("final_review_result") or state.get("review_result") or {}).get("total_score")
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    payload = {k: state.get(k) for k in _RUN_KEYS}
+    payload = _payload(state)
     with _conn() as conn:
         cur = conn.execute(
             "INSERT INTO projects (project_name, model, total_score, created_at, state_json) VALUES (?,?,?,?,?)",
@@ -60,7 +73,7 @@ def update_run(project_id: int, state: dict) -> bool:
     이력 목록에 최초 실행 모델이 남아 실제 사용 모델과 어긋난다(외부 리뷰 P2-8).
     """
     total = (state.get("final_review_result") or state.get("review_result") or {}).get("total_score")
-    payload = {k: state.get(k) for k in _RUN_KEYS}
+    payload = _payload(state)
     with _conn() as conn:
         cur = conn.execute(
             "UPDATE projects SET model=?, total_score=?, state_json=? WHERE id=?",

@@ -503,8 +503,61 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 > 응답·fallback 을 내 `status=fallback`/`empty` 인 Artifact 가 생길 수 있고, 그때 처음으로
 > 폴백이 0 이 아니게 된다. 옛 v2 프로젝트(Artifact 가 아예 없는 기록) 경로도 미검증.
 >
-> **다음**: 옛 v2 프로젝트·`/revise` 검증 → 실 LLM 1~2주제 소규모 검증(여기서 나온
+> **다음**: 옛 v2 프로젝트·`/revise` 검증(PR 5e) → 실 LLM 1~2주제 소규모 검증(여기서 나온
 > `shadow_fallbacks` 가 전환 판단의 근거) → Staging 에서 `prefer_artifact` 적용.
+
+### PR 5e. 옛 기록 경로 검증 — 위험도 2/10 — ✅ 완료
+
+PR 5a~5d 의 검증은 전부 **새로 실행한** State 기준이었다. 그런데 운영에서 `prefer_artifact`
+를 켜면 그날부터 열리는 기록의 대부분은 **그 전에 저장된 것**이다. 그 기록에는 `artifacts` 가
+아예 없고 `migrate.upgrade_state` 가 평면 결과에서 파생해 채운다. 이 경로가 세 모드에서 어떻게
+되는지는 확인된 적이 없었다. 체인 전체를 본다:
+**옛 v2 기록 → migrate → 세 모드 → `/revise` → 재검증 → 저장 → 재조회.**
+
+> **결과 ① 옛 기록은 세 모드 모두에서 정상 수정된다.** migrate 가 7개를 파생(`status=complete`,
+> `source=legacy_derived`)하고, `artifact_only` 에서도 **읽기 전부가 Artifact 경로**(폴백 0)로
+> 완주한다. 저장·재조회 후 `state_version=3`·`artifact_parity ok` 유지.
+>
+> **결과 ② 그런데 `/revise` 는 7개 중 2개만 읽는다** — `research_analysis`×2 ·
+> `competitor_analysis`×1(총 3회). 그래서 *결과 키가 빠진 옛 기록*(`pestel_result={}`)이나
+> *`failed_nodes` 가 기록된 옛 기록*도 세 모드에서 통과하는데, 이는 **결손 Artifact 를 안전하게
+> 소비해서가 아니라 애초에 읽지 않아서**다. 이 구분을 흐리면 "결손 기록도 괜찮다"는 잘못된
+> 안심이 된다. `test_revise_reads_only_research_and_competitor` 가 읽기 범위를 고정해, PR 6 에서
+> 범위가 넓어지면 관련 테스트가 함께 깨지도록 했다.
+>
+> **결과 ③ 세 모드가 갈리는 유일한 지점 = `project_id` 없는 `/revise`.**
+> 저장된 base 가 없으니 State 에 Artifact 도 평면 결과도 없다.
+>
+> | 모드 | 결과 |
+> |---|---|
+> | `legacy` | 완주(degraded). shadow_fallbacks **3**(missing 3) |
+> | `prefer_artifact` | 완주(degraded), **legacy 와 동일한 문서**. fallbacks **3**(missing 3) |
+> | `artifact_only` | `revise`·`verify` 실패, `run_status=failed`, **최종본이 빈 문자열** |
+>
+> `artifact_only` 의 실패는 의도된 것이지만(검증 전용 모드), **HTTP 는 200 인 채 내용만 비므로
+> 더 눈에 안 띈다.** 이것이 `artifact_only` 를 운영에 켜면 안 되는 구체적 근거이고, 전환
+> 대상인 `prefer_artifact` 는 이 경로에서도 안전하다는 근거이기도 하다.
+>
+> **결과 ④ shadow 지표가 실경로에서 검증됐다.** 5d 는 이 성질을 손으로 만든 State 로만
+> 고정했고, 관통 실행의 폴백은 늘 0 이라 **0 이 아닌 값을 옳게 세는지 볼 기회가 없었다.**
+> 여기서 처음으로 폴백이 실제 발생하는 경로가 나와 `legacy` 의 shadow 3 == `prefer_artifact`
+> 의 실제 폴백 3(사유까지 `{missing: 3}` 일치)임이 확인됐다.
+>
+> **함께 고친 것 — 저장 계층이 없는 키를 `None` 으로 굳히던 문제.**
+> `save_run`/`update_run` 이 `{k: state.get(k) for k in _RUN_KEYS}` 로 payload 를 만들어,
+> State 에 **없던** 키가 `None` 값으로 저장됐다. 그러면 재조회 쪽 `state.get("user_input", {})`
+> 가 기본값이 아니라 `None` 을 받아 `{**None}` → **500** 이 된다(`/revise`·`_result_payload`).
+> 없는 키는 저장하지 않도록 바꿨다(`_payload`) — 명시적 `None`(`revision_fallback_reason` 등)은
+> 키가 있으므로 그대로 저장되어 **정상 실행 기록의 저장 내용은 바뀌지 않는다.**
+> ⚠️ **정직 표기**: 이 500 은 **정상 `/run` 경로에서는 재현되지 않았다.** 장애를 주입해
+> (`DEMO_FAIL_NODES`) 7개 노드를 죽여 봐도 `_safe`·fallback 이 흡수해 키가 항상 채워졌다.
+> 일부 키만 있는 기록(외부 도구·수기 이관·다른 버전)이 들어올 때만 발생하는 **잠재 결함**이다.
+>
+> 테스트 16건 추가(497 → **513 passed, 실패 0**), ruff clean. 읽기 동작은 바꾸지 않았다.
+>
+> **아직 남은 것**: 실 LLM 미측정은 그대로다. 옛 기록 검증도 **더미 기준**이다.
+>
+> **다음**: 실 LLM 1~2주제 소규모 검증 → Staging 에서 `prefer_artifact` 적용.
 
 ### PR 6. 제한적 동적 실행과 연결 — 위험도 6/10
 
