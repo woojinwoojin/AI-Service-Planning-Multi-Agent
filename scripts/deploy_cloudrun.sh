@@ -20,7 +20,14 @@
 # 사전 준비(1회, 대화형이라 사람이 직접):
 #   gcloud auth login
 #   gcloud config set project "$GCP_PROJECT"
-#   gcloud services enable run.googleapis.com cloudbuild.googleapis.com secretmanager.googleapis.com
+#   gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
+#                          secretmanager.googleapis.com artifactregistry.googleapis.com
+#
+# ⚠ IAM 도 함께 — 빼면 반드시 막힌다(실제로 둘 다 겪음). 상세·명령은 DEPLOY.md 참고:
+#   ① Compute 기본 SA 에 roles/cloudbuild.builds.builder  (없으면 소스 zip 403)
+#   ② 같은 SA 에 시크릿별 roles/secretmanager.secretAccessor
+#      (없으면 빌드는 성공하는데 컨테이너가 키를 못 읽는다 — 발견이 늦다)
+#   ②는 시크릿 생성 후에 걸어야 하므로 `--secrets` 로 먼저 만들고 → IAM → 본 배포 순서.
 set -euo pipefail
 
 PROJECT="${GCP_PROJECT:?GCP_PROJECT 환경변수를 설정하세요 (예: export GCP_PROJECT=my-proj)}"
