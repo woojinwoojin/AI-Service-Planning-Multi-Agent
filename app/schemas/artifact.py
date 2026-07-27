@@ -35,6 +35,7 @@ PR 2, 정합성 검증은 PR 3, Agent별 Dual Write는 PR 4다. 상세: `docs/ph
 """
 from __future__ import annotations
 
+import contextvars
 import logging
 import os
 from copy import deepcopy
@@ -51,6 +52,11 @@ READ_LEGACY = "legacy"                  # 평면 키만
 READ_PREFER_ARTIFACT = "prefer_artifact"  # Artifact 우선, 없으면 평면 키
 READ_ARTIFACT_ONLY = "artifact_only"    # Artifact 만(폴백 없음)
 READ_MODES = (READ_LEGACY, READ_PREFER_ARTIFACT, READ_ARTIFACT_ONLY)
+
+# 읽기 한 건이 **어디서 왔는지**(PR 5d 런타임 계측). '폴백했다'와 '아예 안 봤다'는 다르다.
+SRC_ARTIFACT = "artifact"              # Artifact 에서 읽음
+SRC_LEGACY_FALLBACK = "legacy_fallback"  # Artifact 를 봤지만 못 써서 평면 키로 떨어짐
+SRC_LEGACY_MODE = "legacy_mode"        # legacy 모드 — Artifact 를 보지도 않음
 
 # status 값 — owner 노드의 실행 결말을 그대로 옮긴다.
 STATUS_COMPLETE = "complete"    # 정상 산출
@@ -467,6 +473,104 @@ def _usable_content(state: dict, artifact_type: str):
     return content, None
 
 
+# ---- 런타임 읽기 계측 (로드맵 2-2 PR 5d) ----
+#
+# `read_status()` 는 finalize 시점의 **가용성 스냅샷**이라 '7개 다 쓸 수 있다'까지만 말한다.
+# 실제로 **몇 번 읽었고 그중 몇 번이 평면 키로 떨어졌는지**는 세지 않았다. 둘은 다르다 —
+# 어떤 Artifact 는 아무도 안 읽고, 어떤 것은 여러 Agent 가 읽는다. 전환 판단에 필요한 건
+# '쓸 수 있었나'가 아니라 '실제로 썼나'다. usage.py 와 같은 contextvar 방식으로 실행별 격리.
+
+_reads: contextvars.ContextVar = contextvars.ContextVar("artifact_reads", default=None)
+
+
+def reads_start() -> None:
+    """이번 실행의 읽기 기록을 초기화한다(`usage.start()` 와 같은 자리에서 호출)."""
+    _reads.set([])
+
+
+def _shadow_reason(state: dict, artifact_type: str) -> str | None:
+    """'지금 `prefer_artifact` 로 전환했다면 이 읽기가 폴백했을까'를 미리 재 본다.
+
+    반환은 폴백 사유(`missing`/`empty`/`failed`) 또는 `None`(정상적으로 Artifact 를 썼을 것).
+    **legacy 모드의 반환값은 건드리지 않는다** — 순수 관측이다. 계측 실패가 실행을 죽이면
+    안 되므로 어떤 예외도 밖으로 내보내지 않는다.
+    """
+    try:
+        return _usable_content(state, artifact_type)[1]
+    except Exception:                                  # pragma: no cover - 방어
+        return "probe_error"
+
+
+def _record_read(artifact_type: str, mode: str, source: str,
+                 reason: str | None, shadow_reason: str | None) -> None:
+    """읽기 한 건을 기록한다. `reads_start()` 전이면 조용히 무시(계측 밖 호출)."""
+    reads = _reads.get()
+    if reads is None:
+        return
+    reads.append({"artifact_type": artifact_type, "mode": mode, "source": source,
+                  "reason": reason, "shadow_reason": shadow_reason})
+
+
+def _tally(reasons: list) -> dict:
+    """사유별 건수. 키 순서를 정렬해 실행마다 같은 모양이 나오게 한다(결정성)."""
+    out: dict[str, int] = {}
+    for r in reasons:
+        out[r] = out.get(r, 0) + 1
+    return {k: out[k] for k in sorted(out)}
+
+
+def reads_summary() -> dict:
+    """이번 실행의 읽기 집계(관측용).
+
+        {measured, total, from_artifact, from_legacy, fallbacks, fallback_reasons,
+         shadow_fallbacks, shadow_reasons, by_type[]}
+
+    - `fallbacks` 는 **실제로 일어난** 폴백 수다(`prefer_artifact` 에서 평면 키로 떨어진 횟수,
+      `artifact_only` 에서 `ArtifactUnavailable` 로 실패한 횟수).
+    - `shadow_fallbacks` 는 `legacy` 로 도는 중에 **'전환했다면 떨어졌을' 횟수**다. 운영
+      트래픽을 실제로 넘겨 보지 않고도 준비도를 잰다. `prefer_artifact` 로 전환하면 이 값이
+      그대로 `fallbacks` 가 된다.
+    - **`measured=False` 는 '폴백 0'이 아니라 '측정 안 함'이다.** `reads_start()` 없이 호출된
+      경로(단위 테스트·옛 기록)에서 0 을 성공으로 읽으면 근거가 없는 안심을 하게 된다.
+    """
+    reads = _reads.get()
+    if reads is None:
+        return {"measured": False, "total": 0, "from_artifact": 0, "from_legacy": 0,
+                "fallbacks": 0, "fallback_reasons": {}, "shadow_fallbacks": 0,
+                "shadow_reasons": {}, "by_type": []}
+
+    from_artifact = [r for r in reads if r["source"] == SRC_ARTIFACT]
+    fallbacks = [r for r in reads if r["source"] == SRC_LEGACY_FALLBACK]
+    shadow = [r for r in reads if r["source"] == SRC_LEGACY_MODE and r["shadow_reason"]]
+
+    by_type = []
+    for spec in LEGACY_ARTIFACT_SPECS:              # 명세 순서 = 위상 순서(결정적)
+        t = spec["artifact_type"]
+        mine = [r for r in reads if r["artifact_type"] == t]
+        if not mine:
+            continue                                # 아무도 안 읽은 유형은 싣지 않는다
+        by_type.append({
+            "artifact_type": t,
+            "reads": len(mine),
+            "from_artifact": sum(1 for r in mine if r["source"] == SRC_ARTIFACT),
+            "fallbacks": sum(1 for r in mine if r["source"] == SRC_LEGACY_FALLBACK),
+            "shadow_fallbacks": sum(1 for r in mine
+                                    if r["source"] == SRC_LEGACY_MODE and r["shadow_reason"]),
+        })
+
+    return {
+        "measured": True,
+        "total": len(reads),
+        "from_artifact": len(from_artifact),
+        "from_legacy": len(reads) - len(from_artifact),
+        "fallbacks": len(fallbacks),
+        "fallback_reasons": _tally([r["reason"] for r in fallbacks if r["reason"]]),
+        "shadow_fallbacks": len(shadow),
+        "shadow_reasons": _tally([r["shadow_reason"] for r in shadow]),
+        "by_type": by_type,
+    }
+
+
 def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
                          mode: str | None = None) -> dict | str:
     """소비자가 Agent 산출물을 읽는 **단일 창구**(로드맵 2-2 PR 5).
@@ -478,18 +582,27 @@ def get_artifact_content(state: dict, artifact_type: str, legacy_key: str,
 
     소비자를 이 함수로 옮겨 두면 기본값(`legacy`)에서는 아무것도 바뀌지 않고,
     준비가 됐을 때 **환경변수만으로**(+재시작) 읽기 경로를 통째로 전환·되돌릴 수 있다.
+
+    모든 호출은 `_record_read` 로 계측된다(PR 5d). 계측은 반환값에 영향을 주지 않는다.
     """
     if not isinstance(state, dict):
         return {}
     m = mode if mode in READ_MODES else read_mode()
     if m == READ_LEGACY:
+        # legacy 에서도 '지금 전환하면 어땠을지'를 함께 잰다(shadow) — 값은 바꾸지 않는다.
+        # 이게 없으면 준비도를 알려고 운영 트래픽을 prefer_artifact 로 넘겨 봐야 한다.
+        _record_read(artifact_type, m, SRC_LEGACY_MODE, None, _shadow_reason(state, artifact_type))
         return state.get(legacy_key) or {}
     content, reason = _usable_content(state, artifact_type)
     if content:
+        _record_read(artifact_type, m, SRC_ARTIFACT, None, None)
         return content
     if m == READ_ARTIFACT_ONLY:
+        # 실패도 기록한다 — 던지고 끝내면 '몇 번 못 읽었는지'가 남지 않는다.
+        _record_read(artifact_type, m, SRC_LEGACY_FALLBACK, reason, reason)
         raise ArtifactUnavailable(f"{artifact_type}: Artifact 를 쓸 수 없음({reason})")
     # prefer_artifact 폴백 — 조용히 넘어가면 Artifact 쪽 오류가 묻힌다.
+    _record_read(artifact_type, m, SRC_LEGACY_FALLBACK, reason, reason)
     _log.warning("Artifact %s 를 쓸 수 없어 평면 키 %s 로 폴백합니다(사유: %s)",
                  artifact_type, legacy_key, reason)
     return state.get(legacy_key) or {}
@@ -514,9 +627,12 @@ def read_status(state: dict) -> dict:
     `prefer_artifact` 로 전환하기 전에 **얼마나 폴백이 날지**를 미리 보는 용도다.
     `unusable` 이 비어 있어야 전환해도 평면 키에 기대지 않는다.
 
-    ⚠️ 런타임 카운터가 아니라 **finalize 시점 스냅샷**이다. Agent 는 Artifact 를 추가만
-    하므로 실행 중 가용성이 줄지는 않지만, '실제로 몇 번 폴백했는지'를 세지는 않는다
-    (실 전환 단계에서 호출 단위 계측이 필요하면 usage·budget 처럼 별도로 붙인다).
+    `usable`/`unusable` 은 여전히 **finalize 시점 스냅샷**이다(가용성). 여기에 실제 호출을
+    센 `runtime`(PR 5d)을 함께 싣는다 — 둘은 답하는 질문이 다르다:
+      - 스냅샷: 끝난 시점에 7개를 **쓸 수 있었나**
+      - runtime: 실행 중 **실제로 몇 번 읽었고 몇 번 떨어졌나**
+    쓸 수 있는데 아무도 안 읽은 유형도, 여러 번 읽힌 유형도 있으므로 스냅샷만으로는
+    전환 위험을 알 수 없다.
     """
     info = read_mode_info()
     unusable: list[dict] = []
@@ -532,4 +648,5 @@ def read_status(state: dict) -> dict:
         "expected": len(LEGACY_ARTIFACT_SPECS),
         "usable": len(LEGACY_ARTIFACT_SPECS) - len(unusable),
         "unusable": unusable,
+        "runtime": reads_summary(),
     }

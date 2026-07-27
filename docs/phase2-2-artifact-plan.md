@@ -305,7 +305,8 @@ def merge_artifacts(left: list, right: list) -> list:
 >
 > **→ 해소됨(PR 5c-1~5c-3)**: Agent 간 읽기 7곳 전부 전환 완료. 이제 `artifact_only` 통과는
 > 분석 파이프라인 전체에 대한 진술이다. 단 **표시 계층은 여전히 평면 키를 읽으며, 이는 의도된
-> 것**이다(외부 API 호환). 실 LLM 기준 검증과 런타임 폴백 계측은 아직 남아 있다.
+> 것**이다(외부 API 호환). 런타임 폴백 계측은 PR 5d 에서 붙였고, **실 LLM 기준 검증은 아직
+> 남아 있다.**
 >
 > **⚠️ 이 동일성 검증의 한계(정직 표기)**: 더미 모드에서 초안은 `_dummy_draft(si, research,
 > pestel)` 로 만들어지므로 **research·pestel 만 산출물에 실제로 반영**된다. 나머지 5개
@@ -313,6 +314,9 @@ def merge_artifacts(left: list, right: list) -> list:
 > 6조합 해시 동일성만으로는 그 5개의 읽기 경로가 검증되지 않는다. 그래서 **프롬프트 문자열을
 > 직접 확인하는 테스트**(`_generate`·`complete_json` 을 가로채 Artifact 값이 들어갔는지)를 함께
 > 두었다. 실 LLM 기준 동일성은 미측정.
+>
+> **→ PR 5d 에서 관통 실행 수준으로 닫음**: 실행 전체의 LLM 프롬프트 스트림을 세 모드에서
+> 대조한다(아래 5d). 실 LLM 기준 동일성은 여전히 미측정.
 >
 > **rollback**: `ARTIFACT_READ_MODE=legacy` 로 바꾼 뒤 **애플리케이션을 재시작하면** 코드 변경
 > 없이 기존 읽기 경로로 복귀한다. '즉시'가 아니다 — `.env` 는 `load_dotenv()` 가 모듈 import
@@ -331,6 +335,7 @@ def merge_artifacts(left: list, right: list) -> list:
 > `state["artifact_read"]` = `{mode, raw, invalid, expected, usable, unusable[]}` —
 > 전환 전에 '얼마나 폴백이 날지' 미리 보는 지표. 단 **finalize 시점 스냅샷이지 런타임
 > 카운터가 아니다**(실제 폴백 횟수를 세지는 않는다).
+> → **PR 5d 에서 `runtime` 하위 키로 실제 호출 카운터를 함께 싣는다.**
 
 소비자가 State 키를 직접 읽는 대신 selector를 쓴다.
 
@@ -429,9 +434,74 @@ PR 5 가 남긴 **Agent 간 읽기 7곳**(뒤 Agent 가 앞 Agent 결과를 읽�
 > 정상 산출물처럼 저장된다) / depends_on ↔ 런타임 읽기 일치.
 >
 > 481 passed(470 → +11), ruff clean. 기본 모드 `legacy` 이므로 동작 변화 없음.
+
+### PR 5d. 런타임 폴백 계측 + 비교 항목 확대 — 위험도 2/10 — ✅ 완료
+
+전환 판단에 쓸 **숫자**를 만든다. 코드 경로는 그대로고 관측만 붙으므로 위험이 낮다.
+
+> **왜 필요한가 — 스냅샷과 실제 호출은 다른 질문이다.**
+> PR 5b 의 `read_status` 는 finalize 시점 가용성만 답한다("7개 다 쓸 수 있었다"). 정작
+> 전환에 필요한 건 **실제로 몇 번 읽었고 몇 번 떨어졌는가**인데, 스냅샷에서는 *아무도 안 읽는
+> Artifact* 와 *10번 읽히는 Artifact* 가 똑같이 `usable 1` 로 보인다. 어느 쪽이 깨지느냐에
+> 따라 영향이 전혀 다른데도 구분이 안 됐다.
 >
-> **다음**: PR 5d(런타임 폴백 계측 + 비교 항목 확대) → 옛 v2 프로젝트·`/revise` 검증 →
-> 실 LLM 1~2주제 소규모 검증 → Staging 에서 `prefer_artifact` 적용.
+> **① 런타임 계측** — `usage.py` 와 같은 contextvar 방식으로 `get_artifact_content` 호출을
+> 실행 단위로 센다(`artifact.reads_start()` → `reads_summary()`). 결과는
+> `state["artifact_read"]["runtime"]` 에 실린다. 진입점은 `/run`(`workflow.py`)과
+> `/revise`(`routes.py`) 둘 다 — **요청마다 초기화**하지 않으면 수정 실행의 폴백률에 원 실행
+> 값이 섞인다.
+>
+> **② shadow 측정 — legacy 로 돌면서 '전환하면 어땠을지'를 잰다.**
+> `legacy` 모드는 Artifact 를 보지도 않으므로 폴백이 원리적으로 0 이다. 그 0 을 준비도로 읽으면
+> 안 된다. 그래서 legacy 읽기마다 Artifact 쪽을 **관측만** 해보고(`_shadow_reason`, 반환값은
+> 건드리지 않는다) '전환했다면 떨어졌을' 횟수를 `shadow_fallbacks` 로 남긴다. 이게 없으면
+> 준비도를 알려고 **운영 트래픽을 실제로 `prefer_artifact` 로 넘겨 봐야** 한다.
+> `test_shadow_measurement_predicts_actual_fallbacks_after_switching` 이 shadow 값이 곧
+> 전환 후 실제 폴백값임을 고정한다.
+>
+> **`measured=False` 는 '폴백 0'이 아니라 '측정 안 함'이다.** `reads_start()` 없이 호출된
+> 경로에서 0 을 성공으로 읽으면 근거 없는 안심을 하게 되므로 플래그로 구분한다.
+>
+> **실측(더미 6조합, serial·parallel × 3모드)**: 실행당 읽기 **20회**, `by_type` 은
+> research 10 · competitor 4 · pestel 2 · 나머지 각 1. `prefer_artifact`·`artifact_only`
+> 에서 **20/20 이 Artifact 경로, 폴백 0**. `legacy` 의 `shadow_fallbacks` 도 **0** →
+> *지금 전환해도 평면 키로 떨어지는 읽기가 없다*(더미 기준). 직렬·병렬 건수가 같아
+> **contextvar 가 fan-out 스레드 경계를 넘는다**는 것도 함께 실증됐다(넘지 못하면 분석 4분기
+> 읽기가 통째로 누락돼 '폴백 0'이 실제보다 좋아 보인다).
+>
+> **③ 비교 항목 확대 — 그리고 그 확대가 더미 모드에서 대체로 공허하다는 사실.**
+> 기존 동일성 검사는 `final_draft`·`verification_result` 만 봤다. **7개 분석 결과·근거 계열·
+> 실행 결말·Artifact content** 까지 `_MODE_INVARIANT_KEYS` 로 넓혔는데, 넓히고 나서 실제로
+> 재보니 **더미 모드에서는 대부분 공허**했다:
+>
+> | 돌연변이(읽기를 고의로 비움) | 프롬프트 스트림 | 7개 산출물 | 최종 문서 해시 |
+> |---|---|---|---|
+> | 모든 읽기를 `{}` 로 | 잡음 | 잡음(`competitor_result` 만) | 잡음 |
+> | `competitor_analysis` 만 `{}` (= swot 의 입력) | **잡음** | 못 잡음 | 못 잡음 |
+>
+> 앞 Agent 결과를 `_dummy()` 가 실제로 쓰는 건 `competitor` 뿐이고(나머지 5개는 입력을 무시한
+> 고정값을 낸다), 더미 초안은 research·pestel 만 반영한다. 즉 **'swot 이 빈 경쟁사 분석을 읽고
+> 만든 SWOT'이 산출물 비교로는 정상으로 보인다.**
+>
+> 그래서 **관통 실행의 LLM 프롬프트 스트림을 세 모드에서 대조**한다
+> (`test_every_agent_receives_identical_input_in_every_mode`, serial·parallel). 프롬프트에는
+> 읽어 온 값이 그대로 직렬화돼 들어가므로 다른 값을 읽으면 반드시 다르다. 5c-2/5c-3 이 Agent
+> 단위로 하던 가로채기를 손으로 만든 State 가 아니라 **실제 실행**에 대해 하는 것이다.
+> 확대한 키 비교는 그대로 두되(실 LLM 에서는 유효하고, 지금도 competitor 는 잡는다),
+> **더미 기준 실질 검증력은 프롬프트 대조에 있다**는 점을 위 표로 남긴다.
+>
+> 테스트 **497건(481 → +16)** 중 496 통과, ruff clean. 기본 모드 `legacy` 이므로 **동작 변화
+> 없음**(계측은 반환값을 바꾸지 않는다). ⚠️ 남는 1건은 실행 환경에 따라 달라지며 **이 변경과
+> 무관**하다 — 로컬 `.env` 의 `WORKFLOW_MODE=parallel` 로 인한
+> `test_run_persists_and_reports_quality`, 또는 전체 부하에서 시간이 흔들리는
+> `test_parallel_faster_than_serial`. 둘 다 해당 파일만 돌리면 통과한다.
+>
+> **아직 남은 것(정직 표기)**: 위 수치는 전부 **더미 기준**이다. 실 LLM 에서는 Agent 가 빈
+> 응답·fallback 을 내 `status=fallback`/`empty` 인 Artifact 가 생길 수 있고, 그때 처음으로
+> 폴백이 0 이 아니게 된다. 옛 v2 프로젝트(Artifact 가 아예 없는 기록) 경로도 미검증.
+>
+> **다음**: 옛 v2 프로젝트·`/revise` 검증 → 실 LLM 1~2주제 소규모 검증(여기서 나온
+> `shadow_fallbacks` 가 전환 판단의 근거) → Staging 에서 `prefer_artifact` 적용.
 
 ### PR 6. 제한적 동적 실행과 연결 — 위험도 6/10
 
