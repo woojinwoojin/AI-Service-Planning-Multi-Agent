@@ -1,6 +1,8 @@
 """프로젝트 이력 저장(SQLite) 테스트 — 임시 DB 사용, 서버·LLM 불필요."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from app.services import store
@@ -10,6 +12,25 @@ from app.services import store
 def tmp_db(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "projects.db")
     return store
+
+
+def test_db_path_can_be_overridden_by_env(monkeypatch, tmp_path):
+    """`PROJECTS_DB_PATH` 로 이력 DB 위치를 바꿀 수 있어야 한다(Phase 7 부하 관측·배포 볼륨).
+
+    부하 관측은 실제 이력을 오염시키면 안 되고, 배포에서는 볼륨 경로가 cwd 와 다를 수 있다.
+    미설정이면 **기존 기본값 그대로**여야 한다(회귀 0).
+    """
+    import importlib
+
+    monkeypatch.setenv("PROJECTS_DB_PATH", str(tmp_path / "custom.db"))
+    reloaded = importlib.reload(store)
+    try:
+        assert reloaded.DB_PATH == tmp_path / "custom.db"
+        monkeypatch.delenv("PROJECTS_DB_PATH")
+        assert importlib.reload(store).DB_PATH == Path("data/projects.db")
+    finally:
+        monkeypatch.delenv("PROJECTS_DB_PATH", raising=False)
+        importlib.reload(store)          # 다른 테스트가 원래 모듈을 쓰도록 되돌린다
 
 
 def _state(name, score):
