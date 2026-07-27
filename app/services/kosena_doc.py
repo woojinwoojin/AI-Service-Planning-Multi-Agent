@@ -246,6 +246,58 @@ def _roadmap(k: dict) -> str:
 
 _STATUS_LABEL = {kosena.OK: "충족", kosena.PARTIAL: "부분", kosena.MISSING: "미충족"}
 
+# 검증 판정 라벨. **`unsupported` 를 '거짓'으로 적지 않는다** — 수집한 근거에서 확인하지 못했다는
+# 뜻이고, 원문에 있을 수도 있다. 이 구분을 문서에 흐리게 쓰면 발표에서 그대로 과장이 된다.
+_VERDICT_LABEL = {
+    "supported": ("근거 확인", "수집한 검색 요약 근거와 일치"),
+    "unsupported": ("근거 미확인", "**거짓이라는 뜻이 아니다** — 현재 근거에서 확인하지 못함"),
+    "contradicted": ("반대 근거", "근거가 주장과 반대 방향"),
+    "uncertain": ("판단 불가", "근거가 모호해 판정 보류"),
+    "not_applicable": ("검증 대상 아님", "추론·제안 주장(사실 주장만 검증한다)"),
+}
+_CLAIM_TYPE_LABEL = {"fact": "사실", "inference": "추론", "proposal": "제안"}
+
+
+def _verification(state: dict) -> str:
+    """부록 — 사실 검증 요약(판정별 개수 + 주장·근거 연결).
+
+    제출 본문에 이걸 싣는 이유는, 검증을 **했다는 사실**과 그 **범위**가 문서 안에서 확인돼야
+    하기 때문이다. `reliability.append_disclaimer` 는 내보내기 경계에서 한계 문구만 붙이고
+    판정별 개수는 담지 않는다.
+
+    범위를 문서에 직접 적는다 — 검색 요약 기준이고 URL 원문 사실성은 재검증하지 않는다.
+    """
+    vr = state.get("verification_result") if isinstance(state.get("verification_result"), dict) else {}
+    claims = vr.get("claims") or []
+    if not vr and not claims:
+        return ""
+    counts: dict[str, int] = {}
+    for c in claims:
+        if isinstance(c, dict):
+            counts[c.get("status") or "uncertain"] = counts.get(c.get("status") or "uncertain", 0) + 1
+    rows = [[label, str(counts.get(k, 0)), meaning]
+            for k, (label, meaning) in _VERDICT_LABEL.items()]
+    linked = sum(1 for c in claims if isinstance(c, dict) and c.get("evidence_ids"))
+    parts = [
+        "## 부록 — 사실 검증 요약 (검색 스니펫 기준)",
+        "> **검증 범위**: 문서의 사실 주장을 수집한 **검색 요약 근거**와 대조해 판정한다. "
+        "출처 URL 의 **원문 사실성은 재검증하지 않는다**. 따라서 '근거 미확인'은 거짓이라는 뜻이 "
+        "아니라, 현재 수집된 근거에서 확인하지 못했다는 뜻이다 — 수치·통계는 원문에서 직접 확인해야 한다.",
+        f"사실 주장 {vr.get('fact_total', 0)}건 중 근거 확인 {vr.get('fact_supported', 0)}건 · "
+        f"주장별 근거 연결 {linked}/{len(claims)}건",
+        _table(["판정", "건수", "뜻"], rows),
+    ]
+    if claims:
+        parts += [
+            "### 주장별 판정",
+            _table(["주장", "유형", "판정", "근거 ID"],
+                   [[c.get("claim", ""), _CLAIM_TYPE_LABEL.get(c.get("claim_type", ""), "—"),
+                     _VERDICT_LABEL.get(c.get("status", ""), (c.get("status", "—"), ""))[0],
+                     ", ".join(c.get("evidence_ids") or []) or "—"]
+                    for c in claims if isinstance(c, dict)]),
+        ]
+    return "\n\n".join(parts)
+
 
 def _compliance_section(comp: dict) -> str:
     """준수 현황 표. **판정 전에도 같은 행 수로 렌더링한다.**
@@ -307,6 +359,9 @@ def build(state: dict) -> str:
         state.get("final_draft") or state.get("draft") or "(생성되지 않음)",
         "## AI 활용 로그",
         ai_log.to_markdown(state.get("ai_usage_log") or ai_log.build(state)),
+        # 검증 요약은 `verification_result` 만 보므로 두 조립 패스에서 동일하게 렌더된다
+        # (줄 수가 같아야 판정이 말하는 분량이 최종 문서의 분량이다 — `_compliance_section` 주석).
+        _verification(state),
         _compliance_section(comp),
     ]
     return "\n\n".join(p for p in parts if p) + "\n"

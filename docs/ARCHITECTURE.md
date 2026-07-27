@@ -9,7 +9,12 @@
 
 ## 1. 개요
 
-아이디어 한 줄 → 여러 AI Agent가 분석을 쌓아 근거 있는 서비스 기획서를 생성하는 도구. FastAPI + LangGraph 기반이며, **실제 웹 검색으로 근거를 확보하고 그 출처를 기획서에 인용**하고, **주장을 근거와 대조 검증**하며, **출력 가능 여부를 게이트로 판정**하는 것이 핵심.
+아이디어 한 줄 → 여러 AI Agent가 분석을 쌓아 근거 있는 서비스 기획서를 생성하는 도구.
+FastAPI + LangGraph 기반 **22개 노드**이며, **실제 웹 검색으로 근거를 확보하고 그 출처를 기획서에
+인용**하고, **주장을 근거와 대조 검증**하며, **출력 가능 여부를 게이트로 판정**하고,
+**기획 방법론(KOSENA) 준수 여부를 코드로 결정적 점검**하는 것이 핵심.
+
+현재 규모: 노드 22 · 테스트 **644개**(실 LLM 호출 없음) · CI 4게이트 · 실측 모델 `gpt-4o-mini`.
 
 **설계를 관통하는 원칙**
 1. **완주 보장** — 어떤 LLM 오류가 나도 파이프라인은 처음~끝까지 돈다(`_safe`).
@@ -62,7 +67,9 @@
 **분석 구간(직렬):**
 ```text
 START → preprocess → research → research_gap → competitor → customer → pestel → swot
-      → business_model → risk → draft → [마무리]
+      → business_model → risk
+      → kosena_industry → kosena_model → kosena_research → kosena_roadmap
+      → draft → [마무리]
 ```
 
 **분석 구간(병렬, `build_parallel_graph`):** Research 이후 독립 4분기를 동시 실행 → Draft 에서 fan-in join.
@@ -74,6 +81,7 @@ research → research_gap ┬→ competitor → swot ┐
 ```
 - Agent 입력·프롬프트·결과 구조는 직렬과 **동일**, 실행 순서만 다르다(비열등성 전제). 지연 차이만 병렬화 효과.
 - fan-in: `add_edge(["swot","customer","risk","business_model"], "draft")` — 깊이 다른 분기의 조기/중복 실행 방지.
+- **KOSENA 4노드는 fan-in 뒤 순차**다(`industry → model → research → roadmap`). 뒤 노드가 앞 결과를 이어받아야 평가표의 'Lean Canvas 블록 간 일관성'·'VPC Fit'이 성립하기 때문에 정확성을 우선해 병렬화하지 않았다(대가: LLM 호출 +4, 지연 +20~30초).
 
 **마무리 구간(공통, `_add_finish_edges`):**
 ```text
@@ -90,6 +98,7 @@ draft → reviewer → _route_revision ┬─ finalize ──────┐
 - **`select_best`**(Phase 4): 재작성본이 초안보다 낮으면 초안 채택(되돌림). → §4.9.
 - **`verify`**: 채택된 문서의 주장을 근거와 대조(Tier 2 유형 분류·근거 상태). → §4.5.
 - 실행 종료 후 `_finalize_run`: 근거 레지스트리 확정·usage·timing·run_status·**quality_gate**·**state_version** 부착.
+- 이어서 `_finalize_kosena`: AI 활용 로그 → **KOSENA 문서 조립 → 준수 판정 → 재조립** → 발표자료. 조립을 두 번 하는 이유는 **순환 의존**이다 — 판정은 조립된 본문에서 분량·가설 표기를 재고, 본문은 판정을 표로 싣는다. `/revise` 후에도 같은 함수를 부른다(안 부르면 KOSENA 산출물만 수정 전 내용으로 남는다). → §4.12
 
 ### 2.3 노드별 역할
 
@@ -104,6 +113,10 @@ draft → reviewer → _route_revision ┬─ finalize ──────┐
 | swot | `agents/swot.py` | SWOT | `swot_result` |
 | business_model | `agents/business_model.py` | 수익원·가격·비용·지표 | `business_model_result` |
 | risk | `agents/risk.py` | 리스크(가능성·영향·대응) | `risk_result` |
+| kosena_industry | `agents/kosena_industry.py` | Critical Uncertainties Top3·Porter·Value Chain·KSF 5·시사점 3 | `kosena`(얕은 병합) |
+| kosena_model | `agents/kosena_model.py` | HMW 5 → 아이디어 25+ → 압축 3 → 컨셉 1 · Lean Canvas 9블록 · 핵심 가설 3 | `kosena` |
+| kosena_research | `agents/kosena_research.py` | 페르소나 2종·CJM·TAM/SAM/SOM 교차검증·경쟁사 3·2·1 + 비교표·포지셔닝 맵 | `kosena` |
+| kosena_roadmap | `agents/kosena_roadmap.py` | VPC·기능 5~7·Use Case 3·MOSCOW·Kano·MVP·Epic-Story-AC·와이어프레임 | `kosena` |
 | draft | `draft_writer.py:draft` | 고정 14섹션 기획서 + 실제 출처 인용 | `draft` |
 | reviewer | `reviewer.py:reviewer` | 초안 5항목 100점 + 개선지시 + 구조화 issues | `review_result`·`initial_review_result` |
 | revise | `draft_writer.py:revise` | 전체 재작성(full-revise fallback) | `final_draft`·`revision_strategy=full` |
@@ -255,6 +268,44 @@ Agent 결과는 원래 State 최상위의 **평면 키 7개**(`*_result`)로만 
 research·pestel 만 반영하므로, "swot 이 빈 경쟁사 분석을 읽고 만든 SWOT"이 산출물 비교로는
 정상으로 보인다(돌연변이 테스트로 실증). 그래서 **관통 실행의 LLM 프롬프트 스트림을 세 모드에서
 대조**하는 것이 실질 검증이다.
+
+### 4.12 KOSENA 방법론 산출물 (체크포인트 3)
+
+기획 방법론 템플릿(KOSENA)은 문서 디자인이 아니라 **거쳐야 할 분석 프레임워크와 산출물 구조**를
+규정한다. 구현은 세 부분으로 갈린다:
+
+| 부분 | 파일 | 성격 |
+|---|---|---|
+| 생성 | `agents/kosena_{industry,model,research,roadmap}.py` | LLM 호출 4회. `state["kosena"]` 에 **얕은 병합 reducer**(`merge_kosena`)로 각자 자기 키만 |
+| 판정 | `services/kosena.py` | **결정적·LLM 없음.** 28개 요구항목을 `ok`/`partial`/`missing` 으로 |
+| 조립 | `services/kosena_doc.py`·`ai_log.py` | 7종 산출물 문서 + 발표자료 + AI 활용 로그. 순수 변환 |
+
+**기존 14섹션 기획서를 재구성하지 않는다.** `final_draft` 를 KOSENA 구조로 갈아엎으면
+`sections.py` 왕복 byte 동일 불변식 · `section_revise` · `quality_gate` 의 서식 체크 ·
+`parallel_bench` 가 한꺼번에 깨진다. 반면 `docx_bytes(markdown)`·`pptx_bytes(markdown)` 는
+**markdown 만 받는 순수 함수**라, 별도 조립본을 같은 함수에 넣으면 기존 경로를 한 줄도 건드리지
+않고 산출물이 나온다.
+
+**순환 의존을 조립 두 번으로 끊는다.** 판정은 조립된 본문에서 분량·가설 표기를 재고, 조립은 판정을
+표로 싣는다. `_finalize_kosena` 가 **조립 → 판정 → 재조립 → 발표자료** 순으로 처리하고,
+`_compliance_section` 이 판정 전에도 같은 행 수로 렌더링해 **두 조립의 줄 수를 같게** 만든다
+(그래야 판정이 말하는 분량이 실제 내려받는 문서의 분량이다).
+
+**허위 충족을 세 겹으로 막는다.** 각 Agent 의 `_dummy()` 는 검사를 통과할 만큼 구조가 완전해서,
+실 LLM 실패 시 그것이 폴백으로 들어가면 "방법론을 지켰다"는 잘못된 판정이 나온다.
+① `llm.dummy_fallback()` — 실모드 폴백은 빈 결과 ② `evaluate` 의 `data_source` — `is_dummy()` 가
+아니라 **내용의 `[더미]` 표식**으로 판정(저장 기록 재판정 대비) ③ 항목별 `nodes` 매핑 — 기여 노드가
+실패·폴백하면 `ok` → `partial` 상한.
+
+**모자란 개수를 지어내 채우지 않는다.** KSF 가 4개면 4개로 두고 검사가 부분 충족을 말한다.
+빈 문자열로 5개를 맞추면 검사만 통과하고 문서엔 빈칸이 남는 최악의 결과가 된다.
+
+**구조적으로 채울 수 없는 항목은 가설 표기 자체를 검사한다.** 평가표 '고객 이해' 우수 기준은
+1차 인터뷰·설문이고 AI 는 이를 만들 수 없다. 지어내면 KOSENA 원칙에 위배되므로, 목표를 '충족'이
+아니라 **가설임을 명시하는 것**으로 두고 `hypothesis_labeling` 이 그 표기를 검사한다.
+
+상세·항목별 매핑 = [`kosena-compliance.md`](kosena-compliance.md) ·
+평가 기준 전체 매핑 = [`평가기준_매핑표.md`](평가기준_매핑표.md)
 
 ---
 
