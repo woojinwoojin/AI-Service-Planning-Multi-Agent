@@ -201,6 +201,7 @@ KOSENA_RESEARCH_SYSTEM = """[역할]
     top_down(전체시장 × 점유율), bottom_up(고객수 × 단가 × 빈도), 두 값이 다른 이유(gap_reason),
     사용한 가정(assumptions). som 은 1~3년차 점유 가능 시장입니다(보통 1~5%).
 (4) competitor_groups: direct(**3개**) · indirect(**2개**) · potential(**1개**).
+    각 항목은 **경쟁사 이름 문자열**입니다(객체가 아니라 문자열 배열).
 (5) comparison_criteria: 경쟁사 비교 항목 **10개 이상**(기능·가격·UX·마케팅·고객획득·수익모델·
     인력·기술스택 등).
 (6) positioning_map: x_axis·y_axis(축 이름)와 points(경쟁사와 자사 위치, x·y 는 0~10 숫자).

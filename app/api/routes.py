@@ -24,6 +24,7 @@ from app.graph.workflow import (
 from app.schemas import artifact
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
 from app.services import (
+    ai_log,
     budget,
     docx_export,
     llm,
@@ -360,10 +361,28 @@ def run_and_save(payload: ProjectInput) -> dict:
     saved_json = save_run_json(payload.project_name, state)
     saved_docx = docx_export.save_docx(payload.project_name, final)
     saved_pptx = pptx_export.save_pptx(payload.project_name, final)
+
+    # KOSENA 7종 산출물(체크포인트 3, p5)과 AI 활용 로그(p4: '별도 파일 첨부').
+    # 기존 산출물은 그대로 두고 **추가로** 저장한다 — 제출 형식이 본문/발표/AI 로그로 나뉜다.
+    name = payload.project_name
+    kosena_files = {}
+    if state.get("kosena_plan"):
+        plan = reliability.append_disclaimer(state["kosena_plan"])
+        kosena_files["saved_kosena_md"] = save_markdown(f"{name}-KOSENA", plan)
+        kosena_files["saved_kosena_docx"] = docx_export.save_docx(f"{name}-KOSENA", plan)
+    if state.get("kosena_deck"):
+        kosena_files["saved_kosena_pptx"] = pptx_export.save_pptx(
+            f"{name}-KOSENA-발표", state["kosena_deck"])
+    if state.get("ai_usage_log"):
+        kosena_files["saved_ai_log_md"] = save_markdown(
+            f"{name}-AI활용로그", ai_log.to_markdown(state["ai_usage_log"]))
+
     return {
         "saved_md": saved_md,
         "saved_json": saved_json,
         "saved_docx": saved_docx,
         "saved_pptx": saved_pptx,
+        **kosena_files,
+        "kosena_compliance": (state.get("kosena_compliance") or {}).get("summary", ""),
         "revision_count": state.get("revision_count", 0),
     }

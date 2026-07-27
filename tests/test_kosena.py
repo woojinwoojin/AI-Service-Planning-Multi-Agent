@@ -143,11 +143,18 @@ def test_hypothesis_labeling_checks_the_document_text():
 
 
 def test_doc_length_reports_estimated_pages():
-    r = kosena.evaluate({"final_draft": "가" * (kosena._CHARS_PER_PAGE * 35)})
-    assert _by_id(r, "doc_length")["status"] == kosena.OK
-    short = kosena.evaluate({"final_draft": "가" * 500})
+    """분량은 **줄 수**로 잰다 — 표가 많은 문서에서 글자 수 기준은 크게 빗나간다."""
+    long_doc = "\n".join(["본문"] * (kosena._LINES_PER_PAGE * 35))
+    assert _by_id(kosena.evaluate({"final_draft": long_doc}), "doc_length")["status"] == kosena.OK
+    short = kosena.evaluate({"final_draft": "짧은 문서"})
     assert _by_id(short, "doc_length")["status"] == kosena.PARTIAL
     assert "쪽(추정)" in _by_id(short, "doc_length")["detail"]   # 추정치임을 표기
+
+
+def test_doc_length_measures_the_kosena_deliverable_not_the_draft():
+    """제출 본문은 KOSENA 7종 산출물이다 — 14섹션 초안은 그 안의 일부일 뿐이다."""
+    st = {"final_draft": "짧음", "kosena_plan": "\n".join(["줄"] * (kosena._LINES_PER_PAGE * 35))}
+    assert _by_id(kosena.evaluate(st), "doc_length")["status"] == kosena.OK
 
 
 # ---- Artifact selector 를 타는가 ----
@@ -214,9 +221,9 @@ def test_run_records_kosena_compliance(monkeypatch):
     # 남은 미충족을 **집합으로 고정**한다. 항목별 단언을 늘어놓으면 진척이 생길 때마다
     # 테스트가 깨져서 매번 손봐야 한다(실제로 두 번 겪었다). 여기서는
     # '무엇이 아직 안 됐는지'가 바뀌는 순간에만 실패하게 둔다.
-    # sources_cited 는 더미가 웹검색을 하지 않아 미충족이다(실 LLM 에서는 충족).
-    assert set(r["unmet"]) == {"sources_cited", "ai_usage_log",
-                               "hypothesis_labeling", "doc_length"}
+    # sources_cited 는 더미가 웹검색을 하지 않아 미충족이다(실 LLM 18회 실측에서는 충족).
+    # doc_length 는 자동 생성 본문이 약 11쪽이라 30~50쪽 요건에 미달한다(정직 표기).
+    assert set(r["unmet"]) == {"sources_cited", "doc_length"}
 
 
 def test_old_record_gets_compliance_on_read(tmp_path, monkeypatch):

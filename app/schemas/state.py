@@ -89,6 +89,13 @@ class ProjectState(TypedDict, total=False):
     # 아직 없는 항목(CJM·TAM/SAM/SOM·VPC·MOSCOW·Epic-Story·와이어프레임)은 비어 있고,
     # kosena_compliance 가 그 사실을 항목 단위로 보고한다.
     kosena: Annotated[dict, merge_kosena]
+    # AI 활용 로그(체크포인트 3, p4): 프롬프트·입력·응답·검증·채택 여부. 별도 파일로 첨부한다.
+    # 새 계측이 아니라 Artifact 메타데이터·reviewer 판정·select_best 를 형식만 바꿔 모은 것.
+    ai_usage_log: list
+    # KOSENA 7종 산출물 본문·발표자료 Markdown(p5). 기존 final_draft(14섹션)는 그대로 두고
+    # 별도로 조립한다 — 재구성하면 sections 왕복 불변식·section_revise·quality_gate 가 깨진다.
+    kosena_plan: str
+    kosena_deck: str
     # logs 는 reducer 필드: 병렬 노드가 동시에 로그를 추가해도 유실·충돌 없이 이어붙는다.
     # 각 노드는 '자기 새 로그만' 반환하고(operator.add 로 누적), 기존 전체 로그를 다시 반환하지 않는다.
     logs: Annotated[list, operator.add]  # 실행 로그 / 진행 상태 표시용

@@ -34,6 +34,24 @@ def _strs(v, limit: int | None = None) -> list[str]:
     return out[:limit] if limit else out
 
 
+def _names(v, limit: int | None = None) -> list[str]:
+    """경쟁사 목록을 이름 배열로 정규화한다.
+
+    LLM 은 경쟁사를 문자열로도, `{"name": ..., "why": ...}` 객체로도 낸다(실측에서 객체로
+    나와 분류가 통째로 0/0/0 이 됐다). 둘 다 받아 이름만 뽑는다 — 형식 차이로 내용을 잃는 것이
+    가장 아까운 실패다.
+    """
+    out: list[str] = []
+    for item in v if isinstance(v, list) else []:
+        if isinstance(item, str) and item.strip():
+            out.append(item.strip())
+        elif isinstance(item, dict):
+            name = item.get("name") or item.get("competitor") or item.get("company")
+            if isinstance(name, str) and name.strip():
+                out.append(name.strip())
+    return out[:limit] if limit else out
+
+
 def _dicts(v, keys, limit: int | None = None) -> list[dict]:
     """dict 리스트에서 지정 키만 남긴다. **하나라도 채워진 항목만** 살린다."""
     out = []
@@ -65,8 +83,8 @@ def _validate(result: dict, fallback: dict) -> dict:
         market_sizing["assumptions"] = _strs(ms_raw.get("assumptions"))
 
     cg_raw = result.get("competitor_groups") if isinstance(result.get("competitor_groups"), dict) else {}
-    competitor_groups = {g: _strs(cg_raw.get(g), n) for g, n in GROUP_SIZES.items()
-                         if _strs(cg_raw.get(g))}
+    competitor_groups = {g: _names(cg_raw.get(g), n) for g, n in GROUP_SIZES.items()
+                         if _names(cg_raw.get(g))}
 
     pm_raw = result.get("positioning_map") if isinstance(result.get("positioning_map"), dict) else {}
     points = []

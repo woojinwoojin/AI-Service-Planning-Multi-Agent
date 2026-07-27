@@ -18,10 +18,12 @@ from collections.abc import Callable
 from langgraph.graph import END, START, StateGraph
 
 from app.services import (
+    ai_log,
     budget,
     demo,
     evidence,
     kosena,
+    kosena_doc,
     llm,
     migrate,
     quality_gate,
@@ -457,6 +459,15 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     # KOSENA 방법론 준수 판정(체크포인트 3). **반드시 _finalize_artifacts 뒤**에 온다 —
     # 검사가 Artifact 를 selector 로 읽으므로, 확정 전이면 빈 값을 보고 전부 미충족으로 판정한다.
     # 미충족이어도 실행을 실패시키지 않는다(quality_gate·check_parity 와 같은 태도).
+    # AI 활용 로그(체크포인트 3, p4) — Artifact 메타데이터·reviewer 판정·select_best 를
+    # 재사용하므로 새 계측이 없다. kosena_compliance **앞**에 와야 검사가 이 로그를 본다.
+    state["ai_usage_log"] = ai_log.build(state)
+    # KOSENA 7종 산출물 문서·발표자료(p5). 기존 14섹션 기획서는 **그대로 두고** 별도로 조립한다
+    # — 재구성하면 sections 왕복 불변식·section_revise·quality_gate 가 함께 깨진다.
+    # 내보내기는 markdown 을 받는 기존 익스포터를 그대로 쓴다(새 익스포터 불필요).
+    state["kosena_plan"] = kosena_doc.build(state)
+    state["kosena_deck"] = kosena_doc.build_deck(state)
+    # 준수 판정은 **문서 조립 뒤**에 온다 — 분량·가설 표기를 조립된 본문에서 재기 때문이다.
     state["kosena_compliance"] = kosena.evaluate(state)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
