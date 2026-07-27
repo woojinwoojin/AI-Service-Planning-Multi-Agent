@@ -1,8 +1,11 @@
 # AI 서비스 기획 보조 Multi-Agent
 
-> 아이디어 한 줄을 입력하면 여러 AI Agent가 **시장조사 → 경쟁사 분석 → 고객 문제 → PESTEL → SWOT → 수익모델 → 리스크 → 기획서 작성 → 심사 → 일관성 편집 → 근거 일치성 검증**을 순차 수행해 근거 있는 서비스 기획서를 만들어 주는 도구입니다.
+> 아이디어 한 줄을 입력하면 여러 AI Agent가 **시장조사 → 경쟁사 분석 → 고객 문제 → PESTEL → SWOT → 수익모델 → 리스크 → KOSENA 방법론 분석(Porter·Lean Canvas·CJM·TAM/SAM/SOM·VPC·MVP·Epic-Story) → 기획서 작성 → 심사 → 일관성 편집 → 근거 일치성 검증**을 수행해 근거 있는 서비스 기획서를 만들어 주는 도구입니다.
 
-FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색으로 근거를 확보하고 그 출처를 기획서에 인용**하는 것이 핵심 차별점입니다.
+FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 두 가지입니다:
+**① 실제 웹 검색으로 근거를 확보하고 그 출처를 기획서에 인용**하고,
+**② 기획 방법론(KOSENA)이 요구하는 프레임워크를 실제로 거쳤는지 코드로 결정적 점검**해 결과를
+문서·화면에 표면화합니다(28개 요구항목).
 
 > 이 문서는 **실제 구현된 현재 상태**를 설명합니다. 초기 12-Agent 풀버전 구상과 13일 압축 계획, 잘라낸 범위는 [`ROADMAP.md`](ROADMAP.md)를, 상세 명세는 [`docs/PRD.md`](docs/PRD.md)를 참고하세요.
 
@@ -16,14 +19,16 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 - 심사 Agent가 5항목 100점으로 평가하고, 미달 시 **1회 자동 재작성**
 - 일관성 편집 패스가 **섹션 간 중복 제거·연결 보강**을 수행
 - 재작성·편집이 끝난 **최종본을 다시 채점**해, 화면 점수가 실제 최종 문서와 일치(초안 → 최종 변화 표시)
-- 마지막에 검증 Agent가 기획서 주장을 근거와 대조(근거 확인율 산출)
+- 마지막에 검증 Agent가 기획서 주장을 근거와 대조(근거 확인율 산출 — **검색 요약 기준**이며 URL 원문은 재검증하지 않음)
+- KOSENA 방법론 Agent 4종이 **7종 산출물**(산업 분석·Lean Canvas·고객 리서치·시장/경쟁사·컨셉/기능·로드맵·발표)을 만들고, **28개 요구항목 준수 여부를 자체 점검**해 문서와 화면에 표시
+- Agent별 **프롬프트·입력·산출·검증·채택 여부**를 AI 활용 로그로 남겨 별도 파일로 첨부
 - 사용자가 결과를 보고 **직접 수정 요청**(Human-in-the-Loop)으로 재작성 가능
-- 실행 결과는 **SQLite 이력에 자동 저장**되고, 실행당 **토큰·추정 비용·지연**(관측성)을 함께 표시
-- 최종 기획서를 **Markdown / JSON / Word(.docx) / PowerPoint(.pptx)**로 저장·다운로드
+- 실행 결과는 **SQLite 이력에 자동 저장**되고(⚠️ 컨테이너 재시작 시 소실), 실행당 **토큰·추정 비용·지연**(관측성)을 함께 표시
+- 최종 기획서와 KOSENA 산출물을 **Markdown / JSON / Word(.docx) / PowerPoint(.pptx)**로 저장·다운로드
 
 ---
 
-## 2. 아키텍처 (13-노드 Multi-Agent)
+## 2. 아키텍처 (22-노드 Multi-Agent)
 
 ```text
 사용자 입력
@@ -36,13 +41,18 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
   → SWOT Agent            (강점/약점/기회/위협)
   → Business Model Agent  (수익원/가격/비용/핵심지표)
   → Risk Agent            (유형별 리스크 + 가능성/영향/대응)
+  → KOSENA Industry Agent (Porter · Value Chain · KSF 5 · 설계 시사점 — 체크포인트 3)
+  → KOSENA Model Agent    (HMW 5 → 아이디어 25+ → 압축 3 → 컨셉 1 · Lean Canvas 9블록 · 핵심 가설 3)
+  → KOSENA Research Agent (페르소나 2종 · CJM · TAM/SAM/SOM 교차검증 · 경쟁사 3·2·1 + 비교표 · 포지셔닝 맵)
+  → KOSENA Roadmap Agent  (VPC · 기능 5~7 · Use Case 3 · MOSCOW · Kano · MVP · Epic-Story-AC · 와이어프레임)
   → Draft Writer Agent    (고정 14섹션 기획서 작성, 실제 출처 인용)
   → Reviewer Agent        (5항목 100점 평가 + 개선지시)
-  → (총점 < 90 이면) Draft Writer 재작성 1회
-  → Polish                (섹션 간 중복 제거·연결 문장 보강, 구조·표·참고자료 유지)
+  → (총점 < 90 이면) 섹션 단위 보완 또는 전체 재작성 1회
+  → Polish                (섹션 간 중복 제거·연결 문장 보강 — 표현 이슈 없으면 조건부 생략)
   → Final Reviewer        (재작성·편집 후 최종본 재평가 → 화면 표시 점수)
+  → Select Best           (재작성본이 초안보다 낮으면 초안으로 되돌림)
   → Verify (근거 일치성)   (기획서 주장 ↔ 수집된 조사 결과 대조, 근거 확인율 산출)
-  → 최종 기획서 + Agent별 산출물 + 실행 관측치
+  → 최종 기획서 + KOSENA 7종 산출물 + AI 활용 로그 + 준수 자체점검 + 실행 관측치
 ```
 
 - **오케스트레이션**: LangGraph `StateGraph`. 모든 노드는 `_safe()`로 감싸 한 Agent가 실패해도 파이프라인이 **처음부터 끝까지 완주**합니다.
@@ -107,8 +117,13 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 - **산출물** — Markdown / 전체 결과 JSON / Word(.docx) / PowerPoint(.pptx, `##` 섹션별 슬라이드·표 렌더·내용 넘침 시 자동 분할)
 - **입력 자동완성** — 프로젝트명(+기존 입력)으로 **비어 있는 항목만** AI가 채움. 사용자가 이미 쓴 값은 보존·문맥으로만 활용하고, AI가 채운 필드는 `AI 추천` 배지로 표시(수정 시 `AI 추천 수정됨`). **AI 제안과 비교** 모드에서는 4개 항목 모두에 제안을 받아 `내 값 vs AI`를 나란히 보고 항목별로 기존 유지·AI 적용·합치기를 선택(입력은 확인 전까지 그대로). 각 AI 추천에는 **추천 이유·확신도(높음/보통/낮음)·참고한 기존 입력**을 함께 표시
 - **최소 웹 UI** — 입력 / 결과(Agent별) / 최종 기획서 / 이력 4화면 (FastAPI가 서빙하는 자체완결 HTML)
+- **KOSENA 방법론 산출물** — 기획 방법론 템플릿(KOSENA)이 요구하는 프레임워크를 4개 Agent가 생성하고
+  **7종 산출물 문서 + 발표자료(20쪽)**로 조립. 28개 요구항목을 코드로 결정적 점검하고 결과를 문서·화면에
+  표면화(`app/services/kosena.py`). 상세 = [`docs/kosena-compliance.md`](docs/kosena-compliance.md)
+- **AI 활용 로그** — Agent별 프롬프트·입력·산출·검증·**채택 여부**를 별도 파일로 첨부. 재작성본이 초안보다
+  낮아 되돌린 기록(`best_version`)이 "AI 응답을 그대로 쓰지 않았다"는 증거가 된다
 - **비교 harness** — 단일 vs 멀티(`run_compare.py`), 다중 모델(`run_multimodel.py`), 직렬 vs 병렬(`run_parallel_bench.py`) 재현 가능한 실험
-- **회귀 테스트** — `pytest` 523개 (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 커버리지 하한 90%
+- **회귀 테스트** — `pytest` **658개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 하한 90%
 
 ---
 
@@ -118,13 +133,13 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 |---|---|
 | Backend | FastAPI |
 | Agent 오케스트레이션 | LangGraph |
-| LLM | OpenAI · Anthropic (provider/모델 선택 가능, 키 없으면 더미 모드) |
+| LLM | OpenAI · Anthropic (provider/모델 선택 가능, 키 없으면 더미 모드). **실측에 사용한 모델 ID = `gpt-4o-mini`** |
 | 웹 검색 | Tavily (키 없으면 검색 생략하고 LLM 지식 기반) |
-| 이력 저장 | SQLite (python 내장 sqlite3, `data/projects.db`) |
+| 이력 저장 | SQLite (python 내장 sqlite3, `data/projects.db`) — ⚠️ **컨테이너 재시작 시 사라진다**(Cloud Run 공개 배포에서는 이력 비영속. 산출물 다운로드로 대응) |
 | 관측성 | 자체 usage 집계 (토큰·추정 비용·지연) |
 | 산출물 | python-docx (.docx), python-pptx (.pptx), Markdown, JSON |
-| Frontend | 자체완결 HTML (인라인 CSS/JS, 외부 CDN 없음) |
-| 테스트 | pytest |
+| Frontend | 자체완결 HTML (인라인 CSS/JS). **외부 CDN·빌드 도구를 쓰지 않는다** — FastAPI 가 그대로 서빙해 빌드·CORS·별도 배포가 불필요하고, 폐쇄망에서도 동작하며, CDN 의 가용성·버전 변동·공급망 위험을 끌어들이지 않는다. 대가는 **JS 자동 테스트 부재**(수동 확인 의존) |
+| 테스트 | pytest (658개) · ruff · GitHub Actions CI 4게이트 |
 
 ---
 
@@ -183,6 +198,61 @@ pytest -q
 
 ---
 
+## 7-1. 배포 절차 (GCP Cloud Run)
+
+배포 경로는 두 가지입니다. 자세한 배경은 [`DEPLOY.md`](DEPLOY.md) 참고.
+
+### A. 승인형 CD — GitHub Actions (권장)
+
+`.github/workflows/deploy-cloudrun.yml` — **`workflow_dispatch` 로만 돌아갑니다**(push 자동 배포
+없음). 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이 사람의
+확인 없이 바뀌기 때문입니다.
+
+흐름: **게이트(ruff + pytest) → 승인 대기 → GCP 인증 → Cloud Run 새 Revision → 원격 `/health` 확인**
+게이트가 실패하면 배포 잡은 시작하지 않고, `concurrency` 로 배포가 겹치지 않습니다.
+
+**사전 설정(저장소 관리자, 1회):**
+
+1. **Secrets** (Settings → Secrets and variables → Actions)
+   | 이름 | 용도 |
+   |---|---|
+   | `GCP_PROJECT` | GCP 프로젝트 ID |
+   | `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF 공급자 리소스 이름 (권장 — 장기 키를 저장소에 두지 않음) |
+   | `GCP_SERVICE_ACCOUNT` | WIF 로 가장할 서비스 계정 이메일 |
+   | `GCP_SA_KEY` | *(WIF 대신)* 서비스 계정 키 JSON — 폴백. 유출 시 회수가 어려워 WIF 를 권합니다 |
+2. **Secret Manager** 에 `OPENAI_API_KEY`·`TAVILY_API_KEY` 생성(`scripts/deploy_cloudrun.sh` 가 만들어 줍니다)
+3. **승인 게이트**: Settings → Environments → `production` 생성 → **Required reviewers** 지정.
+   ⚠️ 이 설정이 없으면 워크플로는 승인 없이 바로 배포됩니다 — 워크플로 파일만으로는 승인을
+   강제할 수 없습니다.
+4. 서비스 계정 권한: `roles/run.admin` · `roles/cloudbuild.builds.editor` ·
+   `roles/iam.serviceAccountUser` · `roles/secretmanager.secretAccessor`
+
+**실행**: Actions → *Cloud Run 배포 (승인형)* → Run workflow → `confirm` 에 **`deploy`** 입력
+(오타 배포 방지). `dummy_mode` 를 켜면 `USE_DUMMY=1` 로 올려 키 없이 화면·계약만 확인합니다.
+
+> ⚠️ **이 워크플로는 아직 실제로 실행해 검증하지 않았습니다.** 시크릿·WIF 설정 전에는 인증
+> 단계에서 명확한 메시지와 함께 실패합니다(가짜 성공을 만들지 않습니다).
+
+### B. 수동 스크립트 (검증된 경로)
+
+```bash
+gcloud auth login                    # 대화형 — 직접 실행 필요
+export GCP_PROJECT=your-project-id
+bash scripts/deploy_cloudrun.sh      # Secret Manager 등록 + Cloud Run 배포 + URL 출력
+```
+
+`--source .` 를 쓰므로 **로컬 Docker 데몬이 필요 없습니다**(Cloud Build 가 이미지를 만듭니다).
+
+### 두 경로 공통 주의
+
+- **`--max-instances=1` 은 필수**입니다. `public_guard` 의 요청·비용 카운터가 프로세스 메모리라,
+  인스턴스가 늘면 상한이 인스턴스 수만큼 곱해져 방어가 조용히 약해집니다.
+- **이력은 비영속**입니다(SQLite 파일 → 재시작 시 소실). 사용자에게 산출물 다운로드를 안내합니다.
+- **GCS FUSE + SQLite 조합은 금지**입니다(파일 잠금 문제로 DB 손상).
+- 배포 후 `/health` 의 `public_limits` 로 공개 상한이 실제로 걸렸는지 확인하세요.
+
+---
+
 ## 8. 저장소 구조
 
 ```text
@@ -199,13 +269,28 @@ app/
  │   ├─ swot.py             # SWOT
  │   ├─ business_model.py   # 수익모델
  │   ├─ risk.py             # 리스크
- │   ├─ draft_writer.py     # 기획서 작성 + 재작성 + polish(일관성 편집)
- │   ├─ reviewer.py         # 평가
+ │   ├─ research_gap.py     # 보고된 근거 공백에만 추가 조사(제한적 동적 실행)
+ │   ├─ kosena_industry.py  # KOSENA M1 — Porter·Value Chain·KSF·시사점
+ │   ├─ kosena_model.py     # KOSENA M1 — HMW·아이디어 발산/수렴·Lean Canvas·핵심 가설
+ │   ├─ kosena_research.py  # KOSENA M2 — 페르소나·CJM·TAM/SAM/SOM·경쟁사 비교표·포지셔닝
+ │   ├─ kosena_roadmap.py   # KOSENA M3 — VPC·기능·MOSCOW·Kano·MVP·Epic-Story-AC·와이어프레임
+ │   ├─ draft_writer.py     # 기획서 작성 + 재작성 + 섹션 단위 보완 + polish(일관성 편집)
+ │   ├─ reviewer.py         # 평가(구조화 issues — 섹션 단위 보완의 입력)
  │   ├─ verifier.py         # 근거 일치성 검증(주장↔조사결과 대조)
  │   └─ single_agent.py     # 단일 LLM 기준선(비교용)
  ├─ services/
  │   ├─ llm.py              # LLM 래퍼 (provider/모델·재시도·fallback·관측 record)
  │   ├─ search.py           # Tavily 웹 검색
+ │   ├─ evidence.py         # 통합 근거 레지스트리(evidence_id 부여·주장 역인덱스)
+ │   ├─ kosena.py           # KOSENA 28개 요구항목 준수 검사(결정적·LLM 없음)
+ │   ├─ kosena_doc.py       # KOSENA 7종 산출물 문서·발표자료 조립
+ │   ├─ ai_log.py           # AI 활용 로그(프롬프트·입력·산출·검증·채택 여부)
+ │   ├─ quality_gate.py     # 출력 가능 여부 게이트
+ │   ├─ reliability.py      # 검증 범위·한계 문구 단일 소스(UI·내보내기·JSON 공통)
+ │   ├─ sections.py         # 14섹션 stable ID ↔ 제목 단일원천(왕복 byte 동일)
+ │   ├─ budget.py           # 실행별 예산·시간 상한
+ │   ├─ public_guard.py     # 공개 배포 상한(IP 빈도·전역 일일 실행수·비용)
+ │   ├─ migrate.py          # State 스키마 버전·옛 기록 읽기 정규화
  │   ├─ compare.py          # 단일 vs 멀티 비교·채점
  │   ├─ parallel_bench.py   # 직렬 vs 병렬 비교 측정(wall time·결정론 품질·비용)
  │   ├─ store.py            # 프로젝트 이력 저장 (SQLite)
@@ -217,7 +302,7 @@ app/
  ├─ prompts/templates.py    # 프롬프트 템플릿
  ├─ schemas/state.py        # State·입출력 스키마
  └─ static/index.html       # 최소 UI(입력/결과/최종/이력)
-tests/                      # pytest 523개 (LLM 호출 없이 검증 로직·라우트 테스트)
+tests/                      # pytest 658개 (LLM 호출 없이 검증 로직·라우트 테스트)
 run_compare.py              # 단일 vs 멀티 비교실험 CLI
 run_multimodel.py           # 생성 모델별 비교실험 CLI
 run_parallel_bench.py       # 직렬 vs 병렬 비교실험 CLI (wall time·품질·비용)
@@ -230,6 +315,33 @@ docs/                       # PRD, 로드맵, 비교결과
 
 ## 9. 현재 범위와 향후
 
-원래 12-Agent 풀버전 구상에서 다음은 **의도적으로 제외**했습니다(범위 관리): RAG · CI/CD · 로그인. 이력 저장(SQLite)·관측성·다중 모델 비교·일관성 편집·고객 문제 분석·PPTX 산출은 이후 복원·추가했습니다.
+구현한 것과 앞으로 할 것을 섞지 않습니다. 평가 기준별 상세 매핑은
+[`docs/평가기준_매핑표.md`](docs/평가기준_매핑표.md)에 있습니다.
 
-향후 후보: 관측성 per-Agent 분해, UI에서 단일 vs 멀티 나란히 보기, 섹션 간 연결성 추가 개선. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.
+### 구현 완료
+
+Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹 검색 grounding · 통합 근거 레지스트리 ·
+근거 일치성 검증 · Reviewer 평가와 섹션 단위 보완 · 최고 버전 채택 · 출력 가능 여부 게이트 ·
+**KOSENA 방법론 산출물 7종 + 준수 자체점검 28항목 + AI 활용 로그** · DOCX/PPTX/MD/JSON 산출 ·
+이력 저장·재조회 · 관측성(토큰·비용·지연·stage) · 예산 상한 · 공개 배포 상한 ·
+**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 + **Actions 승인형 CD** — 워크플로는 있으나 실제 실행은 미검증).
+
+> 초기 구상에서 **RAG·로그인은 여전히 제외**입니다(범위 관리). CI/CD 는 처음엔 제외했다가
+> 이후 CI(4게이트)와 Staging 파이프라인을 추가했습니다 — 아래 '향후'에 남은 부분을 적었습니다.
+
+### 알려진 한계 (정직 표기)
+
+- **사실 검증은 검색 요약 기준**입니다. URL 원문의 사실성은 재검증하지 않습니다.
+  `unsupported` 는 '거짓'이 아니라 '현재 근거에서 확인하지 못함'입니다.
+- **출처 검사는 실행 전체 기준**입니다. KOSENA 산출물의 항목별 근거 연결은 미구현입니다.
+- **본문 분량이 요건(A4 30~50쪽) 미달**입니다(약 11.9쪽). 분량을 위한 분량은 넣지 않았습니다 —
+  근거는 [`docs/kosena-compliance.md`](docs/kosena-compliance.md)에 있습니다.
+- **이력은 비영속**입니다(SQLite 파일 → 컨테이너 재시작 시 소실).
+- **인터뷰·설문 등 1차 자료는 만들 수 없습니다.** 지어내지 않고 **가설임을 명시**하며,
+  그 표기 여부 자체를 검사합니다.
+- **JS 자동 테스트가 없습니다.** UI 변경은 브라우저 수동 확인에 의존합니다.
+
+### 향후 후보
+
+승인형 CD 의 실제 실행 검증 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
+사람 기획서 기준선 보정 · 관측성 per-Agent 분해. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.

@@ -25,7 +25,7 @@ p20 '고객 이해' 평가축). 이는 PDF 결론과도 맞는다 — *"완벽�
 """
 from __future__ import annotations
 
-from app.services import ai_log, kosena
+from app.services import ai_log, evidence, kosena
 
 # 산출물 7종의 제목(p5). 발표자료(7번)는 PPTX 로 따로 만들므로 본문에는 요약만 싣는다.
 DELIVERABLES = [
@@ -244,7 +244,96 @@ def _roadmap(k: dict) -> str:
     return "\n\n".join(parts)
 
 
+_SOURCE_TYPE_LABEL = {"government": "정부·공공", "academic": "학술·연구", "corporate": "기업 공식",
+                      "news": "언론", "community": "블로그·커뮤니티", "unknown": "기타"}
+
 _STATUS_LABEL = {kosena.OK: "충족", kosena.PARTIAL: "부분", kosena.MISSING: "미충족"}
+
+# 검증 판정 라벨. **`unsupported` 를 '거짓'으로 적지 않는다** — 수집한 근거에서 확인하지 못했다는
+# 뜻이고, 원문에 있을 수도 있다. 이 구분을 문서에 흐리게 쓰면 발표에서 그대로 과장이 된다.
+_VERDICT_LABEL = {
+    "supported": ("근거 확인", "수집한 검색 요약 근거와 일치"),
+    "unsupported": ("근거 미확인", "**거짓이라는 뜻이 아니다** — 현재 근거에서 확인하지 못함"),
+    "contradicted": ("반대 근거", "근거가 주장과 반대 방향"),
+    "uncertain": ("판단 불가", "근거가 모호해 판정 보류"),
+    "not_applicable": ("검증 대상 아님", "추론·제안 주장(사실 주장만 검증한다)"),
+}
+_CLAIM_TYPE_LABEL = {"fact": "사실", "inference": "추론", "proposal": "제안"}
+
+
+def _sources(state: dict) -> str:
+    """부록 — 근거 출처 목록 + **검색 기준일**.
+
+    근거가 '어느 시점의 웹 스냅샷인지' 문서에 없으면, 몇 달 전 자료를 최신처럼 읽는다.
+    공식·1차 출처를 위로 올려(`evidence.authority_rank`) 정량 주장의 근거가 어디서 왔는지
+    먼저 보이게 한다.
+
+    ⚠️ 이 표는 **실행 전체에서 수집한 출처**다. KOSENA 항목(TAM·경쟁사·정책)별로 어느 근거가
+    붙었는지는 아직 연결하지 않으므로, 여기서 '항목별 근거'라고 적지 않는다.
+    """
+    reg = [e for e in (state.get("evidence_registry") or [])
+           if isinstance(e, dict) and e.get("url")]
+    if not reg:
+        return ""
+    basis = evidence.search_basis_date(reg)
+    ordered = sorted(enumerate(reg),
+                     key=lambda p: (evidence.authority_rank(p[1].get("source_type", "")), p[0]))
+    rows = [[e.get("evidence_id", ""), _SOURCE_TYPE_LABEL.get(e.get("source_type", ""), "기타"),
+             e.get("title") or e.get("url", ""),
+             e.get("published_date") or "미상",
+             str(e.get("retrieved_at") or "")[:10] or "미기록",
+             str(len(e.get("used_by_claims") or []))]
+            for _, e in ordered]
+    return "\n\n".join([
+        "## 부록 — 근거 출처",
+        (f"> **검색 기준일: {basis}**" if basis else "> 검색 기준일: 기록 없음")
+        + " · 아래 근거는 그 시점의 웹 검색 결과이며, 이후 변경된 내용은 반영되지 않는다.\n"
+        "> 공식·1차 출처(정부·공공 → 학술 → 기업 공식 → 언론 → 커뮤니티) 순으로 정렬했다. "
+        "출처 유형은 **권위성 힌트일 뿐 신뢰도 판정이 아니다**.\n"
+        "> ⚠️ 이 목록은 **실행 전체에서 수집한 출처**다 — KOSENA 항목별 근거 연결은 미구현이다.",
+        _table(["ID", "유형", "제목", "발행일", "조회일", "인용된 주장 수"], rows),
+    ])
+
+
+def _verification(state: dict) -> str:
+    """부록 — 사실 검증 요약(판정별 개수 + 주장·근거 연결).
+
+    제출 본문에 이걸 싣는 이유는, 검증을 **했다는 사실**과 그 **범위**가 문서 안에서 확인돼야
+    하기 때문이다. `reliability.append_disclaimer` 는 내보내기 경계에서 한계 문구만 붙이고
+    판정별 개수는 담지 않는다.
+
+    범위를 문서에 직접 적는다 — 검색 요약 기준이고 URL 원문 사실성은 재검증하지 않는다.
+    """
+    vr = state.get("verification_result") if isinstance(state.get("verification_result"), dict) else {}
+    claims = vr.get("claims") or []
+    if not vr and not claims:
+        return ""
+    counts: dict[str, int] = {}
+    for c in claims:
+        if isinstance(c, dict):
+            counts[c.get("status") or "uncertain"] = counts.get(c.get("status") or "uncertain", 0) + 1
+    rows = [[label, str(counts.get(k, 0)), meaning]
+            for k, (label, meaning) in _VERDICT_LABEL.items()]
+    linked = sum(1 for c in claims if isinstance(c, dict) and c.get("evidence_ids"))
+    parts = [
+        "## 부록 — 사실 검증 요약 (검색 스니펫 기준)",
+        "> **검증 범위**: 문서의 사실 주장을 수집한 **검색 요약 근거**와 대조해 판정한다. "
+        "출처 URL 의 **원문 사실성은 재검증하지 않는다**. 따라서 '근거 미확인'은 거짓이라는 뜻이 "
+        "아니라, 현재 수집된 근거에서 확인하지 못했다는 뜻이다 — 수치·통계는 원문에서 직접 확인해야 한다.",
+        f"사실 주장 {vr.get('fact_total', 0)}건 중 근거 확인 {vr.get('fact_supported', 0)}건 · "
+        f"주장별 근거 연결 {linked}/{len(claims)}건",
+        _table(["판정", "건수", "뜻"], rows),
+    ]
+    if claims:
+        parts += [
+            "### 주장별 판정",
+            _table(["주장", "유형", "판정", "근거 ID"],
+                   [[c.get("claim", ""), _CLAIM_TYPE_LABEL.get(c.get("claim_type", ""), "—"),
+                     _VERDICT_LABEL.get(c.get("status", ""), (c.get("status", "—"), ""))[0],
+                     ", ".join(c.get("evidence_ids") or []) or "—"]
+                    for c in claims if isinstance(c, dict)]),
+        ]
+    return "\n\n".join(parts)
 
 
 def _compliance_section(comp: dict) -> str:
@@ -307,6 +396,11 @@ def build(state: dict) -> str:
         state.get("final_draft") or state.get("draft") or "(생성되지 않음)",
         "## AI 활용 로그",
         ai_log.to_markdown(state.get("ai_usage_log") or ai_log.build(state)),
+        # 아래 두 부록은 `evidence_registry`·`verification_result` 만 보므로 두 조립 패스에서
+        # 동일하게 렌더된다(줄 수가 같아야 판정이 말하는 분량이 최종 문서의 분량이다 —
+        # `_compliance_section` 주석 참고).
+        _sources(state),
+        _verification(state),
         _compliance_section(comp),
     ]
     return "\n\n".join(p for p in parts if p) + "\n"

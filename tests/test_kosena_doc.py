@@ -250,3 +250,105 @@ def test_failed_node_does_not_claim_produced_fields():
     entry = next(e for e in ai_log.build(st) if e["agent"] == "kosena_roadmap")
     assert entry["output"]["produced_fields"] == []
     assert entry["adopted"] is False
+
+
+# ---- 부록: 사실 검증 요약 (검증을 했다는 사실과 그 범위가 문서에서 확인돼야 한다) ----
+
+def _verified_state() -> dict:
+    return {"verification_result": {
+        "fact_total": 2, "fact_supported": 1,
+        "claims": [
+            {"claim": "시장이 연 8.2% 성장한다", "claim_type": "fact", "status": "supported",
+             "evidence_ids": ["ev2"]},
+            {"claim": "가격을 낮추면 점유율이 오른다", "claim_type": "fact",
+             "status": "unsupported", "evidence_ids": []},
+            {"claim": "구독 모델을 권장한다", "claim_type": "proposal",
+             "status": "not_applicable", "evidence_ids": []},
+        ]}}
+
+
+def test_plan_includes_the_verification_appendix():
+    plan = kosena_doc.build(_verified_state())
+    assert "부록 — 사실 검증 요약" in plan
+    assert "주장별 근거 연결 1/3건" in plan          # evidence_ids 가 붙은 주장만 센다
+    assert "ev2" in plan
+
+
+def test_verification_appendix_states_its_scope():
+    """검색 요약 기준이고 URL 원문은 재검증하지 않는다는 범위가 문서에 있어야 한다."""
+    plan = kosena_doc.build(_verified_state())
+    assert "검색 스니펫 기준" in plan
+    assert "원문 사실성은 재검증하지 않는다" in plan
+
+
+def test_unsupported_is_not_called_false():
+    """`unsupported` 는 '거짓'이 아니라 '확인하지 못함'이다 — 문서가 이걸 흐리면 과장이 된다.
+
+    '거짓' 이라는 낱말이 문서에 나오는 것 자체는 괜찮다(부정 문맥이면 오히려 정확하다).
+    **모든 등장이 부정 문맥인지**를 본다 — "거짓이다" 처럼 단정하는 표현이 새로 들어오면 잡힌다.
+    """
+    plan = kosena_doc.build(_verified_state())
+    hits = [i for i in range(len(plan)) if plan.startswith("거짓", i)]
+    assert hits, "근거 미확인의 뜻을 밝히는 문구가 없다"
+    for i in hits:
+        assert plan[i:i + 12].startswith("거짓이라는 뜻이 아니"), plan[max(0, i - 40):i + 40]
+
+
+def test_verdict_counts_are_tallied():
+    plan = kosena_doc.build(_verified_state())
+    assert "| 근거 확인 | 1 |" in plan
+    assert "| 근거 미확인 | 1 |" in plan
+    assert "| 검증 대상 아님 | 1 |" in plan
+
+
+def test_verification_appendix_is_omitted_when_nothing_was_verified():
+    """검증 결과가 없으면 빈 표를 싣지 않는다 — '검증했는데 0건'과 '검증 안 함'은 다르다."""
+    assert "부록 — 사실 검증 요약" not in kosena_doc.build({"kosena": {"ksf": ["a"]}})
+
+
+def test_appendix_renders_identically_in_both_assembly_passes(state):
+    """두 조립 패스의 줄 수가 같아야 분량 판정이 최종 문서를 가리킨다(부록 추가 후에도)."""
+    before = dict(state)
+    before.pop("kosena_compliance")
+    assert len(kosena_doc.build(before).splitlines()) == len(state["kosena_plan"].splitlines())
+
+
+# ---- 부록: 근거 출처 + 검색 기준일 ----
+
+def _sourced_state() -> dict:
+    return {"evidence_registry": [
+        {"evidence_id": "ev1", "url": "https://blog.kr/x", "title": "블로그 글",
+         "source_type": "community", "retrieved_at": "2026-07-20T00:00:00+00:00"},
+        {"evidence_id": "ev2", "url": "https://kostat.go.kr/y", "title": "통계청 자료",
+         "source_type": "government", "retrieved_at": "2026-07-27T00:00:00+00:00",
+         "published_date": "2026-03-01", "used_by_claims": ["c1"]},
+    ]}
+
+
+def test_plan_states_the_search_basis_date():
+    """근거가 어느 시점의 웹 스냅샷인지 문서에 있어야 한다(가장 늦은 조회일)."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "검색 기준일: 2026-07-27" in plan
+    assert "이후 변경된 내용은 반영되지 않는다" in plan
+
+
+def test_source_appendix_puts_official_sources_first():
+    plan = kosena_doc.build(_sourced_state())
+    gov, community = plan.index("통계청 자료"), plan.index("블로그 글")
+    assert gov < community, "공식·1차 출처가 커뮤니티보다 먼저 와야 한다"
+
+
+def test_source_appendix_distinguishes_unknown_dates():
+    """발행일을 모르면 '미상' — 빈칸으로 두면 표가 깨진 것처럼 보인다."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "미상" in plan and "2026-03-01" in plan
+
+
+def test_source_appendix_does_not_overclaim_per_item_linkage():
+    """항목별 근거 연결은 미구현이다 — 문서가 그렇게 읽히면 과장이 된다."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "KOSENA 항목별 근거 연결은 미구현" in plan
+
+
+def test_source_appendix_is_omitted_without_evidence():
+    assert "부록 — 근거 출처" not in kosena_doc.build({"kosena": {"ksf": ["a"]}})

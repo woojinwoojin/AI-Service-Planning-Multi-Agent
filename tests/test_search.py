@@ -167,3 +167,79 @@ def test_research_fences_untrusted_hits(monkeypatch):
     research.research({"structured_input": {"project_name": "P", "keywords": ["k"]}, "logs": []})
     assert "<검색결과>" in seen["user"] and "</검색결과>" in seen["user"]   # 데이터 구획으로 격리
     assert "지시" in seen["user"]                                          # 무시 안내 문구 포함
+
+
+# ---- 최신성 메타 (조회 시점·발행일·기간 조건) ----
+
+def test_hits_carry_retrieved_at(monkeypatch):
+    """모든 근거에 조회 시점이 기록돼야 한다 — 없으면 옛 스냅샷을 최신 자료로 읽는다."""
+    class Client:
+        def __init__(self, **kw): pass
+        def search(self, **kw):
+            return {"results": [{"title": "T", "url": "https://a.kr/1", "content": "c"}]}
+
+    monkeypatch.setattr(search, "_key", lambda: "k")
+    monkeypatch.setitem(__import__("sys").modules, "tavily",
+                        type("m", (), {"TavilyClient": Client}))
+    st: dict = {}
+    hits = search.web_search("q", status=st)
+    assert hits[0]["retrieved_at"].endswith("+00:00")      # UTC ISO8601
+    assert st["retrieved_at"] == hits[0]["retrieved_at"]
+
+
+def test_published_date_is_kept_only_when_given(monkeypatch):
+    """모르는 발행일을 빈 값으로 남기면 '미상'과 '검색이 안 줌'이 구분되지 않는다."""
+    class Client:
+        def __init__(self, **kw): pass
+        def search(self, **kw):
+            return {"results": [
+                {"title": "A", "url": "https://a.kr/1", "content": "c",
+                 "published_date": "2026-05-01"},
+                {"title": "B", "url": "https://b.kr/2", "content": "c"}]}
+
+    monkeypatch.setattr(search, "_key", lambda: "k")
+    monkeypatch.setitem(__import__("sys").modules, "tavily",
+                        type("m", (), {"TavilyClient": Client}))
+    objs = search.build_source_objects(search.web_search("q"))
+    assert objs[0]["published_date"] == "2026-05-01"
+    assert "published_date" not in objs[1]
+
+
+def test_recency_filter_is_passed_through(monkeypatch):
+    seen: dict = {}
+
+    class Client:
+        def __init__(self, **kw): pass
+        def search(self, **kw):
+            seen.update(kw)
+            return {"results": [{"title": "T", "url": "https://a.kr/1", "content": "c"}]}
+
+    monkeypatch.setattr(search, "_key", lambda: "k")
+    monkeypatch.setitem(__import__("sys").modules, "tavily",
+                        type("m", (), {"TavilyClient": Client}))
+    st: dict = {}
+    search.web_search("q", status=st, recency_days=365)
+    assert seen.get("topic") == "news" and seen.get("days") == 365
+    assert st["recency"] == "news/365d"
+
+
+def test_unsupported_recency_param_does_not_kill_the_search(monkeypatch):
+    """기간 조건이 검색 자체를 없애면 최악의 교환이다 — 조건 없이 재시도해야 한다."""
+    calls: list[dict] = []
+
+    class Client:
+        def __init__(self, **kw): pass
+        def search(self, **kw):
+            calls.append(kw)
+            if "topic" in kw:
+                raise TypeError("search() got an unexpected keyword argument 'topic'")
+            return {"results": [{"title": "T", "url": "https://a.kr/1", "content": "c"}]}
+
+    monkeypatch.setattr(search, "_key", lambda: "k")
+    monkeypatch.setitem(__import__("sys").modules, "tavily",
+                        type("m", (), {"TavilyClient": Client}))
+    st: dict = {}
+    hits = search.web_search("q", status=st, recency_days=365)
+    assert len(hits) == 1 and st["state"] == "ok"           # 검색이 살아남았다
+    assert st["recency"].startswith("unsupported")          # 그리고 정직하게 기록됐다
+    assert len(calls) == 2

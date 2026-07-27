@@ -205,3 +205,46 @@ def test_full_run_builds_normalized_registry(monkeypatch):
     shared_e = next(e for e in reg if e["url"] == "https://shared.com")
     assert shared_e["source_agents"] == ["research", "competitor"]  # 두 Agent 병합
     assert all(e["used_by_claims"] == [] for e in reg)              # 2-1 단계에선 빈 값
+
+
+# ---- 최신성·권위 순서 (오래된 근거를 최신 자료로 오인하지 않게) ----
+
+def test_registry_carries_recency_meta():
+    objs = [{"url": "https://a.kr/1", "title": "T", "snippet": "s",
+             "retrieved_at": "2026-07-27T10:00:00+00:00", "published_date": "2026-05-01"}]
+    reg = evidence.normalize(evidence.entries_from("research", "q", objs))
+    assert reg[0]["retrieved_at"] == "2026-07-27T10:00:00+00:00"
+    assert reg[0]["published_date"] == "2026-05-01"
+
+
+def test_official_sources_come_first_in_the_prompt():
+    """LLM 은 목록 앞쪽을 더 많이 인용한다 → 정부·학술이 커뮤니티보다 앞에 와야 한다."""
+    reg = [
+        {"evidence_id": "ev1", "url": "u1", "title": "블로그", "source_type": "community"},
+        {"evidence_id": "ev2", "url": "u2", "title": "통계청", "source_type": "government"},
+        {"evidence_id": "ev3", "url": "u3", "title": "논문", "source_type": "academic"},
+    ]
+    lines = evidence.for_prompt(reg).splitlines()
+    assert lines[0].startswith("[ev2]") and lines[1].startswith("[ev3]")
+    assert lines[2].startswith("[ev1]")
+
+
+def test_prompt_keeps_original_order_within_the_same_type():
+    """같은 유형 안에서는 evidence_id 순을 유지해야 판정이 결정적으로 남는다."""
+    reg = [{"evidence_id": f"ev{i}", "url": f"u{i}", "source_type": "news"} for i in (1, 2, 3)]
+    ids = [ln.split("]")[0] + "]" for ln in evidence.for_prompt(reg).splitlines()]
+    assert ids == ["[ev1]", "[ev2]", "[ev3]"]
+
+
+def test_prompt_shows_when_the_evidence_is_from():
+    reg = [{"evidence_id": "ev1", "url": "u", "title": "T", "source_type": "news",
+            "published_date": "2026-05-01", "retrieved_at": "2026-07-27T10:00:00+00:00"}]
+    line = evidence.for_prompt(reg)
+    assert "발행 2026-05-01" in line and "조회 2026-07-27" in line
+
+
+def test_search_basis_date_is_the_latest_retrieval():
+    reg = [{"url": "u1", "retrieved_at": "2026-07-20T00:00:00+00:00"},
+           {"url": "u2", "retrieved_at": "2026-07-27T00:00:00+00:00"}]
+    assert evidence.search_basis_date(reg) == "2026-07-27"
+    assert evidence.search_basis_date([{"url": "u"}]) == ""      # 기록 없으면 빈 문자열
