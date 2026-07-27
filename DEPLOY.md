@@ -117,11 +117,92 @@ python scripts/smoke_test.py --allow-real       # 실 키 서버 대상(비용 �
 > (false green) 실제로 배포되지 않은 것을 배포됐다고 오인하기 때문이다. 연결 전에는 변수를 켜지
 > 말고, 켤 때는 반드시 실제 배포 스텝과 함께 켠다.
 
+## GCP Cloud Run 공개 배포 (Phase 7 사용자 테스트용)
+
+5~10명이 실제로 써 보는 **사용자 테스트**를 위해 공개 주소로 띄운다. 스크립트:
+`scripts/deploy_cloudrun.sh`.
+
+### 왜 Cloud Run 인가
+이미 있는 `Dockerfile` 을 그대로 쓰고, 요청이 없으면 0 으로 줄며, HTTPS·도메인이 자동으로
+붙는다. `--source` 배포는 **Cloud Build** 가 이미지를 만들므로 **로컬 Docker 데몬이 꺼져
+있어도 된다**.
+
+### 사전 준비(1회 — 대화형이라 사람이 직접)
+
+```bash
+gcloud auth login
+gcloud config set project "$GCP_PROJECT"
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com secretmanager.googleapis.com
+```
+
+### 배포
+
+```bash
+export GCP_PROJECT=your-project-id
+bash scripts/deploy_cloudrun.sh            # 시크릿 등록 + 배포
+bash scripts/deploy_cloudrun.sh --secrets  # 키만 갱신
+```
+
+### 공개 주소이므로 반드시 함께 켜는 것들
+
+| 장치 | 값 | 무엇을 막는가 |
+|---|---|---|
+| `--max-instances=1` | 1 | 인스턴스가 늘면 **앱 내부 카운터가 인스턴스 수만큼 곱해진다**(카운터는 프로세스 메모리). 부하 관측상 한 인스턴스가 동시 5를 지연 증가 없이 처리하므로 5~10명에 충분 |
+| `PUBLIC_MAX_RUNS_PER_IP` | 5 / 1시간 | 한 사람의 연타 |
+| `PUBLIC_MAX_RUNS_PER_DAY` | 100 | **전역** 실행 수 — IP 를 바꿔도 걸린다 |
+| `PUBLIC_MAX_COST_PER_DAY_USD` | 2.0 | 실행이 예상보다 비쌀 때의 최종 방어선 |
+| `ENABLE_DEMO_TOOLS=0` | 0 | `/admin`·장애 주입(기본값이지만 명시) |
+| Secret Manager | — | 키를 이미지·env 에 굽지 않는다 |
+
+실행 1건 ≈ LLM 13~15콜 ≈ **$0.012**(실측). 위 기본값이면 하루 최대 **≈$1.2** 로 묶인다.
+현재 상태는 `GET /health` 의 `public_limits` 에서 확인한다(남은 여유가 안 보이면 운영자가
+'왜 429 가 나는지' 알 수 없다).
+
+> ⚠️ **IP 제한은 보증이 아니다.** `X-Forwarded-For` 는 클라이언트가 위조할 수 있다. 실제
+> 보증은 **전역 일일 상한**이 한다(IP 와 무관하게 걸린다). 카운터는 프로세스 메모리라
+> **재시작하면 초기화**된다.
+
+### GCP 비용 안전 (앱 밖 방어선)
+
+앱 상한이 전부 실패해도 결제는 막아야 한다. **예산 알림을 반드시 함께 건다.**
+
+```bash
+gcloud billing budgets create \
+  --billing-account="$(gcloud billing projects describe "$GCP_PROJECT" --format='value(billingAccountName)' | sed 's|.*/||')" \
+  --display-name="ai-planning-agent" \
+  --budget-amount=10USD \
+  --threshold-rule=percent=50 --threshold-rule=percent=90
+```
+
+> 예산 알림은 **알림일 뿐 자동 차단이 아니다.** OpenAI 쪽 상한(계정 usage limit)도 함께
+> 걸어 두는 편이 안전하다.
+
+### 이력은 남지 않는다 (설계 선택)
+
+Cloud Run 은 컨테이너 파일시스템이 **비영속**이고 인스턴스 간 공유도 되지 않는다. 이력
+(SQLite `data/projects.db`)은 컨테이너가 재활용되면 사라진다. 사용자 테스트에서는 이를
+**감수하고**, 참가자에게 **결과 다운로드(MD/JSON/DOCX/PPTX)를 안내**한다. 설문은 별도 폼으로 받는다.
+
+> SQLite 파일을 GCS FUSE 로 마운트해 영속화하는 방법은 **권하지 않는다** — 네트워크
+> 파일시스템에서 SQLite 잠금이 제대로 동작하지 않아 파일이 손상될 수 있다. 영속이 꼭
+> 필요해지면 실행 결과 JSON 을 GCS 에 업로드하거나 Cloud SQL 로 옮기는 편이 옳다.
+
+### 참가자 안내에 넣을 것
+
+- 입력한 내용은 **OpenAI·Tavily 로 전송**된다 → 민감 정보 입력 금지
+- 실행에 **약 70~90초** 걸린다(부하 관측 실측)
+- 결과는 **저장을 보장하지 않으므로** 필요하면 다운로드할 것
+- 1시간에 5회까지 실행 가능
+
 ## 현재 한계 (정직)
 
 - **실 호스트 배포는 미연결** — 레지스트리/호스트/시크릿이 없어 위 확장점으로 남겨둔다. CD 는
   '배포 가능한 이미지가 뜨고 스모크를 통과함'까지 검증한다. 자리표시 잡은 켜면 실패하도록 두어,
   미연결 상태가 성공으로 보이지 않게 한다.
 - **인증·인가 없음** — 공개 주소에 띄우면 누구나 `/run` 을 호출할 수 있다(LLM 비용). 데모 도구는
-  기본 차단했지만, 실제 공개 운영에는 접근 제어·레이트리밋이 별도로 필요하다.
+  기본 차단돼 있고, 요청 상한(`PUBLIC_MAX_*`, 위 GCP 섹션)으로 **폭주는 막지만** 이는
+  **비용 상한이지 인증이 아니다.** 누가 썼는지는 알 수 없고, 상한 안에서는 누구나 쓸 수 있다.
+  장기 공개 운영에는 여전히 접근 제어가 필요하다.
+- **요청 상한은 단일 인스턴스 전제** — 카운터가 프로세스 메모리에 있어 인스턴스가 늘면 전역
+  상한이 곱해지고, 재시작하면 초기화된다. `--max-instances=1` 과 짝으로만 유효하다.
 - **Production CD**(release tag → 배포 → health → rollback)는 UI·E2E 성숙 후 별도(Phase 8 후반).

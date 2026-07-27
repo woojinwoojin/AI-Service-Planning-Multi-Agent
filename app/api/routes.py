@@ -23,7 +23,18 @@ from app.graph.workflow import (
 )
 from app.schemas import artifact
 from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
-from app.services import budget, docx_export, llm, pptx_export, reliability, store, suggest, timing, usage
+from app.services import (
+    budget,
+    docx_export,
+    llm,
+    pptx_export,
+    public_guard,
+    reliability,
+    store,
+    suggest,
+    timing,
+    usage,
+)
 from app.services.markdown_export import save_markdown, save_run_json
 
 router = APIRouter()
@@ -43,6 +54,9 @@ def health() -> dict:
         "default_model": llm.default_model(),
         "artifact_read_mode": read["mode"],
         "artifact_read_mode_invalid": read["invalid"],
+        # 공개 배포 상한(트랙 E). 켜져 있는데 남은 여유가 안 보이면 운영자가 '왜 429 가 나는지'
+        # 를 알 수 없다. 꺼져 있으면 enabled:false 만 나간다.
+        "public_limits": public_guard.status(),
     }
 
 
@@ -86,6 +100,15 @@ def suggest_input(payload: SuggestInput) -> dict:
         raise HTTPException(status_code=400, detail="프로젝트명을 입력하세요.")
     return suggest.suggest_fields(payload.project_name, payload.memo, payload.model,
                                   payload.existing, payload.compare)
+
+
+def _record_public_cost(state: dict) -> None:
+    """공개 배포 일일 비용 누계에 이 실행의 **실측 비용**을 더한다(트랙 E).
+
+    `_result_payload` 안에서 처리하지 않는다 — 그건 순수 변환기이고, 거기에 부수효과를 넣으면
+    '응답을 만들었더니 카운터가 올라가는' 숨은 결합이 생긴다. 상한이 꺼져 있으면 no-op.
+    """
+    public_guard.record_cost((state.get("usage") or {}).get("est_cost_usd") or 0.0)
 
 
 def _result_payload(state: dict, project_id: int) -> RunResult:
@@ -138,6 +161,7 @@ def run(payload: ProjectInput) -> RunResult:
     """아이디어를 입력받아 Multi-Agent 워크플로를 실행하고, 결과를 이력에 저장·반환."""
     state = run_workflow(payload.to_state_input())
     state["verification_summary"] = reliability.summary()
+    _record_public_cost(state)
     project_id = store.save_run(state)
     return _result_payload(state, project_id)
 
@@ -212,6 +236,7 @@ def run_stream(payload: ProjectInput) -> StreamingResponse:
                 if ev.get("type") == "done":
                     state = ev["state"]
                     state["verification_summary"] = reliability.summary()
+                    _record_public_cost(state)
                     project_id = store.save_run(state)
                     yield _sse({"type": "done",
                                 "result": _result_payload(state, project_id).model_dump()})
@@ -284,6 +309,7 @@ def revise(payload: ReviseInput) -> RunResult:
                                        state.get("workflow_mode", "serial"),
                                        state["usage"].get("wall_time_ms"))
     state["verification_summary"] = reliability.summary()
+    _record_public_cost(state)
 
     # 이력 반영: 기존 프로젝트가 있으면 갱신, 없으면 신규 저장(수정 결과가 이력에 남도록)
     if payload.project_id and store.update_run(payload.project_id, state):
