@@ -123,7 +123,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 - **AI 활용 로그** — Agent별 프롬프트·입력·산출·검증·**채택 여부**를 별도 파일로 첨부. 재작성본이 초안보다
   낮아 되돌린 기록(`best_version`)이 "AI 응답을 그대로 쓰지 않았다"는 증거가 된다
 - **비교 harness** — 단일 vs 멀티(`run_compare.py`), 다중 모델(`run_multimodel.py`), 직렬 vs 병렬(`run_parallel_bench.py`) 재현 가능한 실험
-- **회귀 테스트** — `pytest` **644개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 하한 90%
+- **회귀 테스트** — `pytest` **658개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 하한 90%
 
 ---
 
@@ -139,7 +139,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 | 관측성 | 자체 usage 집계 (토큰·추정 비용·지연) |
 | 산출물 | python-docx (.docx), python-pptx (.pptx), Markdown, JSON |
 | Frontend | 자체완결 HTML (인라인 CSS/JS). **외부 CDN·빌드 도구를 쓰지 않는다** — FastAPI 가 그대로 서빙해 빌드·CORS·별도 배포가 불필요하고, 폐쇄망에서도 동작하며, CDN 의 가용성·버전 변동·공급망 위험을 끌어들이지 않는다. 대가는 **JS 자동 테스트 부재**(수동 확인 의존) |
-| 테스트 | pytest (644개) · ruff · GitHub Actions CI 4게이트 |
+| 테스트 | pytest (658개) · ruff · GitHub Actions CI 4게이트 |
 
 ---
 
@@ -198,6 +198,61 @@ pytest -q
 
 ---
 
+## 7-1. 배포 절차 (GCP Cloud Run)
+
+배포 경로는 두 가지입니다. 자세한 배경은 [`DEPLOY.md`](DEPLOY.md) 참고.
+
+### A. 승인형 CD — GitHub Actions (권장)
+
+`.github/workflows/deploy-cloudrun.yml` — **`workflow_dispatch` 로만 돌아갑니다**(push 자동 배포
+없음). 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이 사람의
+확인 없이 바뀌기 때문입니다.
+
+흐름: **게이트(ruff + pytest) → 승인 대기 → GCP 인증 → Cloud Run 새 Revision → 원격 `/health` 확인**
+게이트가 실패하면 배포 잡은 시작하지 않고, `concurrency` 로 배포가 겹치지 않습니다.
+
+**사전 설정(저장소 관리자, 1회):**
+
+1. **Secrets** (Settings → Secrets and variables → Actions)
+   | 이름 | 용도 |
+   |---|---|
+   | `GCP_PROJECT` | GCP 프로젝트 ID |
+   | `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF 공급자 리소스 이름 (권장 — 장기 키를 저장소에 두지 않음) |
+   | `GCP_SERVICE_ACCOUNT` | WIF 로 가장할 서비스 계정 이메일 |
+   | `GCP_SA_KEY` | *(WIF 대신)* 서비스 계정 키 JSON — 폴백. 유출 시 회수가 어려워 WIF 를 권합니다 |
+2. **Secret Manager** 에 `OPENAI_API_KEY`·`TAVILY_API_KEY` 생성(`scripts/deploy_cloudrun.sh` 가 만들어 줍니다)
+3. **승인 게이트**: Settings → Environments → `production` 생성 → **Required reviewers** 지정.
+   ⚠️ 이 설정이 없으면 워크플로는 승인 없이 바로 배포됩니다 — 워크플로 파일만으로는 승인을
+   강제할 수 없습니다.
+4. 서비스 계정 권한: `roles/run.admin` · `roles/cloudbuild.builds.editor` ·
+   `roles/iam.serviceAccountUser` · `roles/secretmanager.secretAccessor`
+
+**실행**: Actions → *Cloud Run 배포 (승인형)* → Run workflow → `confirm` 에 **`deploy`** 입력
+(오타 배포 방지). `dummy_mode` 를 켜면 `USE_DUMMY=1` 로 올려 키 없이 화면·계약만 확인합니다.
+
+> ⚠️ **이 워크플로는 아직 실제로 실행해 검증하지 않았습니다.** 시크릿·WIF 설정 전에는 인증
+> 단계에서 명확한 메시지와 함께 실패합니다(가짜 성공을 만들지 않습니다).
+
+### B. 수동 스크립트 (검증된 경로)
+
+```bash
+gcloud auth login                    # 대화형 — 직접 실행 필요
+export GCP_PROJECT=your-project-id
+bash scripts/deploy_cloudrun.sh      # Secret Manager 등록 + Cloud Run 배포 + URL 출력
+```
+
+`--source .` 를 쓰므로 **로컬 Docker 데몬이 필요 없습니다**(Cloud Build 가 이미지를 만듭니다).
+
+### 두 경로 공통 주의
+
+- **`--max-instances=1` 은 필수**입니다. `public_guard` 의 요청·비용 카운터가 프로세스 메모리라,
+  인스턴스가 늘면 상한이 인스턴스 수만큼 곱해져 방어가 조용히 약해집니다.
+- **이력은 비영속**입니다(SQLite 파일 → 재시작 시 소실). 사용자에게 산출물 다운로드를 안내합니다.
+- **GCS FUSE + SQLite 조합은 금지**입니다(파일 잠금 문제로 DB 손상).
+- 배포 후 `/health` 의 `public_limits` 로 공개 상한이 실제로 걸렸는지 확인하세요.
+
+---
+
 ## 8. 저장소 구조
 
 ```text
@@ -247,7 +302,7 @@ app/
  ├─ prompts/templates.py    # 프롬프트 템플릿
  ├─ schemas/state.py        # State·입출력 스키마
  └─ static/index.html       # 최소 UI(입력/결과/최종/이력)
-tests/                      # pytest 644개 (LLM 호출 없이 검증 로직·라우트 테스트)
+tests/                      # pytest 658개 (LLM 호출 없이 검증 로직·라우트 테스트)
 run_compare.py              # 단일 vs 멀티 비교실험 CLI
 run_multimodel.py           # 생성 모델별 비교실험 CLI
 run_parallel_bench.py       # 직렬 vs 병렬 비교실험 CLI (wall time·품질·비용)
@@ -269,7 +324,7 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 근거 일치성 검증 · Reviewer 평가와 섹션 단위 보완 · 최고 버전 채택 · 출력 가능 여부 게이트 ·
 **KOSENA 방법론 산출물 7종 + 준수 자체점검 28항목 + AI 활용 로그** · DOCX/PPTX/MD/JSON 산출 ·
 이력 저장·재조회 · 관측성(토큰·비용·지연·stage) · 예산 상한 · 공개 배포 상한 ·
-**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트).
+**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 + **Actions 승인형 CD** — 워크플로는 있으나 실제 실행은 미검증).
 
 > 초기 구상에서 **RAG·로그인은 여전히 제외**입니다(범위 관리). CI/CD 는 처음엔 제외했다가
 > 이후 CI(4게이트)와 Staging 파이프라인을 추가했습니다 — 아래 '향후'에 남은 부분을 적었습니다.
@@ -288,6 +343,5 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 
 ### 향후 후보
 
-검색 결과 최신성 메타(`retrieved_at`·기간 필터) · Actions 승인형 CD(GCP 인증 → Cloud Run 배포) ·
-KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
+승인형 CD 의 실제 실행 검증 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
 사람 기획서 기준선 보정 · 관측성 per-Agent 분해. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.

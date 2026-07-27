@@ -30,7 +30,11 @@
 from __future__ import annotations
 
 # build_source_objects 가 붙이는 메타 필드(그대로 레지스트리 항목에 실어 나른다).
-_META_KEYS = ("title", "snippet", "source_type", "content_scope", "original_text_extracted")
+# `retrieved_at`(조회 시점)·`published_date`(발행일, 검색이 줄 때만)도 그대로 실어 나른다 —
+# 근거가 언제 조회된 것인지 없으면 몇 달 전 스냅샷을 최신 자료처럼 읽게 된다. 같은 URL 이
+# 여러 번 나오면 `normalize` 가 최초 항목을 대표로 두므로 **처음 조회한 시점**이 남는다.
+_META_KEYS = ("title", "snippet", "source_type", "content_scope", "original_text_extracted",
+              "retrieved_at", "published_date")
 
 
 def entries_from(source_agent: str, query: str, source_objects: list) -> list[dict]:
@@ -114,24 +118,59 @@ def normalize(raw_entries: list) -> list[dict]:
     return registry
 
 
+# 정량 주장(시장 규모·정책·통계)은 **공식·1차 출처를 우선**해야 한다. 신뢰도 점수가 아니라
+# '어느 것을 먼저 보게 할지'의 순서다 — 정부·공공 → 학술 → 기업 공식 → 언론 → 커뮤니티.
+_AUTHORITY_ORDER = ("government", "academic", "corporate", "news", "community", "unknown")
+
+
+def authority_rank(source_type: str) -> int:
+    """`_AUTHORITY_ORDER` 상의 순위(작을수록 공식). 모르는 유형은 맨 뒤."""
+    try:
+        return _AUTHORITY_ORDER.index((source_type or "unknown").strip())
+    except ValueError:
+        return len(_AUTHORITY_ORDER)
+
+
 def for_prompt(registry: list) -> str:
     """정규화된 레지스트리를 verifier 프롬프트용 근거 목록 문자열로 만든다.
 
     각 줄에 evidence_id 를 앞세워, LLM 이 주장별로 '어느 근거가 뒷받침하는지'를
     evidence_id 로 지목(인용)할 수 있게 한다(2-3/Tier 2 의 주장-근거 연결 토대).
+
+    **공식·1차 출처를 먼저 싣는다**(`authority_rank`). LLM 은 목록 앞쪽을 더 많이 인용하므로,
+    정부·학술 자료가 커뮤니티 글보다 앞에 오면 정량 주장이 더 단단한 근거에 붙는다.
+    같은 유형 안에서는 **원래 순서(evidence_id 순)를 유지**해 판정이 결정적으로 남는다.
+
+    조회 시점(`retrieved_at`)·발행일(`published_date`)을 각 줄에 함께 적는다 — 오래된 근거를
+    최신 자료로 오인해 "현재 시장은…" 같은 주장을 붙이는 것을 막기 위함이다.
     """
+    items = [e for e in (registry or []) if isinstance(e, dict)]
+    ordered = sorted(enumerate(items),
+                     key=lambda p: (authority_rank(p[1].get("source_type", "")), p[0]))
     lines: list[str] = []
-    for e in registry or []:
-        if not isinstance(e, dict):
-            continue
+    for _, e in ordered:
         eid = e.get("evidence_id", "")
         stype = e.get("source_type", "") or "unknown"
         title = (e.get("title") or "").strip()
         snippet = (e.get("snippet") or "").strip()
-        head = f"[{eid}] ({stype})"
+        when = " ".join(x for x in (
+            f"발행 {e['published_date']}" if e.get("published_date") else "",
+            f"조회 {str(e['retrieved_at'])[:10]}" if e.get("retrieved_at") else "",
+        ) if x)
+        head = f"[{eid}] ({stype}{'; ' + when if when else ''})"
         body = f"{title}: {snippet}" if title else snippet
         lines.append(f"{head} {body}".rstrip())
     return "\n".join(lines)
+
+
+def search_basis_date(registry: list) -> str:
+    """레지스트리에 기록된 **가장 늦은 조회 시점**의 날짜(YYYY-MM-DD). 없으면 빈 문자열.
+
+    문서의 '검색 기준일'로 쓴다 — 근거가 어느 시점의 웹 스냅샷인지 독자가 알아야 한다.
+    """
+    stamps = [str(e.get("retrieved_at"))[:10] for e in (registry or [])
+              if isinstance(e, dict) and e.get("retrieved_at")]
+    return max(stamps) if stamps else ""
 
 
 def link_claims(registry: list, claims: list) -> list[dict]:

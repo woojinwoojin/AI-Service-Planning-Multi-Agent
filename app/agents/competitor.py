@@ -16,6 +16,20 @@ from app.schemas import artifact
 from app.schemas.state import ProjectState
 from app.services import evidence, llm, search
 
+# 경쟁 서비스 검색의 기간 상한(일). 1년으로 둔 이유는 두 방향의 실패를 함께 피하려는 것이다 —
+# 너무 좁히면 권위 있는 비교 자료 대신 최근 홍보글만 올라오고, 너무 넓히면 문 닫은 서비스나 옛
+# 가격이 현재 경쟁 환경처럼 실린다.
+#
+# **실측(2026-07-27, 쿼리="AI 기반 대학생 진로 설계 서비스 경쟁 서비스 비교 대안")**:
+#   기간 조건 없음 → Google AI 소개·Wikipedia "AI"·YouTube 강좌·Coursera "What is AI"
+#                    (일반 AI 문서. 경쟁사 분석에 쓸 수 없다)
+#   news/365d      → 대학 전공 선택 AI·청소년의 대학 조사 AI 활용·입학사정 AI 도입 논의
+#                    (주제 적합)
+# 경쟁사 쿼리는 고유명사가 적어 일반 검색이 상위어로 흘러가는데, 뉴스 토픽이 그걸 막았다.
+#
+# 기간 조건이 지원되지 않으면 `web_search` 가 조건 없이 재시도하므로 검색 자체가 사라지지 않는다.
+COMPETITOR_RECENCY_DAYS = 365
+
 
 def _validate(result: dict, fallback: dict) -> dict:
     if not isinstance(result, dict):
@@ -65,7 +79,12 @@ def competitor(state: ProjectState) -> dict:
     search_status: dict = {}
     query = f"{si.get('project_name', '')} 경쟁 서비스 비교 대안".strip()
     if not llm.is_dummy():
-        hits = search.web_search(query, max_results=4, status=search_status)
+        # 경쟁 서비스는 **최신성이 결과의 의미를 바꾼다** — 문 닫은 서비스나 2년 전 가격이
+        # 현재 경쟁 환경처럼 실리면 분석이 틀린다. 그래서 기간을 제한한다.
+        # (시장 규모 통계는 반대다 — 권위 있는 1차 자료가 몇 년 전 발간일 수 있어
+        #  research 의 조사 검색에는 기간 조건을 걸지 않는다.)
+        hits = search.web_search(query, max_results=4, status=search_status,
+                                 recency_days=COMPETITOR_RECENCY_DAYS)
 
     user = (
         "아래 시장조사 결과를 근거로 경쟁사 분석을 수행하세요.\n"

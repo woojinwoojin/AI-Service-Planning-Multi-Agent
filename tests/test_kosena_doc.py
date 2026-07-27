@@ -311,3 +311,44 @@ def test_appendix_renders_identically_in_both_assembly_passes(state):
     before = dict(state)
     before.pop("kosena_compliance")
     assert len(kosena_doc.build(before).splitlines()) == len(state["kosena_plan"].splitlines())
+
+
+# ---- 부록: 근거 출처 + 검색 기준일 ----
+
+def _sourced_state() -> dict:
+    return {"evidence_registry": [
+        {"evidence_id": "ev1", "url": "https://blog.kr/x", "title": "블로그 글",
+         "source_type": "community", "retrieved_at": "2026-07-20T00:00:00+00:00"},
+        {"evidence_id": "ev2", "url": "https://kostat.go.kr/y", "title": "통계청 자료",
+         "source_type": "government", "retrieved_at": "2026-07-27T00:00:00+00:00",
+         "published_date": "2026-03-01", "used_by_claims": ["c1"]},
+    ]}
+
+
+def test_plan_states_the_search_basis_date():
+    """근거가 어느 시점의 웹 스냅샷인지 문서에 있어야 한다(가장 늦은 조회일)."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "검색 기준일: 2026-07-27" in plan
+    assert "이후 변경된 내용은 반영되지 않는다" in plan
+
+
+def test_source_appendix_puts_official_sources_first():
+    plan = kosena_doc.build(_sourced_state())
+    gov, community = plan.index("통계청 자료"), plan.index("블로그 글")
+    assert gov < community, "공식·1차 출처가 커뮤니티보다 먼저 와야 한다"
+
+
+def test_source_appendix_distinguishes_unknown_dates():
+    """발행일을 모르면 '미상' — 빈칸으로 두면 표가 깨진 것처럼 보인다."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "미상" in plan and "2026-03-01" in plan
+
+
+def test_source_appendix_does_not_overclaim_per_item_linkage():
+    """항목별 근거 연결은 미구현이다 — 문서가 그렇게 읽히면 과장이 된다."""
+    plan = kosena_doc.build(_sourced_state())
+    assert "KOSENA 항목별 근거 연결은 미구현" in plan
+
+
+def test_source_appendix_is_omitted_without_evidence():
+    assert "부록 — 근거 출처" not in kosena_doc.build({"kosena": {"ksf": ["a"]}})
