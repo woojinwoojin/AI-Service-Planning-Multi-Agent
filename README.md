@@ -108,7 +108,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, **실제 웹 검색�
 - **입력 자동완성** — 프로젝트명(+기존 입력)으로 **비어 있는 항목만** AI가 채움. 사용자가 이미 쓴 값은 보존·문맥으로만 활용하고, AI가 채운 필드는 `AI 추천` 배지로 표시(수정 시 `AI 추천 수정됨`). **AI 제안과 비교** 모드에서는 4개 항목 모두에 제안을 받아 `내 값 vs AI`를 나란히 보고 항목별로 기존 유지·AI 적용·합치기를 선택(입력은 확인 전까지 그대로). 각 AI 추천에는 **추천 이유·확신도(높음/보통/낮음)·참고한 기존 입력**을 함께 표시
 - **최소 웹 UI** — 입력 / 결과(Agent별) / 최종 기획서 / 이력 4화면 (FastAPI가 서빙하는 자체완결 HTML)
 - **비교 harness** — 단일 vs 멀티(`run_compare.py`), 다중 모델(`run_multimodel.py`), 직렬 vs 병렬(`run_parallel_bench.py`) 재현 가능한 실험
-- **회귀 테스트** — `pytest` 320개 (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과
+- **회귀 테스트** — `pytest` 523개 (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 커버리지 하한 90%
 
 ---
 
@@ -217,7 +217,7 @@ app/
  ├─ prompts/templates.py    # 프롬프트 템플릿
  ├─ schemas/state.py        # State·입출력 스키마
  └─ static/index.html       # 최소 UI(입력/결과/최종/이력)
-tests/                      # pytest 320개 (LLM 호출 없이 검증 로직·라우트 테스트)
+tests/                      # pytest 523개 (LLM 호출 없이 검증 로직·라우트 테스트)
 run_compare.py              # 단일 vs 멀티 비교실험 CLI
 run_multimodel.py           # 생성 모델별 비교실험 CLI
 run_parallel_bench.py       # 직렬 vs 병렬 비교실험 CLI (wall time·품질·비용)

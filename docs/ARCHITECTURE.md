@@ -1,7 +1,7 @@
 # 아키텍처 · 설계 결정(ADR) · 주요 코드
 
-> 갱신: 2026-07-24 · 대상: 현재 main · 코드 근거를 함께 표기
-> 관련 문서: [`../README.md`](../README.md) · [`개발_로드맵_v2.md`](개발_로드맵_v2.md) · [`PRD.md`](PRD.md) · [`정보신뢰성_전략.md`](정보신뢰성_전략.md) · [`병렬화_측정결과_및_PR7_계획.md`](병렬화_측정결과_및_PR7_계획.md)
+> 갱신: 2026-07-27 · 대상: 현재 main · 코드 근거를 함께 표기
+> 관련 문서: [`../README.md`](../README.md) · [`개발_로드맵_v2.md`](개발_로드맵_v2.md) · [`PRD.md`](PRD.md) · [`정보신뢰성_전략.md`](정보신뢰성_전략.md) · [`병렬화_측정결과_및_PR7_계획.md`](병렬화_측정결과_및_PR7_계획.md) · [`phase2-2-artifact-plan.md`](phase2-2-artifact-plan.md)
 
 이 문서는 **"왜 이렇게 만들었는가"(설계 결정)**와 **"어디를 보면 되는가"(주요 코드)**를 한곳에 모은 개발자용 레퍼런스입니다.
 
@@ -49,8 +49,10 @@
 │ timing(단계 계측) · usage(토큰·비용) · tracing(Langfuse)     │
 │ store(SQLite) · markdown/docx/pptx_export · suggest          │
 │ [평가] compare · evaluation · eval_set · gt_eval · polish_eval│
-│ [벤치] parallel_bench                                        │
+│ [벤치] parallel_bench · artifact_real_check                  │
 └────────────────────────────────────────────────────────────┘
+       ▲ 계층을 가로지름: schemas/artifact.py (Artifact Contract, §4.11)
+         Agent 가 쓰고(Dual Write) 소비자가 읽는(selector) 표준 봉투
 ```
 
 ### 2.2 워크플로 (직렬/병렬 공통 마무리)
@@ -127,6 +129,8 @@ structured_input · research_result · competitor_result · competitor_sources
 customer_result · swot_result · business_model_result · risk_result · pestel_result
 evidence_registry: Annotated[list, operator.add]   # 통합 근거(2-1), 종료 시 normalize
 evidence_gaps · dynamic_research                   # 근거 공백 보고 / 추가 조사 내역(2-5)
+artifacts: Annotated[list, merge_artifacts]        # 표준 봉투 7개(2-2). id 기준 병합 reducer
+artifact_parity · artifact_read                    # 정합성 자기점검 / 읽기 모드·폴백 계측(→§4.11)
 # 문서·평가
 draft · review_result · initial_review_result
 final_draft · revision_count
@@ -194,6 +198,63 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 ### 4.10 품질 게이트 & State 버전 (Phase 4·5)
 - **quality_gate**(`quality_gate.py`): `release_ready = 총점≥80 · 치명 이슈 0 · 주요 이슈≤1 · 서식 정상 · 근거 충족률(fact_support_rate)≥0.8`. `blocking_reasons`·`unresolved_issues`(최종본 critical/major)로 무엇을 고칠지 안내. 임계값은 사람 보정 전 잠정값(`thresholds.calibrated=false`). state/응답/UI에 표면화. **사실 주장 0건이면 근거 충족률이 공허 충족(1.0)으로 자동 통과**하므로, `metrics.verifiable_claims`·`metrics.fact_total`·`na_checks`·`warnings`로 '검증 통과'와 '검증 대상 없음'을 구분해 보고한다(리뷰3 B-4 — release_ready 는 막지 않음, UI 는 해당 체크를 N/A 로 표시).
 - **State 버전/재조회 정규화**(`migrate.py`, Phase 5): `STATE_VERSION`. SQLite JSON blob이라 DDL migration 대신 **읽기 시점** `upgrade_state`가 옛 기록의 누락 필드에 안전 기본값 주입 + `quality_gate` 소급 계산 + 버전 태깅(멱등). `store.get_project`·`_finalize_run`에서 적용.
+  - 저장 payload(`store._payload`)는 **State 에 없는 키를 넣지 않는다.** `None` 으로 채우면 재조회 쪽 `state.get(k, {})` 가 기본값이 아니라 `None` 을 받아 `{**None}` → 500 이 된다(PR 5e).
+
+### 4.11 Artifact Contract — 표준 봉투 + 읽기 모드 (로드맵 2-2)
+
+Agent 결과는 원래 State 최상위의 **평면 키 7개**(`*_result`)로만 존재해, 누가 만들었는지·무엇에
+의존하는지·어느 근거를 썼는지·어느 섹션을 책임지는지가 코드를 읽어야만 드러났다. 이 정보를
+공통 봉투로 표준화한 것이 `schemas/artifact.py` 다. **`content` 내부 스키마는 Agent 마다 제각각인
+채로 둔다** — 내용까지 통일하려면 7개 Agent 와 그 소비자를 한꺼번에 건드려야 한다.
+
+```python
+{artifact_id, artifact_type, owner_agent, schema_version,
+ content, evidence_ids[], depends_on[], target_sections[], status, metadata}
+```
+
+- **통짜 교체가 아니라 Strangler 점진 전환**(사용자 결정). 평면 키 7개는 **그대로 두고** 같은
+  내용을 병행 기록한다(Dual Write). 평면 키 제거는 이번 Phase 의 목표가 아니다.
+- **`artifact_id` 는 랜덤·시간이 아니라 고정 상수**다(`evidence_id` 와 같은 이유) — 같은 State 면
+  항상 같은 결과라야 테스트가 재현되고 재조회해도 id 가 흔들리지 않는다.
+- **reducer `merge_artifacts`** — `operator.add` 를 쓰면 안 된다. 한 Agent 가 두 번 방출하거나
+  (`research` 뒤 `research_gap` 이 보강본을 다시 냄) 재실행되면 중복된다. id 기준 덮어쓰기 +
+  출력 순서를 위상 순서로 고정(병렬 도착 순서에 결과가 흔들리지 않도록).
+- **`reconcile`(finalize)** 이 최종 확정: 평면 결과에서 파생 → **Agent 가 직접 쓴 것으로 덮고**
+  → `evidence_ids`·`status` 를 이 시점 값으로 재확정. Agent 는 실행 시점에 둘 다 알 수 없다
+  (`evidence_id` 는 종료 시 `normalize` 가 부여, failed/fallback 은 `_assess_quality` 가 판정).
+- **`check_parity`(PR 3)** 가 평면 결과와 content 동등성을 자기점검하되 **실행을 실패시키지
+  않는다** — 아직 그림자 구조인데 멀쩡한 실행을 죽이면 손해가 크다. `artifact_parity` 와 로그로
+  표면화한다.
+
+**읽기 모드 `ARTIFACT_READ_MODE`** — 소비자는 평면 키를 직접 읽지 않고 `artifact.read(state, type)`
+단일 창구를 쓴다(평면 키 이름이 호출부에 나타나지 않아 명세와 어긋날 여지가 없다).
+
+| 모드 | 동작 |
+|---|---|
+| `legacy`(기본) | 평면 키만 — 전환 전과 **완전히 동일** |
+| `prefer_artifact` | Artifact 우선, 못 쓰면 평면 키로 폴백(사유 `missing`/`empty`/`failed` 기록) |
+| `artifact_only` | Artifact 만. 못 쓰면 `ArtifactUnavailable` 로 **명시적 실패**(검증 전용) |
+
+오타·미지값은 **가장 안전한 `legacy`** 로 떨어지되 조용히 넘어가지 않는다 — warning 로그 +
+`/health.artifact_read_mode_invalid` + 실행 기록. **rollback = `ARTIFACT_READ_MODE=legacy` + 재시작**
+('즉시'가 아니다 — `.env` 는 import 시 1회만 읽힌다).
+
+**런타임 폴백 계측(PR 5d)** — `usage.py` 와 같은 contextvar 방식으로 읽기 호출을 실행 단위로 세어
+`artifact_read.runtime` 에 싣는다. 가용성 스냅샷("쓸 수 있었나")과 실제 호출("몇 번 읽고 몇 번
+떨어졌나")은 다른 질문이다. **shadow 측정**: `legacy` 는 Artifact 를 보지도 않아 폴백이 원리적으로
+0 이므로, legacy 읽기마다 Artifact 쪽을 **관측만** 해서(반환값 불변) "전환했다면 떨어졌을" 횟수를
+남긴다 — 운영 트래픽을 실제로 넘겨 보지 않고 준비도를 잰다. `measured=False` 는 "폴백 0"이 아니라
+**"측정 안 함"**이다.
+
+⚠️ **평면 키를 계속 직접 읽는 곳 = `api/routes.py`·`services/parallel_bench.py`(표시·집계)이며
+의도된 것**이다(외부 API 는 평면 필드를 그대로 제공한다). `test_unconverted_readers_are_known`
+이 이 목록을 고정해, 새 직접 읽기가 생기면 실패한다.
+
+⚠️ **검증 방법론(중요)**: 더미 모드에서 **최종 문서 해시로는 분석 Agent 의 읽기 경로가 검증되지
+않는다.** `_dummy()` 가 앞 Agent 결과를 실제로 쓰는 건 `competitor` 뿐이고 더미 초안은
+research·pestel 만 반영하므로, "swot 이 빈 경쟁사 분석을 읽고 만든 SWOT"이 산출물 비교로는
+정상으로 보인다(돌연변이 테스트로 실증). 그래서 **관통 실행의 LLM 프롬프트 스트림을 세 모드에서
+대조**하는 것이 실질 검증이다.
 
 ---
 
@@ -221,6 +282,9 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 | **18** | **Phase 4 품질 게이트 + 최고 버전 채택 + 모델 분리** | 출력 가능 여부·미해결 이슈 표면화, 나쁜 재작성 되돌림, 자기 채점 편향 완화 |
 | **19** | **Phase 5 State 버전 + 읽기 시점 정규화** | 옛 프로젝트 재조회 호환(누락 필드·게이트 소급). DDL migration 없음(JSON blob) |
 | **20** | **2-5 제한된 동적 실행(`research_gap`)** | 트리거를 'Agent 가 보고한 근거 공백'으로 한정 + 검색·LLM 상한 + 예산 연동 → 자유 동적 실행의 비용 폭주 없이 근거를 보강. 항상 도는 no-op 노드라 그래프가 갈라지지 않음(대신 노드 1개 상시 추가) |
+| **21** | **2-2 Artifact Contract를 통짜 교체가 아닌 Strangler 점진 전환으로** | 평면 키 7개가 운영 17파일 90회 참조돼 통짜 교체 위험 8~9/10. 병행 기록(Dual Write) + 읽기 모드 플래그로 위험을 PR 단위로 쪼갬. 대가: 같은 내용이 두 곳에 존재(저장 +29.6%)하고 전환이 길어짐 |
+| **22** | **읽기 전환을 env 플래그(`ARTIFACT_READ_MODE`) 뒤에 두고 기본은 `legacy`** | 코드 되돌리기 없이 rollback(재시작 필요). 오타는 가장 안전한 legacy 로 떨어지되 경고·`/health` 로 표면화 — 조용히 무시하면 운영자가 전환됐다고 오해 |
+| **23** | **가용성 스냅샷과 별개로 런타임 폴백 카운터 + legacy 의 shadow 측정** | "쓸 수 있었나"와 "실제로 몇 번 떨어졌나"는 다른 질문. shadow 로 **전환 전에** 준비도를 재 운영 트래픽을 실험대에 올리지 않음. `measured=False`(측정 안 함)를 0(폴백 없음)과 구분 |
 
 > ADR-1~12의 상세 배경은 git 이력 및 이전 문서 버전 참조. 자동 재작성 1회 상한(구 ADR-8)은 `_route_revision`의 `revision_count<1`로 유지.
 
@@ -237,6 +301,10 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 | 최고 버전 채택 | `workflow.py:_select_best` |
 | 심사(초안/최종)·모델 분리 | `reviewer.py:reviewer`·`final_reviewer`·`_reviewer_model`; 구조화 issues `_validate_issues` |
 | 근거 레지스트리 | `services/evidence.py:entries_from`·`normalize`·`for_prompt`·`link_claims` |
+| Artifact 명세·의존 관계 | `schemas/artifact.py:LEGACY_ARTIFACT_SPECS`(위상 순서·`depends_on`·`target_sections`) |
+| Artifact 쓰기(Dual Write)·병합·확정 | `artifact.py:make_artifact`·`merge_artifacts`(reducer)·`reconcile`·`check_parity` |
+| Artifact 읽기(소비자 단일 창구) | `artifact.py:read`·`get_artifact_content`·`read_mode`(`ARTIFACT_READ_MODE`) |
+| 읽기 폴백 계측·shadow | `artifact.py:reads_start`·`reads_summary`·`read_status`; 부착 `workflow._finalize_artifacts` |
 | 근거 검증(Tier 2) | `agents/verifier.py:verify`·`_validate`·`judge_claim` |
 | 품질 게이트 | `services/quality_gate.py:evaluate`(임계값 상수) |
 | State 버전·재조회 정규화 | `services/migrate.py:STATE_VERSION`·`upgrade_state` |
@@ -247,6 +315,7 @@ API 하드닝(리뷰3 D-4): `/projects?limit=` 은 `Query(50, ge=1, le=100)`(0·
 | API 엔드포인트·응답 스키마 | `api/routes.py` · `schemas/state.py:RunResult` |
 | 병렬 벤치 | `run_parallel_bench.py` · `services/parallel_bench.py` |
 | 평가·게이트 실측 | `run_eval.py`(`evaluation`·`eval_set`) · `run_gt_eval.py`(`gt_eval`) · `run_polish_eval.py`(`polish_eval`) |
+| Artifact 실 LLM 검증 | `run_artifact_real_check.py` · `services/artifact_real_check.py:prompt_parity`·`summarize` |
 
 ---
 
@@ -272,7 +341,11 @@ CREATE TABLE IF NOT EXISTS projects (
 3. `workflow.py`의 직렬·병렬 그래프 양쪽에 `add_node`(반드시 `_safe`) + 엣지 등록.
 4. 검색 근거를 쓰면 `evidence.entries_from`로 `evidence_registry` 방출.
 5. `draft_writer`에서 결과를 서식에 반영(필요 시 `sections.SECTION_SPECS`).
-6. `tests/`에 `_validate` 중심 테스트 추가(LLM 없이).
+6. **Artifact(§4.11)**: `LEGACY_ARTIFACT_SPECS` 에 명세 추가(`depends_on` 은 상상이 아니라 **실제
+   읽는 유형**으로 — `test_declared_depends_on_matches_actual_runtime_reads` 가 대조한다) +
+   반환에 `artifact.make_artifact(...)` 방출(Dual Write). 앞 Agent 결과를 읽을 때는 평면 키를
+   직접 읽지 말고 **`artifact.read(state, type)`**.
+7. `tests/`에 `_validate` 중심 테스트 추가(LLM 없이).
 
 ---
 
@@ -281,11 +354,18 @@ CREATE TABLE IF NOT EXISTS projects (
 ```bash
 uvicorn app.main:app --reload            # 서버 → http://localhost:8000/ · /docs(OpenAPI)
 WORKFLOW_MODE=parallel uvicorn ...        # 병렬 그래프로 실행(기본 serial)
+ARTIFACT_READ_MODE=prefer_artifact ...    # Artifact 우선 읽기(기본 legacy) — §4.11
+curl localhost:8000/health                # 현재 읽기 모드·오타 여부 확인
 python run_parallel_bench.py --topics 3 --reps 2 --fresh   # 직렬 vs 병렬 실측(유료)
 python run_eval.py --topics 5 --samples 2 # 8기준 루브릭 평가(유료)
 python run_gt_eval.py                     # 신뢰도 GT 스모크셋(유료, 소액)
 python run_polish_eval.py                 # PR-8 Polish 품질 블라인드 검증(유료, 소액)
-pytest -q                                 # 회귀 테스트 242개(무비용·USE_DUMMY/mock)
+python run_artifact_real_check.py --topics 6   # Artifact 읽기 전환 실 LLM 검증(유료, 소액)
+pytest -q                                 # 회귀 테스트(무비용·USE_DUMMY/mock)
 ruff check .                              # 정적 검사(무비용)
 ```
-CI(`.github/workflows/ci.yml`): PR/main push마다 ruff + pytest(실 LLM 미호출).
+CI(`.github/workflows/ci.yml`): PR/main push마다 **4잡** — ruff+pytest(커버리지 하한 90%)·
+gitleaks·pip-audit·docker build. 실 LLM 미호출. main 브랜치 보호에 4개 모두 required check
+(⚠️ 잡 `name:` 을 바꾸면 브랜치 보호 설정도 함께 갱신해야 한다).
+⚠️ 로컬 `.env` 에 `WORKFLOW_MODE=parallel` 이 있으면 직렬을 가정한 테스트 1건이 실패한다
+(CI 는 `WORKFLOW_MODE=serial` 을 명시한다).
