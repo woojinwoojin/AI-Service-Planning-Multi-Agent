@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 
-from app.api.errors import COMMON_ERROR_RESPONSES, register_error_handlers
+from app.api.errors import COMMON_ERROR_RESPONSES, error_payload, register_error_handlers
 from app.api.routes import router
-from app.services import demo
+from app.services import demo, public_guard
 from app.services.migrate import STATE_VERSION
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -41,6 +41,25 @@ app = FastAPI(
 register_error_handlers(app)   # 통일 오류 응답 형식(Phase 5)
 # 모든 라우트에 공통 오류 응답(422·500) 스키마를 OpenAPI 에 노출한다.
 app.include_router(router, responses=COMMON_ERROR_RESPONSES)
+
+
+@app.middleware("http")
+async def _public_limits(request: Request, call_next):
+    """공개 배포용 요청 상한(트랙 E). **기본은 비활성**이라 로컬·CI 동작은 그대로다.
+
+    LLM 을 실제로 태우는 경로(`/run`·`/run/stream`·`/revise`)에만 적용한다. 조회·내보내기는
+    비용이 없으므로 막지 않는다 — 참가자가 자기 결과를 다시 보는 것까지 막으면 테스트가 망가진다.
+
+    거절은 **429 + 통일 오류 봉투**로 내보내고, 사유 문장에 '무엇에 걸렸고 언제 풀리는지'를
+    담는다(막혔다는 사실만 알려주면 참가자는 고장으로 오해한다).
+    """
+    if request.url.path in public_guard.GUARDED_PATHS and public_guard.enabled():
+        ip = public_guard.client_ip(
+            request.headers, request.client.host if request.client else "")
+        allowed, reason = public_guard.check(ip)
+        if not allowed:
+            return JSONResponse(status_code=429, content=error_payload(429, reason))
+    return await call_next(request)
 
 
 @app.get("/")
