@@ -19,6 +19,9 @@ _origin: contextvars.ContextVar = contextvars.ContextVar("timing_origin", defaul
 
 # 분석 병렬 구간(Research 이후 독립 4분기의 6개 노드)
 ANALYSIS_NODES = ("competitor", "customer", "pestel", "swot", "business_model", "risk")
+# KOSENA M1 구간(체크포인트 3) — 분석 블록과 draft 사이의 **순차** 2노드.
+# 병렬 실행에서도 순차라 span 이 아니라 duration 합이 맞다.
+KOSENA_NODES = ("kosena_industry", "kosena_model", "kosena_research", "kosena_roadmap")
 
 
 def start() -> None:
@@ -73,6 +76,13 @@ def summarize(events: list[dict], mode: str, wall_time_ms: float | None = None) 
     if analysis:
         stages["analysis_block"] = round(
             max(a["ended_at_ms"] for a in analysis) - min(a["started_at_ms"] for a in analysis), 1)
+
+    # KOSENA M1 구간(체크포인트 3). 분석 블록과 draft 사이의 **순차** 2노드다.
+    # 새 노드를 여기 빠뜨리면 그 시간이 어느 stage 에도 안 잡혀 coverage 가 떨어지고 병목이
+    # 가려진다 — PR-7 의 section_revise 에서 같은 실수를 이미 한 번 했다(아래 주석 참고).
+    kosena_nodes = [by_node[n] for n in KOSENA_NODES if n in by_node]
+    if kosena_nodes:
+        stages["kosena_block"] = round(sum(k["duration_ms"] for k in kosena_nodes), 1)
 
     if "draft" in by_node:
         stages["draft"] = by_node["draft"]["duration_ms"]

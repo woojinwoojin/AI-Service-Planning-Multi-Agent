@@ -204,9 +204,19 @@ def test_run_records_kosena_compliance(monkeypatch):
     state = run_workflow({"project_name": "KOSENA", "problem": "P"})
     r = state["kosena_compliance"]
     assert r["total"] == len(kosena.REQUIREMENTS)
-    # 현재 파이프라인은 PESTEL 만 온전히 충족한다 — 이 사실이 리포트에 그대로 나와야 한다.
-    assert _by_id(r, "pestel_6")["status"] == kosena.OK
-    assert _by_id(r, "lean_canvas_9")["status"] == kosena.MISSING
+
+    # 생성 Agent 가 붙은 모듈(M1·M2·M3)은 전부 충족이어야 한다.
+    for module in ("M1", "M2", "M3"):
+        rows = [c for c in r["checks"] if c["module"] == module]
+        assert all(c["status"] == kosena.OK for c in rows), \
+            (module, [c["title"] for c in rows if c["status"] != kosena.OK])
+
+    # 남은 미충족을 **집합으로 고정**한다. 항목별 단언을 늘어놓으면 진척이 생길 때마다
+    # 테스트가 깨져서 매번 손봐야 한다(실제로 두 번 겪었다). 여기서는
+    # '무엇이 아직 안 됐는지'가 바뀌는 순간에만 실패하게 둔다.
+    # sources_cited 는 더미가 웹검색을 하지 않아 미충족이다(실 LLM 에서는 충족).
+    assert set(r["unmet"]) == {"sources_cited", "ai_usage_log",
+                               "hypothesis_labeling", "doc_length"}
 
 
 def test_old_record_gets_compliance_on_read(tmp_path, monkeypatch):
