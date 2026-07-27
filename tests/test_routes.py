@@ -262,3 +262,48 @@ def test_demo_fail_injection_ignored_when_disabled(client, monkeypatch):
     }).json()
     assert "customer" not in d["fallback_reasons"]               # 주입되지 않음
     assert "risk" not in d["fallback_reasons"]
+
+
+# ---- KOSENA 산출물이 응답으로 나오는가 (체크포인트 3) ----
+
+def test_run_response_exposes_kosena_outputs(client):
+    """저장·JSON 내보내기에는 있었지만 **응답에 없어서** 화면에서 볼 수 없었다.
+
+    내부 구현이 있어도 사용자·평가자에게 보이지 않으면 구현 여부를 알아볼 수 없다.
+    """
+    d = client.post("/run", json={"project_name": "노출", "problem": "P"}).json()
+    assert d["kosena_plan"] and d["kosena_deck"]
+    assert d["ai_usage_log"] and d["kosena"]
+    comp = d["kosena_compliance"]
+    assert comp["total"] == 28 and comp["data_source"] == "dummy"
+    # 문서에 실린 준수율이 응답의 준수율과 같아야 한다(순환 의존 수정의 계약).
+    assert comp["summary"] in d["kosena_plan"]
+
+
+def test_kosena_outputs_survive_history_reload(client):
+    """이력에서 불러온 뒤에도 KOSENA 산출물이 그대로 있어야 화면 STEP 4 가 뜬다."""
+    pid = client.post("/run", json={"project_name": "재조회", "problem": "P"}).json()["project_id"]
+    st = client.get(f"/projects/{pid}").json()["state"]
+    assert st["kosena_plan"] and st["kosena_compliance"]["total"] == 28
+
+
+def test_ai_log_export_returns_markdown(client):
+    """AI 로그 별도 파일 첨부(KOSENA p4). 조립은 서버 한 곳(ai_log.to_markdown)에만 둔다."""
+    run = client.post("/run", json={"project_name": "로그", "problem": "P"}).json()
+    r = client.post("/export/ai-log",
+                    json={"project_name": "로그", "ai_usage_log": run["ai_usage_log"]})
+    assert r.status_code == 200
+    assert "text/markdown" in r.headers["content-type"]
+    body = r.content.decode("utf-8")
+    assert "# AI 활용 로그" in body and "kosena_research" in body
+
+
+def test_kosena_documents_export_through_the_existing_exporters(client):
+    """KOSENA 문서·발표자료는 markdown 을 받는 기존 익스포터를 그대로 쓴다(새 익스포터 없음)."""
+    run = client.post("/run", json={"project_name": "내보내기", "problem": "P"}).json()
+    docx = client.post("/export/docx",
+                       json={"project_name": "내보내기-KOSENA", "markdown": run["kosena_plan"]})
+    pptx = client.post("/export/pptx",
+                       json={"project_name": "내보내기-KOSENA", "markdown": run["kosena_deck"]})
+    assert docx.status_code == 200 and len(docx.content) > 10_000
+    assert pptx.status_code == 200 and len(pptx.content) > 10_000

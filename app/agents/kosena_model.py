@@ -27,6 +27,11 @@ LEAN_BLOCKS = ("problem", "customer_segments", "uvp", "solution", "channels",
 HMW_COUNT = 5
 IDEA_MIN = 25
 HYPOTHESIS_COUNT = 3
+# 발산 → 수렴(p9): 25개 이상 → **3개** → 1개. 중간의 3개 압축이 빠지면 25개에서 곧바로 1개로
+# 건너뛴 것이고, 그건 KOSENA 가 요구하는 수렴 과정이 아니다(무엇을 왜 버렸는지가 남지 않는다).
+SHORTLIST_COUNT = 3
+SHORTLIST_FIELDS = ("concept", "feasibility", "marketability", "differentiation",
+                    "selection_reason")
 
 
 def _strs(v, limit: int | None = None) -> list[str]:
@@ -50,15 +55,28 @@ def _validate(result: dict, fallback: dict) -> dict:
                          "validation": str(item.get("validation", "")),
                          "metric": str(item.get("metric", ""))})
 
+    # 압축 후보 3개. 개수가 모자라면 **복제해 채우지 않는다** — 준수 검사가 부분 충족으로
+    # 보고하는 편이, 같은 후보를 3개인 척 늘리는 것보다 정직하다.
+    shortlist = []
+    for item in (result.get("shortlisted_concepts") or [])[:SHORTLIST_COUNT]:
+        if isinstance(item, dict) and item.get("concept"):
+            shortlist.append({k: str(item.get(k, "")).strip() for k in SHORTLIST_FIELDS})
+
     concept = result.get("selected_concept")
     out = {
         "hmw": _strs(result.get("hmw"), HMW_COUNT),
         "ideas": _strs(result.get("ideas")),
+        "shortlisted_concepts": shortlist,
         "selected_concept": concept.strip() if isinstance(concept, str) else "",
         "lean_canvas": lean_canvas,
         "key_hypotheses": hyps,
     }
-    return out if any(out.values()) else dict(fallback)
+    if any(out.values()):
+        return out
+    # 실모드 폴백은 **비어 있다**(`llm.dummy_fallback`) — 실패한 호출의 더미 구조가 KOSENA 준수
+    # 검사를 충족으로 통과시키지 않도록. 그때는 `{}` 대신 **키를 갖춘 빈 결과**를 돌려준다.
+    # `{}` 를 내보내면 호출부 로그의 result[...] 접근이 KeyError 로 노드를 실패시킨다.
+    return dict(fallback) if fallback else out
 
 
 def _dummy() -> dict:
@@ -66,6 +84,10 @@ def _dummy() -> dict:
         "hmw": [f"[더미] 어떻게 하면 사용자가 상황 {i}에서 목표를 달성할 수 있을까?"
                 for i in range(1, HMW_COUNT + 1)],
         "ideas": [f"[더미] 아이디어 {i}" for i in range(1, IDEA_MIN + 1)],
+        "shortlisted_concepts": [
+            {"concept": f"[더미] 압축 후보 {i}", "feasibility": "[더미] 실현가능성 평가",
+             "marketability": "[더미] 시장성 평가", "differentiation": "[더미] 차별성 평가",
+             "selection_reason": "[더미] 남긴 이유"} for i in range(1, SHORTLIST_COUNT + 1)],
         "selected_concept": "[더미] 실현가능성·시장성·차별성 기준으로 선정한 최종 컨셉",
         "lean_canvas": {k: f"[더미] {k} 가설" for k in LEAN_BLOCKS},
         "key_hypotheses": [
@@ -82,7 +104,7 @@ def kosena_model(state: ProjectState) -> dict:
     # KSF·시사점은 같은 실행의 앞 KOSENA 노드가 넣어 둔 값이다(Artifact 가 아니라 state["kosena"]).
     prior = state.get("kosena") if isinstance(state.get("kosena"), dict) else {}
 
-    fallback = _dummy()
+    fallback = llm.dummy_fallback(_dummy())
     si = state.get("structured_input", {})
     user = (
         "아래 결과를 근거로 아이디어 발산·수렴과 Lean Canvas 를 작성하세요.\n"
@@ -101,5 +123,7 @@ def kosena_model(state: ProjectState) -> dict:
     mode = llm.mode_label(status, state.get("model", ""))
     logs = [f"[kosena_model] 비즈니스 모델 설계 완료 ({mode}, Lean Canvas "
             f"{len(result['lean_canvas'])}/9 · HMW {len(result['hmw'])}/{HMW_COUNT} · "
-            f"아이디어 {len(result['ideas'])}/{IDEA_MIN}+)"]
+            f"아이디어 {len(result['ideas'])}/{IDEA_MIN}+ → 압축 "
+            f"{len(result['shortlisted_concepts'])}/{SHORTLIST_COUNT} → 컨셉 "
+            f"{'1' if result['selected_concept'] else '0'})"]
     return {"kosena": result, "logs": logs}

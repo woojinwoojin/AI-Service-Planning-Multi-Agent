@@ -25,7 +25,14 @@ AI 파이프라인은 이를 만들 수 없다. 지어내면 KOSENA 원칙(정�
 """
 from __future__ import annotations
 
+import json
+
 from app.schemas import artifact
+
+# Agent 의 `_dummy()` 가 붙이는 표식. 준수율은 "방법론을 지켰다"는 주장이므로, 그 주장이 지어낸
+# 내용 위에 서면 안 된다. `llm.is_dummy()` 를 보지 않고 **내용**을 보는 이유는 저장된 기록을
+# 나중에 다시 판정할 때도 같은 답이 나와야 하기 때문이다(그때 프로세스는 실모드일 수 있다).
+_DUMMY_MARK = "[더미]"
 
 # 본문 분량 추정용 — **줄 수 기준**이다. 글자 수로 세면 표가 많은 문서에서 크게 빗나간다:
 # 표 한 행은 글자 수가 적어도 렌더링에서는 한 줄을 온전히 차지한다(실측한 KOSENA 산출물은
@@ -147,12 +154,20 @@ def _c_implications_3(c):
 
 
 def _c_hmw(c):
+    """HMW 5개 → 아이디어 25개 이상 → **압축 3개** → 최종 컨셉 1개(p9).
+
+    중간의 3개 압축을 함께 본다. 이것이 없으면 25개에서 곧바로 1개로 건너뛴 것이고, 무엇을 왜
+    버렸는지가 남지 않는다 — KOSENA 가 요구하는 수렴 과정이 아니다. 별도 항목으로 세지 않고
+    이 항목 안에서 판정하는 이유는, 같은 '아이디에이션' 요구의 한 단계이기 때문이다.
+    """
     k = c["kosena"]
     hmw, ideas = _n(k.get("hmw")), _n(k.get("ideas"))
-    if hmw >= 5 and ideas >= 25 and k.get("selected_concept"):
-        return OK, f"HMW {hmw}개 · 아이디어 {ideas}개 · 컨셉 선정"
-    if hmw or ideas:
-        return PARTIAL, f"HMW {hmw}/5 · 아이디어 {ideas}/25 · 컨셉 {'있음' if k.get('selected_concept') else '없음'}"
+    short = _n(k.get("shortlisted_concepts"))
+    if hmw >= 5 and ideas >= 25 and short == 3 and k.get("selected_concept"):
+        return OK, f"HMW {hmw}개 · 아이디어 {ideas}개 → 압축 3개 → 컨셉 1개"
+    if hmw or ideas or short:
+        return PARTIAL, (f"HMW {hmw}/5 · 아이디어 {ideas}/25 · 압축 {short}/3 · "
+                         f"컨셉 {'있음' if k.get('selected_concept') else '없음'}")
     return MISSING, "없음"
 
 
@@ -223,8 +238,19 @@ def _c_competitors_321(c):
 
 
 def _c_comparison_10(c):
-    n = _n(c["kosena"].get("comparison_criteria"))
-    return (OK, f"{n}개 항목") if n >= 10 else (PARTIAL, f"{n}/10 항목") if n else (MISSING, "없음")
+    """비교 항목 10개 이상 **+ 실제 비교표**(p14).
+
+    `comparison_criteria` 는 기준 목록이다 — 기준만 10개 나열하고 경쟁사별 값이 없으면 그건
+    비교표가 아니다. 과제 기대 결과물에 '경쟁사 비교표'가 명시돼 있어, 기준만으로 충족을 주면
+    평가자가 볼 때 빠진 것으로 판단한다. 별도 항목으로 세지 않고 여기서 함께 판정한다.
+    """
+    k = c["kosena"]
+    n, rows = _n(k.get("comparison_criteria")), _n(k.get("competitor_comparison"))
+    if n >= 10 and rows >= 2:
+        return OK, f"기준 {n}개 · 비교표 {rows}행"
+    if n or rows:
+        return PARTIAL, f"기준 {n}/10 · 비교표 {rows}행({'값 없음' if not rows else '2행 이상 필요'})"
+    return MISSING, "없음"
 
 
 def _c_positioning_map(c):
@@ -300,16 +326,52 @@ def _c_wireframe(c):
 
 
 def _c_sources(c):
+    """실행 전체에 인용된 출처가 있는가.
+
+    **범위를 분명히 해 둔다 — 이건 '각 KOSENA 주장별 출처 검증'이 아니다.** 레지스트리에 URL 이
+    있는지만 본다. 그래서 Research Agent 가 출처 5건을 모았지만 TAM/SAM/SOM 이나 경쟁사 정보에
+    직접 연결된 근거는 없는 상태에서도 이 항목은 충족이 된다. 주장 단위 연결은 14섹션 기획서
+    쪽에서 `verify` 가 `evidence_ids` 로 하고 있고, KOSENA 산출물 필드별 연결은 아직 없다.
+
+    발표·문서에서 이 항목을 '주장별 출처 검증'으로 말하면 과장이다. detail 문구가 그 경계를
+    직접 적는다(사람이 보고서만 봐도 범위를 알 수 있어야 한다).
+    """
     n = len([e for e in (c["state"].get("evidence_registry") or []) if isinstance(e, dict) and e.get("url")])
-    return (OK, f"출처 {n}건") if n else (MISSING, "인용된 출처 없음")
+    if not n:
+        return MISSING, "인용된 출처 없음"
+    linked = len([e for e in c["state"]["evidence_registry"]
+                  if isinstance(e, dict) and e.get("used_by_claims")])
+    return OK, (f"출처 {n}건(주장 연결 {linked}건) — 실행 전체의 출처 존재 검사이며 "
+                f"KOSENA 산출물 항목별 근거 연결은 미구현")
 
 
 def _c_ai_log(c):
-    n = _n(c["state"].get("ai_usage_log"))
-    if n:
-        return OK, f"{n}건"
-    # 재료는 이미 있다 — Artifact 의 owner_agent·depends_on·status + reviewer 판정.
-    return MISSING, f"전용 로그 없음(재료: artifacts {_n(c['state'].get('artifacts'))}건·logs 존재)"
+    """AI 활용 로그가 **프롬프트·입력·응답·검증·채택 여부를 실제로 담고 있는가**(p4).
+
+    배열이 하나라도 있으면 충족으로 보던 검사였다. 그런데 KOSENA 노드의 항목은 `inputs: []` ·
+    `output: {"artifact": None}` 이라 "프롬프트 템플릿 있음 · 채택 Yes" 뿐이었고, 그걸로는
+    KOSENA 가 요구하는 5가지를 남겼다고 말할 수 없다. 그래서 항목의 **내용**을 본다.
+    """
+    entries = c["state"].get("ai_usage_log")
+    n = _n(entries)
+    if not n:
+        # 재료는 이미 있다 — Artifact 의 owner_agent·depends_on·status + reviewer 판정.
+        return MISSING, f"전용 로그 없음(재료: artifacts {_n(c['state'].get('artifacts'))}건·logs 존재)"
+
+    def _complete(e) -> bool:
+        if not isinstance(e, dict):
+            return False
+        out = e.get("output") or {}
+        return bool((e.get("prompt") or {}).get("template")
+                    and e.get("inputs")
+                    and (out.get("artifact") or out.get("produced_fields"))
+                    and (e.get("verification") or {}).get("status")
+                    and "adopted" in e)
+
+    full = sum(1 for e in entries if _complete(e))
+    if full == n:
+        return OK, f"{n}건 · 전부 프롬프트·입력·산출·검증·채택 기록"
+    return PARTIAL, f"{n}건 중 {full}건만 5항목(프롬프트·입력·산출·검증·채택) 완비"
 
 
 def _submission_doc(c) -> str:
@@ -349,57 +411,76 @@ def _c_doc_length(c):
 
 # 요구사항 명세 — 순서는 PDF 모듈 순. `page` 는 근거 쪽수(원문 대조용).
 REQUIREMENTS: list[dict] = [
-    {"id": "pestel_6", "module": "M1", "title": "PESTEL 6영역", "page": 7, "check": _c_pestel_6},
-    {"id": "pestel_critical_top3", "module": "M1", "title": "Critical Uncertainties Top 3",
+    {"id": "pestel_6", "nodes": ("pestel",), "module": "M1", "title": "PESTEL 6영역", "page": 7, "check": _c_pestel_6},
+    {"id": "pestel_critical_top3", "nodes": ("pestel", "kosena_industry"), "module": "M1", "title": "Critical Uncertainties Top 3",
      "page": 7, "check": _c_pestel_critical},
-    {"id": "frameworks_2", "module": "M1", "title": "Porter/SWOT/Value Chain 중 2개 이상",
+    {"id": "frameworks_2", "nodes": ("swot", "kosena_industry"), "module": "M1", "title": "Porter/SWOT/Value Chain 중 2개 이상",
      "page": 8, "check": _c_frameworks_2},
-    {"id": "ksf_5", "module": "M1", "title": "KSF 5개", "page": 8, "check": _c_ksf_5},
-    {"id": "implications_3", "module": "M1", "title": "설계 시사점 3가지", "page": 8,
+    {"id": "ksf_5", "nodes": ("kosena_industry",), "module": "M1", "title": "KSF 5개", "page": 8, "check": _c_ksf_5},
+    {"id": "implications_3", "nodes": ("kosena_industry",), "module": "M1", "title": "설계 시사점 3가지", "page": 8,
      "check": _c_implications_3},
-    {"id": "hmw_ideation", "module": "M1", "title": "HMW 5개 · 아이디어 25+ · 컨셉 선정",
-     "page": 9, "check": _c_hmw},
-    {"id": "lean_canvas_9", "module": "M1", "title": "Lean Canvas 9블록", "page": 10,
+    {"id": "hmw_ideation", "nodes": ("kosena_model",), "module": "M1",
+     "title": "HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개", "page": 9, "check": _c_hmw},
+    {"id": "lean_canvas_9", "nodes": ("kosena_model",), "module": "M1", "title": "Lean Canvas 9블록", "page": 10,
      "check": _c_lean_canvas},
-    {"id": "key_hypotheses_3", "module": "M1", "title": "핵심 가설 3개", "page": 10,
+    {"id": "key_hypotheses_3", "nodes": ("kosena_model",), "module": "M1", "title": "핵심 가설 3개", "page": 10,
      "check": _c_hypotheses_3},
-    {"id": "personas_2", "module": "M2", "title": "페르소나 2종 × 필수 5항목", "page": 12,
+    {"id": "personas_2", "nodes": ("kosena_research",), "module": "M2", "title": "페르소나 2종 × 필수 5항목", "page": 12,
      "check": _c_personas_2},
-    {"id": "cjm", "module": "M2", "title": "CJM 5단계 × 4항목 + Opportunity", "page": 12,
+    {"id": "cjm", "nodes": ("kosena_research",), "module": "M2", "title": "CJM 5단계 × 4항목 + Opportunity", "page": 12,
      "check": _c_cjm},
-    {"id": "tam_sam_som", "module": "M2", "title": "TAM·SAM·SOM", "page": 13,
+    {"id": "tam_sam_som", "nodes": ("kosena_research",), "module": "M2", "title": "TAM·SAM·SOM", "page": 13,
      "check": _c_tam_sam_som},
-    {"id": "sizing_cross_check", "module": "M2", "title": "Top-down · Bottom-up 교차검증",
+    {"id": "sizing_cross_check", "nodes": ("kosena_research",), "module": "M2", "title": "Top-down · Bottom-up 교차검증",
      "page": 13, "check": _c_sizing_cross},
-    {"id": "competitors_3_2_1", "module": "M2", "title": "경쟁사 직접3·간접2·잠재1", "page": 14,
+    {"id": "competitors_3_2_1", "nodes": ("kosena_research",), "module": "M2", "title": "경쟁사 직접3·간접2·잠재1", "page": 14,
      "check": _c_competitors_321},
-    {"id": "comparison_criteria_10", "module": "M2", "title": "비교 항목 10개 이상", "page": 14,
-     "check": _c_comparison_10},
-    {"id": "positioning_map", "module": "M2", "title": "2축 포지셔닝 맵", "page": 14,
+    {"id": "comparison_criteria_10", "nodes": ("kosena_research",), "module": "M2",
+     "title": "비교 항목 10개 이상 + 경쟁사 비교표", "page": 14, "check": _c_comparison_10},
+    {"id": "positioning_map", "nodes": ("kosena_research",), "module": "M2", "title": "2축 포지셔닝 맵", "page": 14,
      "check": _c_positioning_map},
-    {"id": "vpc", "module": "M2", "title": "VPC 6영역 + Fit", "page": 15, "check": _c_vpc},
-    {"id": "core_features_5_7", "module": "M2", "title": "핵심 기능 5~7개", "page": 15,
+    {"id": "vpc", "nodes": ("kosena_roadmap",), "module": "M2", "title": "VPC 6영역 + Fit", "page": 15, "check": _c_vpc},
+    {"id": "core_features_5_7", "nodes": ("kosena_roadmap",), "module": "M2", "title": "핵심 기능 5~7개", "page": 15,
      "check": _c_core_features},
-    {"id": "use_cases_3", "module": "M2", "title": "Use Case 3종", "page": 15,
+    {"id": "use_cases_3", "nodes": ("kosena_roadmap",), "module": "M2", "title": "Use Case 3종", "page": 15,
      "check": _c_use_cases_3},
-    {"id": "moscow", "module": "M3", "title": "MOSCOW 4구분(Won't 명시)", "page": 17,
+    {"id": "moscow", "nodes": ("kosena_roadmap",), "module": "M3", "title": "MOSCOW 4구분(Won't 명시)", "page": 17,
      "check": _c_moscow},
-    {"id": "kano", "module": "M3", "title": "Kano 3분류", "page": 17, "check": _c_kano},
-    {"id": "mvp_scope", "module": "M3", "title": "MVP 범위", "page": 17, "check": _c_mvp},
-    {"id": "epic_story_ac", "module": "M3", "title": "Epic-Story-AC (Given-When-Then)",
+    {"id": "kano", "nodes": ("kosena_roadmap",), "module": "M3", "title": "Kano 3분류", "page": 17, "check": _c_kano},
+    {"id": "mvp_scope", "nodes": ("kosena_roadmap",), "module": "M3", "title": "MVP 범위", "page": 17, "check": _c_mvp},
+    {"id": "epic_story_ac", "nodes": ("kosena_roadmap",), "module": "M3", "title": "Epic-Story-AC (Given-When-Then)",
      "page": 18, "check": _c_epic_story_ac},
-    {"id": "milestones_kpi", "module": "M3", "title": "마일스톤 · KPI", "page": 3,
+    {"id": "milestones_kpi", "nodes": ("kosena_roadmap",), "module": "M3", "title": "마일스톤 · KPI", "page": 3,
      "check": _c_milestones_kpi},
-    {"id": "wireframes", "module": "M3", "title": "와이어프레임 2~3개 화면", "page": 5,
+    {"id": "wireframes", "nodes": ("kosena_roadmap",), "module": "M3", "title": "와이어프레임 2~3개 화면", "page": 5,
      "check": _c_wireframe},
-    {"id": "sources_cited", "module": "공통", "title": "출처 명시", "page": 4, "check": _c_sources},
-    {"id": "ai_usage_log", "module": "공통", "title": "AI 활용 로그(프롬프트·응답·채택 여부)",
+    {"id": "sources_cited", "nodes": ("research",), "module": "공통",
+     "title": "출처 명시 (실행 전체 · 항목별 연결 아님)", "page": 4, "check": _c_sources},
+    {"id": "ai_usage_log", "nodes": (), "module": "공통", "title": "AI 활용 로그(프롬프트·응답·채택 여부)",
      "page": 4, "check": _c_ai_log},
-    {"id": "hypothesis_labeling", "module": "공통", "title": "정량 주장의 가설·추정 표기",
+    {"id": "hypothesis_labeling", "nodes": (), "module": "공통", "title": "정량 주장의 가설·추정 표기",
      "page": 4, "check": _c_hypothesis_labeling},
-    {"id": "doc_length", "module": "공통", "title": "본문 A4 30~50쪽", "page": 4,
+    {"id": "doc_length", "nodes": (), "module": "공통", "title": "본문 A4 30~50쪽", "page": 4,
      "check": _c_doc_length},
 ]
+
+
+def _provenance(state: dict, c: dict) -> tuple[str, str]:
+    """이 준수율이 **어떤 데이터 위에서 나온 것인가**. (출처, 경고문구) 를 돌려준다.
+
+    구조 검사만으로는 '실제 분석 결과'와 '구조만 완전한 더미'를 구분할 수 없다. 그래서 판정
+    자체에 출처를 박아 넣는다 — 그러지 않으면 더미 실행의 준수율 캡처가 실행 성과처럼 읽힌다.
+
+    실모드에서 LLM 이 실패하면 산출물이 비므로(`llm.dummy_fallback`) 항목이 자연히 미충족·부분
+    으로 떨어진다. 그래도 어느 단계가 폴백됐는지는 함께 밝힌다.
+    """
+    dumped = json.dumps(c["kosena"], ensure_ascii=False, default=str)
+    fb = sorted(n for n in (state.get("fallback_nodes") or []) if str(n).startswith("kosena"))
+    if _DUMMY_MARK in dumped:
+        return "dummy", " · ⚠️ 더미 데이터 기준(실 LLM 결과 아님)"
+    if fb:
+        return "fallback", f" · ⚠️ LLM 실패로 폴백된 단계 있음({', '.join(fb)})"
+    return "real", ""
 
 
 def evaluate(state: dict) -> dict:
@@ -410,15 +491,24 @@ def evaluate(state: dict) -> dict:
          "checks": [{id, module, title, page, status, detail}],
          "by_module": {"M1": {ok,partial,missing}, ...},
          "unmet": [id...],            # partial + missing (무엇을 더 해야 하는지)
-         "summary": "..."}            # 문서·UI 에 그대로 실을 한 줄
+         "data_source": "real|dummy|fallback",   # 이 준수율이 선 데이터의 성격
+         "summary": "..."}            # 문서·UI 에 그대로 실을 한 줄(출처 경고 포함)
     """
     c = _ctx(state)
+    # 이 항목의 재료를 만든 노드가 실패·폴백했는가. 그러면 구조가 채워져 있어도 충족이라고
+    # 말할 수 없다 — 기존 분석 Agent(pestel 등)는 실모드 실패에도 자기 더미로 폴백하므로
+    # `pestel_6` 같은 항목이 '6개 영역'으로 ok 가 됐다. 실패한 호출 위의 준수율은 허위다.
+    broken = set(state.get("fallback_nodes") or []) | set(state.get("failed_nodes") or []) \
+        if isinstance(state, dict) else set()
     checks: list[dict] = []
     for spec in REQUIREMENTS:
         try:
             status, detail = spec["check"](c)
         except Exception as exc:                       # 검사 하나가 죽어도 리포트는 나와야 한다
             status, detail = MISSING, f"검사 오류: {type(exc).__name__}"
+        if status == OK and (hit := broken.intersection(spec.get("nodes") or ())):
+            status = PARTIAL
+            detail = f"{detail} — 단, {', '.join(sorted(hit))} 가 실패·폴백해 충족으로 보지 않음"
         checks.append({"id": spec["id"], "module": spec["module"], "title": spec["title"],
                        "page": spec["page"], "status": status, "detail": detail})
 
@@ -427,14 +517,16 @@ def evaluate(state: dict) -> dict:
     for x in checks:
         m = by_module.setdefault(x["module"], {OK: 0, PARTIAL: 0, MISSING: 0})
         m[x["status"]] += 1
+    source, caveat = _provenance(state if isinstance(state, dict) else {}, c)
     return {
         "total": len(checks),
         "ok": counts[OK], "partial": counts[PARTIAL], "missing": counts[MISSING],
         "checks": checks,
         "by_module": by_module,
         "unmet": [x["id"] for x in checks if x["status"] != OK],
+        "data_source": source,
         "summary": (f"KOSENA 준수 {counts[OK]}/{len(checks)} 충족 · "
-                    f"부분 {counts[PARTIAL]} · 미충족 {counts[MISSING]}"),
+                    f"부분 {counts[PARTIAL]} · 미충족 {counts[MISSING]}{caveat}"),
     }
 
 

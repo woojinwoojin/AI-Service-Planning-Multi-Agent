@@ -139,6 +139,25 @@ def is_dummy() -> bool:
     return True
 
 
+def dummy_fallback(dummy: dict) -> dict:
+    """더미 결과를 **더미 모드에서만** 폴백으로 쓴다. 실모드 실패의 폴백은 빈 결과다.
+
+    더미 결과는 검사를 통과할 만큼 구조가 완전하다(예: HMW 5개 · 아이디어 25개 · Lean Canvas
+    9블록). 그래서 실 LLM 호출이 실패했는데 그 구조가 그대로 결과로 들어가면, 구조를 보는
+    KOSENA 준수 검사가 **충족으로 판정**한다. 즉 다음이 가능했다:
+
+        실 LLM 실패 → [더미] 데이터 폴백 → KOSENA 28개 항목 대부분 충족
+
+    준수율은 방법론을 지켰다는 주장이므로, 그 주장이 실패한 호출 위에 서면 안 된다. 실모드에서는
+    빈 결과를 돌려 **없는 것을 없다고** 보고하게 한다(`_validate` 가 키는 유지한다).
+
+    더미 모드에서는 그대로 더미를 쓴다 — 키 없이도 배선·검사를 관통 확인해야 하고, 그 실행은
+    `run_status=degraded` 와 로그의 '더미' 표기로 이미 정직하게 구분된다. 더미 내용이 준수율을
+    채우는 문제는 `kosena.evaluate` 가 `[더미]` 표식을 보고 별도로 낮춘다.
+    """
+    return dummy if is_dummy() else {}
+
+
 def _get_model(model: str = ""):
     """설정된 provider에 맞는 LangChain chat model 반환.
 

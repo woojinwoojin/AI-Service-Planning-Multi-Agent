@@ -28,19 +28,58 @@ from __future__ import annotations
 from app.prompts import templates
 from app.schemas import artifact
 
-# 노드 → (역할, system 프롬프트 상수명). Artifact 를 내지 않는 문서·검토 단계용.
-# Artifact 를 내는 7개 Agent 는 LEGACY_ARTIFACT_SPECS 에서 자동으로 뽑는다(두 곳에 적지 않는다).
-_DOC_NODES: list[tuple[str, str, str]] = [
-    ("kosena_industry", "산업 분석 전략가", "KOSENA_INDUSTRY_SYSTEM"),
-    ("kosena_model", "린 스타트업 코치", "KOSENA_MODEL_SYSTEM"),
-    ("kosena_research", "데이터 기반 서비스 기획자", "KOSENA_RESEARCH_SYSTEM"),
-    ("kosena_roadmap", "프로덕트 오너", "KOSENA_ROADMAP_SYSTEM"),
-    ("research_gap", "근거 공백 보강 조사자", "RESEARCH_GAP_SYSTEM"),
-    ("draft", "기획서 작성자", "DRAFT_WRITER_SYSTEM"),
-    ("reviewer", "기획서 심사자", "REVIEWER_SYSTEM"),
-    ("polish", "일관성 편집자", "EDITOR_SYSTEM"),
-    ("final_reviewer", "최종본 심사자", "REVIEWER_SYSTEM"),
-    ("verify", "근거 일치성 검증자", "VERIFY_SYSTEM"),
+# Artifact 를 내지 않는 문서·검토·KOSENA 단계. Artifact 를 내는 7개 Agent 는
+# LEGACY_ARTIFACT_SPECS 에서 자동으로 뽑는다(두 곳에 적지 않는다).
+#
+# **`inputs`·`produces` 를 왜 손으로 적는가.** 이 노드들은 Artifact 를 내지 않으므로
+# `depends_on`(입력)도 `content`(응답)도 없다. 그래서 예전에는 `inputs: []` ·
+# `output: {"artifact": None}` 으로 비어 있었고, KOSENA Agent 4종의 로그가 사실상
+# "프롬프트 템플릿 있음 · 채택 Yes" 뿐이었다 — 그걸로는 KOSENA 가 요구하는
+# *프롬프트 + 입력 + 응답 + 채택 여부*(p4)를 남겼다고 말할 수 없다.
+#
+# 값은 각 노드의 `artifact.read(...)` 호출과 `_validate()` 출력 키에서 그대로 옮긴 것이고,
+# 드리프트는 테스트로 막는다(`produces` 합집합이 실제 `state["kosena"]` 키를 덮는지 확인).
+_DOC_NODES: list[dict] = [
+    {"node": "kosena_industry", "role": "산업 분석 전략가", "prompt": "KOSENA_INDUSTRY_SYSTEM",
+     "inputs": ["pestel_analysis", "research_analysis", "competitor_analysis", "swot_analysis"],
+     "state_key": "kosena",
+     "produces": ["critical_uncertainties", "porter", "value_chain", "ksf", "implications"]},
+    {"node": "kosena_model", "role": "린 스타트업 코치", "prompt": "KOSENA_MODEL_SYSTEM",
+     "inputs": ["research_analysis", "customer_analysis", "business_model_analysis",
+                "kosena.ksf", "kosena.implications"],
+     "state_key": "kosena",
+     "produces": ["hmw", "ideas", "shortlisted_concepts", "selected_concept", "lean_canvas",
+                  "key_hypotheses"]},
+    {"node": "kosena_research", "role": "데이터 기반 서비스 기획자",
+     "prompt": "KOSENA_RESEARCH_SYSTEM",
+     "inputs": ["research_analysis", "customer_analysis", "competitor_analysis"],
+     "state_key": "kosena",
+     "produces": ["personas", "cjm", "market_sizing", "competitor_groups",
+                  "comparison_criteria", "competitor_comparison", "positioning_map"]},
+    {"node": "kosena_roadmap", "role": "프로덕트 오너", "prompt": "KOSENA_ROADMAP_SYSTEM",
+     "inputs": ["customer_analysis", "business_model_analysis", "risk_analysis",
+                "kosena.lean_canvas", "kosena.personas"],
+     "state_key": "kosena",
+     "produces": ["vpc", "core_features", "use_cases", "moscow", "kano", "mvp_scope",
+                  "epics", "milestones", "kpis", "wireframes"]},
+    {"node": "research_gap", "role": "근거 공백 보강 조사자", "prompt": "RESEARCH_GAP_SYSTEM",
+     "inputs": ["evidence_gaps"], "state_key": "evidence_registry",
+     "produces": ["evidence_registry", "dynamic_research"]},
+    {"node": "draft", "role": "기획서 작성자", "prompt": "DRAFT_WRITER_SYSTEM",
+     "inputs": ["research_analysis", "competitor_analysis", "customer_analysis",
+                "swot_analysis", "business_model_analysis", "risk_analysis", "pestel_analysis"],
+     "state_key": "draft", "produces": ["draft"]},
+    {"node": "reviewer", "role": "기획서 심사자", "prompt": "REVIEWER_SYSTEM",
+     "inputs": ["draft"], "state_key": "review_result",
+     "produces": ["review_result", "initial_review_result"]},
+    {"node": "polish", "role": "일관성 편집자", "prompt": "EDITOR_SYSTEM",
+     "inputs": ["final_draft"], "state_key": "final_draft", "produces": ["final_draft"]},
+    {"node": "final_reviewer", "role": "최종본 심사자", "prompt": "REVIEWER_SYSTEM",
+     "inputs": ["final_draft"], "state_key": "final_review_result",
+     "produces": ["final_review_result", "best_version"]},
+    {"node": "verify", "role": "근거 일치성 검증자", "prompt": "VERIFY_SYSTEM",
+     "inputs": ["final_draft", "evidence_registry"], "state_key": "verification_result",
+     "produces": ["verification_result"]},
 ]
 
 # Artifact 를 내는 Agent 의 system 프롬프트 상수명.
@@ -81,6 +120,22 @@ def _adoption(state: dict, node: str, status: str) -> tuple[bool, str]:
     return True, ""
 
 
+def _produced(state: dict, spec: dict, status: str) -> list[str]:
+    """이 노드가 **실제로 채운** 필드만. 선언된 목록을 그대로 싣지 않는다.
+
+    선언을 그대로 베끼면 실패한 노드도 "10개 필드를 만들었다"고 적힌다. 로그의 값은 산출물이
+    있다는 주장이므로, State 에서 값이 실제로 있는 것만 남긴다. `kosena` 처럼 여러 노드가 한 키를
+    공유하는 경우도 필드 단위로 보면 누가 무엇을 냈는지 정확히 갈린다.
+    """
+    if status == artifact.STATUS_FAILED:
+        return []
+    key = spec["state_key"]
+    holder = state.get(key)
+    if key == "kosena" and isinstance(holder, dict):
+        return [f for f in spec["produces"] if holder.get(f)]
+    return [f for f in spec["produces"] if state.get(f)]
+
+
 def build(state: dict) -> list[dict]:
     """실행 State 에서 AI 활용 로그를 만든다(결정적·LLM 호출 없음).
 
@@ -104,7 +159,11 @@ def build(state: dict) -> list[dict]:
             "agent": spec["owner_agent"],
             "role": f"{spec['artifact_type']} 담당",
             "prompt": _prompt_info(_ARTIFACT_PROMPTS.get(spec["owner_agent"], "")),
-            "inputs": [by_id.get(d, d) for d in a.get("depends_on") or []],
+            # 입력은 `depends_on` 에서 온다. 파이프라인 첫 Agent(research)는 앞선 산출물이 없어
+            # 비는데, 그때 빈 배열을 남기면 "입력을 기록하지 않았다"로 읽힌다 — 실제 입력은
+            # 사용자 아이디어이고, 웹검색을 했으면 그것도 입력이다(근거 id 로 확인된다).
+            "inputs": [by_id.get(d, d) for d in a.get("depends_on") or []]
+                      or (["structured_input"] + (["web_search"] if a.get("evidence_ids") else [])),
             "output": {"artifact": spec["artifact_type"],
                        "target_sections": a.get("target_sections") or [],
                        "evidence_ids": a.get("evidence_ids") or []},
@@ -116,7 +175,8 @@ def build(state: dict) -> list[dict]:
     # 2) 문서·검토·KOSENA 단계 — Artifact 는 없지만 프롬프트·채택 판정은 있다.
     failed = set(state.get("failed_nodes") or [])
     fallback = set(state.get("fallback_nodes") or [])
-    for node, role, const in _DOC_NODES:
+    for spec in _DOC_NODES:
+        node = spec["node"]
         if node in failed:
             status = artifact.STATUS_FAILED
         elif node in fallback:
@@ -125,8 +185,13 @@ def build(state: dict) -> list[dict]:
             status = artifact.STATUS_COMPLETE
         adopted, note = _adoption(state, node, status)
         entries.append({
-            "agent": node, "role": role, "prompt": _prompt_info(const),
-            "inputs": [], "output": {"artifact": None},
+            "agent": node, "role": spec["role"], "prompt": _prompt_info(spec["prompt"]),
+            "inputs": list(spec["inputs"]),
+            # Artifact 가 없으므로 '어떤 State 키의 어떤 필드를 만들었는지'로 응답을 특정한다.
+            # 실패·폴백한 노드는 실제로 채운 필드만 남겨 '만들었다고 적혀 있는데 비어 있는'
+            # 로그가 되지 않게 한다.
+            "output": {"artifact": None, "state_key": spec["state_key"],
+                       "produced_fields": _produced(state, spec, status)},
             "verification": {"schema_validated": True, "status": status},
             "adopted": adopted, "note": note,
         })
@@ -140,8 +205,10 @@ def build(state: dict) -> list[dict]:
             "role": "기획서 재작성",
             "prompt": _prompt_info("REVISER_SYSTEM" if strategy == "full"
                                    else "SECTION_REVISER_SYSTEM"),
-            "inputs": ["review_result.issues"],
-            "output": {"artifact": None, "revised_sections": state.get("revised_section_ids") or []},
+            "inputs": ["review_result.issues", "final_draft"],
+            "output": {"artifact": None, "state_key": "final_draft",
+                       "produced_fields": ["final_draft"],
+                       "revised_sections": state.get("revised_section_ids") or []},
             "verification": {"schema_validated": True,
                              "status": artifact.STATUS_COMPLETE,
                              "reviewer_rescored": bool(state.get("final_review_result"))},
@@ -178,9 +245,14 @@ def to_markdown(entries: list[dict]) -> str:
     ]
     for e in entries:
         p = e.get("prompt") or {}
+        o = e.get("output") or {}
         five = "✅" if p.get("five_part_structure") else "—"
         inputs = ", ".join(e.get("inputs") or []) or "—"
-        art = (e.get("output") or {}).get("artifact") or "—"
+        # Artifact 를 내는 Agent 는 Artifact 이름으로, 그 외 노드는 실제로 채운 State 필드로
+        # 응답을 특정한다(둘 다 없으면 정직하게 '—').
+        produced = o.get("produced_fields") or []
+        art = o.get("artifact") or (
+            f"`{o.get('state_key')}`: {', '.join(produced)}" if produced else "—")
         out.append(
             f"| `{e['agent']}` | {e['role']} | `{p.get('template', '—')}` {five} | {inputs} "
             f"| {art} | {(e.get('verification') or {}).get('status', '')} "

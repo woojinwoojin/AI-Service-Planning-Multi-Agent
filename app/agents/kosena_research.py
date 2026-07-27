@@ -27,6 +27,12 @@ CJM_STAGES = ("인지", "고려", "구매", "사용", "재사용/이탈")
 CJM_ITEMS = ("action", "emotion", "pain_point", "touchpoint")
 CRITERIA_MIN = 10
 GROUP_SIZES = {"direct": 3, "indirect": 2, "potential": 1}
+# 경쟁사 비교표 열(p14). `comparison_criteria` 는 비교 **기준 목록**이라 그것만으로는 비교표가
+# 아니다 — 과제 기대 결과물에 '경쟁사 비교표'가 명시돼 있어 실제 값이 채워진 행이 필요하다.
+# 10개 기준을 전부 가로 열로 펴면 A4 에서 표가 넘치므로, 평가에 직접 쓰이는 8열만 고정하고
+# 나머지 기준은 `comparison_criteria` 목록으로 남긴다.
+COMPARISON_COLUMNS = ("name", "type", "features", "price", "ux", "target_user",
+                      "revenue_model", "strength", "weakness")
 
 
 def _strs(v, limit: int | None = None) -> list[str]:
@@ -106,9 +112,16 @@ def _validate(result: dict, fallback: dict) -> dict:
         "market_sizing": market_sizing,
         "competitor_groups": competitor_groups,
         "comparison_criteria": _strs(result.get("comparison_criteria")),
+        # 비교표는 개수를 자르지 않는다 — 경쟁사가 6곳이면 6행 + 자사 1행이 다 필요하다.
+        "competitor_comparison": _dicts(result.get("competitor_comparison"), COMPARISON_COLUMNS),
         "positioning_map": positioning_map,
     }
-    return out if any(out.values()) else dict(fallback)
+    if any(out.values()):
+        return out
+    # 실모드 폴백은 **비어 있다**(`llm.dummy_fallback`) — 실패한 호출의 더미 구조가 KOSENA 준수
+    # 검사를 충족으로 통과시키지 않도록. 그때는 `{}` 대신 **키를 갖춘 빈 결과**를 돌려준다.
+    # `{}` 를 내보내면 호출부 로그의 result[...] 접근이 KeyError 로 노드를 실패시킨다.
+    return dict(fallback) if fallback else out
 
 
 def _dummy() -> dict:
@@ -130,6 +143,14 @@ def _dummy() -> dict:
                               "indirect": ["[더미] 간접1", "[더미] 간접2"],
                               "potential": ["[더미] 잠재1"]},
         "comparison_criteria": [f"[더미] 비교항목 {i}" for i in range(1, CRITERIA_MIN + 1)],
+        "competitor_comparison": [
+            {"name": n, "type": t, "features": "[더미] 기능", "price": "[더미] 가격",
+             "ux": "[더미] UX", "target_user": "[더미] 대상", "revenue_model": "[더미] 수익모델",
+             "strength": "[더미] 강점", "weakness": "[더미] 약점"}
+            for n, t in (("[더미] 직접1", "direct"), ("[더미] 직접2", "direct"),
+                         ("[더미] 직접3", "direct"), ("[더미] 간접1", "indirect"),
+                         ("[더미] 간접2", "indirect"), ("[더미] 잠재1", "potential"),
+                         ("자사", "self"))],
         "positioning_map": {"x_axis": "가격", "y_axis": "기능",
                             "points": [{"name": "자사", "x": 4.0, "y": 8.0},
                                        {"name": "[더미] A", "x": 7.0, "y": 6.0}]},
@@ -142,7 +163,7 @@ def kosena_research(state: ProjectState) -> dict:
     customer = artifact.read(state, "customer_analysis")
     competitor = artifact.read(state, "competitor_analysis")
 
-    fallback = _dummy()
+    fallback = llm.dummy_fallback(_dummy())
     user = (
         "아래 결과를 근거로 고객 리서치와 시장 사이징을 수행하세요.\n"
         f"[아이디어]\n{json.dumps(state.get('structured_input', {}), ensure_ascii=False)}\n\n"
@@ -159,5 +180,6 @@ def kosena_research(state: ProjectState) -> dict:
     logs = [f"[kosena_research] 고객·시장 분석 완료 ({mode}, 페르소나 "
             f"{len(result['personas'])}/{PERSONA_COUNT} · CJM "
             f"{len(result['cjm'].get('stages', []))}/5 · 비교항목 "
-            f"{len(result['comparison_criteria'])}/{CRITERIA_MIN}+)"]
+            f"{len(result['comparison_criteria'])}/{CRITERIA_MIN}+ · 비교표 "
+            f"{len(result['competitor_comparison'])}행)"]
     return {"kosena": result, "logs": logs}

@@ -225,6 +225,13 @@
     </div>
   </section>
 
+  <!-- 4) KOSENA 산출물 — 산출물이 없는 옛 기록에서는 카드 자체를 숨긴다 -->
+  <section class="card hidden" id="kosenaCard">
+    <div class="step">STEP 4 · KOSENA 방법론 산출물</div>
+    <h2>KOSENA 기획서 · 준수 자체점검 · AI 활용 로그</h2>
+    <div id="kosenaBody"></div>
+  </section>
+
 </main>
 <script>
 let lastRun = null;
@@ -253,7 +260,33 @@ async function loadModels() {
   } catch (e) { sel.innerHTML = '<option value="">기본값</option>'; }
 }
 
-function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+// 화면에 실을 값을 문자열로 만든다. **한 필드의 형식 차이로 결과 화면이 통째로 사라지지 않게**
+// 하는 것이 목적이다 — 이전에는 esc() 가 곧바로 (s||"").replace 를 불러서, 문자열이 아닌 값이
+// 하나라도 오면 TypeError 로 renderResults 전체가 죽었다.
+//
+// 실측(gpt-4o-mini): 문자열 배열을 요구한 `research_result.competitors` 에 객체 배열
+// ([{name, features, ...}])이 돌아왔다. Agent 의 `_validate` 는 `isinstance(value, list)` 만
+// 보고 원소 타입은 검사하지 않아 그대로 통과하고, 화면의 listOf() 가 원소마다 inline() →
+// esc() 를 부르다 죽었다. 그 결과 "불러오기 실패: (s || \"\").replace is not a function" 로
+// **이력 불러오기와 실행 직후 결과 화면이 함께 사라졌다**(데모 경로 그대로).
+//
+// LLM 출력의 형식 흔들림은 완전히 막을 수 없으므로, 표시 계층에서 흡수한다.
+// (이름은 `displayText` 다 — 아래쪽 suggest 용 `asText` 와 겹치면 함수 선언 호이스팅으로
+//  나중 정의가 이겨서 이 함수가 조용히 덮인다. 실제로 한 번 그렇게 깨졌다.)
+function displayText(v) {
+  if (typeof v === "string") return v;
+  if (v === null || v === undefined || v === false) return "";
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map(displayText).filter(Boolean).join(", ");
+  if (typeof v === "object") {
+    // 객체는 대표 이름 필드를 우선 보여준다(경쟁사 {name, features…} 같은 형태).
+    const pick = v.name || v.title || v.description || v.text || v.claim || v.content;
+    if (pick) return displayText(pick);
+    return Object.entries(v).filter(([, x]) => x).map(([k, x]) => `${k}: ${displayText(x)}`).join(" · ");
+  }
+  return String(v);
+}
+function esc(s){ return displayText(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 // 출처 링크는 http/https 만 허용한다. HTML escape 만으로는 javascript:·data: URL을 막지 못한다.
 function safeUrl(u){ u=(u||"").trim(); return /^https?:\/\//i.test(u) ? u : "#"; }
 function inline(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>"); }
@@ -559,6 +592,79 @@ function renderFinal(md) {
     : "";
   document.getElementById("finalDoc").innerHTML = head + halluc + renderMarkdown(md) + disclaimer;
   document.getElementById("finalCard").classList.remove("hidden");
+}
+
+// KOSENA 산출물 카드(체크포인트 3). 산출물이 없는 실행·옛 기록에서는 카드를 숨긴다 —
+// 빈 표를 보여주면 '생성했는데 비었다'와 '이 실행에는 없다'를 구분할 수 없다.
+function renderKosena(d) {
+  const card = document.getElementById("kosenaCard");
+  const plan = (d && d.kosena_plan) || "", deck = (d && d.kosena_deck) || "";
+  const comp = (d && d.kosena_compliance) || {}, log = (d && d.ai_usage_log) || [];
+  if (!plan && !deck && !(comp.checks || []).length && !log.length) { card.classList.add("hidden"); return; }
+
+  const ST = {ok:["충족","#e6f4ea","#1e7a34"], partial:["부분","#fff3e0","#b45309"], missing:["미충족","#fde2e1","#b42318"]};
+  const stBadge = s => { const [t,bg,c]=ST[s]||["-","#eef1f5","#555"];
+    return `<span style="background:${bg};color:${c};border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">${t}</span>`; };
+  const checks = comp.checks || [];
+  // 정직 표기: 이 점검은 '구조·산출물 존재'를 보는 것이고 내용 타당성은 보지 않는다.
+  // 여기서 '품질 검증'이라고 쓰면 발표에서 그대로 과장으로 이어진다.
+  const scopeNote = `<div class="muted" style="font-size:12px;margin-bottom:8px">`
+    + `KOSENA 방법론이 요구하는 <b>필수 구조와 산출물의 존재 여부</b>를 코드로 결정적 점검한 결과입니다`
+    + `(LLM 판정 아님). 분석 내용의 타당성·프레임워크 간 일관성은 Reviewer와 사람 검토가 추가로 필요합니다.</div>`;
+  // 출처 경고: 준수율은 '방법론을 지켰다'는 주장이므로, 그 주장이 어떤 데이터 위에 섰는지 함께
+  // 보여야 한다. 이게 없으면 더미 실행의 캡처가 실행 성과처럼 읽힌다.
+  const SRC_MSG = {
+    dummy: "이 준수율은 <b>더미 데이터</b> 기준입니다(실 LLM 결과 아님). 배선·검사 관통 확인용이며 실행 성과가 아닙니다.",
+    fallback: "일부 단계가 <b>LLM 실패로 폴백</b>되었습니다. 해당 항목은 충족으로 판정하지 않습니다.",
+  };
+  const srcNotice = SRC_MSG[comp.data_source]
+    ? `<div class="notice" style="margin-bottom:10px">⚠ ${SRC_MSG[comp.data_source]}</div>` : "";
+  const byModule = comp.by_module || {};
+  const modChips = Object.keys(byModule).map(m => {
+    const v = byModule[m] || {};
+    return `<span class="chip">${esc(m)} <b>${v.ok||0}</b>/${(v.ok||0)+(v.partial||0)+(v.missing||0)}</span>`;
+  }).join(" ");
+  const compTable = checks.length ? `<table><thead><tr><th>모듈</th><th>요구 항목</th><th>상태</th><th>근거(쪽)</th><th>판정 근거</th></tr></thead><tbody>`
+    + checks.map(c=>`<tr><td>${esc(c.module)}</td><td>${esc(c.title)}</td><td>${stBadge(c.status)}</td><td>p${esc(String(c.page))}</td><td>${esc(c.detail)}</td></tr>`).join("")
+    + `</tbody></table>` : '<span class="muted">준수 점검 결과가 없습니다.</span>';
+
+  const logTable = log.length ? `<table><thead><tr><th>Agent</th><th>역할</th><th>프롬프트</th><th>입력</th><th>산출</th><th>상태</th><th>채택</th></tr></thead><tbody>`
+    + log.map(e=>{ const p=e.prompt||{}, o=e.output||{};
+        const produced = (o.produced_fields||[]).join(", ");
+        return `<tr><td><code>${esc(e.agent)}</code></td><td>${esc(e.role)}</td>`
+          + `<td>${esc(p.template||"-")}${p.five_part_structure?" ✅":""}</td>`
+          + `<td>${esc((e.inputs||[]).join(", ")) || "-"}</td>`
+          + `<td>${esc(o.artifact || produced || "-")}</td>`
+          + `<td>${esc((e.verification||{}).status||"")}</td>`
+          + `<td>${e.adopted ? "채택" : "<b>미채택</b>"}${e.note?` <span class="muted">(${esc(e.note)})</span>`:""}</td></tr>`; }).join("")
+    + `</tbody></table>` : '<span class="muted">AI 활용 로그가 없습니다.</span>';
+
+  document.getElementById("kosenaBody").innerHTML = `
+    <div class="sec">
+      <h4>준수 자체점검 <span class="total" style="font-size:18px">${comp.ok ?? 0}</span><span class="muted">/${comp.total ?? checks.length} 충족 · 부분 ${comp.partial ?? 0} · 미충족 ${comp.missing ?? 0}</span></h4>
+      ${srcNotice}
+      ${scopeNote}
+      <div class="scores">${modChips}</div>
+      <details style="margin-top:10px"><summary>항목별 판정 ${checks.length}건 보기</summary>${compTable}</details>
+    </div>
+    <div class="sec">
+      <h4>산출물 내려받기</h4>
+      <div class="btns">
+        <button class="ghost" onclick="downloadKosenaMd()">KOSENA 기획서 .md</button>
+        <button class="ghost" onclick="downloadKosenaDocx()">KOSENA 기획서 .docx</button>
+        <button class="ghost" onclick="downloadKosenaPptx()">KOSENA 발표자료 .pptx</button>
+        <button class="ghost" onclick="downloadAiLogMd()">AI 활용 로그 .md</button>
+      </div>
+    </div>
+    <div class="sec">
+      <h4>AI 활용 로그 <span class="muted" style="font-weight:400">(프롬프트·입력·산출·검증·채택 여부)</span></h4>
+      <details><summary>${log.length}건 보기</summary>${logTable}</details>
+    </div>
+    <div class="sec">
+      <h4>KOSENA 기획서 본문</h4>
+      <details><summary>본문 펼쳐 보기</summary><div class="doc" style="margin-top:10px">${plan ? renderMarkdown(plan) : '<span class="muted">생성되지 않음</span>'}</div></details>
+    </div>`;
+  card.classList.remove("hidden");
 }
 
 const SUGGEST_FIELDS = ["description", "target_user", "problem", "keywords"];
@@ -905,6 +1011,7 @@ function runWorkflow() {
       showLogs(result.logs);
       renderResults(result);
       renderFinal(result.final_draft);
+      renderKosena(result);
       loadHistory();
       document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
       btn.disabled = false; btn.textContent = "기획서 생성";
@@ -943,6 +1050,7 @@ async function reviseDraft() {
     lastRun = {...lastRun, ...d, logs: (lastRun.logs||[]).concat(d.logs||[])};
     renderResults(lastRun);
     renderFinal(d.final_draft);
+    renderKosena(lastRun);
     showLogs(lastRun.logs);
     loadHistory();
     document.getElementById("revreq").value = "";
@@ -972,39 +1080,59 @@ function downloadJson() {
   if (!lastRun) return;
   download(slug(lastRun.structured_input?.project_name)+".json", JSON.stringify(lastRun, null, 2), "application/json");
 }
-async function downloadDocx() {
+// 서버 변환이 필요한 내보내기 공통 처리(docx·pptx·AI로그 md).
+// 다른 점은 엔드포인트·본문·파일명뿐이라 한 곳에 모은다 — KOSENA 산출물이 추가되면서
+// 같은 코드가 5벌이 될 상황이었고, fallback 경고를 한 군데서 빠뜨리기 쉬웠다.
+async function exportViaServer({path, body, filename, label}) {
   if (!lastRun) return;
   // item 9: fallback/더미가 섞인 결과를 정식 산출물로 내려받기 전 경고
   if ((lastRun.run_status || "success") !== "success") {
-    if (!confirm("이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 DOCX로 내려받을까요?")) return;
+    if (!confirm(`이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 ${label}로 내려받을까요?`)) return;
   }
-  const name = lastRun.structured_input?.project_name || "plan";
   try {
-    const r = await fetch("/export/docx", {method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({project_name:name, markdown:lastRun.final_draft})});
+    const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)});
     if (!r.ok) throw await apiError(r, "내보내기 실패");
     const blob = await r.blob();
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = slug(name)+".docx"; a.click();
+    a.href = URL.createObjectURL(blob); a.download = filename; a.click();
     URL.revokeObjectURL(a.href);
-  } catch (e) { alert("DOCX 변환 실패: " + e.message); }
+  } catch (e) { alert(`${label} 변환 실패: ` + e.message); }
 }
-async function downloadPptx() {
-  if (!lastRun) return;
-  // item 9: fallback/더미가 섞인 결과를 정식 산출물로 내려받기 전 경고
-  if ((lastRun.run_status || "success") !== "success") {
-    if (!confirm("이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 PPTX로 내려받을까요?")) return;
-  }
-  const name = lastRun.structured_input?.project_name || "plan";
-  try {
-    const r = await fetch("/export/pptx", {method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({project_name:name, markdown:lastRun.final_draft})});
-    if (!r.ok) throw await apiError(r, "내보내기 실패");
-    const blob = await r.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = slug(name)+".pptx"; a.click();
-    URL.revokeObjectURL(a.href);
-  } catch (e) { alert("PPTX 변환 실패: " + e.message); }
+function runName() { return lastRun?.structured_input?.project_name || "plan"; }
+
+function downloadDocx() {
+  return exportViaServer({path:"/export/docx", label:"DOCX", filename:slug(runName())+".docx",
+    body:{project_name:runName(), markdown:lastRun?.final_draft}});
+}
+function downloadPptx() {
+  return exportViaServer({path:"/export/pptx", label:"PPTX", filename:slug(runName())+".pptx",
+    body:{project_name:runName(), markdown:lastRun?.final_draft}});
+}
+
+// KOSENA 산출물 내보내기 — 기존 익스포터를 그대로 쓴다(Markdown 을 받으므로 새 익스포터 불필요).
+function downloadKosenaMd() {
+  if (!lastRun?.kosena_plan) { alert("이 실행에는 KOSENA 기획서가 없습니다."); return; }
+  download(slug(runName())+"-KOSENA.md", lastRun.kosena_plan, "text/markdown");
+}
+function downloadKosenaDocx() {
+  if (!lastRun?.kosena_plan) { alert("이 실행에는 KOSENA 기획서가 없습니다."); return; }
+  return exportViaServer({path:"/export/docx", label:"KOSENA DOCX",
+    filename:slug(runName())+"-KOSENA.docx",
+    body:{project_name:runName()+"-KOSENA", markdown:lastRun.kosena_plan}});
+}
+function downloadKosenaPptx() {
+  if (!lastRun?.kosena_deck) { alert("이 실행에는 KOSENA 발표자료가 없습니다."); return; }
+  return exportViaServer({path:"/export/pptx", label:"KOSENA PPTX",
+    filename:slug(runName())+"-KOSENA-발표.pptx",
+    body:{project_name:runName()+"-KOSENA-발표", markdown:lastRun.kosena_deck}});
+}
+function downloadAiLogMd() {
+  if (!lastRun?.ai_usage_log?.length) { alert("이 실행에는 AI 활용 로그가 없습니다."); return; }
+  // Markdown 조립은 서버(ai_log.to_markdown) 한 곳에만 둔다 — 문서 안의 로그와 갈라지지 않도록.
+  return exportViaServer({path:"/export/ai-log", label:"AI 활용 로그",
+    filename:slug(runName())+"-AI활용로그.md",
+    body:{project_name:runName(), ai_usage_log:lastRun.ai_usage_log}});
 }
 
 async function loadHistory() {
@@ -1030,6 +1158,7 @@ async function loadProject(id) {
     showLogs(d.state.logs || []);
     renderResults(d.state);
     renderFinal(d.state.final_draft || "");
+    renderKosena(d.state);
     document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
   } catch (e) { alert("불러오기 실패: " + e.message); }
 }

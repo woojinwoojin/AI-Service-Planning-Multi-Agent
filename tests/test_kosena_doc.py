@@ -5,6 +5,8 @@
 """
 from __future__ import annotations
 
+import io
+
 import pytest
 
 from app.agents import kosena_research as rsc
@@ -89,10 +91,64 @@ def test_plan_embeds_compliance_and_ai_log(state):
     assert "KOSENA 준수 현황" in plan and "AI 활용 로그" in plan
 
 
+# ---- 판정↔문서 일관성 (순환 의존을 조립→판정→재조립으로 끊는다) ----
+
+def test_document_reports_the_same_compliance_as_the_final_state(state):
+    """본문에 실린 준수율이 최종 State 의 준수율과 **같아야** 한다.
+
+    조립 시점에 판정이 없으면 `build()` 가 즉석 판정을 돌렸고, 그때는 `kosena_plan` 이 아직
+    State 에 없어 14섹션 초안으로 분량·가설 표기를 재고 있었다. 그래서 문서가 말하는 준수율과
+    최종 State 의 준수율이 어긋났다(문서 26/28 · State 27/28 같은 형태).
+    """
+    assert state["kosena_compliance"]["summary"] in state["kosena_plan"]
+
+
+def test_deck_reports_the_decided_compliance_not_undecided(state):
+    """발표자료는 판정 **뒤**에 조립돼야 한다 — 이전에는 '(미판정)' 이 그대로 실렸다."""
+    assert state["kosena_compliance"]["summary"] in state["kosena_deck"]
+    assert "(미판정)" not in state["kosena_deck"]
+
+
+def test_page_estimate_survives_reassembly(state):
+    """판정 전/후 조립의 **줄 수가 같아야** 판정이 실제 최종 문서의 분량을 말한 것이 된다.
+
+    `_compliance_section` 이 판정 전에도 같은 행 수로 렌더링하기 때문에 성립한다. 이게 깨지면
+    '약 N쪽(추정)' 이 실제로 내려받는 문서와 다른 문서의 분량을 가리킨다.
+    """
+    before = dict(state)
+    before.pop("kosena_compliance")                       # 판정 전 상태를 재현
+    first_pass = len(kosena_doc.build(before).splitlines())
+    assert first_pass == len(state["kosena_plan"].splitlines())
+
+
+def test_revise_reassembles_kosena_outputs(state):
+    """`/revise` 후에도 KOSENA 산출물이 다시 조립돼야 한다.
+
+    고치지 않으면 14섹션 기획서만 수정되고 KOSENA 문서·준수 판정·AI 로그는 수정 전 내용으로
+    남는다. 화면(STEP 4)이 그 값을 그대로 보여주므로 옛 산출물이 눈에 보인다.
+    """
+    from app.graph.workflow import rerun_finalizers
+
+    for key in ("kosena_plan", "kosena_deck", "kosena_compliance", "ai_usage_log"):
+        state.pop(key)                                    # 재조립하지 않으면 비어 있을 것이다
+    rerun_finalizers(state)
+    assert state["kosena_plan"] and state["kosena_deck"] and state["ai_usage_log"]
+    assert state["kosena_compliance"]["summary"] in state["kosena_plan"]
+
+
 def test_deck_is_within_the_required_slide_range(state):
-    """발표 15~20쪽(p4). `##` 하나가 슬라이드 하나가 된다(pptx_export 규칙)."""
-    slides = state["kosena_deck"].count("\n## ")
-    assert kosena.DECK_PAGES_MIN <= slides <= kosena.DECK_PAGES_MAX, slides
+    """발표 15~20쪽(p4).
+
+    Markdown 의 `##` 개수가 아니라 **실제로 만들어진 PPTX 의 슬라이드 수**를 센다. `##` 만 세면
+    맨 앞의 `#` 제목 슬라이드가 빠져 한 장씩 적게 나오고, 실제로 그 한 장 차이 때문에 21장짜리
+    발표자료가 상한 검사를 통과했다. 요건은 파일의 장수에 대한 것이므로 파일을 본다.
+    """
+    from pptx import Presentation
+    from app.services import pptx_export
+
+    deck = Presentation(io.BytesIO(pptx_export.pptx_bytes(state["kosena_deck"], "KOSENA")))
+    n = len(deck.slides)
+    assert kosena.DECK_PAGES_MIN <= n <= kosena.DECK_PAGES_MAX, n
 
 
 def test_deck_closes_with_limits_not_just_highlights(state):
@@ -143,3 +199,54 @@ def test_page_estimate_counts_lines_not_characters():
     r = kosena.evaluate({"kosena_plan": table})
     doc = next(c for c in r["checks"] if c["id"] == "doc_length")
     assert doc["status"] == kosena.OK and "추정" in doc["detail"]
+
+
+# ---- AI 활용 로그가 실제 입력·산출을 담는가 (KOSENA p4) ----
+
+def test_kosena_nodes_record_their_real_inputs(state):
+    """KOSENA 노드는 Artifact 를 내지 않는다 — 그래서 예전엔 inputs 가 비어 있었다.
+
+    "프롬프트 템플릿 있음 · 채택 Yes" 만으로는 KOSENA 가 요구하는
+    *프롬프트 + 입력 + 응답 + 채택 여부*(p4)를 남겼다고 말할 수 없다.
+    """
+    log = {e["agent"]: e for e in state["ai_usage_log"]}
+    assert set(log["kosena_research"]["inputs"]) == {
+        "research_analysis", "customer_analysis", "competitor_analysis"}
+    assert "kosena.ksf" in log["kosena_model"]["inputs"]        # 앞 KOSENA 노드의 결과도 입력이다
+
+
+def test_kosena_nodes_record_the_fields_they_produced(state):
+    out = next(e for e in state["ai_usage_log"] if e["agent"] == "kosena_research")["output"]
+    assert out["state_key"] == "kosena"
+    assert {"personas", "cjm", "market_sizing", "competitor_comparison"} <= set(out["produced_fields"])
+
+
+def test_every_log_entry_carries_all_five_kosena_items(state):
+    """준수 검사가 보는 5항목(프롬프트·입력·산출·검증·채택)이 **모든** 항목에 있어야 한다."""
+    for e in state["ai_usage_log"]:
+        out = e["output"]
+        assert e["prompt"]["template"], e["agent"]
+        assert e["inputs"], e["agent"]
+        assert out.get("artifact") or out.get("produced_fields"), e["agent"]
+        assert e["verification"]["status"], e["agent"]
+        assert "adopted" in e, e["agent"]
+
+
+def test_produced_fields_do_not_drift_from_the_agents(state):
+    """선언한 `produces` 합집합이 실제 `state["kosena"]` 키를 덮어야 한다.
+
+    Agent 출력 키가 늘었는데 선언을 안 고치면 로그가 산출물을 조용히 누락한다(손으로 적은
+    목록의 유일한 위험이라 여기서 고정한다).
+    """
+    from app.services import ai_log as mod
+
+    declared = {f for s in mod._DOC_NODES if s["state_key"] == "kosena" for f in s["produces"]}
+    assert set(state["kosena"]) <= declared, set(state["kosena"]) - declared
+
+
+def test_failed_node_does_not_claim_produced_fields():
+    """실패한 노드가 "10개 필드를 만들었다"고 적히면 로그가 거짓이 된다."""
+    st = {"artifacts": [], "kosena": {}, "failed_nodes": ["kosena_roadmap"]}
+    entry = next(e for e in ai_log.build(st) if e["agent"] == "kosena_roadmap")
+    assert entry["output"]["produced_fields"] == []
+    assert entry["adopted"] is False

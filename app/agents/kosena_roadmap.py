@@ -89,7 +89,12 @@ def _validate(result: dict, fallback: dict) -> dict:
         "kpis": _dicts(result.get("kpis"), ("name", "target")),
         "wireframes": _dicts(result.get("wireframes"), ("screen", "layout"), WIREFRAME_COUNT),
     }
-    return out if any(out.values()) else dict(fallback)
+    if any(out.values()):
+        return out
+    # 실모드 폴백은 **비어 있다**(`llm.dummy_fallback`) — 실패한 호출의 더미 구조가 KOSENA 준수
+    # 검사를 충족으로 통과시키지 않도록. 그때는 `{}` 대신 **키를 갖춘 빈 결과**를 돌려준다.
+    # `{}` 를 내보내면 호출부 로그의 result[...] 접근이 KeyError 로 노드를 실패시킨다.
+    return dict(fallback) if fallback else out
 
 
 _WIRE = ("┌──────────────────────────┐\n"
@@ -134,7 +139,7 @@ def kosena_roadmap(state: ProjectState) -> dict:
     risk = artifact.read(state, "risk_analysis")
     prior = state.get("kosena") if isinstance(state.get("kosena"), dict) else {}
 
-    fallback = _dummy()
+    fallback = llm.dummy_fallback(_dummy())
     user = (
         "아래 결과를 근거로 가치 제안과 개발 로드맵을 설계하세요.\n"
         f"[아이디어]\n{json.dumps(state.get('structured_input', {}), ensure_ascii=False)}\n\n"
