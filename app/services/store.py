@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,7 +15,10 @@ from pathlib import Path
 from app.services import migrate
 from app.services.markdown_export import _RUN_KEYS
 
-DB_PATH = Path("data/projects.db")
+# 기본은 기존과 동일한 상대 경로. `PROJECTS_DB_PATH` 로 덮을 수 있게 둔 이유는 두 가지다 —
+# 부하 관측(`run_load_test.py`)이 실제 이력을 오염시키지 않고 임시 DB 로 돌 수 있어야 하고,
+# 배포에서 볼륨 경로가 cwd 와 다를 수 있다. 테스트는 그대로 `store.DB_PATH` 를 monkeypatch 한다.
+DB_PATH = Path(os.getenv("PROJECTS_DB_PATH", "") or "data/projects.db")
 
 
 def _conn() -> sqlite3.Connection:
