@@ -17,7 +17,19 @@ from collections.abc import Callable
 
 from langgraph.graph import END, START, StateGraph
 
-from app.services import budget, demo, evidence, llm, migrate, quality_gate, sections, timing, tracing, usage
+from app.services import (
+    budget,
+    demo,
+    evidence,
+    kosena,
+    llm,
+    migrate,
+    quality_gate,
+    sections,
+    timing,
+    tracing,
+    usage,
+)
 from app.agents import (
     business_model,
     competitor,
@@ -418,6 +430,10 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     state["quality_gate"] = quality_gate.evaluate(state)  # 출력 가능 여부 게이트(로드맵 Phase 4)
     _finalize_artifacts(state)    # Agent 결과를 표준 Artifact 봉투로 병행 기록(로드맵 2-2)
+    # KOSENA 방법론 준수 판정(체크포인트 3). **반드시 _finalize_artifacts 뒤**에 온다 —
+    # 검사가 Artifact 를 selector 로 읽으므로, 확정 전이면 빈 값을 보고 전부 미충족으로 판정한다.
+    # 미충족이어도 실행을 실패시키지 않는다(quality_gate·check_parity 와 같은 태도).
+    state["kosena_compliance"] = kosena.evaluate(state)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
 
