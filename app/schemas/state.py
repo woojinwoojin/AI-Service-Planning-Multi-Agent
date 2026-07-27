@@ -174,6 +174,17 @@ class ExportInput(BaseModel):
     markdown: str = Field(..., description="변환할 기획서 Markdown")
 
 
+class AiLogExportInput(BaseModel):
+    """AI 활용 로그 → Markdown 내보내기 입력(KOSENA p4: 'AI 로그 별도 파일 첨부').
+
+    로그 배열을 클라이언트가 되돌려 보내는 이유는 **Markdown 조립을 한 곳에만 두기 위해서**다
+    (`ai_log.to_markdown`). 화면에서 따로 조립하면 문서 안의 로그와 내려받은 로그가 갈라진다.
+    """
+
+    project_name: str = Field("", description="프로젝트명(파일명)")
+    ai_usage_log: list = Field(default_factory=list, description="build() 가 만든 로그 항목 배열")
+
+
 class RunResult(BaseModel):
     """워크플로 실행 결과 (Agent별 결과 확인용)."""
 
@@ -215,3 +226,11 @@ class RunResult(BaseModel):
     timing: dict = Field(default_factory=dict)     # 단계별 실행시간·critical path·coverage
     budget: dict = Field(default_factory=dict)      # 예산·시간 상한 대비 소비·초과·강제 여부(트랙 D)
     state_version: int = 0                          # State 스키마 버전(Phase 5, 옛 기록 재조회 호환)
+    # KOSENA 산출물(체크포인트 3). **응답에 실어야 화면에서 볼 수 있다** — 저장(`_RUN_KEYS`)과
+    # JSON 내보내기에는 이미 들어 있었지만 여기에 없어서 `/run` 사용자는 정상 실행을 해도
+    # KOSENA 결과를 확인·내려받을 수 없었다(내부 구현이 있어도 평가자에게는 없는 것과 같다).
+    kosena: dict = Field(default_factory=dict)              # Porter·KSF·Lean Canvas·CJM·MVP 등 원본 산출물
+    kosena_compliance: dict = Field(default_factory=dict)   # 28개 항목 자체점검 결과
+    kosena_plan: str = ""                                   # KOSENA 7종 산출물 본문 Markdown
+    kosena_deck: str = ""                                   # KOSENA 발표자료 Markdown(## 하나=슬라이드 하나)
+    ai_usage_log: list = Field(default_factory=list)        # 프롬프트·입력·산출·검증·채택 여부

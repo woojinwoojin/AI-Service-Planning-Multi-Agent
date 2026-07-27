@@ -72,8 +72,13 @@ def _validate(result: dict, fallback: dict) -> dict:
         "ksf": _strs(result.get("ksf"), KSF_COUNT),
         "implications": _strs(result.get("implications"), IMPLICATION_COUNT),
     }
-    # 전부 비면 fallback — 부분적으로라도 나왔으면 그대로 살린다(있는 만큼이 정직하다).
-    return out if any(out.values()) else dict(fallback)
+    # 부분적으로라도 나왔으면 그대로 살린다(있는 만큼이 정직하다).
+    if any(out.values()):
+        return out
+    # 실모드 폴백은 **비어 있다**(`llm.dummy_fallback`) — 실패한 호출의 더미 구조가 KOSENA 준수
+    # 검사를 충족으로 통과시키지 않도록. 그때는 `{}` 대신 **키를 갖춘 빈 결과**를 돌려준다.
+    # `{}` 를 내보내면 호출부 로그의 result[...] 접근이 KeyError 로 노드를 실패시킨다.
+    return dict(fallback) if fallback else out
 
 
 def _dummy() -> dict:
@@ -98,7 +103,7 @@ def kosena_industry(state: ProjectState) -> dict:
     competitor = artifact.read(state, "competitor_analysis")
     swot = artifact.read(state, "swot_analysis")
 
-    fallback = _dummy()
+    fallback = llm.dummy_fallback(_dummy())
     user = (
         "아래 앞 단계 분석 결과를 근거로 산업 분석을 수행하세요.\n"
         f"[PESTEL]\n{json.dumps(pestel, ensure_ascii=False)}\n\n"

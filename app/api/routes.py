@@ -22,7 +22,14 @@ from app.graph.workflow import (
     run_workflow_stream,
 )
 from app.schemas import artifact
-from app.schemas.state import ExportInput, ProjectInput, ReviseInput, RunResult, SuggestInput
+from app.schemas.state import (
+    AiLogExportInput,
+    ExportInput,
+    ProjectInput,
+    ReviseInput,
+    RunResult,
+    SuggestInput,
+)
 from app.services import (
     ai_log,
     budget,
@@ -154,6 +161,14 @@ def _result_payload(state: dict, project_id: int) -> RunResult:
         timing=state.get("timing", {}),
         budget=state.get("budget", {}),
         state_version=state.get("state_version", 0),
+        # KOSENA 산출물(체크포인트 3). 저장·JSON 내보내기에는 이미 있었으나 응답에 없어서
+        # 화면에서 확인·내려받기가 불가능했다. 옛 기록(이 키가 없는 실행)은 기본값으로 비어 있고,
+        # 화면이 '없으면 카드를 숨기는' 방식이라 재조회가 깨지지 않는다.
+        kosena=state.get("kosena", {}),
+        kosena_compliance=state.get("kosena_compliance", {}),
+        kosena_plan=state.get("kosena_plan", ""),
+        kosena_deck=state.get("kosena_deck", ""),
+        ai_usage_log=state.get("ai_usage_log", []),
     )
 
 
@@ -349,6 +364,20 @@ def export_pptx(payload: ExportInput) -> Response:
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         headers={"Content-Disposition": disposition},
     )
+
+
+@router.post("/export/ai-log", tags=["내보내기"], summary="AI 활용 로그 Markdown 내보내기")
+def export_ai_log(payload: AiLogExportInput) -> Response:
+    """AI 활용 로그를 별도 첨부용 Markdown 으로 변환해 다운로드 응답으로 반환(KOSENA p4).
+
+    DOCX·PPTX 내보내기와 같은 계약이다 — 화면이 가진 내용을 보내고 **서버가 형식을 만든다**.
+    조립을 `ai_log.to_markdown` 한 곳에만 두어야 문서 안의 로그와 내려받은 파일이 갈라지지 않는다.
+    """
+    md = ai_log.to_markdown(payload.ai_usage_log)
+    fname = f"{docx_export._slugify(payload.project_name or 'ai-log')}-AI활용로그.md"
+    disposition = f"attachment; filename=\"ai-usage-log.md\"; filename*=UTF-8''{quote(fname)}"
+    return Response(content=md.encode("utf-8"), media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": disposition})
 
 
 @router.post("/run/save", tags=["실행"], summary="실행 + 산출물(.md/.docx/.pptx/.json) 저장")

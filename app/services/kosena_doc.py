@@ -96,9 +96,17 @@ def _lean_canvas(k: dict) -> str:
         _kv_table(k.get("lean_canvas") or {}, labels),
         "### 핵심 가설 3개와 검증 계획",
         _table(["가설", "검증 방법", "판단 지표"], hyp_rows),
-        "### 아이디어 발산 → 수렴",
+        # 수렴 과정을 단계별로 남긴다(p9). 압축 3개를 싣지 않으면 25개에서 곧바로 1개로
+        # 건너뛴 문서가 되고, 무엇을 왜 버렸는지가 평가자에게 보이지 않는다.
+        f"### 아이디어 발산 → 수렴 ({len(k.get('ideas') or [])}개 → "
+        f"{len(k.get('shortlisted_concepts') or [])}개 → 1개)",
         "**HMW 질문**\n" + _bullets(k.get("hmw")),
         f"**발산한 아이디어 {len(k.get('ideas') or [])}개**\n" + _bullets((k.get("ideas") or [])[:25]),
+        "**압축 후보 3개 (실현가능성·시장성·차별성 평가)**",
+        _table(["후보 컨셉", "실현가능성", "시장성", "차별성", "남긴 이유"],
+               [[s.get("concept", ""), s.get("feasibility", ""), s.get("marketability", ""),
+                 s.get("differentiation", ""), s.get("selection_reason", "")]
+                for s in k.get("shortlisted_concepts") or []]),
         "**최종 컨셉**\n\n" + (k.get("selected_concept") or "(생성되지 않음)"),
     ])
 
@@ -118,6 +126,38 @@ def _customer(k: dict) -> str:
     return "\n\n".join(parts)
 
 
+_COMP_TYPE = {"direct": "직접", "indirect": "간접", "potential": "잠재", "self": "자사"}
+
+
+def _comparison_tables(k: dict) -> str:
+    """경쟁사 비교표(p14). **9열을 한 표에 넣지 않고 두 표로 나눈다.**
+
+    A4 세로 폭에 9열을 밀어 넣으면 각 칸이 두세 글자로 줄어들어 표가 읽히지 않는다(DOCX 는
+    열 폭을 자동 축소한다). 그래서 '무엇을 파는가'(기능·가격·UX·대상·수익모델)와
+    '어디가 세고 약한가'(강점·약점)를 갈라 싣는다 — 같은 행 순서를 유지하므로 대조가 된다.
+
+    `comparison_criteria` 는 비교 **기준 목록**이고 이 표가 그 기준으로 채운 **값**이다. 둘을
+    같은 것으로 보면 기준만 나열한 문서가 '비교표 있음'으로 잘못 읽힌다.
+    """
+    rows = k.get("competitor_comparison") or []
+    if not rows:
+        return "### 경쟁사 비교표\n\n(생성되지 않음 — 비교 기준만 있고 경쟁사별 값이 없음)"
+    label = [f"{r.get('name', '')} ({_COMP_TYPE.get(r.get('type', ''), r.get('type', '—'))})"
+             for r in rows]
+    return "\n\n".join([
+        f"### 경쟁사 비교표 ({len(rows)}행)",
+        "**① 제품·시장**",
+        _table(["대상", "주요 기능", "가격", "UX", "타깃 사용자", "수익 모델"],
+               [[label[i], r.get("features", ""), r.get("price", ""), r.get("ux", ""),
+                 r.get("target_user", ""), r.get("revenue_model", "")]
+                for i, r in enumerate(rows)]),
+        "**② 강점·약점**",
+        _table(["대상", "강점", "약점"],
+               [[label[i], r.get("strength", ""), r.get("weakness", "")]
+                for i, r in enumerate(rows)]),
+    ])
+
+
 def _market(k: dict) -> str:
     ms = k.get("market_sizing") or {}
     cg = k.get("competitor_groups") or {}
@@ -135,6 +175,7 @@ def _market(k: dict) -> str:
                                 ["잠재 경쟁자 (1)", ", ".join(cg.get("potential") or [])]]),
         f"### 비교 항목 ({len(k.get('comparison_criteria') or [])}개)",
         _bullets(k.get("comparison_criteria")),
+        _comparison_tables(k),
         f"### 포지셔닝 맵 ({pm.get('x_axis', '')} × {pm.get('y_axis', '')})",
         _table([pm.get("x_axis", "X") and "대상", f"{pm.get('x_axis', 'X')} (0~10)",
                 f"{pm.get('y_axis', 'Y')} (0~10)"], pm_rows),
@@ -203,14 +244,49 @@ def _roadmap(k: dict) -> str:
     return "\n\n".join(parts)
 
 
+_STATUS_LABEL = {kosena.OK: "충족", kosena.PARTIAL: "부분", kosena.MISSING: "미충족"}
+
+
+def _compliance_section(comp: dict) -> str:
+    """준수 현황 표. **판정 전에도 같은 행 수로 렌더링한다.**
+
+    판정과 문서는 서로를 필요로 한다 — 판정은 조립된 본문에서 분량·가설 표기를 재고, 본문은
+    판정 결과를 표로 싣는다. 그래서 조립을 두 번 한다(조립 → 판정 → 재조립). 그때 **첫 조립과
+    재조립의 줄 수가 같아야** 판정이 실제 최종 문서의 분량을 말한 것이 된다. 항목 수는
+    `REQUIREMENTS` 로 고정이므로, 판정 전에는 같은 자리를 '판정 전'으로 채워 행 수를 맞춘다.
+
+    이전에는 `build()` 안에서 판정이 없으면 즉석 `evaluate()` 를 돌렸는데, 그 시점에는
+    `kosena_plan` 이 아직 State 에 없어 **분량·가설 표기를 14섹션 초안 기준으로** 재고 있었다.
+    그래서 본문에 실린 준수율과 최종 State 의 준수율이 어긋났다.
+    """
+    checks = comp.get("checks") or [
+        {"module": r["module"], "title": r["title"], "page": r["page"],
+         "status": None, "detail": "판정 전"} for r in kosena.REQUIREMENTS
+    ]
+    return "\n\n".join([
+        "## KOSENA 준수 현황 (구조 자체점검)",
+        "> 이 표는 KOSENA 가 요구하는 **필수 구조와 산출물의 존재 여부**를 코드로 결정적 점검한 "
+        "결과다(LLM 판정 아님). 분석 내용의 타당성과 프레임워크 간 일관성은 포함하지 않으며, "
+        "Reviewer 와 사람 검토가 추가로 필요하다.",
+        comp.get("summary", "(판정 전)"),
+        _table(["모듈", "항목", "상태", "근거(쪽)", "비고"],
+               [[c["module"], c["title"], _STATUS_LABEL.get(c["status"], "판정 전"),
+                 f"p{c['page']}", c["detail"]] for c in checks]),
+    ])
+
+
 def build(state: dict) -> str:
-    """State 에서 KOSENA 7종 산출물 Markdown 을 조립한다(결정적·LLM 호출 없음)."""
+    """State 에서 KOSENA 7종 산출물 Markdown 을 조립한다(결정적·LLM 호출 없음).
+
+    `kosena_compliance` 가 아직 없어도 **판정 전 표**로 같은 분량을 낸다(`_compliance_section`).
+    호출 순서는 `workflow._finalize_kosena` 가 정한다.
+    """
     if not isinstance(state, dict):
         return ""
     k = state.get("kosena") if isinstance(state.get("kosena"), dict) else {}
     si = state.get("structured_input") or {}
     name = si.get("project_name") or "서비스 기획안"
-    comp = state.get("kosena_compliance") or kosena.evaluate(state)
+    comp = state.get("kosena_compliance") or {}
 
     parts = [
         f"# {name} — 서비스 기획안 (KOSENA)",
@@ -231,12 +307,7 @@ def build(state: dict) -> str:
         state.get("final_draft") or state.get("draft") or "(생성되지 않음)",
         "## AI 활용 로그",
         ai_log.to_markdown(state.get("ai_usage_log") or ai_log.build(state)),
-        "## KOSENA 준수 현황 (자체 판정)",
-        f"{comp.get('summary', '')}\n",
-        _table(["모듈", "항목", "상태", "근거(쪽)", "비고"],
-               [[c["module"], c["title"],
-                 {"ok": "충족", "partial": "부분", "missing": "미충족"}[c["status"]],
-                 f"p{c['page']}", c["detail"]] for c in comp.get("checks") or []]),
+        _compliance_section(comp),
     ]
     return "\n\n".join(p for p in parts if p) + "\n"
 
@@ -252,8 +323,10 @@ def build_deck(state: dict) -> str:
     comp = state.get("kosena_compliance") or {}
     slides = [
         f"# {si.get('project_name', '서비스 기획안')}",
-        "## 문제 정의\n\n" + (si.get("problem") or "—"),
-        "## 목표 사용자\n\n" + (si.get("target_user") or "—"),
+        # 두 항목을 한 장에 합친다 — 각각 한 문장짜리라 따로 두면 장수만 늘고, 발표 15~20쪽
+        # 상한(p4)을 넘긴다. 경쟁사 비교표 슬라이드를 넣으면서 21장이 됐다.
+        "## 문제 정의 · 목표 사용자\n\n"
+        + f"**문제**\n\n{si.get('problem') or '—'}\n\n**목표 사용자**\n\n{si.get('target_user') or '—'}",
         "## 거시환경 — Critical Uncertainties\n\n" + _bullets(k.get("critical_uncertainties"), "factor"),
         "## 산업 구조 — Porter's Five Forces\n\n"
         + _table(["Force", "강도"], [[f, v.get("level", "")] for f, v in (k.get("porter") or {}).items()]),
@@ -272,6 +345,12 @@ def build_deck(state: dict) -> str:
         "## 시장 규모 (추정)\n\n"
         + _kv_table(ms, {"tam": "TAM", "sam": "SAM", "som": "SOM",
                          "top_down": "Top-down", "bottom_up": "Bottom-up"}),
+        # 발표에서는 폭이 좁으므로 비교표를 4열로 줄인다(본문 표는 9열을 두 표로 나눠 싣는다).
+        "## 경쟁사 비교\n\n"
+        + _table(["대상", "가격", "강점", "약점"],
+                 [[f"{r.get('name', '')} ({_COMP_TYPE.get(r.get('type', ''), '—')})",
+                   r.get("price", ""), r.get("strength", ""), r.get("weakness", "")]
+                  for r in k.get("competitor_comparison") or []]),
         "## 경쟁 포지셔닝\n\n"
         + _table(["대상", "X", "Y"],
                  [[p.get("name", ""), p.get("x", ""), p.get("y", "")]

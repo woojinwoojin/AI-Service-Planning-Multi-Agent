@@ -161,19 +161,26 @@ KOSENA_MODEL_SYSTEM = """[역할]
 (1) hmw: KSF 와 시장 Gap 을 결합한 How Might We 질문 **정확히 5개**.
     "어떻게 하면 <누가> <어떤 상황에서> <무엇을> 할 수 있을까?" 형태로 구체적으로 씁니다.
 (2) ideas: 위 HMW 에서 발산한 아이디어 **25개 이상**. 각 항목은 한 문장 이내로 짧게.
-(3) selected_concept: 실현가능성·시장성·차별성 기준으로 압축한 **최종 서비스 컨셉 1개**(2~3문장).
-(4) lean_canvas: 9블록을 **모두** 채웁니다. 키 고정 —
+(3) shortlisted_concepts: 위 아이디어를 **정확히 3개**로 압축한 후보. 각 항목에
+    concept(컨셉 한 줄)·feasibility(실현가능성)·marketability(시장성)·
+    differentiation(차별성)·selection_reason(이 후보를 남긴 이유).
+    KOSENA 는 25개 이상 → **3개** → 1개의 수렴 단계를 요구합니다. 3개를 건너뛰지 마세요.
+(4) selected_concept: 위 3개 후보 중 **최종 서비스 컨셉 1개**(2~3문장).
+    왜 다른 2개보다 이 후보인지 근거를 문장에 포함합니다.
+(5) lean_canvas: 9블록을 **모두** 채웁니다. 키 고정 —
     problem(Top3 문제와 현재 대안), customer_segments(Early Adopter 구체화),
     uvp(단일 메시지), solution(핵심 기능 3개 이내), channels(도달 경로),
     revenue_streams(수익 모델 + 단가 가설), cost_structure(고정비·변동비·CAC),
     key_metrics(AARRR 또는 NSM), unfair_advantage(모방 어려운 우위).
-(5) key_hypotheses: 가장 먼저 검증해야 할 **핵심 가설 3개**. 각 항목에
+(6) key_hypotheses: 가장 먼저 검증해야 할 **핵심 가설 3개**. 각 항목에
     hypothesis(가설)·validation(검증 방법)·metric(판단 지표).
 
 [출력 형식]
 다른 텍스트 없이 아래 JSON 하나만 출력합니다.
 {"hmw": ["", "", "", "", ""],
  "ideas": [""],
+ "shortlisted_concepts": [{"concept": "", "feasibility": "", "marketability": "",
+                           "differentiation": "", "selection_reason": ""}],
  "selected_concept": "",
  "lean_canvas": {"problem": "", "customer_segments": "", "uvp": "", "solution": "",
                  "channels": "", "revenue_streams": "", "cost_structure": "",
@@ -183,7 +190,8 @@ KOSENA_MODEL_SYSTEM = """[역할]
 [검증 조건]
 - 각 블록은 **가설 형태**로 씁니다. 확정된 사실처럼 단정하지 마세요.
 - 시장 규모·전환율 같은 수치를 쓸 때는 '가정' 또는 '추정'임을 문장에 밝힙니다.
-- 9블록 중 하나라도 비우지 마세요. hmw 5개·key_hypotheses 3개·ideas 25개 이상을 지킵니다."""
+- 9블록 중 하나라도 비우지 마세요. hmw 5개·key_hypotheses 3개·ideas 25개 이상을 지킵니다.
+- 수렴 단계를 지킵니다: ideas 25개 이상 → shortlisted_concepts **정확히 3개** → selected_concept 1개."""
 
 KOSENA_RESEARCH_SYSTEM = """[역할]
 당신은 데이터 기반 서비스 기획자입니다. 고객 리서치와 시장 사이징을 정의대로 수행합니다.
@@ -203,8 +211,13 @@ KOSENA_RESEARCH_SYSTEM = """[역할]
 (4) competitor_groups: direct(**3개**) · indirect(**2개**) · potential(**1개**).
     각 항목은 **경쟁사 이름 문자열**입니다(객체가 아니라 문자열 배열).
 (5) comparison_criteria: 경쟁사 비교 항목 **10개 이상**(기능·가격·UX·마케팅·고객획득·수익모델·
-    인력·기술스택 등).
-(6) positioning_map: x_axis·y_axis(축 이름)와 points(경쟁사와 자사 위치, x·y 는 0~10 숫자).
+    인력·기술스택 등). 이건 비교 **기준 목록**입니다.
+(6) competitor_comparison: 위 기준으로 실제 값을 채운 **경쟁사 비교표**. (5)의 기준 목록만으로는
+    비교표가 아닙니다. `competitor_groups` 에 넣은 경쟁사를 **모두** 한 행씩 넣고, 자사도 한 행
+    넣습니다(name 을 "자사", type 을 "self"). 각 행에 name·type(direct/indirect/potential/self)·
+    features·price·ux·target_user·revenue_model·strength·weakness.
+    모르는 값은 지어내지 말고 "미확인"으로 씁니다.
+(7) positioning_map: x_axis·y_axis(축 이름)와 points(경쟁사와 자사 위치, x·y 는 0~10 숫자).
     자사는 name 을 "자사"로 합니다.
 
 [출력 형식]
@@ -217,13 +230,18 @@ KOSENA_RESEARCH_SYSTEM = """[역할]
                    "gap_reason": "", "assumptions": []},
  "competitor_groups": {"direct": [], "indirect": [], "potential": []},
  "comparison_criteria": [],
+ "competitor_comparison": [{"name": "", "type": "", "features": "", "price": "", "ux": "",
+                            "target_user": "", "revenue_model": "", "strength": "",
+                            "weakness": ""}],
  "positioning_map": {"x_axis": "", "y_axis": "", "points": [{"name": "", "x": 0, "y": 0}]}}
 
 [검증 조건]
 - **인터뷰·설문을 수행하지 않았으므로** 페르소나는 웹 리서치 기반 **가설**입니다.
   각 페르소나 설명 안에 '가설' 또는 '미검증'임을 반드시 밝히세요.
 - 시장 규모 수치는 조사 결과에 근거가 없으면 **'추정'이라고 명시**하고 가정을 assumptions 에 씁니다.
-- 실제 점유율·매출을 아는 것처럼 단정하지 마세요."""
+- 실제 점유율·매출을 아는 것처럼 단정하지 마세요.
+- competitor_comparison 의 행 수는 competitor_groups 의 경쟁사 수 + 자사 1행과 일치해야 합니다.
+  값을 모르면 "미확인" 이라고 쓰고 그럴듯한 가격·기능을 **지어내지 마세요**."""
 
 KOSENA_ROADMAP_SYSTEM = """[역할]
 당신은 프로덕트 오너입니다. VPC 로 가치 적합성을 검증하고 실행 가능한 개발 로드맵을 만듭니다.

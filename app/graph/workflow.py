@@ -363,6 +363,10 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
     state.update(_assess_quality(state))
     state["quality_gate"] = quality_gate.evaluate(state)  # 수정본에 대해 품질 게이트 재판정
     _finalize_artifacts(state)    # 수정 후에도 Artifact 를 최신 결과로 재생성(로드맵 2-2)
+    # KOSENA 산출물도 재조립한다 — 하지 않으면 14섹션 기획서만 수정되고 KOSENA 문서·준수 판정·
+    # AI 활용 로그는 수정 전 내용으로 남는다. 화면(STEP 4)이 이 값을 그대로 보여주므로 옛
+    # 산출물이 눈에 보인다. LLM 호출이 없어 /revise 지연에 사실상 영향이 없다.
+    _finalize_kosena(state)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
 
@@ -444,6 +448,42 @@ def _finalize_artifacts(state: ProjectState) -> None:
             f"(matched {parity['matched']}/{parity['expected']}): {reasons}")
 
 
+def _finalize_kosena(state: ProjectState) -> None:
+    """KOSENA 산출물·준수 판정을 확정한다(체크포인트 3). LLM·검색 호출 없는 순수 변환이다.
+
+    **반드시 `_finalize_artifacts` 뒤**에 와야 한다 — 준수 검사가 Artifact 를 selector 로 읽으므로
+    확정 전이면 빈 값을 보고 전부 미충족으로 판정한다. 미충족이어도 실행을 실패시키지 않는다
+    (`quality_gate`·`check_parity` 와 같은 태도).
+
+    **조립을 두 번 하는 이유 — 순환 의존이다.**
+
+        판정(`kosena.evaluate`)  → 조립된 본문(`kosena_plan`)에서 분량·가설 표기를 잰다
+        조립(`kosena_doc.build`) → 판정 결과를 준수 현황 표로 싣는다
+
+    어느 쪽을 먼저 둬도 한쪽은 헛것을 본다. 그래서 **조립 → 판정 → 재조립** 으로 끊는다.
+    `_compliance_section` 이 판정 전에도 같은 행 수로 렌더링하므로 두 조립의 줄 수가 같고,
+    따라서 판정이 말하는 분량이 실제 최종 문서의 분량이다.
+
+    이전 순서(로그 → 조립 → 발표자료 → 판정)에서는 조립 시점에 판정이 없어서 `build()` 가
+    즉석 `evaluate()` 를 돌렸고, 그때는 `kosena_plan` 이 State 에 없어 **14섹션 초안**을 기준으로
+    분량·가설 표기를 쟀다. 그 결과 본문에 실린 준수율 · 최종 State 의 준수율 · 발표자료의
+    '(미판정)' 이 서로 어긋났다.
+
+    `/revise` 후에도 같은 함수를 부른다(`rerun_finalizers`) — 그렇지 않으면 14섹션 기획서만
+    수정되고 KOSENA 문서·준수 판정은 수정 전 내용으로 남아, 화면에 옛 산출물이 그대로 보인다.
+    """
+    # AI 활용 로그(p4) — Artifact 메타데이터·reviewer 판정·select_best 를 재사용하므로 새 계측이
+    # 없다. 문서 조립 **앞**에 와야 본문의 'AI 활용 로그' 절이 이 값을 싣는다.
+    state["ai_usage_log"] = ai_log.build(state)
+    # KOSENA 7종 산출물(p5). 기존 14섹션 기획서는 **그대로 두고** 별도로 조립한다 — 재구성하면
+    # sections 왕복 불변식·section_revise·quality_gate 가 함께 깨진다. 내보내기는 markdown 을
+    # 받는 기존 익스포터를 그대로 쓴다(새 익스포터 불필요).
+    state["kosena_plan"] = kosena_doc.build(state)        # 1차 조립(준수 표는 '판정 전')
+    state["kosena_compliance"] = kosena.evaluate(state)   # 그 본문을 기준으로 판정
+    state["kosena_plan"] = kosena_doc.build(state)        # 확정된 판정으로 재조립
+    state["kosena_deck"] = kosena_doc.build_deck(state)   # 발표자료도 확정된 판정을 싣는다
+
+
 def _finalize_run(state: ProjectState) -> ProjectState:
     """실행 종료 공통 후처리: 트레이스 flush + 관측치·실행 품질 표면화."""
     tracing.flush()                     # CLI/짧은 실행에서도 트레이스 유실 방지
@@ -456,19 +496,7 @@ def _finalize_run(state: ProjectState) -> ProjectState:
     state.update(_assess_quality(state))  # 실행 품질(run_status/failed/fallback) 표면화
     state["quality_gate"] = quality_gate.evaluate(state)  # 출력 가능 여부 게이트(로드맵 Phase 4)
     _finalize_artifacts(state)    # Agent 결과를 표준 Artifact 봉투로 병행 기록(로드맵 2-2)
-    # KOSENA 방법론 준수 판정(체크포인트 3). **반드시 _finalize_artifacts 뒤**에 온다 —
-    # 검사가 Artifact 를 selector 로 읽으므로, 확정 전이면 빈 값을 보고 전부 미충족으로 판정한다.
-    # 미충족이어도 실행을 실패시키지 않는다(quality_gate·check_parity 와 같은 태도).
-    # AI 활용 로그(체크포인트 3, p4) — Artifact 메타데이터·reviewer 판정·select_best 를
-    # 재사용하므로 새 계측이 없다. kosena_compliance **앞**에 와야 검사가 이 로그를 본다.
-    state["ai_usage_log"] = ai_log.build(state)
-    # KOSENA 7종 산출물 문서·발표자료(p5). 기존 14섹션 기획서는 **그대로 두고** 별도로 조립한다
-    # — 재구성하면 sections 왕복 불변식·section_revise·quality_gate 가 함께 깨진다.
-    # 내보내기는 markdown 을 받는 기존 익스포터를 그대로 쓴다(새 익스포터 불필요).
-    state["kosena_plan"] = kosena_doc.build(state)
-    state["kosena_deck"] = kosena_doc.build_deck(state)
-    # 준수 판정은 **문서 조립 뒤**에 온다 — 분량·가설 표기를 조립된 본문에서 재기 때문이다.
-    state["kosena_compliance"] = kosena.evaluate(state)
+    _finalize_kosena(state)       # KOSENA 산출물·준수 판정(체크포인트 3)
     migrate.upgrade_state(state)  # 스키마 버전 태깅 + 누락 필드 보정(Phase 5)
     return state
 
