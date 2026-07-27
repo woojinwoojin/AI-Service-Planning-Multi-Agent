@@ -17,7 +17,7 @@ MVP/Epic-Story-AC/와이어프레임을 **직접** 본다.
 
 ## 현재 판정 (더미 실행 기준)
 
-**28개 요구항목 중 충족 24 · 부분 1 · 미충족 3.** (KOSENA Agent 4종 도입 후)
+**28개 요구항목 중 충족 24 · 부분 1 · 미충족 3.** (KOSENA Agent 4종 도입 후, 더미 기준)
 
 | 모듈 | 충족 | 부분 | 미충족 | 상태 |
 |---|---|---|---|---|
@@ -84,39 +84,39 @@ AI 로그·문서 조립 후 **26/28**.
 
 ### M2 — 데이터 기반 전략적 서비스 기획
 
-| KOSENA 요구 | 쪽 | 현재 | 비고 |
+| KOSENA 요구 | 쪽 | 현재 | 담당 |
 |---|---|---|---|
-| 페르소나 **2종** × 필수 5항목 | p5·p12 | 🟡 | `customer_result.target_persona` 가 **문자열 1개**. 규격 미달 |
-| CJM 5단계 × 4항목 + Opportunity | p12 | ❌ | |
-| TAM · SAM · SOM | p13 | ❌ | |
-| **Top-down · Bottom-up 교차검증** | p13 | ❌ | 평가표에 직접 등장하는 항목 |
-| 경쟁사 **직접3 · 간접2 · 잠재1** | p14 | 🟡 | 경쟁사 목록은 있으나 **분류가 없음** |
-| 비교 항목 **10개 이상** | p14 | ❌ | |
-| **2축** 포지셔닝 맵 | p14 | 🟡 | `positioning` 서술만 있고 좌표 축이 없음 |
-| VPC 6영역 + Fit | p15 | ❌ | |
-| 핵심 기능 **5~7개** | p15 | ❌ | `핵심 기능` 섹션은 있으나 개수 규격이 없음 |
-| Use Case **3종** | p15 | ❌ | |
+| 페르소나 **2종** × 필수 5항목 | p5·p12 | ✅ | `kosena_research` — 기존 `target_persona` 는 문자열 1개라 규격 미달이었다 |
+| CJM 5단계 × 4항목 + Opportunity | p12 | ✅ | `kosena_research` |
+| TAM · SAM · SOM | p13 | ✅ | `kosena_research` |
+| **Top-down · Bottom-up 교차검증** | p13 | ✅ | `kosena_research` — 차이 사유·가정까지 |
+| 경쟁사 **직접3 · 간접2 · 잠재1** | p14 | ✅ | `kosena_research` |
+| 비교 항목 **10개 이상** | p14 | ✅ | `kosena_research` |
+| **2축** 포지셔닝 맵 | p14 | ✅ | `kosena_research` — 축 없으면 버린다(서술만으로는 맵이 아니다) |
+| VPC 6영역 + Fit | p15 | ✅ | `kosena_roadmap` |
+| 핵심 기능 **5~7개** | p15 | ✅ | `kosena_roadmap` |
+| Use Case **3종** | p15 | ✅ | `kosena_roadmap` |
 
 ### M3 — 서비스 개발 로드맵
 
-| KOSENA 요구 | 쪽 | 현재 | 비고 |
+| KOSENA 요구 | 쪽 | 현재 | 담당 |
 |---|---|---|---|
-| MOSCOW 4구분(**Won't 명시**) | p17 | ❌ | |
-| Kano 3분류 | p17 | ❌ | |
-| MVP 범위 | p17 | ❌ | |
-| Epic – Story – AC (**Given-When-Then**) | p18 | ❌ | |
-| 마일스톤 · KPI | p3·p5 | ❌ | `추진 계획` 섹션은 있으나 KOSENA 형식이 아님 |
-| 와이어프레임 2~3개 화면 | p4·p5 | ❌ | |
+| MOSCOW 4구분(**Won't 명시**) | p17 | ✅ | `kosena_roadmap` — `wont` 는 비어도 키를 남긴다 |
+| Kano 3분류 | p17 | ✅ | `kosena_roadmap` |
+| MVP 범위 | p17 | ✅ | `kosena_roadmap` |
+| Epic – Story – AC (**Given-When-Then**) | p18 | ✅ | `kosena_roadmap` — GWT 미완성이면 부분 충족으로 보인다 |
+| 마일스톤 · KPI | p3·p5 | ✅ | `kosena_roadmap` |
+| 와이어프레임 2~3개 화면 | p4·p5 | ✅ | `kosena_roadmap` — ASCII 구조 스케치 3화면 |
 
 ### 공통
 
 | KOSENA 요구 | 쪽 | 현재 | 비고 |
 |---|---|---|---|
-| 출처 명시 | p4 | ❌(더미) | **실 LLM 에서는 충족** — Evidence Registry 로 URL 인용 |
-| AI 활용 로그(프롬프트·응답·채택 여부) | p4·p19 | ❌ | 재료는 이미 있다 — Artifact 의 `owner_agent`·`depends_on`·`status` + reviewer 판정. **형식만 맞추면 된다** |
-| 정량 주장의 가설·추정 표기 | p4 | ❌ | 아래 참고 |
-| 본문 A4 **30~50쪽** | p4 | 🟡 | 현재 약 1쪽(더미). 실행에서도 크게 못 미침 |
-| 발표 **15~20쪽** | p4 | — | PPTX 는 생성되나 분량 규격 미검사 |
+| 출처 명시 | p4 | ✅(실 LLM) | Evidence Registry 로 URL 인용. **더미는 웹검색을 하지 않아 미충족으로 나온다** |
+| AI 활용 로그(프롬프트·응답·채택 여부) | p4·p19 | ✅ | `ai_log` — Artifact 메타데이터·reviewer 판정·`select_best` 재사용(새 계측 0) |
+| 정량 주장의 가설·추정 표기 | p4 | ✅ | KOSENA 본문 머리의 면책 문구 |
+| 본문 A4 **30~50쪽** | p4 | 🟡 | 실 LLM 기준 약 11쪽 — **유일하게 남은 실질 미달**(아래 참고) |
+| 발표 **15~20쪽** | p4 | ✅ | `kosena_deck` **20슬라이드** |
 
 ## 구조적으로 채울 수 없는 항목 (정직 표기)
 
@@ -132,27 +132,36 @@ AI 로그·문서 조립 후 **26/28**.
 
 이 태도는 PDF 의 결론과도 맞는다 — *"완벽한 기획서가 아니라 의사결정 가능한 가설을 만든다"*(p21).
 
-## 보완 방향
+## 어떻게 메웠나 (KOSENA Agent 4종)
 
-**새 Agent 10개를 만드는 문제가 아니다.** 다만 *"기존 산출물을 재조립하면 된다"* 도 정확하지
-않다 — 위 표에서 보듯 **재료 자체가 없는 항목이 다수**다(Porter·Lean Canvas 6블록·CJM·
-TAM/SAM/SOM·VPC·MOSCOW·Kano·Epic-Story). 이들은 포맷팅이 아니라 **새 분석**이 필요하다.
+착수 전 판단은 *"기존 산출물을 재조립하면 된다"* 였는데 **절반만 맞았다** — 재료 자체가 없는
+항목이 다수였다(Lean Canvas 9블록 중 6블록·CJM·TAM/SAM/SOM·VPC·MOSCOW·Epic-Story). 이들은
+포맷팅이 아니라 **새 분석**이 필요했다. 다만 새 Agent 10개가 아니라 **4개**로 충분했다.
 
-| 구분 | 항목 |
+| Agent | 담당 |
 |---|---|
-| 재조립으로 가능 | 경쟁사 3·2·1 분류, 포지셔닝 맵(기존 비교표 + 축), 핵심 기능 개수 규격 |
-| **새 LLM 분석 필요** | Porter, Value Chain, KSF, 시사점, HMW, Lean Canvas, 페르소나 2종, CJM, TAM/SAM/SOM, VPC, Use Case, MOSCOW, Kano, MVP, Epic-Story-AC, 와이어프레임 |
-| 형식만 맞추면 됨 | AI 활용 로그(Artifact 메타데이터 재사용) |
+| `kosena_industry` | Critical Uncertainties Top3 · Porter · Value Chain · KSF 5 · 시사점 3 |
+| `kosena_model` | HMW 5 · 아이디어 25+ · 컨셉 · Lean Canvas 9블록 · 핵심 가설 3 |
+| `kosena_research` | 페르소나 2종 · CJM · TAM/SAM/SOM 교차검증 · 경쟁사 3/2/1 · 비교항목 10+ · 포지셔닝 맵 |
+| `kosena_roadmap` | VPC · 기능 5~7 · Use Case 3 · MOSCOW · Kano · MVP · Epic-Story-AC · 마일스톤/KPI · 와이어프레임 |
 
-**유리한 점**: PDF p7 의 프레임워크 체인 —
+**PDF p7 의 프레임워크 체인이 그대로 쓰였다** —
 > 거시환경(PESTEL) → 산업환경(Porter) → 자사환경(SWOT) → KSF 도출
 
-이 구조가 이 프로젝트의 **Artifact `depends_on` 모델과 그대로 대응**한다. 새 Agent 를 그 위에
-얹으면 의존 관계가 자동 기록되고, 기존 검증(`depends_on` ↔ 런타임 읽기 대조)이 그대로 적용된다.
+이 구조가 이 프로젝트의 **Artifact `depends_on` 모델과 대응**해서, 새 Agent 를 그 위에 얹는
+것으로 배선이 끝났다. 4개 노드는 순차이고(`industry → model → research → roadmap`), 뒤 노드가
+앞 결과를 이어받아야 평가표의 'Lean Canvas 블록 간 일관성'·'VPC Fit'이 성립한다.
 
-**내보내기는 추가 작업이 거의 없다.** `docx_export`·`pptx_export` 가 **markdown 을 입력으로**
-받고 표를 렌더링하므로(`add_table`, 넘침 시 자동 분할), KOSENA 구조를 markdown 으로 만들면
-DOCX/PPTX 는 따라온다.
+**공통 설계 원칙 — 모자란 개수를 지어내 채우지 않는다.** KSF 가 4개면 4개로 두고 검사가 '부분
+충족'을 말하게 한다. 빈 문자열로 5개를 맞추면 검사만 통과하고 문서엔 빈칸이 남는, 가장 나쁜
+결과가 된다.
+
+**프롬프트는 KOSENA 표준 5단 구조**([역할][입력][요구사항][출력 형식][검증 조건], p19)로
+작성했다 — 형식 준수 자체가 'AI 활용' 평가 항목이라 테스트로 고정했다.
+
+> **실측에서 잡은 회귀**: 실 LLM 이 경쟁사를 문자열이 아니라 **객체 배열**로 반환해 분류가
+> 통째로 0/0/0 이 됐다. 둘 다 받아 이름만 뽑도록 고쳤다 — 형식 차이로 내용을 잃는 것이 가장
+> 아까운 실패다. 더미에서는 절대 나오지 않았을 종류다.
 
 ## 산출물 (p5 의 7종 + p4 의 제출 형식)
 
