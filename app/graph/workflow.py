@@ -35,6 +35,8 @@ from app.agents import (
     competitor,
     customer,
     draft_writer,
+    kosena_industry,
+    kosena_model,
     pestel,
     preprocess,
     research,
@@ -175,6 +177,11 @@ def _register_nodes(g: StateGraph) -> None:
     g.add_node("swot", _safe("swot", swot.swot))
     g.add_node("business_model", _safe("business_model", business_model.business_model))
     g.add_node("risk", _safe("risk", risk.risk))
+    # KOSENA M1(체크포인트 3): 분석 결과 → Porter·Value Chain·KSF·시사점 → HMW·Lean Canvas.
+    # PDF p7 의 체인(PESTEL→Porter→SWOT→KSF)을 그대로 따르므로 분석 구간 **뒤**, draft **앞**이다.
+    # industry → model 순서는 필수 — HMW 가 KSF 를 입력으로 쓴다(p9).
+    g.add_node("kosena_industry", _safe("kosena_industry", kosena_industry.kosena_industry))
+    g.add_node("kosena_model", _safe("kosena_model", kosena_model.kosena_model))
     g.add_node("draft", _safe("draft", draft_writer.draft))
     g.add_node("reviewer", _safe("reviewer", reviewer.reviewer))
     g.add_node("revise", _safe("revise", draft_writer.revise))
@@ -215,7 +222,9 @@ def build_serial_graph():
     g.add_edge("pestel", "swot")
     g.add_edge("swot", "business_model")
     g.add_edge("business_model", "risk")
-    g.add_edge("risk", "draft")
+    g.add_edge("risk", "kosena_industry")       # KOSENA M1(체크포인트 3)
+    g.add_edge("kosena_industry", "kosena_model")
+    g.add_edge("kosena_model", "draft")
     _add_finish_edges(g)
     return g.compile()
 
@@ -243,7 +252,10 @@ def build_parallel_graph():
     g.add_edge("research_gap", "pestel")
     g.add_edge("pestel", "risk")
     g.add_edge("research_gap", "business_model")
-    g.add_edge(["swot", "customer", "risk", "business_model"], "draft")  # fan-in join
+    # fan-in join → KOSENA M1 은 네 분기 결과를 **모두** 입력으로 쓰므로 합류 지점에 붙인다.
+    g.add_edge(["swot", "customer", "risk", "business_model"], "kosena_industry")
+    g.add_edge("kosena_industry", "kosena_model")
+    g.add_edge("kosena_model", "draft")
     _add_finish_edges(g)
     return g.compile()
 
