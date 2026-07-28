@@ -202,23 +202,27 @@ pytest -q
 
 배포 경로는 두 가지입니다. 자세한 배경은 [`DEPLOY.md`](DEPLOY.md) 참고.
 
-### A. 수동 트리거형 CD — GitHub Actions
+### A. 승인형 CD — GitHub Actions (main 자동 트리거)
 
-`.github/workflows/deploy-cloudrun.yml` — **`workflow_dispatch` 로만 돌아갑니다**(push 자동 배포
-없음). 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이 사람의
-확인 없이 바뀌기 때문입니다.
+`.github/workflows/deploy-cloudrun.yml` — **main 에 머지되면 배포 파이프라인이 자동으로
+이어집니다.** 되돌리기·더미 확인용 `workflow_dispatch` 수동 경로도 함께 있습니다.
+문서만 바뀐 커밋(`**.md`·`docs/**`)은 `paths-ignore` 로 건너뜁니다 — 이미지 동작이 같은데
+Revision 과 빌드 비용만 늘기 때문입니다.
 
-흐름: **게이트(ruff + pytest) → GCP 인증(WIF) → Cloud Run 새 Revision → 원격 `/health` 확인**
+흐름: **게이트(ruff + pytest) → 승인 대기 → GCP 인증(WIF) → Cloud Run 새 Revision → 원격 `/health`**
 게이트가 실패하면 배포 잡은 시작하지 않고, `concurrency` 로 배포가 겹치지 않습니다.
 
-> ⚠️ **아직 '승인형'이 아닙니다.** `environment: production` 선언만으로는 승인 절차가 생기지
-> 않습니다. 아래 3번(Required reviewers)을 설정해야 승인 대기가 걸립니다.
+> ⚠️ **'자동'의 범위를 정확히 적습니다.** 트리거와 파이프라인 진행은 자동이지만, 실서비스에
+> 반영되는 마지막 단계에는 **사람 승인이 남아 있습니다** — `production` 환경에 Required
+> reviewers 가 걸려 있어 배포 잡이 승인 대기로 멈춥니다. 실 LLM 키가 붙은 공개 서비스라
+> 일부러 남긴 게이트입니다. 완전 무인 배포로 바꾸려면 아래 3번 설정을 지우면 됩니다
+> (코드 변경이 아니라 **저장소 설정**입니다).
 >
-> | 단계 | 정확한 명칭 |
-> |---|---|
-> | **지금** | 수동 트리거형 Cloud Run 배포 워크플로 |
-> | Required reviewers 설정 후 | 승인형 Cloud Run CD |
-> | 실제 dispatch 성공 후 | **검증된** 승인형 Cloud Run CD |
+> 그래서 다음 두 표현은 **둘 다 틀립니다**:
+> - "승인 없이 자동 배포된다" → 승인 게이트가 있습니다.
+> - "승인 없이는 배포가 불가능하다" → `can_admins_bypass=true` 라 관리자는 우회할 수 있습니다.
+>   1인 개발이라 `prevent_self_review=true` 로 두면 **아무도 승인할 수 없어 배포가 영구 정지**되므로
+>   자기 승인을 허용했습니다.
 
 **사전 설정(저장소 관리자, 1회):**
 
@@ -249,12 +253,21 @@ pytest -q
 4. 서비스 계정 권한: `roles/run.admin` · `roles/cloudbuild.builds.editor` ·
    `roles/iam.serviceAccountUser` · `roles/secretmanager.secretAccessor`
 
-**실행**: Actions → *Cloud Run 배포 (수동 트리거)* → Run workflow → `confirm` 에 **`deploy`** 입력
-(오타 배포 방지). `dummy_mode` 를 켜면 `USE_DUMMY=1` 로 올려 키 없이 화면·계약만 확인합니다.
+**자동 실행**: main 에 코드가 머지되면 바로 시작됩니다 → Actions 에서 *Review deployments* 로 승인.
 
-> ⚠️ **이 워크플로는 아직 실제로 실행해 검증하지 않았습니다.** 시크릿·WIF 설정 전에는 설정 확인
-> 단계에서 명확한 메시지와 함께 실패합니다(가짜 성공을 만들지 않습니다). 검증 전까지는
-> "구성했다"까지만 말하고 "동작한다"고 하지 않습니다.
+**수동 실행**: Actions → *Cloud Run CD (main 자동 + 수동 트리거)* → Run workflow → `confirm` 에
+**`deploy`** 입력(오타 배포 방지). `dummy_mode` 를 켜면 `USE_DUMMY=1` 로 올려 키 없이 화면·계약만
+확인합니다.
+
+> ⚠️ **`dummy_mode` 로 배포하면 공개 URL 이 더미로 덮입니다.** 2026-07-28 에 실제로 그렇게 됐고,
+> 배포 단계는 전부 success 인데 `/health` 가 `"dummy_mode":true` 였습니다. **배포 성공 ≠ 실 모드**
+> 이므로 확인은 항상 `/health` 의 `dummy_mode` 필드로 합니다. 되돌리려면 main 에 코드 커밋이
+> 머지되게 하거나(자동 배포가 실 모드로 올립니다) `dummy_mode` 를 끄고 재-dispatch 합니다.
+
+**검증 이력(2026-07-28)**: dispatch 로 전 경로 성공 — WIF 인증 → Cloud Build → Revision
+`ai-planning-agent-00003-7bs` → 원격 `/health` ok. 그전 두 번의 실패는 둘 다 이 파일의 결함이었고
+(`if: ${{ secrets.X }}` · ruff 미설치 exit 127), **이 워크플로는 PR CI 에서 돌지 않으므로 YAML
+파싱만으로는 검증되지 않습니다.**
 
 ### B. 수동 스크립트 (검증된 경로)
 
@@ -347,7 +360,7 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 근거 일치성 검증 · Reviewer 평가와 섹션 단위 보완 · 최고 버전 채택 · 출력 가능 여부 게이트 ·
 **KOSENA 방법론 산출물 7종 + 준수 자체점검 28항목 + AI 활용 로그** · DOCX/PPTX/MD/JSON 산출 ·
 이력 저장·재조회 · 관측성(토큰·비용·지연·stage) · 예산 상한 · 공개 배포 상한 ·
-**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 = 검증된 경로, + **Actions 수동 트리거형 배포 워크플로** — 구성했으나 실제 실행 미검증이며 Required reviewers 설정 전에는 승인형이 아님).
+**CI 4게이트 + main 브랜치 보호** · Docker 컨테이너 · GCP Cloud Run 배포(수동 스크립트 = 검증된 경로, + **승인형 CD** — main 머지 시 자동 트리거, 실서비스 반영 직전 `production` 승인 게이트. 2026-07-28 dispatch 로 전 경로 실행 검증됨).
 
 > 초기 구상에서 **RAG·로그인은 여전히 제외**입니다(범위 관리). CI/CD 는 처음엔 제외했다가
 > 이후 CI(4게이트)와 Staging 파이프라인을 추가했습니다 — 아래 '향후'에 남은 부분을 적었습니다.
