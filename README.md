@@ -298,14 +298,13 @@ app/
  ├─ graph/workflow.py       # LangGraph 워크플로 (노드·엣지·_safe·관측 집계)
  ├─ agents/
  │   ├─ preprocess.py       # 입력 구조화(함수)
- │   ├─ research.py         # 시장조사 (웹 검색 grounding)
+ │   ├─ research.py         # 시장조사(웹 검색 grounding) + `research_gap` — 보고된 근거 공백에만 추가 조사(제한적 동적 실행)
  │   ├─ competitor.py       # 경쟁사 분석
  │   ├─ customer.py         # 고객 문제(페르소나·Pain·니즈·JTBD)
  │   ├─ pestel.py           # PESTEL 6요인
  │   ├─ swot.py             # SWOT
  │   ├─ business_model.py   # 수익모델
  │   ├─ risk.py             # 리스크
- │   ├─ research_gap.py     # 보고된 근거 공백에만 추가 조사(제한적 동적 실행)
  │   ├─ kosena_industry.py  # KOSENA M1 — Porter·Value Chain·KSF·시사점
  │   ├─ kosena_model.py     # KOSENA M1 — HMW·아이디어 발산/수렴·Lean Canvas·핵심 가설
  │   ├─ kosena_research.py  # KOSENA M2 — 페르소나·CJM·TAM/SAM/SOM·경쟁사 비교표·포지셔닝
@@ -379,5 +378,5 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 
 ### 향후 후보
 
-배포 워크플로의 Required reviewers 설정 + 실제 실행 검증 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
-사람 기획서 기준선 보정 · 관측성 per-Agent 분해. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.
+자동 배포의 운영 모니터링·실패 알림 고도화 · KOSENA 산출물 항목별 근거 연결 · URL 원문 대조 검증 · 선택적 재실행(변경된 Agent 만) ·
+사용자별 인증·이력 소유권 · 사람 기획서 기준선 보정 · 관측성 per-Agent 분해. 자세한 배경은 [`ROADMAP.md`](ROADMAP.md) 참고.

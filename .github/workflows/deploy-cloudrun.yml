@@ -129,11 +129,10 @@ jobs:
           echo "설정 확인 완료"
 
       # **인증은 Workload Identity Federation 하나만 지원한다.**
-      # 서비스 계정 키(JSON) 폴백을 두지 않은 이유는 두 가지다:
-      #   1) 장기 크리덴셜을 저장소에 두면 유출 시 회수가 어렵다.
-      #   2) 검증할 수 없는 분기를 늘리지 않는다 — 이 워크플로 자체가 아직 실행 검증 전이고,
-      #      두 경로 중 어느 쪽도 돌려보지 못한 상태에서 갈래를 두면 실패 지점만 늘어난다.
-      # 수동 배포가 필요하면 이미 검증된 `scripts/deploy_cloudrun.sh` 경로가 있다.
+      # 서비스 계정 키(JSON) 폴백을 두지 않았다 — 장기 크리덴셜을 저장소에 두면 유출 시 회수가
+      # 어렵고, 검증할 수 없는 분기를 늘리면 실패 지점만 는다.
+      # WIF 단일 경로는 **2026-07-28 실제 dispatch 배포로 인증부터 원격 헬스체크까지 검증했다.**
+      # 수동 배포가 필요하면 `scripts/deploy_cloudrun.sh` 경로가 있다(옵션을 이 파일과 같게 유지).
       - name: GCP 인증 (Workload Identity Federation)
         uses: google-github-actions/auth@v2
         with:
@@ -158,6 +157,10 @@ jobs:
           # `--source .` 는 Cloud Build 가 이미지를 만들어 준다(러너에 Docker 데몬 불필요).
           # `--max-instances=1` 은 필수다 — public_guard 의 요청·비용 카운터가 프로세스 메모리라,
           # 인스턴스가 늘면 상한이 인스턴스 수만큼 곱해진다(방어가 조용히 약해진다).
+          # ⚠️ **`scripts/deploy_cloudrun.sh` 와 옵션·환경변수를 같게 유지한다.** 어긋나면 어느
+          # 경로로 배포했는지에 따라 서비스 설정이 달라지고, 공개 상한이 '단일 프로세스·단일
+          # 인스턴스' 전제 위에 서 있으므로 그 차이가 곧 방어 강도의 차이가 된다.
+          # (외부 리뷰 P1: concurrency·min-instances 누락 + timeout 600/900 불일치)
           gcloud run deploy "$CLOUD_RUN_SERVICE" \
             --source . \
             --project "$PROJECT" \
@@ -165,9 +168,11 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --max-instances=1 \
+            --min-instances=0 \
+            --concurrency=8 \
             --cpu=1 --memory=1Gi --timeout=900 \
             --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY:latest,TAVILY_API_KEY=TAVILY_API_KEY:latest" \
-            --set-env-vars="^@^USE_DUMMY=${USE_DUMMY}@LLM_PROVIDER=openai@OPENAI_MODEL=gpt-4o-mini@WORKFLOW_MODE=parallel@ENABLE_DEMO_TOOLS=0@ARTIFACT_READ_MODE=legacy@PUBLIC_MAX_RUNS_PER_IP=5@PUBLIC_IP_WINDOW_SEC=3600@PUBLIC_MAX_RUNS_PER_DAY=100@PUBLIC_MAX_COST_PER_DAY_USD=2.0"
+            --set-env-vars="^@^USE_DUMMY=${USE_DUMMY}@LLM_PROVIDER=openai@OPENAI_MODEL=gpt-4o-mini@WORKFLOW_MODE=parallel@ENABLE_DEMO_TOOLS=0@ENABLE_SERVER_SAVE=0@ARTIFACT_READ_MODE=legacy@PUBLIC_MAX_RUNS_PER_IP=5@PUBLIC_IP_WINDOW_SEC=3600@PUBLIC_MAX_RUNS_PER_DAY=100@PUBLIC_MAX_COST_PER_DAY_USD=2.0@PUBLIC_MAX_SUGGESTIONS_PER_IP=20"
 
           url="$(gcloud run services describe "$CLOUD_RUN_SERVICE" \
             --project "$PROJECT" --region "$GCP_REGION" --format='value(status.url)')"

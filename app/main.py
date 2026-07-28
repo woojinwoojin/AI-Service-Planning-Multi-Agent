@@ -47,16 +47,23 @@ app.include_router(router, responses=COMMON_ERROR_RESPONSES)
 async def _public_limits(request: Request, call_next):
     """공개 배포용 요청 상한(트랙 E). **기본은 비활성**이라 로컬·CI 동작은 그대로다.
 
-    LLM 을 실제로 태우는 경로(`/run`·`/run/stream`·`/revise`)에만 적용한다. 조회·내보내기는
-    비용이 없으므로 막지 않는다 — 참가자가 자기 결과를 다시 보는 것까지 막으면 테스트가 망가진다.
+    LLM 을 실제로 태우는 경로에만 적용한다. 조회·내보내기는 비용이 없으므로 막지 않는다 —
+    참가자가 자기 결과를 다시 보는 것까지 막으면 테스트가 망가진다.
+
+    두 종류를 구분한다(자세한 이유는 `public_guard` 의 경로 상수 주석):
+    - `GUARDED_PATHS` = 전체 워크플로(`/run`·`/run/stream`·`/revise`·`/run/save`) → `kind="run"`
+    - `LIGHT_PATHS`   = LLM 1콜(`/suggest`) → `kind="light"` (별도 IP 버킷, 일일 실행 수 미차감)
 
     거절은 **429 + 통일 오류 봉투**로 내보내고, 사유 문장에 '무엇에 걸렸고 언제 풀리는지'를
     담는다(막혔다는 사실만 알려주면 참가자는 고장으로 오해한다).
     """
-    if request.url.path in public_guard.GUARDED_PATHS and public_guard.enabled():
+    path = request.url.path
+    kind = "run" if path in public_guard.GUARDED_PATHS else (
+        "light" if path in public_guard.LIGHT_PATHS else "")
+    if kind and public_guard.enabled():
         ip = public_guard.client_ip(
             request.headers, request.client.host if request.client else "")
-        allowed, reason = public_guard.check(ip)
+        allowed, reason = public_guard.check(ip, kind)
         if not allowed:
             return JSONResponse(status_code=429, content=error_payload(429, reason))
     return await call_next(request)

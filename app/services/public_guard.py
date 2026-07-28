@@ -29,13 +29,35 @@ import time
 from datetime import datetime, timezone
 
 # 상한이 적용되는 경로 — 실제로 LLM 을 태우는 것만. 조회·내보내기는 대상이 아니다.
-GUARDED_PATHS = frozenset({"/run", "/run/stream", "/revise"})
+#
+# **전체 워크플로를 돌리는 경로**(LLM 13~18콜). `/run/save` 를 빠뜨려서 공개 주소에서 상한 없이
+# 전체 실행을 반복할 수 있었다(외부 리뷰 P0). 화면은 `/run/save` 를 쓰지 않지만, 라우트가 열려
+# 있으면 누구나 호출할 수 있다 — "UI 가 안 쓴다"는 방어가 아니다.
+GUARDED_PATHS = frozenset({"/run", "/run/stream", "/revise", "/run/save"})
+
+# **LLM 을 쓰지만 1콜로 끝나는 경로.** 전체 실행과 같은 바구니에 넣으면 자동완성 몇 번으로
+# 실행 한도가 소진돼 정작 기획서를 못 만든다(IP 5회/시간이면 자동완성 2번에 40% 소진).
+# 그래서 IP 빈도만 **별도 버킷**으로 세고, 일일 실행 수에는 더하지 않는다.
+# 돈에 대한 보증은 두 종류 모두 **전역 일일 비용 상한**이 한다(아래 check 참고).
+LIGHT_PATHS = frozenset({"/suggest"})
 
 _lock = threading.Lock()
 _ip_hits: dict[str, list[float]] = {}     # ip -> 최근 요청 시각(monotonic)
 _day: str = ""                            # 현재 집계 중인 UTC 날짜
 _day_runs: int = 0
 _day_cost: float = 0.0
+
+
+def server_save_enabled() -> bool:
+    """`/run/save`(전체 실행 + **서버 로컬 디스크 저장**) 허용 여부. 기본 켜짐.
+
+    공개 배포에서는 `ENABLE_SERVER_SAVE=0` 으로 끈다 — 공개 주소에서 반복 호출되면 LLM 비용과
+    컨테이너 디스크가 함께 늘고, 화면은 이 경로를 쓰지 않아(내보내기는 브라우저가 받는다) 꺼도
+    기능 손실이 없다. 로컬·CI 는 기본값으로 그대로 동작한다.
+
+    상한(`GUARDED_PATHS`)과 **둘 다** 적용한다 — 켜 둔 채로 공개해도 상한은 걸린다.
+    """
+    return os.getenv("ENABLE_SERVER_SAVE", "1").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _env_int(name: str, default: int) -> int:
@@ -62,12 +84,15 @@ def limits() -> dict:
         "ip_window_sec": _env_int("PUBLIC_IP_WINDOW_SEC", 3600),
         "max_runs_per_day": _env_int("PUBLIC_MAX_RUNS_PER_DAY", 0),
         "max_cost_per_day_usd": _env_float("PUBLIC_MAX_COST_PER_DAY_USD", 0.0),
+        # 자동완성(1콜) 전용 IP 빈도. 전체 실행 한도와 섞지 않는다.
+        "max_suggestions_per_ip": _env_int("PUBLIC_MAX_SUGGESTIONS_PER_IP", 0),
     }
 
 
 def enabled() -> bool:
     lim = limits()
-    return any((lim["max_runs_per_ip"], lim["max_runs_per_day"], lim["max_cost_per_day_usd"]))
+    return any((lim["max_runs_per_ip"], lim["max_runs_per_day"],
+                lim["max_cost_per_day_usd"], lim["max_suggestions_per_ip"]))
 
 
 def _roll_day_locked() -> None:
@@ -88,35 +113,48 @@ def client_ip(headers, fallback: str = "") -> str:
     return xff or fallback or "unknown"
 
 
-def check(ip: str) -> tuple[bool, str]:
+def check(ip: str, kind: str = "run") -> tuple[bool, str]:
     """이 요청을 받아도 되는지. `(허용여부, 거절 사유 메시지)`.
 
     사유는 **사용자에게 그대로 보여줄 문장**이다 — 무엇에 걸렸고 언제 풀리는지 알려준다.
+
+    `kind="run"`  : 전체 워크플로. IP 빈도 + 일일 실행 수 + 일일 비용 세 축 전부.
+    `kind="light"`: LLM 1콜 경로(자동완성). **별도 IP 버킷** + 일일 비용만 본다 —
+                    일일 실행 수를 깎지 않으므로 자동완성이 기획서 생성 몫을 먹지 않는다.
+
+    두 종류 모두 **일일 비용 상한**에 걸린다. IP 는 위조 가능하므로(위 주석) 돈에 대한 실제
+    보증은 이 축이 한다 — 그래서 light 경로도 여기서는 빠지지 않는다.
     """
     global _day_runs
     lim = limits()
-    if not any((lim["max_runs_per_ip"], lim["max_runs_per_day"], lim["max_cost_per_day_usd"])):
+    if not enabled():
         return True, ""
     now = time.monotonic()
+    light = kind == "light"
     with _lock:
         _roll_day_locked()
-        if lim["max_runs_per_day"] and _day_runs >= lim["max_runs_per_day"]:
+        if not light and lim["max_runs_per_day"] and _day_runs >= lim["max_runs_per_day"]:
             return False, (f"오늘 이 서비스의 실행 한도({lim['max_runs_per_day']}건)를 모두 "
                            "사용했습니다. 내일(UTC 기준) 다시 시도해 주세요.")
+        # 비용 상한은 종류와 무관하게 적용한다(폭주 차단의 최종 방어선).
         if lim["max_cost_per_day_usd"] and _day_cost >= lim["max_cost_per_day_usd"]:
             return False, ("오늘 이 서비스의 사용 예산을 모두 사용했습니다. "
                            "내일(UTC 기준) 다시 시도해 주세요.")
-        if lim["max_runs_per_ip"]:
+        cap = lim["max_suggestions_per_ip"] if light else lim["max_runs_per_ip"]
+        if cap:
             window = lim["ip_window_sec"]
-            hits = [t for t in _ip_hits.get(ip, []) if now - t < window]
-            _ip_hits[ip] = hits
-            if len(hits) >= lim["max_runs_per_ip"]:
+            # light 는 키를 분리해 전체 실행 카운터와 섞이지 않게 한다.
+            key = f"{ip}\tlight" if light else ip
+            hits = [t for t in _ip_hits.get(key, []) if now - t < window]
+            _ip_hits[key] = hits
+            if len(hits) >= cap:
                 mins = max(1, int((window - (now - hits[0])) / 60))
-                return False, (f"요청이 너무 잦습니다. {window // 60}분 안에 "
-                               f"{lim['max_runs_per_ip']}건까지 실행할 수 있습니다. "
-                               f"약 {mins}분 뒤 다시 시도해 주세요.")
+                what = "자동완성" if light else "실행"
+                return False, (f"{what} 요청이 너무 잦습니다. {window // 60}분 안에 "
+                               f"{cap}건까지 할 수 있습니다. 약 {mins}분 뒤 다시 시도해 주세요.")
             hits.append(now)
-        _day_runs += 1
+        if not light:
+            _day_runs += 1
     return True, ""
 
 

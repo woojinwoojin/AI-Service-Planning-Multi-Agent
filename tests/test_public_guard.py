@@ -10,10 +10,18 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services import llm, public_guard, store
+from app.services import (
+    docx_export,
+    llm,
+    markdown_export,
+    pptx_export,
+    public_guard,
+    store,
+)
 
 _ENV = ["PUBLIC_MAX_RUNS_PER_IP", "PUBLIC_IP_WINDOW_SEC",
-        "PUBLIC_MAX_RUNS_PER_DAY", "PUBLIC_MAX_COST_PER_DAY_USD"]
+        "PUBLIC_MAX_RUNS_PER_DAY", "PUBLIC_MAX_COST_PER_DAY_USD",
+        "PUBLIC_MAX_SUGGESTIONS_PER_IP", "ENABLE_SERVER_SAVE"]
 
 
 @pytest.fixture(autouse=True)
@@ -30,6 +38,15 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(store, "DB_PATH", tmp_path / "p.db")
     monkeypatch.setattr(llm, "is_dummy", lambda: True)
     return TestClient(app)
+
+
+@pytest.fixture
+def outputs_tmp(tmp_path, monkeypatch):
+    """`/run/save` 가 파일을 쓰는 3개 OUTPUT_DIR 를 임시 경로로 돌려 저장소 오염 방지."""
+    out = tmp_path / "outputs"
+    for mod in (markdown_export, docx_export, pptx_export):
+        monkeypatch.setattr(mod, "OUTPUT_DIR", out)
+    return out
 
 
 # ---- 기본은 비활성 ----
@@ -137,6 +154,77 @@ def test_read_only_paths_are_never_blocked(client, monkeypatch):
     assert client.get("/health").status_code == 200
     assert client.post("/export/docx", json={"project_name": "조회",
                                              "markdown": "# 문서"}).status_code == 200
+
+
+# ---- LLM 을 태우는 경로가 상한을 빠져나가지 않는지 (외부 리뷰 P0) ----
+
+def test_run_save_is_guarded(client, monkeypatch):
+    """`/run/save` 도 전체 워크플로를 돌린다 — 상한 없이 반복 호출되면 안 된다.
+
+    화면이 이 경로를 쓰지 않는다는 것은 방어가 아니다(라우트가 열려 있으면 누구나 부른다).
+    """
+    assert "/run/save" in public_guard.GUARDED_PATHS
+    monkeypatch.setenv("PUBLIC_MAX_RUNS_PER_DAY", "1")
+    public_guard.reset()
+    public_guard.check("x")                                     # 한도 소진
+    r = client.post("/run/save", json={"project_name": "한도", "problem": "P"})
+    assert r.status_code == 429
+    assert r.json()["error"]["code"] == "rate_limited"
+
+
+def test_suggest_is_guarded(client, monkeypatch):
+    """`/suggest` 도 LLM 을 1회 호출한다 — 공개 주소에서 무제한이면 안 된다."""
+    assert "/suggest" in public_guard.LIGHT_PATHS
+    monkeypatch.setenv("PUBLIC_MAX_SUGGESTIONS_PER_IP", "1")
+    monkeypatch.setenv("PUBLIC_IP_WINDOW_SEC", "3600")
+    public_guard.reset()
+    assert client.post("/suggest", json={"project_name": "추천"}).status_code == 200
+    r = client.post("/suggest", json={"project_name": "추천"})
+    assert r.status_code == 429
+    assert r.json()["error"]["code"] == "rate_limited"
+
+
+def test_suggest_does_not_consume_run_quota(monkeypatch):
+    """자동완성이 **기획서 생성 몫**을 깎으면 정작 실행을 못 한다(한 바구니에 넣지 않는 이유)."""
+    monkeypatch.setenv("PUBLIC_MAX_RUNS_PER_DAY", "2")
+    monkeypatch.setenv("PUBLIC_MAX_SUGGESTIONS_PER_IP", "50")
+    public_guard.reset()
+    for _ in range(5):
+        assert public_guard.check("1.1.1.1", "light")[0] is True
+    assert public_guard.status()["runs_today"] == 0          # 일일 실행 수 미차감
+    assert public_guard.check("1.1.1.1")[0] is True          # 실행 2건은 그대로 남아 있다
+    assert public_guard.check("1.1.1.1")[0] is True
+    assert public_guard.check("1.1.1.1")[0] is False
+
+
+def test_light_path_still_bound_by_daily_cost(monkeypatch):
+    """IP 는 위조 가능하므로 **돈에 대한 보증은 일일 비용 상한**이다 — light 도 예외가 아니다."""
+    monkeypatch.setenv("PUBLIC_MAX_COST_PER_DAY_USD", "0.05")
+    public_guard.reset()
+    assert public_guard.check("1.1.1.1", "light")[0] is True
+    public_guard.record_cost(0.06)
+    ok, reason = public_guard.check("1.1.1.1", "light")
+    assert ok is False and "예산" in reason
+
+
+def test_run_save_records_cost(client, monkeypatch, outputs_tmp):
+    """`/run/save` 는 비용을 일일 누계에 더해야 한다 — 그전에는 집계조차 되지 않았다."""
+    calls: list[float] = []
+    monkeypatch.setenv("PUBLIC_MAX_COST_PER_DAY_USD", "999")     # 상한은 켜 두되 막지는 않게
+    public_guard.reset()
+    monkeypatch.setattr(public_guard, "record_cost", lambda c: calls.append(c))
+    assert client.post("/run/save", json={"project_name": "집계", "problem": "P"}).status_code == 200
+    assert calls, "/run/save 가 _record_public_cost 를 부르지 않았다"
+
+
+def test_server_save_can_be_disabled_for_public(client, monkeypatch, outputs_tmp):
+    """공개 배포에서는 `ENABLE_SERVER_SAVE=0` 으로 서버 디스크 저장 경로를 끈다."""
+    monkeypatch.setenv("ENABLE_SERVER_SAVE", "0")
+    r = client.post("/run/save", json={"project_name": "차단", "problem": "P"})
+    assert r.status_code == 404                                   # 존재하지 않는 것처럼
+    monkeypatch.setenv("ENABLE_SERVER_SAVE", "1")
+    assert client.post("/run/save",
+                       json={"project_name": "허용", "problem": "P"}).status_code == 200
 
 
 def test_health_exposes_limit_status(client, monkeypatch):
