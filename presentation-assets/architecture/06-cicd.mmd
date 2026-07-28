@@ -1,0 +1,18 @@
+%% Fig.6 형상관리·배포 — 근거: .github/workflows/ci.yml, deploy-cloudrun.yml
+flowchart LR
+    BR[기능 브랜치] --> PR[Pull Request]
+    PR --> CI{"CI 4게이트"}
+    CI --> G1[ruff + pytest<br/>커버리지 ≥ 90%]
+    CI --> G2[gitleaks<br/>전체 이력]
+    CI --> G3[pip-audit]
+    CI --> G4[docker build]
+    G1 --> PASS
+    G2 --> PASS
+    G3 --> PASS
+    G4 --> PASS{{"4개 모두 통과<br/>= 머지 가능"}}
+    PASS --> MAIN["main<br/>브랜치 보호 · 직접 push 불가"]
+    MAIN --> GATE[배포 게이트<br/>ruff + pytest]
+    GATE --> APPR{{"production 승인 대기<br/>Required reviewers"}}
+    APPR -- 사람이 승인 --> DEP["Cloud Run 새 Revision<br/>max-instances=1"]
+    DEP --> HC[원격 /health 확인]
+    MAIN -. "문서만 변경<br/>paths-ignore" .-> NOOP[배포 건너뜀]

@@ -1,0 +1,13 @@
+%% Fig.2 병렬 그래프 — 근거: app/graph/workflow.py:256-272 (build_parallel_graph)
+%% fan-in 대상은 draft 가 아니라 kosena_industry 다.
+flowchart LR
+    START([START]) --> PRE[preprocess] --> RES[research] --> GAP[research_gap]
+    GAP --> COMP[competitor] --> SWOT[swot]
+    GAP --> CUST[customer]
+    GAP --> PES[pestel] --> RISK[risk]
+    GAP --> BM[business_model]
+    SWOT --> KI
+    CUST --> KI
+    RISK --> KI
+    BM --> KI
+    KI[kosena_industry<br/>fan-in join] --> KM[kosena_model] --> KR[kosena_research] --> KRD[kosena_roadmap] --> DRAFT[draft] --> FIN[[마무리 구간]]
