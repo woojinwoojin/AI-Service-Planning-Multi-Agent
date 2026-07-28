@@ -1,0 +1,2465 @@
+{
+  "structured_input": {
+    "project_name": "시각 장애인 거동 보조 웨어러블 머신",
+    "description": "시각 장애인을 위한 거동 보조 웨어러블 머신으로, 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕습니다.",
+    "target_user": "20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자",
+    "problem": "보행 중 장애물·신호·경로 정보를 실시간으로 알기 어려워 독립적인 이동이 제한된다",
+    "keywords": [
+      "시각장애",
+      "웨어러블",
+      "보행 보조"
+    ],
+    "target_market": "20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자"
+  },
+  "research_result": {
+    "market_overview": "시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년에는 108억 달러에 이를 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 추정됩니다. 이 시장은 개인의 독립성과 이동성을 향상시키기 위한 다양한 하드웨어 및 소프트웨어 솔루션을 포함하고 있습니다.",
+    "industry_trends": [
+      "개인 맞춤형 시각 보조 기기의 개발이 증가하고 있으며, 이는 사용자의 고유한 요구를 충족시키는 데 중점을 두고 있습니다.",
+      "AI 기반 도구와 IoT 기술의 발전이 시각 장애인을 위한 보조 기술의 혁신을 이끌고 있습니다.",
+      "시각 장애인을 위한 보조 기술의 접근성과 사용성을 높이기 위한 공공 정책과 교육 이니셔티브가 강화되고 있습니다."
+    ],
+    "customer_needs": [
+      "시각 장애인들은 보행 중 장애물이나 신호를 실시간으로 인식할 수 있는 기술의 필요성을 느끼고 있습니다.",
+      "독립적인 이동을 원하는 시각 장애인들은 기존의 보조 기기가 제공하는 정보의 한계를 극복할 수 있는 솔루션을 요구하고 있습니다.",
+      "사용자 친화적인 인터페이스와 직관적인 조작이 가능한 웨어러블 기기에 대한 수요가 증가하고 있습니다."
+    ],
+    "competitors": [
+      {
+        "name": "Aira",
+        "description": "Aira는 시각 장애인을 위한 실시간 비디오 지원 서비스를 제공하며, 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕습니다."
+      },
+      {
+        "name": "OrCam",
+        "description": "OrCam은 시각 장애인을 위한 착용 가능한 장치로, 텍스트와 얼굴을 인식하여 사용자에게 음성으로 정보를 제공합니다."
+      },
+      {
+        "name": "Seeing AI",
+        "description": "Seeing AI는 Microsoft에서 개발한 앱으로, 시각 장애인이 주변 환경을 이해할 수 있도록 다양한 정보를 음성으로 제공합니다."
+      }
+    ],
+    "opportunities": [
+      "웨어러블 기술의 발전을 통해 시각 장애인을 위한 보다 혁신적이고 효율적인 이동 보조 기기를 개발할 수 있는 기회가 존재합니다.",
+      "AI와 머신러닝 기술을 활용하여 사용자 맞춤형 솔루션을 제공함으로써 시장에서 차별화된 경쟁력을 가질 수 있습니다.",
+      "웨어러블 기기는 시각 장애인이 사물을 더욱 자연스럽게 인식하고 상호작용할 수 있도록 설계되고 있습니다.",
+      "AI 기반 웨어러블 기기는 시각 장애인에게 음성으로 정보를 제공하며, 독립적인 이동을 지원하는 데 중점을 두고 있습니다."
+    ],
+    "risks": [
+      "기술적 결함이나 사용자 경험의 부족으로 인해 제품의 신뢰성이 저하될 수 있습니다.",
+      "시각 장애인 시장의 특성상, 다양한 요구를 충족시키기 위한 지속적인 연구 개발이 필요하며, 이에 따른 비용 부담이 클 수 있습니다."
+    ],
+    "sources": [
+      "장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스 — http://www.e-patentnews.com/12138",
+      "시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년) — https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531",
+      "시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ... — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057",
+      "시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스 — https://blogs.nvidia.co.kr/blog/hours_device",
+      "CES에서 보여준 장애인 보조기술의 미래 — https://www.seoulpa.kr/home/kor/M112337332/archive/information/view.do?idx=cb00d1a0008a85e71a41b8741facbffeedae7ef2b1a22acaa4ccb1f7229ee097",
+      "시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 ... — https://researchi.co.kr/newjob/13623",
+      "[보고서]장애인 사용자 경험을 고려한 제품 및 서비스 설계 가이드라인 개발 — https://scienceon.kisti.re.kr/srch/selectPORSrchReport.do?cn=TRKO201700014187",
+      "건강관리 웨어러블 기기 사용자 경험 조사: 초점집단인터뷰 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003141440",
+      "영국 GiveVision과 시각장애인을 위한 웨어러블 기기에 대한 고찰 — https://www.ablenews.co.kr/news/articleViewAmp.html?idxno=215426",
+      "'시각장애인에 희망의 빛을'…삼성 시각보조 솔루션 빛을 보다 — https://www.yna.co.kr/amp/view/AKR20230306035000003",
+      "시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지) — https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market",
+      "시각 장애 시장 규모를 위한 보조 기술(2032년) — https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96",
+      "시각 장애 시장 동향, 점유율 및 예측, 2025-2032년 — https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337",
+      "시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033 — https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438",
+      "보조 기술 시장 규모, 성장 보고서 2035 — https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777",
+      "https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market",
+      "https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96",
+      "https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337",
+      "https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438",
+      "https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777"
+    ],
+    "source_objects": [
+      {
+        "title": "시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지)",
+        "url": "https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market",
+        "snippet": "시각 장애인을 위한 보조 기술 시장 규모는 2025년 56억 6천만 달러에서 2034년 108억 달러에 이를 것으로 예상됩니다. 이 시장은 2026년부터 2034년까지 연평균 7.45%의 성장률을 기록할 것으로 추정됩니다.\n\n본 보고서는 제품 유형(교육용 기기 및 소프트웨어, 수학 및 과학 기기, 이동 보조 기기, 저시력 기기)별로 분류하고, 최종 사용자(맹인학교, 기업 및 사회단체, 개인, 연맹 및 병원)를 기준으로 시장을 분석합니다. 각 주요 부문에 대해 글로벌, 지역 및 국가 수준에서 포괄적인 분석을 제공합니다. 보고서에는 모",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:36+00:00"
+      },
+      {
+        "title": "시각 장애 시장 규모를 위한 보조 기술(2032년)",
+        "url": "https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96",
+        "snippet": "## 시장 정의\n\n시장에는 시각 장애가 있는 개인의 독립성, 이동성 및 의사소통 능력을 향상시키도록 설계된 하드웨어 및 소프트웨어 솔루션이 포함됩니다. 이러한 기술에는 교육 또는 전문 환경에서 사용자의 일상 활동을 지원하는 화면 판독기, 확대 장치, 점자 디스플레이, 탐색 보조 도구 및 AI 기반 도구가 포함됩니다.\n\n시장 범위는 삶의 질을 향상하고 포용성을 촉진하는 것을 목표로 하는 개인 사용, 직장 접근성, 교육 및 공공 서비스 애플리케이션을 포괄합니다. 이 보고서는 주요 시장 동인, 주요 추세, 규제 프레임워크 및 업계를 형성",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:36+00:00"
+      },
+      {
+        "title": "시각 장애 시장 동향, 점유율 및 예측, 2025-2032년",
+        "url": "https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337",
+        "snippet": "전 세계 시각 장애 시장은 지난 10년간 인구 고령화와 안과 질환 발병률 증가로 인해 꾸준히 성장해 왔습니다. 그러나 기존의 시각 보조 장치와 기술은 시각 장애인 개개인의 고유한 요구를 적절히 해결하지 못하는 획일적인 솔루션인 경향이 있습니다. 개인 맞춤형 시각 보조 기기의 개발은 시각 장애의 수준과 유형에 맞는 고도로 맞춤화된 솔루션을 제공함으로써 이 시장에 혁신을 가져올 것으로 기대됩니다. 기존의 기기와 달리 개인화된 기술은 개인의 시력 능력, 생활 방식, 선호도에 대한 광범위한 데이터를 활용하여 비교할 수 없는 시각 보조 기능",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:36+00:00"
+      },
+      {
+        "title": "시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033",
+        "url": "https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438",
+        "snippet": "## 시각 장애 시장을위한 보조 기술의 보고서\n\n이 보고서는 시각 장애가있는 개인의 삶의 질을 향상시키는 장치 및 도구에 중점을 둔 시각 장애 시장을위한 글로벌 보조 기술에 대한 포괄적 인 범위를 제공합니다. 시장 동향, 세분화, 지역 통찰력, 회사 전략 및 기술 발전을 분석합니다. 하드웨어 및 소프트웨어 솔루션을 포함하여 총 85 개 이상의 제품 범주가 검사됩니다.\n\n이 보고서는 5 개의 주요 지역에서 30 개 이상의 국가를 다루고 있습니다. 각 지역은 장치 채택률, 공공 정책 지원, 교육 이니셔티브 및 의료 인프라 측면에서 분석",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:36+00:00"
+      },
+      {
+        "title": "보조 기술 시장 규모, 성장 보고서 2035",
+        "url": "https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777",
+        "snippet": "이동 장애는 신체 이동성을 향상시키기 위해 설계된 다양한 제품을 포함하는 보조 기술 시장을 지배하고 있습니다. 휠체어와 스쿠터와 같은 전통적인 장치는 독립성을 촉진하는 IoT 기반 이동 보조기구와 같은 혁신적인 기술 솔루션으로 보완됩니다. 반면, 시각 장애는 시각 장애인을 위한 안구 보조기구 및 애플리케이션의 기술 발전에 의해 촉진되는 새로운 세그먼트를 나타냅니다. 더 많은 기업들이 지능형 솔루션을 만드는 데 투자함에 따라 시각 장애 시장이 성장하고 있으며, 이는 기술의 지속적인 혁신과 접근성의 필요성을 강조합니다.\n\n### 응용 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:36+00:00"
+      },
+      {
+        "title": "장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스",
+        "url": "http://www.e-patentnews.com/12138",
+        "snippet": "분리를 최대화하기 위한 로그 우도 기능을 사용한다는 점이다. 이에 따라 노이즈로부터 타켓 음성을 효과적으로 격리시켜 오디오 처리 시스템의 전반적인 성능을 향상시켜 음성 인식의 정확성도 높이는 것이다.    해외에서도 장애인을 위한 웨어러블 기술 개발이 빠르게 진행되고 있으며, 다양한 혁신적 제품들이 상용화되고 있다. 이스라엘에서 시각장애인을 위한 기술은 안경 프레임에 부착할 수 있는 카메라 기반 웨어러블 디바이스로 텍스트를 실시간으로 읽어주고, 얼굴 및 물체 인식은 물론 음성 출력 기능으로 시각장애인의 독서와 사물 인식 능력을 대폭",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:51+00:00"
+      },
+      {
+        "title": "시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년)",
+        "url": "https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531",
+        "snippet": "급속한 기술 발전: 시각 장애인을 위한 보조 기술은 AI 기반 솔루션으로 빠르게 변화하고 있습니다. 시각 정보를 음성으로 변환하는 스마트 안경, AI 기반 사물 및 텍스트 인식, 웨어러블 내비게이션 장치, 음성 비서 등이 주목받으면서 시각 장애인 보조 기술 시장의 성장이 가속화되고 있습니다. 2024년 2월, 싱가포르 국립대학교(NUS) 연구진은 시각 장애인이 사물을 더욱 자연스럽게 인식하고 상호작용할 수 있도록 특별히 설계된 AI 기반 웨어러블 기기인 AiSee를 발표했습니다. AiSee는 눈에 띄지 않는 골전도 헤드폰, 초소형 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:51+00:00"
+      },
+      {
+        "title": "시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ...",
+        "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057",
+        "snippet": "SN - 2289-0181  \nAB - 본 논문에서는 시각장애인의 라이프 사이클을 사전에 학습하여 시각장애인의 자립생활을 돕는적정기술로 음성인식 기반 스마트 웨어러블 디바이스, 스마트 기기 및 웹 AI서버를 포함하는 음성, 사물 및 문자 인식 플랫폼을 제안하였다. 시각장애인용 웨어러블 기기는 착용편의성과 사물인식기능효율을 높이기 위해 리버스 넥밴드 구조로 설계하여 제작하였으며, 웨어러블 기기에 부착된 고감도소형 마이크와 스피커는 웨어러블 기기와 연동된 스마트기기의 앱으로 구성된 음성인식 인터페이스기능을 지원하도록 구성하였다. 음성,",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "government",
+        "retrieved_at": "2026-07-28T04:57:51+00:00"
+      },
+      {
+        "title": "시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스",
+        "url": "https://blogs.nvidia.co.kr/blog/hours_device",
+        "snippet": "country_code\n\n# 시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스\n\n시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스\n\n식품 내용 표시 라벨을 읽고, 횡단보도를 건너고, 친구를 알아보는 것과 같은 일상적인 일들은 대부분의 사람들에게 쉬운 일입니다. 하지만, 시각 장애인에게는 이러한 간단한 일조차 어려운 일이 될 수 있죠.\n\n시각 장애인들이 좀 더 독립적인 삶을 살 수 있도록 개발된 새로운 웨어러블 디바이스 호루스(Horus)는, GPU 기반 딥 러닝과 컴퓨터 비전 기술을 이용해 사용자들이 바라보는 것이 무엇인",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:51+00:00"
+      },
+      {
+        "title": "CES에서 보여준 장애인 보조기술의 미래",
+        "url": "https://www.seoulpa.kr/home/kor/M112337332/archive/information/view.do?idx=cb00d1a0008a85e71a41b8741facbffeedae7ef2b1a22acaa4ccb1f7229ee097",
+        "snippet": "1) 시각장애인 지원 기술\n\nOrCam MyEye Pro는 현재 전 세계 48개국에서 25개 언어로 지원되며 실질적으로 널리 사용되고 있는 AI 기반 웨어러블 시각보조기기다. 사용자는 이 기기를 안경테에 부착해 독립적으로 책, 스마트폰, 라벨, 얼굴, 화폐, 색상 등을 실시간으로 음성 안내받을 수 있다. 무게가 22.5g에 불과하고 손짓, 음성 명령, 터치 등 다양한 방식으로 손쉽게 정보를 인식할 수 있으며, 인터넷 연결 없이도 작동해 장소 제약이 없다. 2019년부터 사용자는 \"예전에는 점자책이나 오디오북이 나올 때까지 기다려야 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:51+00:00"
+      },
+      {
+        "title": "시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 ...",
+        "url": "https://researchi.co.kr/newjob/13623",
+        "snippet": "시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 시각 장애인(전맹,약시)[15만원] 조사목적 시각장애인분들 대상으로 웨어러블",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:54+00:00"
+      },
+      {
+        "title": "[보고서]장애인 사용자 경험을 고려한 제품 및 서비스 설계 가이드라인 개발",
+        "url": "https://scienceon.kisti.re.kr/srch/selectPORSrchReport.do?cn=TRKO201700014187",
+        "snippet": "## **리뷰 대상 논문**. ### *논문 목록 ( 건)* 선택삭제 PDF 업로드. |  | 논문 제목 (파일명) | 구분 | 등록일 |. 과학기술 분야 학술정보 AI 검색 및 분석. AI 기반 논문 자동 요약 및 번역. 국내 오픈액세스 정보 통합 제공. 사회 현안 연계 국가 R&D 정보 분석. 국내 과학기술 학술정보 통합 검색. 국가 R&D 정보 통합 제공 플랫폼. 국내 학술지 논문 인용지수 및 평가 정보. 전기전자·컴퓨터공학 논문 및 표준 데이터베이스. R&D 사업공고 통합 검색. 국가R&D 참여 연구자 통합 검색. 다분야 연",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T04:57:54+00:00"
+      },
+      {
+        "title": "건강관리 웨어러블 기기 사용자 경험 조사: 초점집단인터뷰",
+        "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003141440",
+        "snippet": "본 연구는 30-50대 성인을 대상으로 웨어러블 기기를 건강관리에 활용하고 있는 사용자 경험을 탐색하기 위해 초점집단인터뷰 방법을 활용하였다. 총 10명의 참여자를 대상",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "government",
+        "retrieved_at": "2026-07-28T04:57:54+00:00"
+      },
+      {
+        "title": "영국 GiveVision과 시각장애인을 위한 웨어러블 기기에 대한 고찰",
+        "url": "https://www.ablenews.co.kr/news/articleViewAmp.html?idxno=215426",
+        "snippet": "게다가 기기의 무게는 150g으로 타 VR 헤드셋보다 훨씬 가볍다. 이러한 장점을 통해 'SightPlus'는 가정용으로도, 시력 진단을 위해 병원에서도 사용한다.",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T04:57:54+00:00"
+      },
+      {
+        "title": "'시각장애인에 희망의 빛을'…삼성 시각보조 솔루션 빛을 보다",
+        "url": "https://www.yna.co.kr/amp/view/AKR20230306035000003",
+        "snippet": "또 별도의 시각장애인 사용자 평가 결과, 기존 상용제품보다 성능과 사용성이 뛰어난 것으로 나타났다고 덧붙였다. 송승환 감독은 \"어렴풋이 형체만",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "news",
+        "retrieved_at": "2026-07-28T04:57:54+00:00"
+      }
+    ]
+  },
+  "competitor_result": {
+    "competitors": [
+      {
+        "name": "Aira",
+        "description": "Aira는 시각 장애인을 위한 실시간 비디오 지원 서비스를 제공하며, 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕습니다.",
+        "strengths": [
+          "실시간 비디오 지원으로 사용자의 즉각적인 도움이 가능",
+          "전문가와의 연결을 통해 신뢰성 있는 정보 제공"
+        ],
+        "weaknesses": [
+          "서비스 이용에 따른 비용 부담",
+          "인터넷 연결이 필수적이므로 접근성 제한"
+        ]
+      },
+      {
+        "name": "OrCam",
+        "description": "OrCam은 시각 장애인을 위한 착용 가능한 장치로, 텍스트와 얼굴을 인식하여 사용자에게 음성으로 정보를 제공합니다.",
+        "strengths": [
+          "비접촉식 인식으로 사용자 편의성 증가",
+          "다양한 언어 지원으로 글로벌 시장 접근 가능"
+        ],
+        "weaknesses": [
+          "비용이 높은 편으로 일반 사용자에게 부담",
+          "기술적 한계로 인한 인식 오류 가능성"
+        ]
+      },
+      {
+        "name": "Seeing AI",
+        "description": "Seeing AI는 Microsoft에서 개발한 앱으로, 시각 장애인이 주변 환경을 이해할 수 있도록 다양한 정보를 음성으로 제공합니다.",
+        "strengths": [
+          "무료로 제공되어 접근성이 높음",
+          "AI 기술을 활용한 다양한 기능 제공"
+        ],
+        "weaknesses": [
+          "스마트폰에 의존하므로 기기 사용이 필수",
+          "인터넷 연결이 필요한 기능이 많음"
+        ]
+      }
+    ],
+    "positioning": "우리 서비스는 AI 기반의 개인 맞춤형 웨어러블 기기로, 시각 장애인의 독립적인 이동을 지원하며, 기존 솔루션의 한계를 극복하는 데 중점을 둡니다.",
+    "differentiation": [
+      "사용자 맞춤형 솔루션 제공을 위한 AI 및 머신러닝 기술 활용",
+      "웨어러블 기기를 통해 보다 직관적이고 사용자 친화적인 인터페이스 제공",
+      "비용 효율적인 솔루션으로 접근성 향상"
+    ]
+  },
+  "customer_result": {
+    "target_persona": "20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자로서, 일상생활에서의 자율성을 높이기 위해 새로운 기술을 활용하고자 하는 상황에 처해 있습니다.",
+    "pain_points": [
+      "보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다.",
+      "기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다.",
+      "사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다."
+    ],
+    "needs": [
+      "실시간으로 장애물, 신호, 경로 정보를 인식할 수 있는 기술이 필요하다.",
+      "독립적인 이동을 지원하는 보다 직관적이고 사용하기 쉬운 웨어러블 기기를 원한다.",
+      "개인의 필요에 맞춘 맞춤형 솔루션을 기대한다."
+    ],
+    "jobs_to_be_done": [
+      "주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 기기를 사용하고 싶다.",
+      "일상적인 활동에서 독립성을 높이고 싶다.",
+      "기술을 통해 사회적 상호작용을 증진시키고 싶다."
+    ]
+  },
+  "swot_result": {
+    "strengths": [
+      "AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공",
+      "웨어러블 기기를 통한 직관적이고 사용자 친화적인 인터페이스",
+      "비용 효율적인 솔루션으로 접근성 향상"
+    ],
+    "weaknesses": [
+      "기술적 결함이나 사용자 경험 부족으로 인한 신뢰성 저하",
+      "지속적인 연구 개발 필요로 인한 비용 부담"
+    ],
+    "opportunities": [
+      "웨어러블 기술 발전으로 혁신적 이동 보조 기기 개발 가능",
+      "AI 기반 솔루션으로 시장에서 차별화된 경쟁력 확보",
+      "시각 장애인을 위한 공공 정책 및 교육 이니셔티브 강화"
+    ],
+    "threats": [
+      "Aira, OrCam, Seeing AI와 같은 경쟁사의 강력한 존재",
+      "기술 발전 속도에 따른 시장 변화에 대한 적응 필요",
+      "사용자 요구의 다양성으로 인한 지속적인 제품 개선 필요"
+    ]
+  },
+  "business_model_result": {
+    "revenue_streams": [
+      "판매(하드웨어)",
+      "구독 서비스(소프트웨어)",
+      "데이터 분석 서비스",
+      "파트너십 및 협력"
+    ],
+    "pricing": "하드웨어는 일회성 구매로 제공되며, 초기 가격은 시장 조사에 따라 경쟁력 있는 수준으로 설정합니다. 소프트웨어는 월간 또는 연간 구독 모델로 제공하며, 사용자 맞춤형 기능에 따라 가격이 다르게 책정될 수 있습니다. 데이터 분석 서비스는 기업 및 기관에 제공하여 추가 수익을 창출합니다.",
+    "cost_structure": [
+      "연구개발 비용",
+      "제조 및 생산 비용",
+      "마케팅 및 판매 비용",
+      "고객 지원 및 유지 관리 비용"
+    ],
+    "key_metrics": [
+      "판매량",
+      "구독자 수",
+      "고객 유지율",
+      "고객 만족도",
+      "수익 성장률"
+    ]
+  },
+  "risk_result": {
+    "risks": [
+      {
+        "category": "기술",
+        "description": "기술적 결함이나 사용자 경험의 부족으로 인해 제품의 신뢰성이 저하될 수 있습니다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "철저한 품질 관리와 사용자 피드백을 반영한 지속적인 개선을 통해 제품의 신뢰성을 높여야 합니다."
+      },
+      {
+        "category": "시장",
+        "description": "경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있습니다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공하여 소비자 기반을 확대해야 합니다."
+      },
+      {
+        "category": "법규",
+        "description": "법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있습니다.",
+        "likelihood": "중",
+        "impact": "상",
+        "mitigation": "법률 전문가와 협력하여 규제 준수를 철저히 하고, 법적 변화에 대한 지속적인 모니터링을 통해 위험을 최소화해야 합니다."
+      },
+      {
+        "category": "운영",
+        "description": "정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있습니다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 운영 환경을 조성해야 합니다."
+      },
+      {
+        "category": "시장",
+        "description": "사회적 편견이나 차별이 여전히 존재할 수 있으며, 이는 기술 수용에 부정적인 영향을 미칠 수 있습니다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성과 이점을 홍보해야 합니다."
+      }
+    ]
+  },
+  "pestel_result": {
+    "Political": {
+      "content": "시각 장애인을 위한 보조 기술에 대한 공공 정책과 교육 이니셔티브가 강화되고 있으며, 이는 시각 장애인의 접근성과 사용성을 높이는 데 기여하고 있습니다. 정부의 지원이 증가하면서 기업들은 이러한 정책을 활용하여 시장 진입 및 확장을 도모할 수 있습니다.",
+      "opportunity": "정부의 지원 정책을 활용하여 보조 기술의 개발 및 배급을 촉진할 수 있는 기회가 존재합니다.",
+      "threat": "정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있습니다.",
+      "response": "정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 운영 환경을 조성해야 합니다."
+    },
+    "Economic": {
+      "content": "시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다. 이는 시각 장애인을 위한 기술에 대한 수요 증가와 관련이 있습니다.",
+      "opportunity": "시장의 성장에 따라 새로운 제품과 서비스 개발을 통해 수익을 극대화할 수 있는 기회가 있습니다.",
+      "threat": "경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있습니다.",
+      "response": "비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공하여 소비자 기반을 확대해야 합니다."
+    },
+    "Social": {
+      "content": "시각 장애인들은 독립적인 이동을 원하며, 사용자 친화적인 인터페이스와 직관적인 조작이 가능한 웨어러블 기기에 대한 수요가 증가하고 있습니다. 사회적 인식이 변화하면서 시각 장애인을 위한 기술에 대한 관심이 높아지고 있습니다.",
+      "opportunity": "사회적 인식의 변화는 시각 장애인을 위한 보조 기술의 수요를 증가시킬 수 있는 기회를 제공합니다.",
+      "threat": "사회적 편견이나 차별이 여전히 존재할 수 있으며, 이는 기술 수용에 부정적인 영향을 미칠 수 있습니다.",
+      "response": "사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성과 이점을 홍보해야 합니다."
+    },
+    "Technological": {
+      "content": "AI 기반 도구와 IoT 기술의 발전이 시각 장애인을 위한 보조 기술의 혁신을 이끌고 있습니다. 개인 맞춤형 시각 보조 기기의 개발이 증가하고 있으며, 이는 사용자의 고유한 요구를 충족시키는 데 중점을 두고 있습니다.",
+      "opportunity": "기술 혁신을 통해 사용자 맞춤형 솔루션을 제공함으로써 시장에서 차별화된 경쟁력을 가질 수 있는 기회가 있습니다.",
+      "threat": "기술적 결함이나 사용자 경험의 부족으로 인해 제품의 신뢰성이 저하될 수 있습니다.",
+      "response": "철저한 품질 관리와 사용자 피드백을 반영한 지속적인 개선을 통해 제품의 신뢰성을 높여야 합니다."
+    },
+    "Environmental": {
+      "content": "시각 장애인을 위한 보조 기술의 개발은 환경적 지속 가능성을 고려해야 합니다. 기술의 생산 과정에서 발생할 수 있는 환경적 영향을 최소화하는 것이 중요합니다.",
+      "opportunity": "환경 친화적인 제품 개발을 통해 소비자에게 긍정적인 이미지를 구축할 수 있는 기회가 있습니다.",
+      "threat": "환경 규제가 강화될 경우, 생산 비용이 증가할 수 있습니다.",
+      "response": "지속 가능한 자원을 활용한 제품 개발 및 환경 규제 준수를 통해 장기적인 경쟁력을 확보해야 합니다."
+    },
+    "Legal": {
+      "content": "시각 장애인을 위한 보조 기술에 대한 법적 규제가 강화되고 있으며, 이는 기업의 제품 개발 및 마케팅 전략에 영향을 미칠 수 있습니다. 특히 접근성 관련 법률이 중요합니다.",
+      "opportunity": "법적 규제를 준수함으로써 시장에서의 신뢰성을 높이고, 정부 지원을 받을 수 있는 기회를 창출할 수 있습니다.",
+      "threat": "법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있습니다.",
+      "response": "법률 전문가와 협력하여 규제 준수를 철저히 하고, 법적 변화에 대한 지속적인 모니터링을 통해 위험을 최소화해야 합니다."
+    }
+  },
+  "draft": "# 시각 장애인 거동 보조 웨어러블 머신 기획서\n\n## 프로젝트 개요\n시각 장애인을 위한 거동 보조 웨어러블 머신은 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 혁신적인 기술입니다. 이 기기는 시각 장애인의 독립적인 이동을 지원하며, 보다 나은 삶의 질을 제공합니다.\n\n## 추진 배경\n시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다. 이러한 시장 성장에 따라 시각 장애인을 위한 보다 혁신적이고 효율적인 이동 보조 기기의 필요성이 증가하고 있습니다.\n\n## 문제 정의\n시각 장애인들은 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵고, 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한됩니다. 또한, 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다는 문제를 겪고 있습니다.\n\n## 목표 사용자\n우리의 목표 사용자는 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자입니다. 이들은 일상생활에서의 자율성을 높이기 위해 새로운 기술을 활용하고자 하는 상황에 처해 있습니다.\n\n## 시장 및 산업 분석\n시각 장애인을 위한 보조 기술 시장은 개인의 독립성과 이동성을 향상시키기 위한 다양한 하드웨어 및 소프트웨어 솔루션을 포함하고 있습니다. 개인 맞춤형 시각 보조 기기의 개발이 증가하고 있으며, AI 기반 도구와 IoT 기술의 발전이 이 시장의 혁신을 이끌고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 시각 장애인을 위한 보조 기술에 대한 공공 정책과 교육 이니셔티브가 강화되고 있음 | 정부의 지원 정책을 활용하여 보조 기술의 개발 및 배급을 촉진할 수 있는 기회 | 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있음 | 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축해야 함 |\n| Economic | 시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상됨 | 시장의 성장에 따라 새로운 제품과 서비스 개발을 통해 수익을 극대화할 수 있는 기회 | 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있음 | 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공해야 함 |\n| Social | 시각 장애인들은 독립적인 이동을 원하며, 사용자 친화적인 웨어러블 기기에 대한 수요가 증가하고 있음 | 사회적 인식의 변화는 보조 기술의 수요를 증가시킬 수 있는 기회 | 사회적 편견이나 차별이 여전히 존재할 수 있음 | 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성을 홍보해야 함 |\n| Technological | AI 기반 도구와 IoT 기술의 발전이 보조 기술의 혁신을 이끌고 있음 | 기술 혁신을 통해 사용자 맞춤형 솔루션을 제공할 수 있는 기회 | 기술적 결함이나 사용자 경험의 부족으로 제품의 신뢰성이 저하될 수 있음 | 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요함 |\n| Environmental | 보조 기술의 개발은 환경적 지속 가능성을 고려해야 함 | 환경 친화적인 제품 개발을 통해 긍정적인 이미지를 구축할 수 있는 기회 | 환경 규제가 강화될 경우, 생산 비용이 증가할 수 있음 | 지속 가능한 자원을 활용한 제품 개발 및 환경 규제 준수가 필요함 |\n| Legal | 보조 기술에 대한 법적 규제가 강화되고 있음 | 법적 규제를 준수함으로써 시장에서의 신뢰성을 높일 수 있음 | 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있음 | 법률 전문가와 협력하여 규제 준수를 철저히 해야 함 |\n\n## SWOT 분석\n- **강점**: AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공, 웨어러블 기기를 통한 직관적이고 사용자 친화적인 인터페이스, 비용 효율적인 솔루션으로 접근성 향상.\n- **약점**: 기술적 결함이나 사용자 경험 부족으로 인한 신뢰성 저하, 지속적인 연구 개발 필요로 인한 비용 부담.\n- **기회**: 웨어러블 기술 발전으로 혁신적 이동 보조 기기 개발 가능, AI 기반 솔루션으로 시장에서 차별화된 경쟁력 확보, 시각 장애인을 위한 공공 정책 및 교육 이니셔티브 강화.\n- **위협**: Aira, OrCam, Seeing AI와 같은 경쟁사의 강력한 존재, 기술 발전 속도에 따른 시장 변화에 대한 적응 필요, 사용자 요구의 다양성으로 인한 지속적인 제품 개선 필요.\n\n## 제안 서비스\n우리의 서비스는 AI 기반의 개인 맞춤형 웨어러블 기기로, 시각 장애인의 독립적인 이동을 지원하며, 기존 솔루션의 한계를 극복하는 데 중점을 둡니다. 이 기기는 실시간으로 장애물, 신호, 경로 정보를 인식하여 사용자가 안전하게 이동할 수 있도록 돕습니다.\n\n## 핵심 기능\n제안하는 웨어러블 머신은 실시간 장애물 인식, 음성 안내 시스템, 사용자 맞춤형 설정 기능을 포함하여, 사용자가 보다 직관적으로 기기를 조작할 수 있도록 설계되었습니다.\n\n## 차별성\n우리 서비스는 사용자 맞춤형 솔루션 제공을 위한 AI 및 머신러닝 기술을 활용하며, 웨어러블 기기를 통해 보다 직관적이고 사용자 친화적인 인터페이스를 제공합니다. 또한, 비용 효율적인 솔루션으로 접근성을 높여 경쟁사와의 차별성을 확보합니다.\n\n## 수익 모델\n수익원으로는 하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력을 통해 추가 수익을 창출할 계획입니다. 하드웨어는 일회성 구매로 제공되며, 소프트웨어는 월간 또는 연간 구독 모델로 운영됩니다.\n\n## 기대효과\n이 서비스를 통해 시각 장애인들은 보다 안전하고 독립적인 이동을 할 수 있으며, 삶의 질이 향상될 것으로 기대됩니다. 또한, 사용자 맞춤형 솔루션을 제공함으로써 고객 만족도를 높이고, 시장에서의 경쟁력을 강화할 수 있습니다.\n\n## 추진 계획\n프로젝트는 시장 조사, 프로토타입 개발, 사용자 테스트, 제품 출시의 단계로 진행되며, 각 단계에서 사용자 피드백을 반영하여 지속적으로 개선할 계획입니다.\n\n## 위험요인 및 대응방안\n- **기술적 리스크**: 기술적 결함이나 사용자 경험 부족으로 제품의 신뢰성이 저하될 수 있습니다. 이를 위해 철저한 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요합니다.\n- **시장 리스크**: 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있습니다. 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공하여 소비자 기반을 확대해야 합니다.\n- **법적 리스크**: 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있습니다. 법률 전문가와 협력하여 규제 준수를 철저히 하고, 법적 변화에 대한 지속적인 모니터링이 필요합니다.\n- **운영 리스크**: 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있습니다. 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 운영 환경을 조성해야 합니다.\n- **사회적 리스크**: 사회적 편견이나 차별이 여전히 존재할 수 있으며, 이는 기술 수용에 부정적인 영향을 미칠 수 있습니다. 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성과 이점을 홍보해야 합니다.\n\n## 참고자료\n\n- 시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지) — https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market\n- 시각 장애 시장 규모를 위한 보조 기술(2032년) — https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96\n- 시각 장애 시장 동향, 점유율 및 예측, 2025-2032년 — https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337\n- 시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033 — https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438\n- 보조 기술 시장 규모, 성장 보고서 2035 — https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777\n- 장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스 — http://www.e-patentnews.com/12138\n- 시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년) — https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531\n- 시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ... — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057",
+  "review_result": {
+    "total_score": 62,
+    "section_scores": {
+      "problem_clarity": 15,
+      "market_validity": 10,
+      "solution_specificity": 12,
+      "differentiation": 10,
+      "feasibility": 15
+    },
+    "strengths": [
+      "시각 장애인을 위한 독립적인 이동 지원이라는 명확한 문제 정의",
+      "AI 및 머신러닝 기술을 활용한 혁신적인 접근 방식",
+      "사용자 맞춤형 솔루션 제공을 통한 차별성 강조"
+    ],
+    "weaknesses": [
+      "시장 분석에서 구체적인 데이터 출처와 수치의 신뢰성 부족",
+      "해결 방안의 구체성이 부족하여 사용자의 실제 경험을 반영하지 못함",
+      "서비스 차별성에 대한 설명이 다소 일반적이고 구체적인 경쟁 우위 요소가 부족함"
+    ],
+    "unsupported_claims": [
+      "2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것이라는 시장 예측에 대한 구체적인 근거 부족"
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 시장 성장 예측의 출처를 명확히 하고, 구체적인 데이터와 근거를 추가할 것",
+      "제안 서비스 섹션에서 해결 방안의 구체성을 높이기 위해 사용자 경험을 반영한 실제 사용 사례를 추가할 것",
+      "차별성 섹션에서 경쟁사와의 비교를 통해 구체적인 차별화 요소를 명확히 할 것"
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "시장 성장 예측에 대한 근거가 부족하여 신뢰성이 떨어짐",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 시장 성장 예측의 출처를 명확히 하고, 구체적인 데이터와 근거를 추가할 것."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "service",
+        "description": "해결 방안의 구체성이 부족하여 사용자의 실제 경험을 반영하지 못함",
+        "revision_instruction": "제안 서비스 섹션에서 해결 방안의 구체성을 높이기 위해 사용자 경험을 반영한 실제 사용 사례를 추가할 것."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "differentiation",
+        "description": "서비스 차별성에 대한 설명이 다소 일반적이고 구체적인 경쟁 우위 요소가 부족함",
+        "revision_instruction": "차별성 섹션에서 경쟁사와의 비교를 통해 구체적인 차별화 요소를 명확히 할 것."
+      }
+    ]
+  },
+  "initial_review_result": {
+    "total_score": 62,
+    "section_scores": {
+      "problem_clarity": 15,
+      "market_validity": 10,
+      "solution_specificity": 12,
+      "differentiation": 10,
+      "feasibility": 15
+    },
+    "strengths": [
+      "시각 장애인을 위한 독립적인 이동 지원이라는 명확한 문제 정의",
+      "AI 및 머신러닝 기술을 활용한 혁신적인 접근 방식",
+      "사용자 맞춤형 솔루션 제공을 통한 차별성 강조"
+    ],
+    "weaknesses": [
+      "시장 분석에서 구체적인 데이터 출처와 수치의 신뢰성 부족",
+      "해결 방안의 구체성이 부족하여 사용자의 실제 경험을 반영하지 못함",
+      "서비스 차별성에 대한 설명이 다소 일반적이고 구체적인 경쟁 우위 요소가 부족함"
+    ],
+    "unsupported_claims": [
+      "2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것이라는 시장 예측에 대한 구체적인 근거 부족"
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 시장 성장 예측의 출처를 명확히 하고, 구체적인 데이터와 근거를 추가할 것",
+      "제안 서비스 섹션에서 해결 방안의 구체성을 높이기 위해 사용자 경험을 반영한 실제 사용 사례를 추가할 것",
+      "차별성 섹션에서 경쟁사와의 비교를 통해 구체적인 차별화 요소를 명확히 할 것"
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "시장 성장 예측에 대한 근거가 부족하여 신뢰성이 떨어짐",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 시장 성장 예측의 출처를 명확히 하고, 구체적인 데이터와 근거를 추가할 것."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "service",
+        "description": "해결 방안의 구체성이 부족하여 사용자의 실제 경험을 반영하지 못함",
+        "revision_instruction": "제안 서비스 섹션에서 해결 방안의 구체성을 높이기 위해 사용자 경험을 반영한 실제 사용 사례를 추가할 것."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "differentiation",
+        "description": "서비스 차별성에 대한 설명이 다소 일반적이고 구체적인 경쟁 우위 요소가 부족함",
+        "revision_instruction": "차별성 섹션에서 경쟁사와의 비교를 통해 구체적인 차별화 요소를 명확히 할 것."
+      }
+    ]
+  },
+  "final_draft": "# 시각 장애인 거동 보조 웨어러블 머신 기획서\n\n## 프로젝트 개요\n시각 장애인을 위한 거동 보조 웨어러블 머신은 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 혁신적인 기술입니다. 이 기기는 시각 장애인의 독립적인 이동을 지원하며, 보다 나은 삶의 질을 제공합니다.\n\n## 추진 배경\n시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다. 이러한 시장 성장에 따라 시각 장애인을 위한 보다 혁신적이고 효율적인 이동 보조 기기의 필요성이 증가하고 있습니다.\n\n## 문제 정의\n시각 장애인들은 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵고, 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한됩니다. 또한, 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다는 문제를 겪고 있습니다.\n\n## 목표 사용자\n우리의 목표 사용자는 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자입니다. 이들은 일상생활에서의 자율성을 높이기 위해 새로운 기술을 활용하고자 하는 상황에 처해 있습니다.\n\n## 시장 및 산업 분석\n\n시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년에는 108억 달러에 이를 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 추정됩니다. 이 시장은 개인의 독립성과 이동성을 향상시키기 위한 다양한 하드웨어 및 소프트웨어 솔루션을 포함하고 있습니다. 개인 맞춤형 시각 보조 기기의 개발이 증가하고 있으며, 이는 사용자의 고유한 요구를 충족시키는 데 중점을 두고 있습니다. AI 기반 도구와 IoT 기술의 발전이 시각 장애인을 위한 보조 기술의 혁신을 이끌고 있으며, 시각 장애인을 위한 보조 기술의 접근성과 사용성을 높이기 위한 공공 정책과 교육 이니셔티브가 강화되고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 시각 장애인을 위한 보조 기술에 대한 공공 정책과 교육 이니셔티브가 강화되고 있음 | 정부의 지원 정책을 활용하여 보조 기술의 개발 및 배급을 촉진할 수 있는 기회 | 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있음 | 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축해야 함 |\n| Economic | 시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상됨 | 시장의 성장에 따라 새로운 제품과 서비스 개발을 통해 수익을 극대화할 수 있는 기회 | 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있음 | 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공해야 함 |\n| Social | 시각 장애인들은 독립적인 이동을 원하며, 사용자 친화적인 웨어러블 기기에 대한 수요가 증가하고 있음 | 사회적 인식의 변화는 보조 기술의 수요를 증가시킬 수 있는 기회 | 사회적 편견이나 차별이 여전히 존재할 수 있음 | 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성을 홍보해야 함 |\n| Technological | AI 기반 도구와 IoT 기술의 발전이 보조 기술의 혁신을 이끌고 있음 | 기술 혁신을 통해 사용자 맞춤형 솔루션을 제공할 수 있는 기회 | 기술적 결함이나 사용자 경험의 부족으로 제품의 신뢰성이 저하될 수 있음 | 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요함 |\n| Environmental | 보조 기술의 개발은 환경적 지속 가능성을 고려해야 함 | 환경 친화적인 제품 개발을 통해 긍정적인 이미지를 구축할 수 있는 기회 | 환경 규제가 강화될 경우, 생산 비용이 증가할 수 있음 | 지속 가능한 자원을 활용한 제품 개발 및 환경 규제 준수가 필요함 |\n| Legal | 보조 기술에 대한 법적 규제가 강화되고 있음 | 법적 규제를 준수함으로써 시장에서의 신뢰성을 높일 수 있음 | 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있음 | 법률 전문가와 협력하여 규제 준수를 철저히 해야 함 |\n\n## SWOT 분석\n- **강점**: AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공, 웨어러블 기기를 통한 직관적이고 사용자 친화적인 인터페이스, 비용 효율적인 솔루션으로 접근성 향상.\n- **약점**: 기술적 결함이나 사용자 경험 부족으로 인한 신뢰성 저하, 지속적인 연구 개발 필요로 인한 비용 부담.\n- **기회**: 웨어러블 기술 발전으로 혁신적 이동 보조 기기 개발 가능, AI 기반 솔루션으로 시장에서 차별화된 경쟁력 확보, 시각 장애인을 위한 공공 정책 및 교육 이니셔티브 강화.\n- **위협**: Aira, OrCam, Seeing AI와 같은 경쟁사의 강력한 존재, 기술 발전 속도에 따른 시장 변화에 대한 적응 필요, 사용자 요구의 다양성으로 인한 지속적인 제품 개선 필요.\n\n## 제안 서비스\n\n우리의 서비스는 AI 기반의 개인 맞춤형 웨어러블 기기로, 시각 장애인의 독립적인 이동을 지원하며, 기존 솔루션의 한계를 극복하는 데 중점을 둡니다. 이 기기는 실시간으로 장애물, 신호, 경로 정보를 인식하여 사용자가 안전하게 이동할 수 있도록 돕습니다. 예를 들어, 사용자가 길을 걷다가 보행 신호가 바뀌었을 때, 기기는 음성 안내를 통해 신호 변화에 대한 정보를 제공합니다. 또한, 사용자가 특정 장소로 이동할 때, 기기는 주변 장애물의 위치를 실시간으로 알려주어 안전한 경로를 선택할 수 있도록 지원합니다. 이러한 기능들은 사용자가 보다 독립적으로 이동할 수 있도록 도와줍니다.\n\n## 핵심 기능\n제안하는 웨어러블 머신은 실시간 장애물 인식, 음성 안내 시스템, 사용자 맞춤형 설정 기능을 포함하여, 사용자가 보다 직관적으로 기기를 조작할 수 있도록 설계되었습니다.\n\n## 차별성\n\n우리 서비스는 AI 및 머신러닝 기술을 활용하여 사용자 맞춤형 솔루션을 제공합니다. 경쟁사인 Aira는 실시간 비디오 지원을 통해 즉각적인 도움을 제공하지만, 인터넷 연결이 필수적이어서 접근성에 제한이 있습니다. OrCam은 비접촉식 인식으로 사용자 편의성을 높이지만, 높은 비용이 일반 사용자에게 부담이 될 수 있습니다. Seeing AI는 무료로 제공되어 접근성이 높지만, 스마트폰에 의존해야 하므로 기기 사용이 필수입니다. \n\n우리의 웨어러블 기기는 이러한 기존 솔루션의 한계를 극복하며, 직관적이고 사용자 친화적인 인터페이스를 제공합니다. 또한, 비용 효율적인 솔루션으로 접근성을 높여, 시각 장애인의 독립적인 이동을 지원하는 데 중점을 둡니다. 이러한 차별화 요소를 통해 경쟁사와의 명확한 구분을 이루고 있습니다.\n\n## 수익 모델\n수익원으로는 하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력을 통해 추가 수익을 창출할 계획입니다. 하드웨어는 일회성 구매로 제공되며, 소프트웨어는 월간 또는 연간 구독 모델로 운영됩니다.\n\n## 기대효과\n이 서비스를 통해 시각 장애인들은 보다 안전하고 독립적인 이동을 할 수 있으며, 삶의 질이 향상될 것으로 기대됩니다. 또한, 사용자 맞춤형 솔루션을 제공함으로써 고객 만족도를 높이고, 시장에서의 경쟁력을 강화할 수 있습니다.\n\n## 추진 계획\n프로젝트는 시장 조사, 프로토타입 개발, 사용자 테스트, 제품 출시의 단계로 진행되며, 각 단계에서 사용자 피드백을 반영하여 지속적으로 개선할 계획입니다.\n\n## 위험요인 및 대응방안\n- **기술적 리스크**: 기술적 결함이나 사용자 경험 부족으로 제품의 신뢰성이 저하될 수 있습니다. 이를 위해 철저한 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요합니다.\n- **시장 리스크**: 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있습니다. 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공하여 소비자 기반을 확대해야 합니다.\n- **법적 리스크**: 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있습니다. 법률 전문가와 협력하여 규제 준수를 철저히 하고, 법적 변화에 대한 지속적인 모니터링이 필요합니다.\n- **운영 리스크**: 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있습니다. 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 운영 환경을 조성해야 합니다.\n- **사회적 리스크**: 사회적 편견이나 차별이 여전히 존재할 수 있으며, 이는 기술 수용에 부정적인 영향을 미칠 수 있습니다. 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성과 이점을 홍보해야 합니다.\n\n## 참고자료\n\n- 시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지) — https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market\n- 시각 장애 시장 규모를 위한 보조 기술(2032년) — https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96\n- 시각 장애 시장 동향, 점유율 및 예측, 2025-2032년 — https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337\n- 시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033 — https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438\n- 보조 기술 시장 규모, 성장 보고서 2035 — https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777\n- 장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스 — http://www.e-patentnews.com/12138\n- 시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년) — https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531\n- 시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ... — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057",
+  "revision_count": 1,
+  "revision_strategy": "section",
+  "revised_section_ids": [
+    "market_analysis",
+    "service",
+    "differentiation"
+  ],
+  "revision_fallback_reason": null,
+  "polish_applied": false,
+  "polish_skip_reason": "내용 이슈만·구조 정상(revision=section)",
+  "best_version": "revised",
+  "reverted_from_revision": false,
+  "final_review_result": {
+    "total_score": 69,
+    "section_scores": {
+      "problem_clarity": 15,
+      "market_validity": 10,
+      "solution_specificity": 12,
+      "differentiation": 18,
+      "feasibility": 14
+    },
+    "strengths": [
+      "시각 장애인을 위한 독립적인 이동 지원이라는 명확한 문제 정의",
+      "AI 기반의 개인 맞춤형 솔루션 제공으로 차별화된 서비스 제안",
+      "시장 성장 가능성에 대한 구체적인 데이터 제시"
+    ],
+    "weaknesses": [
+      "시장 및 산업 분석에서 반복적인 수치 사용으로 인한 가독성 저하",
+      "해결 방안의 구체성이 부족하여 사용자 경험에 대한 명확한 설명 결여"
+    ],
+    "unsupported_claims": [
+      "2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것이라는 시장 예측에 대한 근거 부족"
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 중복된 수치 사용을 줄이고, 각 수치의 출처를 명확히 하여 신뢰성을 높이세요.",
+      "제안 서비스 섹션에서 사용자의 경험을 구체적으로 설명하고, 기기의 작동 방식을 더 상세히 기술하세요."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "시장 성장 예측에 대한 구체적인 근거가 부족합니다.",
+        "revision_instruction": "시장 성장 예측에 대한 출처를 명시하고, 해당 수치의 신뢰성을 높이기 위해 추가 데이터를 포함하세요."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "service",
+        "description": "제안 서비스의 구체적인 작동 방식에 대한 설명이 부족합니다.",
+        "revision_instruction": "제안 서비스 섹션에서 기기의 작동 방식과 사용자 경험을 더 구체적으로 기술하세요."
+      }
+    ]
+  },
+  "verification_result": {
+    "claims": [
+      {
+        "id": "c1",
+        "claim": "시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev1"
+        ]
+      }
+    ],
+    "supported": 1,
+    "total": 1,
+    "support_rate": 1.0,
+    "unsupported": [],
+    "contradicted": [],
+    "evidence_linked": 1,
+    "claim_type_counts": {
+      "proposal": 0,
+      "inference": 0,
+      "fact": 1
+    },
+    "fact_total": 1,
+    "fact_supported": 1,
+    "fact_support_rate": 1.0,
+    "evidence_link_rate": 1.0,
+    "verification_scope": "search_snippet_only"
+  },
+  "verification_summary": {
+    "scope": "search_snippet_only",
+    "original_document_checked": false,
+    "fact_check_completed": false,
+    "note": "본 기획서는 근거 추적성(참고 출처 표시)은 보장하지만, 출처 URL의 원문 사실성은 재검증하지 않았습니다. 검증 판정은 수집된 검색 요약 근거와의 일치 여부이며, 수치·통계 등 정량 정보는 원문에서 직접 확인하시기 바랍니다."
+  },
+  "quality_gate": {
+    "release_ready": false,
+    "checks": {
+      "score": false,
+      "critical_issues": true,
+      "major_issues": false,
+      "structure": true,
+      "evidence": true,
+      "contradicted_claims": true
+    },
+    "blocking_reasons": [
+      "score",
+      "major_issues"
+    ],
+    "na_checks": [],
+    "warnings": [],
+    "metrics": {
+      "score": 69,
+      "critical_count": 0,
+      "major_count": 2,
+      "structure_valid": true,
+      "evidence_coverage": 1.0,
+      "contradicted_count": 0,
+      "fact_total": 1,
+      "verifiable_claims": true
+    },
+    "thresholds": {
+      "score_min": 80,
+      "major_max": 1,
+      "evidence_coverage_min": 0.8,
+      "calibrated": false
+    },
+    "unresolved_issues": [
+      {
+        "severity": "major",
+        "section_id": "market_analysis",
+        "section_title": "시장 및 산업 분석",
+        "issue_type": "unsupported_claim",
+        "instruction": "시장 성장 예측에 대한 출처를 명시하고, 해당 수치의 신뢰성을 높이기 위해 추가 데이터를 포함하세요."
+      },
+      {
+        "severity": "major",
+        "section_id": "service",
+        "section_title": "제안 서비스",
+        "issue_type": "vague",
+        "instruction": "제안 서비스 섹션에서 기기의 작동 방식과 사용자 경험을 더 구체적으로 기술하세요."
+      }
+    ]
+  },
+  "evidence_registry": [
+    {
+      "url": "https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market",
+      "title": "시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지)",
+      "snippet": "시각 장애인을 위한 보조 기술 시장 규모는 2025년 56억 6천만 달러에서 2034년 108억 달러에 이를 것으로 예상됩니다. 이 시장은 2026년부터 2034년까지 연평균 7.45%의 성장률을 기록할 것으로 추정됩니다.\n\n본 보고서는 제품 유형(교육용 기기 및 소프트웨어, 수학 및 과학 기기, 이동 보조 기기, 저시력 기기)별로 분류하고, 최종 사용자(맹인학교, 기업 및 사회단체, 개인, 연맹 및 병원)를 기준으로 시장을 분석합니다. 각 주요 부문에 대해 글로벌, 지역 및 국가 수준에서 포괄적인 분석을 제공합니다. 보고서에는 모",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:36+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 시각장애 웨어러블 보행 보조 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [
+        "c1"
+      ],
+      "evidence_id": "ev1"
+    },
+    {
+      "url": "https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96",
+      "title": "시각 장애 시장 규모를 위한 보조 기술(2032년)",
+      "snippet": "## 시장 정의\n\n시장에는 시각 장애가 있는 개인의 독립성, 이동성 및 의사소통 능력을 향상시키도록 설계된 하드웨어 및 소프트웨어 솔루션이 포함됩니다. 이러한 기술에는 교육 또는 전문 환경에서 사용자의 일상 활동을 지원하는 화면 판독기, 확대 장치, 점자 디스플레이, 탐색 보조 도구 및 AI 기반 도구가 포함됩니다.\n\n시장 범위는 삶의 질을 향상하고 포용성을 촉진하는 것을 목표로 하는 개인 사용, 직장 접근성, 교육 및 공공 서비스 애플리케이션을 포괄합니다. 이 보고서는 주요 시장 동인, 주요 추세, 규제 프레임워크 및 업계를 형성",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:36+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 시각장애 웨어러블 보행 보조 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev2"
+    },
+    {
+      "url": "https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337",
+      "title": "시각 장애 시장 동향, 점유율 및 예측, 2025-2032년",
+      "snippet": "전 세계 시각 장애 시장은 지난 10년간 인구 고령화와 안과 질환 발병률 증가로 인해 꾸준히 성장해 왔습니다. 그러나 기존의 시각 보조 장치와 기술은 시각 장애인 개개인의 고유한 요구를 적절히 해결하지 못하는 획일적인 솔루션인 경향이 있습니다. 개인 맞춤형 시각 보조 기기의 개발은 시각 장애의 수준과 유형에 맞는 고도로 맞춤화된 솔루션을 제공함으로써 이 시장에 혁신을 가져올 것으로 기대됩니다. 기존의 기기와 달리 개인화된 기술은 개인의 시력 능력, 생활 방식, 선호도에 대한 광범위한 데이터를 활용하여 비교할 수 없는 시각 보조 기능",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:36+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 시각장애 웨어러블 보행 보조 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev3"
+    },
+    {
+      "url": "https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438",
+      "title": "시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033",
+      "snippet": "## 시각 장애 시장을위한 보조 기술의 보고서\n\n이 보고서는 시각 장애가있는 개인의 삶의 질을 향상시키는 장치 및 도구에 중점을 둔 시각 장애 시장을위한 글로벌 보조 기술에 대한 포괄적 인 범위를 제공합니다. 시장 동향, 세분화, 지역 통찰력, 회사 전략 및 기술 발전을 분석합니다. 하드웨어 및 소프트웨어 솔루션을 포함하여 총 85 개 이상의 제품 범주가 검사됩니다.\n\n이 보고서는 5 개의 주요 지역에서 30 개 이상의 국가를 다루고 있습니다. 각 지역은 장치 채택률, 공공 정책 지원, 교육 이니셔티브 및 의료 인프라 측면에서 분석",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:36+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 시각장애 웨어러블 보행 보조 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev4"
+    },
+    {
+      "url": "https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777",
+      "title": "보조 기술 시장 규모, 성장 보고서 2035",
+      "snippet": "이동 장애는 신체 이동성을 향상시키기 위해 설계된 다양한 제품을 포함하는 보조 기술 시장을 지배하고 있습니다. 휠체어와 스쿠터와 같은 전통적인 장치는 독립성을 촉진하는 IoT 기반 이동 보조기구와 같은 혁신적인 기술 솔루션으로 보완됩니다. 반면, 시각 장애는 시각 장애인을 위한 안구 보조기구 및 애플리케이션의 기술 발전에 의해 촉진되는 새로운 세그먼트를 나타냅니다. 더 많은 기업들이 지능형 솔루션을 만드는 데 투자함에 따라 시각 장애 시장이 성장하고 있으며, 이는 기술의 지속적인 혁신과 접근성의 필요성을 강조합니다.\n\n### 응용 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:36+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 시각장애 웨어러블 보행 보조 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev5"
+    },
+    {
+      "url": "http://www.e-patentnews.com/12138",
+      "title": "장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스",
+      "snippet": "분리를 최대화하기 위한 로그 우도 기능을 사용한다는 점이다. 이에 따라 노이즈로부터 타켓 음성을 효과적으로 격리시켜 오디오 처리 시스템의 전반적인 성능을 향상시켜 음성 인식의 정확성도 높이는 것이다.    해외에서도 장애인을 위한 웨어러블 기술 개발이 빠르게 진행되고 있으며, 다양한 혁신적 제품들이 상용화되고 있다. 이스라엘에서 시각장애인을 위한 기술은 안경 프레임에 부착할 수 있는 카메라 기반 웨어러블 디바이스로 텍스트를 실시간으로 읽어주고, 얼굴 및 물체 인식은 물론 음성 출력 기능으로 시각장애인의 독서와 사물 인식 능력을 대폭",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev6"
+    },
+    {
+      "url": "https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531",
+      "title": "시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년)",
+      "snippet": "급속한 기술 발전: 시각 장애인을 위한 보조 기술은 AI 기반 솔루션으로 빠르게 변화하고 있습니다. 시각 정보를 음성으로 변환하는 스마트 안경, AI 기반 사물 및 텍스트 인식, 웨어러블 내비게이션 장치, 음성 비서 등이 주목받으면서 시각 장애인 보조 기술 시장의 성장이 가속화되고 있습니다. 2024년 2월, 싱가포르 국립대학교(NUS) 연구진은 시각 장애인이 사물을 더욱 자연스럽게 인식하고 상호작용할 수 있도록 특별히 설계된 AI 기반 웨어러블 기기인 AiSee를 발표했습니다. AiSee는 눈에 띄지 않는 골전도 헤드폰, 초소형 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev7"
+    },
+    {
+      "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057",
+      "title": "시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ...",
+      "snippet": "SN - 2289-0181  \nAB - 본 논문에서는 시각장애인의 라이프 사이클을 사전에 학습하여 시각장애인의 자립생활을 돕는적정기술로 음성인식 기반 스마트 웨어러블 디바이스, 스마트 기기 및 웹 AI서버를 포함하는 음성, 사물 및 문자 인식 플랫폼을 제안하였다. 시각장애인용 웨어러블 기기는 착용편의성과 사물인식기능효율을 높이기 위해 리버스 넥밴드 구조로 설계하여 제작하였으며, 웨어러블 기기에 부착된 고감도소형 마이크와 스피커는 웨어러블 기기와 연동된 스마트기기의 앱으로 구성된 음성인식 인터페이스기능을 지원하도록 구성하였다. 음성,",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev8"
+    },
+    {
+      "url": "https://blogs.nvidia.co.kr/blog/hours_device",
+      "title": "시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스",
+      "snippet": "country_code\n\n# 시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스\n\n시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스\n\n식품 내용 표시 라벨을 읽고, 횡단보도를 건너고, 친구를 알아보는 것과 같은 일상적인 일들은 대부분의 사람들에게 쉬운 일입니다. 하지만, 시각 장애인에게는 이러한 간단한 일조차 어려운 일이 될 수 있죠.\n\n시각 장애인들이 좀 더 독립적인 삶을 살 수 있도록 개발된 새로운 웨어러블 디바이스 호루스(Horus)는, GPU 기반 딥 러닝과 컴퓨터 비전 기술을 이용해 사용자들이 바라보는 것이 무엇인",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev9"
+    },
+    {
+      "url": "https://www.seoulpa.kr/home/kor/M112337332/archive/information/view.do?idx=cb00d1a0008a85e71a41b8741facbffeedae7ef2b1a22acaa4ccb1f7229ee097",
+      "title": "CES에서 보여준 장애인 보조기술의 미래",
+      "snippet": "1) 시각장애인 지원 기술\n\nOrCam MyEye Pro는 현재 전 세계 48개국에서 25개 언어로 지원되며 실질적으로 널리 사용되고 있는 AI 기반 웨어러블 시각보조기기다. 사용자는 이 기기를 안경테에 부착해 독립적으로 책, 스마트폰, 라벨, 얼굴, 화폐, 색상 등을 실시간으로 음성 안내받을 수 있다. 무게가 22.5g에 불과하고 손짓, 음성 명령, 터치 등 다양한 방식으로 손쉽게 정보를 인식할 수 있으며, 인터넷 연결 없이도 작동해 장소 제약이 없다. 2019년부터 사용자는 \"예전에는 점자책이나 오디오북이 나올 때까지 기다려야 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev10"
+    },
+    {
+      "url": "https://researchi.co.kr/newjob/13623",
+      "title": "시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 ...",
+      "snippet": "시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 시각 장애인(전맹,약시)[15만원] 조사목적 시각장애인분들 대상으로 웨어러블",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:54+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev11"
+    },
+    {
+      "url": "https://scienceon.kisti.re.kr/srch/selectPORSrchReport.do?cn=TRKO201700014187",
+      "title": "[보고서]장애인 사용자 경험을 고려한 제품 및 서비스 설계 가이드라인 개발",
+      "snippet": "## **리뷰 대상 논문**. ### *논문 목록 ( 건)* 선택삭제 PDF 업로드. |  | 논문 제목 (파일명) | 구분 | 등록일 |. 과학기술 분야 학술정보 AI 검색 및 분석. AI 기반 논문 자동 요약 및 번역. 국내 오픈액세스 정보 통합 제공. 사회 현안 연계 국가 R&D 정보 분석. 국내 과학기술 학술정보 통합 검색. 국가 R&D 정보 통합 제공 플랫폼. 국내 학술지 논문 인용지수 및 평가 정보. 전기전자·컴퓨터공학 논문 및 표준 데이터베이스. R&D 사업공고 통합 검색. 국가R&D 참여 연구자 통합 검색. 다분야 연",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:54+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev12"
+    },
+    {
+      "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003141440",
+      "title": "건강관리 웨어러블 기기 사용자 경험 조사: 초점집단인터뷰",
+      "snippet": "본 연구는 30-50대 성인을 대상으로 웨어러블 기기를 건강관리에 활용하고 있는 사용자 경험을 탐색하기 위해 초점집단인터뷰 방법을 활용하였다. 총 10명의 참여자를 대상",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:54+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev13"
+    },
+    {
+      "url": "https://www.ablenews.co.kr/news/articleViewAmp.html?idxno=215426",
+      "title": "영국 GiveVision과 시각장애인을 위한 웨어러블 기기에 대한 고찰",
+      "snippet": "게다가 기기의 무게는 150g으로 타 VR 헤드셋보다 훨씬 가볍다. 이러한 장점을 통해 'SightPlus'는 가정용으로도, 시력 진단을 위해 병원에서도 사용한다.",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:54+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev14"
+    },
+    {
+      "url": "https://www.yna.co.kr/amp/view/AKR20230306035000003",
+      "title": "'시각장애인에 희망의 빛을'…삼성 시각보조 솔루션 빛을 보다",
+      "snippet": "또 별도의 시각장애인 사용자 평가 결과, 기존 상용제품보다 성능과 사용성이 뛰어난 것으로 나타났다고 덧붙였다. 송승환 감독은 \"어렴풋이 형체만",
+      "source_type": "news",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:54+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항, 시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev15"
+    },
+    {
+      "url": "https://www.bgr.com/1958519/hands-on-rokid-ar-smart-glasses/",
+      "title": "Hands-On With Rokid's Futuristic AR Smart Glasses - bgr.com",
+      "snippet": "I was able to try Rokid Glasses for a while. Those glasses work with three distinct commands: You can slide and tap the outer arm of the glasses to navigate the menu, you can click a proper button for taking photos or recording videos, and you can ask Rokid's AI assistant to navigate the product. Af",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:57+00:00",
+      "published_date": "Thu, 04 Sep 2025 08:05:27 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev16"
+    },
+    {
+      "url": "https://eu.36kr.com/en/p/3452252964705923",
+      "title": "Can Lens Technology Break Through with AI in the Post-Apple Era? - 36Kr",
+      "snippet": "According to the latest financial report, in the first half of 2025, Lens Technology's smart car and cockpit business achieved revenues of 3.165 billion yuan, a year - on - year increase of 16.45%; the smart headset and wearable device business revenues reached 1.647 billion yuan, a 14.74% increase;",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:57+00:00",
+      "published_date": "Thu, 04 Sep 2025 13:38:57 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev17"
+    },
+    {
+      "url": "https://www.roadtovr.com/rokid-glasses-kickstarter-surpasses-1m-smart-glasses-display/",
+      "title": "Rokid Glasses Raise Over $1M in First Week, Proving Strong Demand for Display-clad Smart Glasses - Road to VR",
+      "snippet": "# Rokid Glasses Raise Over $1M in First Week, Proving Strong Demand for Display-clad Smart Glasses Rokid, the China and US-based AR startup, launched a Kickstarter campaign last week for Rokid Glasses, frontrunning the competition with a pair of smart glasses housing green monochrome displays. If Ro",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:57+00:00",
+      "published_date": "Mon, 01 Sep 2025 13:19:31 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev18"
+    },
+    {
+      "url": "https://www.businessinsider.com/tech-for-seniors-aging-at-home-care-bills-2026-7",
+      "title": "How families are using tech to ease grandma's caregiving bills — and the burden on her loved ones - Business Insider",
+      "snippet": "As part of her morning routine, Karen Murray wakes up and immediately turns on the TV at her mother's assisted living home in New Jersey, 40 minutes away. At the crack of dawn, she puts Pandora on through the TV in her mother Marion's room. Karen, who's 60, can do all this for her from afar using Ma",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T04:57:57+00:00",
+      "published_date": "Sun, 12 Jul 2026 08:05:01 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "시각 장애인 거동 보조 웨어러블 머신 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev19"
+    }
+  ],
+  "evidence_gaps": [
+    {
+      "topic": "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항",
+      "query": "시각 장애인 웨어러블 기술 요구사항"
+    },
+    {
+      "topic": "시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터",
+      "query": "시각 장애인 웨어러블 기기 사용자 경험 조사"
+    }
+  ],
+  "dynamic_research": {
+    "reported": 2,
+    "searches": [
+      {
+        "topic": "시각 장애인 거동 보조 웨어러블 머신의 구체적인 기술적 요구사항",
+        "query": "시각 장애인 웨어러블 기술 요구사항",
+        "hits": 5,
+        "state": "ok"
+      },
+      {
+        "topic": "시각 장애인을 위한 웨어러블 기기의 사용자 경험 관련 데이터",
+        "query": "시각 장애인 웨어러블 기기 사용자 경험 조사",
+        "hits": 5,
+        "state": "ok"
+      }
+    ],
+    "new_sources": 10,
+    "added_findings": 2,
+    "applied": true,
+    "skip_reason": null
+  },
+  "logs": [
+    "[preprocess] 입력 구조화 완료",
+    "[research] 시장조사 완료 (실제 LLM·gpt-4o-mini, 웹검색 5건, 근거공백 2건 보고)",
+    "[research_gap] 추가 조사 완료 (실제 LLM·gpt-4o-mini, 검색 2건 · 새 근거 10건 · 보강 2항목)",
+    "[business_model] 수익모델 설계 완료 (실제 LLM·gpt-4o-mini)",
+    "[competitor] 경쟁사 분석 완료 (실제 LLM·gpt-4o-mini, 웹검색 4건, 3개사)",
+    "[customer] 고객 문제 분석 완료 (실제 LLM·gpt-4o-mini, pain 3건)",
+    "[pestel] PESTEL 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[risk] 리스크 분석 완료 (실제 LLM·gpt-4o-mini, 5건)",
+    "[swot] SWOT 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[kosena_industry] 산업 분석 완료 (실제 LLM·gpt-4o-mini, Porter 5/5 · KSF 5/5 · 시사점 3/3)",
+    "[kosena_model] 비즈니스 모델 설계 완료 (실제 LLM·gpt-4o-mini, Lean Canvas 9/9 · HMW 5/5 · 아이디어 27/25+ → 압축 3/3 → 컨셉 1)",
+    "[kosena_research] 고객·시장 분석 완료 (실제 LLM·gpt-4o-mini, 페르소나 2/2 · CJM 5/5 · 비교항목 10/10+ · 비교표 7행)",
+    "[kosena_roadmap] 로드맵 설계 완료 (실제 LLM·gpt-4o-mini, 기능 5/5~7 · Use Case 3/3 · Story 4 · 와이어프레임 3)",
+    "[draft_writer] 초안 작성 완료 (실제 LLM·gpt-4o-mini)",
+    "[reviewer] 초안 평가 완료 (총점=62, 실제 LLM·gpt-4o-mini)",
+    "[draft_writer] 섹션 단위 재작성 완료 (revision=1, 3개 섹션: 시장 및 산업 분석, 제안 서비스, 차별성, 실제 LLM·gpt-4o-mini)",
+    "[polish] 생략 — 내용 이슈만·구조 정상(revision=section)",
+    "[final_reviewer] 최종본 재평가 완료 (총점=69, Δ+7 vs 초안, 실제 LLM·gpt-4o-mini)",
+    "[verify] 근거 일치성 검증 완료 (실제 LLM·gpt-4o-mini, 사실주장 확인 1/1, 반대근거 0건, 근거연결 1건, 검색 요약 기준)"
+  ],
+  "project_id": 1,
+  "usage": {
+    "calls": 19,
+    "input_tokens": 103101,
+    "output_tokens": 13617,
+    "total_tokens": 116718,
+    "est_cost_usd": 0.0236,
+    "llm_latency_sum_ms": 173542.2,
+    "wall_time_ms": 167545.5,
+    "latency_ms": 173542.2,
+    "fallback_calls": 0
+  },
+  "run_status": "success",
+  "failed_nodes": [],
+  "fallback_nodes": [],
+  "fallback_reasons": {},
+  "workflow_mode": "parallel",
+  "timing": {
+    "workflow_mode": "parallel",
+    "wall_time_ms": 167545.5,
+    "span_ms": 167533.4,
+    "stages": {
+      "preprocess": 0.0,
+      "research": 14940.8,
+      "analysis_block": 30246.4,
+      "kosena_block": 68226.0,
+      "draft": 17404.0,
+      "initial_review": 5975.0,
+      "revise_or_finalize": 10128.8,
+      "polish": 0.1,
+      "final_review": 5254.1,
+      "verify": 9135.3
+    },
+    "nodes": {
+      "competitor": 5405.5,
+      "customer": 4474.2,
+      "pestel": 22807.0,
+      "swot": 2692.1,
+      "business_model": 3171.5,
+      "risk": 7431.0
+    },
+    "critical_path": [
+      "preprocess",
+      "research",
+      "risk",
+      "draft",
+      "reviewer",
+      "section_revise",
+      "polish",
+      "final_reviewer",
+      "verify"
+    ],
+    "stage_sum_ms": 161310.5,
+    "coverage": 0.963,
+    "coverage_active": 0.963
+  },
+  "budget": {
+    "limits": {
+      "max_llm_calls": 50,
+      "max_cost_usd": 1.0,
+      "max_wall_ms": 600000
+    },
+    "spent": {
+      "calls": 19,
+      "est_cost_usd": 0.023635,
+      "wall_time_ms": 167545.5,
+      "provider_attempts": 19
+    },
+    "exceeded": [],
+    "enforced": false
+  },
+  "state_version": 3,
+  "kosena": {
+    "critical_uncertainties": [
+      {
+        "factor": "Political",
+        "why": "정부의 지원 정책은 보조 기술 시장의 성장에 직접적인 영향을 미치며, 기업의 시장 진입 및 확장에 기여할 수 있습니다.",
+        "impact": "정책 변화에 따라 기업의 운영 환경이 달라질 수 있으며, 정부와의 협력 관계가 중요해질 것입니다."
+      },
+      {
+        "factor": "Economic",
+        "why": "시각 장애인을 위한 보조 기술 시장은 연평균 7.45%의 성장률을 기록할 것으로 예상되며, 이는 기업의 수익성에 중요한 영향을 미칩니다.",
+        "impact": "경제적 불황이 발생할 경우 소비자 지출 감소로 인해 시장 성장에 부정적인 영향을 미칠 수 있습니다."
+      },
+      {
+        "factor": "Technological",
+        "why": "AI와 IoT 기술의 발전은 보조 기술의 혁신을 이끌고 있으며, 사용자 맞춤형 솔루션 제공의 기회를 창출합니다.",
+        "impact": "기술적 결함이나 사용자 경험 부족이 제품의 신뢰성에 영향을 미칠 수 있으며, 지속적인 기술 혁신이 필요합니다."
+      }
+    ],
+    "porter": {
+      "rivalry": {
+        "level": "높음",
+        "rationale": "Aira, OrCam, Seeing AI와 같은 강력한 경쟁사가 존재하여 시장 내 경쟁이 치열합니다."
+      },
+      "new_entrants": {
+        "level": "중간",
+        "rationale": "시장 성장 가능성이 높지만, 기술적 진입 장벽과 초기 투자 비용이 존재합니다."
+      },
+      "substitutes": {
+        "level": "중간",
+        "rationale": "기존의 비접촉식 인식 기기나 스마트폰 앱 등이 대체 수단으로 작용할 수 있습니다."
+      },
+      "buyer_power": {
+        "level": "중간",
+        "rationale": "소비자들은 다양한 제품 선택이 가능하므로 가격과 품질에 민감하게 반응할 수 있습니다."
+      },
+      "supplier_power": {
+        "level": "낮음",
+        "rationale": "부품 및 기술 공급자가 다양하여 공급자의 협상력이 상대적으로 낮습니다."
+      }
+    },
+    "value_chain": {
+      "inbound": "고품질 부품 및 기술 확보를 위한 공급망 관리가 중요합니다.",
+      "operations": "AI 및 머신러닝 기술을 활용한 제품 개발 및 품질 관리가 필요합니다.",
+      "outbound": "효율적인 유통망을 통해 소비자에게 신속하게 제품을 제공해야 합니다.",
+      "marketing": "소셜 미디어 및 캠페인을 통해 시각 장애인 대상의 인식 개선과 제품 홍보가 필요합니다.",
+      "service": "사용자 피드백을 반영한 지속적인 제품 개선과 고객 지원 서비스가 중요합니다.",
+      "infrastructure": "기업의 운영 효율성을 높이기 위한 기술 기반의 인프라 구축이 필요합니다.",
+      "hr": "전문 인력 확보 및 지속적인 교육 프로그램이 필요합니다.",
+      "technology": "최신 기술 트렌드를 반영한 연구 개발이 필수적입니다.",
+      "procurement": "비용 효율적인 자원 조달을 통해 경쟁력을 유지해야 합니다."
+    },
+    "ksf": [
+      "AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공",
+      "사용자 친화적인 웨어러블 기기 개발",
+      "비용 효율적인 제품 라인업 구축",
+      "정부 정책 및 교육 이니셔티브와의 협력",
+      "지속적인 기술 혁신 및 품질 관리"
+    ],
+    "implications": [
+      "정부 지원 정책을 활용하여 제품 개발 및 마케팅 전략을 수립해야 합니다.",
+      "AI 기반 기술을 통해 사용자 맞춤형 솔루션을 지속적으로 개선해야 합니다.",
+      "소비자 요구에 맞춘 다양한 가격대의 제품을 제공하여 시장 점유율을 확대해야 합니다."
+    ],
+    "hmw": [
+      "어떻게 하면 20대 후반에서 60대 초반의 시각 장애인이 보행 중 장애물이나 신호를 실시간으로 인식할 수 있을까?",
+      "어떻게 하면 시각 장애인이 독립적인 이동을 위해 사용자 친화적인 웨어러블 기기를 쉽게 사용할 수 있을까?",
+      "어떻게 하면 AI 및 머신러닝 기술을 활용하여 시각 장애인에게 맞춤형 솔루션을 제공할 수 있을까?",
+      "어떻게 하면 정부 정책 및 교육 이니셔티브와 협력하여 시각 장애인을 위한 보조 기기의 접근성을 높일 수 있을까?",
+      "어떻게 하면 비용 효율적인 제품 라인업을 구축하여 더 많은 시각 장애인에게 서비스를 제공할 수 있을까?"
+    ],
+    "ideas": [
+      "AI 기반 장애물 인식 기능을 갖춘 웨어러블 기기 개발",
+      "사용자 맞춤형 음성 안내 시스템 구현",
+      "실시간 경로 안내 기능 추가",
+      "사용자 친화적인 터치 인터페이스 설계",
+      "모바일 앱과 연동하여 추가 기능 제공",
+      "다양한 가격대의 하드웨어 모델 출시",
+      "사용자 피드백을 반영한 지속적인 업데이트 제공",
+      "시각 장애인을 위한 교육 프로그램 개발",
+      "정부 지원금을 활용한 마케팅 전략 수립",
+      "커뮤니티와 협력하여 사용자 테스트 진행",
+      "웨어러블 기기와 스마트폰 연동 기능 강화",
+      "데이터 분석을 통한 사용자 행동 패턴 연구",
+      "다양한 언어 지원을 통한 글로벌 시장 진출",
+      "AI 기반의 경로 최적화 알고리즘 개발",
+      "사용자 맞춤형 디자인 옵션 제공",
+      "기기 사용법을 쉽게 설명하는 비디오 제작",
+      "소셜 미디어 캠페인을 통한 인식 제고",
+      "시각 장애인 전용 포럼 운영",
+      "기기 사용자의 성공 사례 공유",
+      "정기적인 사용자 만족도 조사 실시",
+      "기술 교육 세미나 개최",
+      "웨어러블 기기의 배터리 수명 연장 기술 개발",
+      "시각 장애인을 위한 전용 고객 지원 서비스 제공",
+      "AI 기반의 사용자 맞춤형 피드백 시스템 구축",
+      "기기 사용 시나리오를 기반으로 한 교육 자료 제작",
+      "시각 장애인과의 협업을 통한 제품 개선",
+      "기기 사용자의 안전성을 높이기 위한 기능 추가"
+    ],
+    "shortlisted_concepts": [
+      {
+        "concept": "AI 기반 장애물 인식 기능을 갖춘 웨어러블 기기",
+        "feasibility": "기술적으로 가능하며, 현재 AI 기술이 발전하고 있어 구현이 용이하다.",
+        "marketability": "시각 장애인 시장에서 큰 수요가 예상되며, 독립적인 이동을 원하는 사용자에게 매력적이다.",
+        "differentiation": "기존 제품과 차별화된 실시간 인식 기능을 제공하여 경쟁력을 갖출 수 있다.",
+        "selection_reason": "시각 장애인의 이동 안전성을 크게 향상시킬 수 있는 핵심 기능이기 때문이다."
+      },
+      {
+        "concept": "사용자 맞춤형 음성 안내 시스템",
+        "feasibility": "음성 인식 및 합성 기술이 발전하여 구현이 가능하다.",
+        "marketability": "사용자 친화적인 접근 방식으로 시각 장애인들에게 큰 호응을 얻을 수 있다.",
+        "differentiation": "개인의 필요에 맞춘 맞춤형 음성 안내로 차별화된 경험을 제공한다.",
+        "selection_reason": "사용자 경험을 극대화할 수 있는 중요한 요소이기 때문이다."
+      },
+      {
+        "concept": "사용자 친화적인 터치 인터페이스 설계",
+        "feasibility": "기존의 터치 기술을 활용하여 구현이 가능하다.",
+        "marketability": "사용자 친화적인 인터페이스는 시각 장애인에게 매우 중요한 요소로, 시장에서의 경쟁력을 높일 수 있다.",
+        "differentiation": "기존 제품들보다 직관적이고 사용하기 쉬운 인터페이스로 차별화된다.",
+        "selection_reason": "기기의 사용성을 높여 사용자 만족도를 증가시킬 수 있는 핵심 요소이기 때문이다."
+      }
+    ],
+    "selected_concept": "AI 기반 장애물 인식 기능을 갖춘 웨어러블 기기는 시각 장애인의 독립적인 이동을 지원하는 데 가장 효과적이며, 기술적으로도 실현 가능성이 높고 시장에서의 수요가 크기 때문에 최종 서비스 컨셉으로 선택하였다.",
+    "lean_canvas": {
+      "problem": "1. 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다. 2. 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다. 3. 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다.",
+      "customer_segments": "20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자.",
+      "uvp": "AI 기반 웨어러블 기기로 시각 장애인의 독립적인 이동을 지원합니다.",
+      "solution": "1. 실시간 장애물 인식 기능. 2. 사용자 맞춤형 음성 안내 시스템. 3. 사용자 친화적인 터치 인터페이스.",
+      "channels": "온라인 마케팅, 장애인 관련 커뮤니티, 정부 지원 프로그램.",
+      "revenue_streams": "하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력.",
+      "cost_structure": "연구개발 비용, 제조 및 생산 비용, 마케팅 및 판매 비용, 고객 지원 및 유지 관리 비용.",
+      "key_metrics": "판매량, 구독자 수, 고객 유지율, 고객 만족도, 수익 성장률.",
+      "unfair_advantage": "AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공으로 경쟁사 대비 차별화된 서비스."
+    },
+    "key_hypotheses": [
+      {
+        "hypothesis": "AI 기반 장애물 인식 기능이 시각 장애인의 이동 안전성을 향상시킬 것이다.",
+        "validation": "사용자 테스트를 통해 실제 사용 환경에서의 효과를 평가한다.",
+        "metric": "사용자 이동 중 사고 발생률 감소."
+      },
+      {
+        "hypothesis": "사용자 맞춤형 음성 안내 시스템이 사용자 만족도를 높일 것이다.",
+        "validation": "사용자 설문조사를 통해 만족도를 측정한다.",
+        "metric": "사용자 만족도 점수."
+      },
+      {
+        "hypothesis": "사용자 친화적인 터치 인터페이스가 기기 사용성을 향상시킬 것이다.",
+        "validation": "사용자 테스트를 통해 인터페이스 사용성을 평가한다.",
+        "metric": "사용자 인터페이스 사용 시간 및 오류 발생률."
+      }
+    ],
+    "personas": [
+      {
+        "name": "이준호",
+        "demographics": "30세, IT 회사 직원, 연봉 4천만원, 서울 거주",
+        "behavior": "일상적으로 출퇴근 시 대중교통을 이용하며, 스마트폰과 다양한 앱을 활용해 정보를 얻음. 의사결정 시 사용자 리뷰와 추천을 중요시함.",
+        "goal": "독립적으로 이동하며 일상생활에서의 자율성을 높이고 싶음.",
+        "pain_points": "보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵고, 기존 보조 기기의 정보 한계로 독립적인 이동이 제한됨.",
+        "expectations": "실시간으로 장애물과 신호를 인식할 수 있는 기술을 원하며, 사용자 친화적인 인터페이스를 기대함. 복잡한 기기는 거부함."
+      },
+      {
+        "name": "김영희",
+        "demographics": "45세, 자영업자, 연봉 5천만원, 부산 거주",
+        "behavior": "일상적으로 가게 운영을 위해 외출하며, 스마트폰을 통해 다양한 정보를 검색함. 의사결정 시 가격과 성능을 중요시함.",
+        "goal": "안전하게 이동하며 자립적인 생활을 유지하고 싶음.",
+        "pain_points": "기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한되고, 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡함.",
+        "expectations": "직관적이고 사용하기 쉬운 웨어러블 기기를 원하며, 개인의 필요에 맞춘 맞춤형 솔루션을 기대함."
+      }
+    ],
+    "cjm": {
+      "stages": [
+        {
+          "stage": "인지",
+          "action": "시각 장애인 보조 기기에 대한 정보 검색",
+          "emotion": "호기심과 기대감",
+          "pain_point": "정보의 부족으로 인해 선택의 어려움",
+          "touchpoint": "웹사이트, 소셜 미디어"
+        },
+        {
+          "stage": "고려",
+          "action": "다양한 제품 비교 및 리뷰 확인",
+          "emotion": "혼란과 불안",
+          "pain_point": "제품의 기능과 가격에 대한 불확실성",
+          "touchpoint": "리뷰 사이트, 사용자 포럼"
+        },
+        {
+          "stage": "구매",
+          "action": "구매 결정 및 결제",
+          "emotion": "긴장과 기대",
+          "pain_point": "결제 과정의 복잡함",
+          "touchpoint": "온라인 쇼핑몰"
+        },
+        {
+          "stage": "사용",
+          "action": "기기 착용 및 사용",
+          "emotion": "기대와 불안",
+          "pain_point": "사용법이 복잡해 적응이 어려움",
+          "touchpoint": "사용자 매뉴얼, 고객 지원"
+        },
+        {
+          "stage": "재사용/이탈",
+          "action": "기기 재사용 또는 다른 제품 고려",
+          "emotion": "만족 또는 실망",
+          "pain_point": "기대에 미치지 못하는 성능",
+          "touchpoint": "고객 피드백, 소셜 미디어"
+        }
+      ],
+      "opportunities": [
+        "사용자 맞춤형 기능을 추가하여 개인의 필요를 충족시킬 수 있는 기회를 제공",
+        "사용자 교육 프로그램을 통해 기기 사용법을 쉽게 안내할 수 있는 기회"
+      ]
+    },
+    "market_sizing": {
+      "tam": "108억 달러 (2034년 예상)",
+      "sam": "추정 10억 달러 (시각 장애인 보조 기기 시장의 10%)",
+      "som": "추정 1억 달러 (1~3년차 점유 가능 시장의 1%)",
+      "top_down": "56억 6천만 달러 × 10% = 5억 6천 6백만 달러",
+      "bottom_up": "100만 명 × 100달러 × 5회 = 5억 달러",
+      "gap_reason": "top_down 방식은 시장 전체를 기준으로, bottom_up 방식은 특정 고객 수를 기준으로 하여 차이가 발생",
+      "assumptions": [
+        "시장 성장률은 연평균 7.45%로 가정",
+        "시각 장애인 수는 100만 명으로 가정",
+        "각 사용자의 연간 기기 사용 빈도는 5회로 가정"
+      ]
+    },
+    "competitor_groups": {
+      "direct": [
+        "Aira",
+        "OrCam",
+        "Seeing AI"
+      ],
+      "indirect": [
+        "Google Maps",
+        "Apple Maps"
+      ],
+      "potential": [
+        "Horus"
+      ]
+    },
+    "comparison_criteria": [
+      "기능",
+      "가격",
+      "UX",
+      "마케팅",
+      "고객획득",
+      "수익모델",
+      "인력",
+      "기술스택",
+      "고객 지원",
+      "사용자 피드백"
+    ],
+    "competitor_comparison": [
+      {
+        "name": "Aira",
+        "type": "direct",
+        "features": "실시간 비디오 지원",
+        "price": "월 29.99달러",
+        "ux": "사용자 친화적",
+        "target_user": "시각 장애인",
+        "revenue_model": "구독 기반",
+        "strength": "즉각적인 지원",
+        "weakness": "비용 부담"
+      },
+      {
+        "name": "OrCam",
+        "type": "direct",
+        "features": "텍스트 및 얼굴 인식",
+        "price": "약 4천달러",
+        "ux": "비접촉식 인식",
+        "target_user": "시각 장애인",
+        "revenue_model": "일회성 구매",
+        "strength": "다양한 언어 지원",
+        "weakness": "비용이 높음"
+      },
+      {
+        "name": "Seeing AI",
+        "type": "direct",
+        "features": "AI 기반 음성 안내",
+        "price": "무료",
+        "ux": "스마트폰 기반",
+        "target_user": "시각 장애인",
+        "revenue_model": "무료 제공",
+        "strength": "접근성 높음",
+        "weakness": "스마트폰 의존"
+      },
+      {
+        "name": "Google Maps",
+        "type": "indirect",
+        "features": "경로 안내",
+        "price": "무료",
+        "ux": "사용자 친화적",
+        "target_user": "일반 사용자",
+        "revenue_model": "광고 기반",
+        "strength": "광범위한 사용자 기반",
+        "weakness": "시각 장애인 맞춤형 아님"
+      },
+      {
+        "name": "Apple Maps",
+        "type": "indirect",
+        "features": "경로 안내",
+        "price": "무료",
+        "ux": "사용자 친화적",
+        "target_user": "일반 사용자",
+        "revenue_model": "광고 기반",
+        "strength": "애플 생태계와 통합",
+        "weakness": "시각 장애인 맞춤형 아님"
+      },
+      {
+        "name": "Horus",
+        "type": "potential",
+        "features": "AI 기반 웨어러블 디바이스",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "시각 장애인",
+        "revenue_model": "미확인",
+        "strength": "미확인",
+        "weakness": "미확인"
+      },
+      {
+        "name": "자사",
+        "type": "self",
+        "features": "AI 기반 개인 맞춤형 웨어러블",
+        "price": "미확인",
+        "ux": "사용자 친화적",
+        "target_user": "시각 장애인",
+        "revenue_model": "미확인",
+        "strength": "개인 맞춤형 솔루션",
+        "weakness": "미확인"
+      }
+    ],
+    "positioning_map": {
+      "x_axis": "가격",
+      "y_axis": "기능",
+      "points": [
+        {
+          "name": "Aira",
+          "x": 7.0,
+          "y": 9.0
+        },
+        {
+          "name": "OrCam",
+          "x": 9.0,
+          "y": 8.0
+        },
+        {
+          "name": "Seeing AI",
+          "x": 1.0,
+          "y": 6.0
+        },
+        {
+          "name": "Google Maps",
+          "x": 1.0,
+          "y": 5.0
+        },
+        {
+          "name": "Apple Maps",
+          "x": 1.0,
+          "y": 5.0
+        },
+        {
+          "name": "Horus",
+          "x": 5.0,
+          "y": 7.0
+        },
+        {
+          "name": "자사",
+          "x": 4.0,
+          "y": 9.0
+        }
+      ]
+    },
+    "vpc": {
+      "customer_profile": {
+        "customer_jobs": [
+          "주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 기기를 사용하고 싶다.",
+          "일상적인 활동에서 독립성을 높이고 싶다.",
+          "기술을 통해 사회적 상호작용을 증진시키고 싶다."
+        ],
+        "pains": [
+          "보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다.",
+          "기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다.",
+          "사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다."
+        ],
+        "gains": [
+          "실시간으로 장애물, 신호, 경로 정보를 인식할 수 있는 기술이 필요하다.",
+          "독립적인 이동을 지원하는 보다 직관적이고 사용하기 쉬운 웨어러블 기기를 원한다.",
+          "개인의 필요에 맞춘 맞춤형 솔루션을 기대한다."
+        ]
+      },
+      "value_map": {
+        "products_services": [
+          "AI 기반 웨어러블 기기",
+          "사용자 맞춤형 음성 안내 시스템",
+          "사용자 친화적인 터치 인터페이스"
+        ],
+        "pain_relievers": [
+          "실시간 장애물 인식 기능",
+          "직관적인 사용자 인터페이스",
+          "사용자 교육 프로그램"
+        ],
+        "gain_creators": [
+          "독립적인 이동 지원",
+          "사회적 상호작용 증진",
+          "개인 맞춤형 기능 제공"
+        ]
+      },
+      "fit": "고객의 독립적인 이동 욕구와 제품의 실시간 인식 기능이 잘 맞아떨어짐."
+    },
+    "core_features": [
+      {
+        "name": "실시간 장애물 인식",
+        "impact": "사용자가 안전하게 이동할 수 있도록 지원",
+        "feasibility": "기술적으로 구현 가능"
+      },
+      {
+        "name": "사용자 맞춤형 음성 안내",
+        "impact": "개인의 필요에 맞춘 정보 제공",
+        "feasibility": "AI 기술 활용 가능"
+      },
+      {
+        "name": "직관적인 터치 인터페이스",
+        "impact": "사용자 친화적인 경험 제공",
+        "feasibility": "UI/UX 설계로 가능"
+      },
+      {
+        "name": "사용자 교육 프로그램",
+        "impact": "기기 사용법을 쉽게 안내",
+        "feasibility": "온라인 교육 자료 제작 가능"
+      },
+      {
+        "name": "데이터 분석 서비스",
+        "impact": "사용자 행동 분석을 통한 맞춤형 서비스 제공",
+        "feasibility": "데이터 수집 및 분석 시스템 구축 가능"
+      }
+    ],
+    "use_cases": [
+      {
+        "actor": "이준호",
+        "scenario": "이준호는 출퇴근 시 장애물 인식을 위해 기기를 착용한다.",
+        "expected_result": "기기가 실시간으로 장애물을 인식하고 안내하여 안전하게 이동한다."
+      },
+      {
+        "actor": "김영희",
+        "scenario": "김영희는 가게 운영을 위해 외출 시 기기를 사용한다.",
+        "expected_result": "기기가 신호와 경로 정보를 제공하여 안전하게 이동한다."
+      },
+      {
+        "actor": "이준호",
+        "scenario": "이준호는 기기를 통해 주변 환경을 인식하고 사회적 상호작용을 시도한다.",
+        "expected_result": "기기가 주변 사람들과의 상호작용을 도와준다."
+      }
+    ],
+    "moscow": {
+      "must": [
+        "실시간 장애물 인식",
+        "사용자 맞춤형 음성 안내",
+        "직관적인 터치 인터페이스"
+      ],
+      "should": [
+        "사용자 교육 프로그램",
+        "데이터 분석 서비스"
+      ],
+      "could": [],
+      "wont": [
+        "고급 기능 추가",
+        "다양한 언어 지원"
+      ]
+    },
+    "kano": {
+      "basic": [
+        "실시간 장애물 인식",
+        "사용자 맞춤형 음성 안내"
+      ],
+      "performance": [
+        "직관적인 터치 인터페이스",
+        "사용자 교육 프로그램"
+      ],
+      "excitement": [
+        "데이터 분석 서비스"
+      ]
+    },
+    "mvp_scope": "MVP는 실시간 장애물 인식과 사용자 맞춤형 음성 안내 기능을 포함하며, 직관적인 터치 인터페이스를 통해 사용자 경험을 향상시킵니다. 데이터 분석 서비스는 초기 단계에서 제외됩니다.",
+    "epics": [
+      {
+        "name": "기본 기능 개발",
+        "stories": [
+          {
+            "story": "As a 사용자, I want 실시간 장애물 인식 기능을 사용하고 싶다, So that 안전하게 이동할 수 있다.",
+            "given": "사용자가 기기를 착용하고 있다.",
+            "when": "주변에 장애물이 있을 때.",
+            "then": "기기가 장애물을 인식하고 안내한다."
+          },
+          {
+            "story": "As a 사용자, I want 사용자 맞춤형 음성 안내를 받고 싶다, So that 필요한 정보를 쉽게 얻을 수 있다.",
+            "given": "사용자가 기기를 착용하고 있다.",
+            "when": "기기가 주변 정보를 인식할 때.",
+            "then": "기기가 음성으로 정보를 안내한다."
+          }
+        ]
+      },
+      {
+        "name": "사용자 경험 개선",
+        "stories": [
+          {
+            "story": "As a 사용자, I want 직관적인 터치 인터페이스를 사용하고 싶다, So that 쉽게 기기를 조작할 수 있다.",
+            "given": "사용자가 기기를 착용하고 있다.",
+            "when": "기기를 조작할 때.",
+            "then": "기기가 직관적으로 반응한다."
+          },
+          {
+            "story": "As a 사용자, I want 사용자 교육 프로그램을 통해 기기를 배우고 싶다, So that 쉽게 사용할 수 있다.",
+            "given": "사용자가 기기를 구매했다.",
+            "when": "사용자가 교육 프로그램에 참여할 때.",
+            "then": "기기가 사용법을 쉽게 안내한다."
+          }
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "프로토타입 개발",
+        "period": "2024년 1분기",
+        "goal": "기본 기능이 포함된 프로토타입 완성"
+      },
+      {
+        "name": "베타 테스트",
+        "period": "2024년 2분기",
+        "goal": "사용자 피드백을 통한 기능 개선"
+      },
+      {
+        "name": "정식 출시",
+        "period": "2024년 3분기",
+        "goal": "상용 제품 출시 및 판매 시작"
+      }
+    ],
+    "kpis": [
+      {
+        "name": "판매량",
+        "target": "가정: 첫 6개월 내 500대 판매"
+      },
+      {
+        "name": "구독자 수",
+        "target": "가정: 첫 해 200명 구독자 확보"
+      },
+      {
+        "name": "고객 만족도",
+        "target": "가정: 80% 이상의 고객 만족도"
+      }
+    ],
+    "wireframes": [
+      {
+        "screen": "메인 화면",
+        "layout": "┌───────────────┐\n│   웨어러블 기기   │\n│   [시작하기]     │\n│   [설정]        │\n│   [도움말]      │\n└───────────────┘"
+      },
+      {
+        "screen": "핵심 기능 화면",
+        "layout": "┌───────────────┐\n│   장애물 인식    │\n│   [음성 안내]    │\n│   [환경 정보]    │\n└───────────────┘"
+      },
+      {
+        "screen": "결과/완료 화면",
+        "layout": "┌───────────────┐\n│   이동 완료      │\n│   [다시 시작]    │\n│   [피드백]       │\n└───────────────┘"
+      }
+    ]
+  },
+  "kosena_compliance": {
+    "total": 28,
+    "ok": 27,
+    "partial": 1,
+    "missing": 0,
+    "checks": [
+      {
+        "id": "pestel_6",
+        "module": "M1",
+        "title": "PESTEL 6영역",
+        "page": 7,
+        "status": "ok",
+        "detail": "6개 영역"
+      },
+      {
+        "id": "pestel_critical_top3",
+        "module": "M1",
+        "title": "Critical Uncertainties Top 3",
+        "page": 7,
+        "status": "ok",
+        "detail": "Top 3 선별됨"
+      },
+      {
+        "id": "frameworks_2",
+        "module": "M1",
+        "title": "Porter/SWOT/Value Chain 중 2개 이상",
+        "page": 8,
+        "status": "ok",
+        "detail": "SWOT + Porter + Value Chain"
+      },
+      {
+        "id": "ksf_5",
+        "module": "M1",
+        "title": "KSF 5개",
+        "page": 8,
+        "status": "ok",
+        "detail": "5개"
+      },
+      {
+        "id": "implications_3",
+        "module": "M1",
+        "title": "설계 시사점 3가지",
+        "page": 8,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "hmw_ideation",
+        "module": "M1",
+        "title": "HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개",
+        "page": 9,
+        "status": "ok",
+        "detail": "HMW 5개 · 아이디어 27개 → 압축 3개 → 컨셉 1개"
+      },
+      {
+        "id": "lean_canvas_9",
+        "module": "M1",
+        "title": "Lean Canvas 9블록",
+        "page": 10,
+        "status": "ok",
+        "detail": "9블록"
+      },
+      {
+        "id": "key_hypotheses_3",
+        "module": "M1",
+        "title": "핵심 가설 3개",
+        "page": 10,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "personas_2",
+        "module": "M2",
+        "title": "페르소나 2종 × 필수 5항목",
+        "page": 12,
+        "status": "ok",
+        "detail": "2종 · 필수 5항목 충족"
+      },
+      {
+        "id": "cjm",
+        "module": "M2",
+        "title": "CJM 5단계 × 4항목 + Opportunity",
+        "page": 12,
+        "status": "ok",
+        "detail": "5단계 × 4항목"
+      },
+      {
+        "id": "tam_sam_som",
+        "module": "M2",
+        "title": "TAM·SAM·SOM",
+        "page": 13,
+        "status": "ok",
+        "detail": "TAM·SAM·SOM"
+      },
+      {
+        "id": "sizing_cross_check",
+        "module": "M2",
+        "title": "Top-down · Bottom-up 교차검증",
+        "page": 13,
+        "status": "ok",
+        "detail": "Top-down + Bottom-up"
+      },
+      {
+        "id": "competitors_3_2_1",
+        "module": "M2",
+        "title": "경쟁사 직접3·간접2·잠재1",
+        "page": 14,
+        "status": "ok",
+        "detail": "직접3 · 간접2 · 잠재1"
+      },
+      {
+        "id": "comparison_criteria_10",
+        "module": "M2",
+        "title": "비교 항목 10개 이상 + 경쟁사 비교표",
+        "page": 14,
+        "status": "ok",
+        "detail": "기준 10개 · 비교표 7행"
+      },
+      {
+        "id": "positioning_map",
+        "module": "M2",
+        "title": "2축 포지셔닝 맵",
+        "page": 14,
+        "status": "ok",
+        "detail": "가격 × 기능"
+      },
+      {
+        "id": "vpc",
+        "module": "M2",
+        "title": "VPC 6영역 + Fit",
+        "page": 15,
+        "status": "ok",
+        "detail": "고객 프로필 3 + 가치 지도 3"
+      },
+      {
+        "id": "core_features_5_7",
+        "module": "M2",
+        "title": "핵심 기능 5~7개",
+        "page": 15,
+        "status": "ok",
+        "detail": "5개"
+      },
+      {
+        "id": "use_cases_3",
+        "module": "M2",
+        "title": "Use Case 3종",
+        "page": 15,
+        "status": "ok",
+        "detail": "3종"
+      },
+      {
+        "id": "moscow",
+        "module": "M3",
+        "title": "MOSCOW 4구분(Won't 명시)",
+        "page": 17,
+        "status": "ok",
+        "detail": "Must/Should/Could/Won't"
+      },
+      {
+        "id": "kano",
+        "module": "M3",
+        "title": "Kano 3분류",
+        "page": 17,
+        "status": "ok",
+        "detail": "3분류"
+      },
+      {
+        "id": "mvp_scope",
+        "module": "M3",
+        "title": "MVP 범위",
+        "page": 17,
+        "status": "ok",
+        "detail": "범위 정의됨"
+      },
+      {
+        "id": "epic_story_ac",
+        "module": "M3",
+        "title": "Epic-Story-AC (Given-When-Then)",
+        "page": 18,
+        "status": "ok",
+        "detail": "Epic 2 · Story 4 · AC 전부 Given-When-Then"
+      },
+      {
+        "id": "milestones_kpi",
+        "module": "M3",
+        "title": "마일스톤 · KPI",
+        "page": 3,
+        "status": "ok",
+        "detail": "마일스톤 + KPI"
+      },
+      {
+        "id": "wireframes",
+        "module": "M3",
+        "title": "와이어프레임 2~3개 화면",
+        "page": 5,
+        "status": "ok",
+        "detail": "3개 화면"
+      },
+      {
+        "id": "sources_cited",
+        "module": "공통",
+        "title": "출처 명시 (실행 전체 · 항목별 연결 아님)",
+        "page": 4,
+        "status": "ok",
+        "detail": "출처 19건(주장 연결 1건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현"
+      },
+      {
+        "id": "ai_usage_log",
+        "module": "공통",
+        "title": "AI 활용 로그(프롬프트·응답·채택 여부)",
+        "page": 4,
+        "status": "ok",
+        "detail": "18건 · 전부 프롬프트·입력·산출·검증·채택 기록"
+      },
+      {
+        "id": "hypothesis_labeling",
+        "module": "공통",
+        "title": "정량 주장의 가설·추정 표기",
+        "page": 4,
+        "status": "ok",
+        "detail": "가설·추정 표기 있음"
+      },
+      {
+        "id": "doc_length",
+        "module": "공통",
+        "title": "본문 A4 30~50쪽",
+        "page": 4,
+        "status": "partial",
+        "detail": "약 13.3쪽(추정) — 30~50쪽 필요"
+      }
+    ],
+    "by_module": {
+      "M1": {
+        "ok": 8,
+        "partial": 0,
+        "missing": 0
+      },
+      "M2": {
+        "ok": 10,
+        "partial": 0,
+        "missing": 0
+      },
+      "M3": {
+        "ok": 6,
+        "partial": 0,
+        "missing": 0
+      },
+      "공통": {
+        "ok": 3,
+        "partial": 1,
+        "missing": 0
+      }
+    },
+    "unmet": [
+      "doc_length"
+    ],
+    "data_source": "real",
+    "summary": "KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0"
+  },
+  "kosena_plan": "# 시각 장애인 거동 보조 웨어러블 머신 — 서비스 기획안 (KOSENA)\n\n> ⚠️ **본 문서의 정량 주장은 웹 리서치에 기반한 가설·추정입니다.** 인터뷰·설문 등 1차 자료로 검증되지 않았으며, 페르소나는 **가설형 페르소나**이고 TAM/SAM/SOM 은 명시한 가정 위의 **추정치**입니다. 실제 시장 점유율·고객 반응을 의미하지 않습니다.\n>\n> KOSENA 의 목표대로 *\"완벽한 기획서가 아니라 의사결정 가능한 가설\"* 을 만드는 것이 이 문서의 성격입니다. 각 가설은 시장·고객을 만나며 갱신되어야 합니다.\n\n## 개요\n\n| 항목 | 내용 |\n|---|---|\n| 프로젝트명 | 시각 장애인 거동 보조 웨어러블 머신 |\n| 설명 | 시각 장애인을 위한 거동 보조 웨어러블 머신으로, 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕습니다. |\n| 목표 사용자 | 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자 |\n| 문제 | 보행 중 장애물·신호·경로 정보를 실시간으로 알기 어려워 독립적인 이동이 제한된다 |\n\n## 1. 산업·서비스 분석 보고서\n\n### Critical Uncertainties (영향력·가능성 상위 3)\n\n| 요인 | 왜 중요한가 | 서비스 영향 |\n|---|---|---|\n| Political | 정부의 지원 정책은 보조 기술 시장의 성장에 직접적인 영향을 미치며, 기업의 시장 진입 및 확장에 기여할 수 있습니다. | 정책 변화에 따라 기업의 운영 환경이 달라질 수 있으며, 정부와의 협력 관계가 중요해질 것입니다. |\n| Economic | 시각 장애인을 위한 보조 기술 시장은 연평균 7.45%의 성장률을 기록할 것으로 예상되며, 이는 기업의 수익성에 중요한 영향을 미칩니다. | 경제적 불황이 발생할 경우 소비자 지출 감소로 인해 시장 성장에 부정적인 영향을 미칠 수 있습니다. |\n| Technological | AI와 IoT 기술의 발전은 보조 기술의 혁신을 이끌고 있으며, 사용자 맞춤형 솔루션 제공의 기회를 창출합니다. | 기술적 결함이나 사용자 경험 부족이 제품의 신뢰성에 영향을 미칠 수 있으며, 지속적인 기술 혁신이 필요합니다. |\n\n### Porter's Five Forces\n\n| Force | 강도 | 근거 |\n|---|---|---|\n| rivalry | 높음 | Aira, OrCam, Seeing AI와 같은 강력한 경쟁사가 존재하여 시장 내 경쟁이 치열합니다. |\n| new_entrants | 중간 | 시장 성장 가능성이 높지만, 기술적 진입 장벽과 초기 투자 비용이 존재합니다. |\n| substitutes | 중간 | 기존의 비접촉식 인식 기기나 스마트폰 앱 등이 대체 수단으로 작용할 수 있습니다. |\n| buyer_power | 중간 | 소비자들은 다양한 제품 선택이 가능하므로 가격과 품질에 민감하게 반응할 수 있습니다. |\n| supplier_power | 낮음 | 부품 및 기술 공급자가 다양하여 공급자의 협상력이 상대적으로 낮습니다. |\n\n### Value Chain\n\n| 활동 | 내용 |\n|---|---|\n| inbound | 고품질 부품 및 기술 확보를 위한 공급망 관리가 중요합니다. |\n| operations | AI 및 머신러닝 기술을 활용한 제품 개발 및 품질 관리가 필요합니다. |\n| outbound | 효율적인 유통망을 통해 소비자에게 신속하게 제품을 제공해야 합니다. |\n| marketing | 소셜 미디어 및 캠페인을 통해 시각 장애인 대상의 인식 개선과 제품 홍보가 필요합니다. |\n| service | 사용자 피드백을 반영한 지속적인 제품 개선과 고객 지원 서비스가 중요합니다. |\n| infrastructure | 기업의 운영 효율성을 높이기 위한 기술 기반의 인프라 구축이 필요합니다. |\n| hr | 전문 인력 확보 및 지속적인 교육 프로그램이 필요합니다. |\n| technology | 최신 기술 트렌드를 반영한 연구 개발이 필수적입니다. |\n| procurement | 비용 효율적인 자원 조달을 통해 경쟁력을 유지해야 합니다. |\n\n### KSF (핵심 성공요인 5)\n\n- AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공\n- 사용자 친화적인 웨어러블 기기 개발\n- 비용 효율적인 제품 라인업 구축\n- 정부 정책 및 교육 이니셔티브와의 협력\n- 지속적인 기술 혁신 및 품질 관리\n\n### 서비스 설계 시사점 3\n\n- 정부 지원 정책을 활용하여 제품 개발 및 마케팅 전략을 수립해야 합니다.\n- AI 기반 기술을 통해 사용자 맞춤형 솔루션을 지속적으로 개선해야 합니다.\n- 소비자 요구에 맞춘 다양한 가격대의 제품을 제공하여 시장 점유율을 확대해야 합니다.\n\n## 2. Lean Canvas\n\n### 9개 블록 (작성 순서 1→9)\n\n| 항목 | 내용 |\n|---|---|\n| 1. Problem | 1. 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다. 2. 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다. 3. 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다. |\n| 2. Customer Segments | 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자. |\n| 3. UVP | AI 기반 웨어러블 기기로 시각 장애인의 독립적인 이동을 지원합니다. |\n| 4. Solution | 1. 실시간 장애물 인식 기능. 2. 사용자 맞춤형 음성 안내 시스템. 3. 사용자 친화적인 터치 인터페이스. |\n| 5. Channels | 온라인 마케팅, 장애인 관련 커뮤니티, 정부 지원 프로그램. |\n| 6. Revenue Streams | 하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력. |\n| 7. Cost Structure | 연구개발 비용, 제조 및 생산 비용, 마케팅 및 판매 비용, 고객 지원 및 유지 관리 비용. |\n| 8. Key Metrics | 판매량, 구독자 수, 고객 유지율, 고객 만족도, 수익 성장률. |\n| 9. Unfair Advantage | AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공으로 경쟁사 대비 차별화된 서비스. |\n\n### 핵심 가설 3개와 검증 계획\n\n| 가설 | 검증 방법 | 판단 지표 |\n|---|---|---|\n| AI 기반 장애물 인식 기능이 시각 장애인의 이동 안전성을 향상시킬 것이다. | 사용자 테스트를 통해 실제 사용 환경에서의 효과를 평가한다. | 사용자 이동 중 사고 발생률 감소. |\n| 사용자 맞춤형 음성 안내 시스템이 사용자 만족도를 높일 것이다. | 사용자 설문조사를 통해 만족도를 측정한다. | 사용자 만족도 점수. |\n| 사용자 친화적인 터치 인터페이스가 기기 사용성을 향상시킬 것이다. | 사용자 테스트를 통해 인터페이스 사용성을 평가한다. | 사용자 인터페이스 사용 시간 및 오류 발생률. |\n\n### 아이디어 발산 → 수렴 (27개 → 3개 → 1개)\n\n**HMW 질문**\n- 어떻게 하면 20대 후반에서 60대 초반의 시각 장애인이 보행 중 장애물이나 신호를 실시간으로 인식할 수 있을까?\n- 어떻게 하면 시각 장애인이 독립적인 이동을 위해 사용자 친화적인 웨어러블 기기를 쉽게 사용할 수 있을까?\n- 어떻게 하면 AI 및 머신러닝 기술을 활용하여 시각 장애인에게 맞춤형 솔루션을 제공할 수 있을까?\n- 어떻게 하면 정부 정책 및 교육 이니셔티브와 협력하여 시각 장애인을 위한 보조 기기의 접근성을 높일 수 있을까?\n- 어떻게 하면 비용 효율적인 제품 라인업을 구축하여 더 많은 시각 장애인에게 서비스를 제공할 수 있을까?\n\n**발산한 아이디어 27개**\n- AI 기반 장애물 인식 기능을 갖춘 웨어러블 기기 개발\n- 사용자 맞춤형 음성 안내 시스템 구현\n- 실시간 경로 안내 기능 추가\n- 사용자 친화적인 터치 인터페이스 설계\n- 모바일 앱과 연동하여 추가 기능 제공\n- 다양한 가격대의 하드웨어 모델 출시\n- 사용자 피드백을 반영한 지속적인 업데이트 제공\n- 시각 장애인을 위한 교육 프로그램 개발\n- 정부 지원금을 활용한 마케팅 전략 수립\n- 커뮤니티와 협력하여 사용자 테스트 진행\n- 웨어러블 기기와 스마트폰 연동 기능 강화\n- 데이터 분석을 통한 사용자 행동 패턴 연구\n- 다양한 언어 지원을 통한 글로벌 시장 진출\n- AI 기반의 경로 최적화 알고리즘 개발\n- 사용자 맞춤형 디자인 옵션 제공\n- 기기 사용법을 쉽게 설명하는 비디오 제작\n- 소셜 미디어 캠페인을 통한 인식 제고\n- 시각 장애인 전용 포럼 운영\n- 기기 사용자의 성공 사례 공유\n- 정기적인 사용자 만족도 조사 실시\n- 기술 교육 세미나 개최\n- 웨어러블 기기의 배터리 수명 연장 기술 개발\n- 시각 장애인을 위한 전용 고객 지원 서비스 제공\n- AI 기반의 사용자 맞춤형 피드백 시스템 구축\n- 기기 사용 시나리오를 기반으로 한 교육 자료 제작\n\n**압축 후보 3개 (실현가능성·시장성·차별성 평가)**\n\n| 후보 컨셉 | 실현가능성 | 시장성 | 차별성 | 남긴 이유 |\n|---|---|---|---|---|\n| AI 기반 장애물 인식 기능을 갖춘 웨어러블 기기 | 기술적으로 가능하며, 현재 AI 기술이 발전하고 있어 구현이 용이하다. | 시각 장애인 시장에서 큰 수요가 예상되며, 독립적인 이동을 원하는 사용자에게 매력적이다. | 기존 제품과 차별화된 실시간 인식 기능을 제공하여 경쟁력을 갖출 수 있다. | 시각 장애인의 이동 안전성을 크게 향상시킬 수 있는 핵심 기능이기 때문이다. |\n| 사용자 맞춤형 음성 안내 시스템 | 음성 인식 및 합성 기술이 발전하여 구현이 가능하다. | 사용자 친화적인 접근 방식으로 시각 장애인들에게 큰 호응을 얻을 수 있다. | 개인의 필요에 맞춘 맞춤형 음성 안내로 차별화된 경험을 제공한다. | 사용자 경험을 극대화할 수 있는 중요한 요소이기 때문이다. |\n| 사용자 친화적인 터치 인터페이스 설계 | 기존의 터치 기술을 활용하여 구현이 가능하다. | 사용자 친화적인 인터페이스는 시각 장애인에게 매우 중요한 요소로, 시장에서의 경쟁력을 높일 수 있다. | 기존 제품들보다 직관적이고 사용하기 쉬운 인터페이스로 차별화된다. | 기기의 사용성을 높여 사용자 만족도를 증가시킬 수 있는 핵심 요소이기 때문이다. |\n\n**최종 컨셉**\n\nAI 기반 장애물 인식 기능을 갖춘 웨어러블 기기는 시각 장애인의 독립적인 이동을 지원하는 데 가장 효과적이며, 기술적으로도 실현 가능성이 높고 시장에서의 수요가 크기 때문에 최종 서비스 컨셉으로 선택하였다.\n\n## 3. 고객 리서치 패키지\n\n### 페르소나 (가설형 — 인터뷰 미검증)\n\n#### 이준호\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 30세, IT 회사 직원, 연봉 4천만원, 서울 거주 |\n| 행동 패턴 | 일상적으로 출퇴근 시 대중교통을 이용하며, 스마트폰과 다양한 앱을 활용해 정보를 얻음. 의사결정 시 사용자 리뷰와 추천을 중요시함. |\n| Goal·동기 | 독립적으로 이동하며 일상생활에서의 자율성을 높이고 싶음. |\n| Pain Point | 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵고, 기존 보조 기기의 정보 한계로 독립적인 이동이 제한됨. |\n| 기대·거부 요인 | 실시간으로 장애물과 신호를 인식할 수 있는 기술을 원하며, 사용자 친화적인 인터페이스를 기대함. 복잡한 기기는 거부함. |\n\n#### 김영희\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 45세, 자영업자, 연봉 5천만원, 부산 거주 |\n| 행동 패턴 | 일상적으로 가게 운영을 위해 외출하며, 스마트폰을 통해 다양한 정보를 검색함. 의사결정 시 가격과 성능을 중요시함. |\n| Goal·동기 | 안전하게 이동하며 자립적인 생활을 유지하고 싶음. |\n| Pain Point | 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한되고, 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡함. |\n| 기대·거부 요인 | 직관적이고 사용하기 쉬운 웨어러블 기기를 원하며, 개인의 필요에 맞춘 맞춤형 솔루션을 기대함. |\n\n### Customer Journey Map\n\n| 단계 | Action | Emotion | Pain Point | Touchpoint |\n|---|---|---|---|---|\n| 인지 | 시각 장애인 보조 기기에 대한 정보 검색 | 호기심과 기대감 | 정보의 부족으로 인해 선택의 어려움 | 웹사이트, 소셜 미디어 |\n| 고려 | 다양한 제품 비교 및 리뷰 확인 | 혼란과 불안 | 제품의 기능과 가격에 대한 불확실성 | 리뷰 사이트, 사용자 포럼 |\n| 구매 | 구매 결정 및 결제 | 긴장과 기대 | 결제 과정의 복잡함 | 온라인 쇼핑몰 |\n| 사용 | 기기 착용 및 사용 | 기대와 불안 | 사용법이 복잡해 적응이 어려움 | 사용자 매뉴얼, 고객 지원 |\n| 재사용/이탈 | 기기 재사용 또는 다른 제품 고려 | 만족 또는 실망 | 기대에 미치지 못하는 성능 | 고객 피드백, 소셜 미디어 |\n\n**Opportunity**\n- 사용자 맞춤형 기능을 추가하여 개인의 필요를 충족시킬 수 있는 기회를 제공\n- 사용자 교육 프로그램을 통해 기기 사용법을 쉽게 안내할 수 있는 기회\n\n## 4. 시장·경쟁사 분석\n\n### TAM · SAM · SOM (추정치 — 명시한 가정 위)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 108억 달러 (2034년 예상) |\n| SAM | 추정 10억 달러 (시각 장애인 보조 기기 시장의 10%) |\n| SOM | 추정 1억 달러 (1~3년차 점유 가능 시장의 1%) |\n| Top-down 추정 | 56억 6천만 달러 × 10% = 5억 6천 6백만 달러 |\n| Bottom-up 추정 | 100만 명 × 100달러 × 5회 = 5억 달러 |\n| 두 값이 다른 이유 | top_down 방식은 시장 전체를 기준으로, bottom_up 방식은 특정 고객 수를 기준으로 하여 차이가 발생 |\n\n**사용한 가정**\n- 시장 성장률은 연평균 7.45%로 가정\n- 시각 장애인 수는 100만 명으로 가정\n- 각 사용자의 연간 기기 사용 빈도는 5회로 가정\n\n### 경쟁사 분류\n\n| 구분 | 대상 |\n|---|---|\n| 직접 경쟁자 (3) | Aira, OrCam, Seeing AI |\n| 간접 경쟁자 (2) | Google Maps, Apple Maps |\n| 잠재 경쟁자 (1) | Horus |\n\n### 비교 항목 (10개)\n\n- 기능\n- 가격\n- UX\n- 마케팅\n- 고객획득\n- 수익모델\n- 인력\n- 기술스택\n- 고객 지원\n- 사용자 피드백\n\n### 경쟁사 비교표 (7행)\n\n**① 제품·시장**\n\n| 대상 | 주요 기능 | 가격 | UX | 타깃 사용자 | 수익 모델 |\n|---|---|---|---|---|---|\n| Aira (직접) | 실시간 비디오 지원 | 월 29.99달러 | 사용자 친화적 | 시각 장애인 | 구독 기반 |\n| OrCam (직접) | 텍스트 및 얼굴 인식 | 약 4천달러 | 비접촉식 인식 | 시각 장애인 | 일회성 구매 |\n| Seeing AI (직접) | AI 기반 음성 안내 | 무료 | 스마트폰 기반 | 시각 장애인 | 무료 제공 |\n| Google Maps (간접) | 경로 안내 | 무료 | 사용자 친화적 | 일반 사용자 | 광고 기반 |\n| Apple Maps (간접) | 경로 안내 | 무료 | 사용자 친화적 | 일반 사용자 | 광고 기반 |\n| Horus (잠재) | AI 기반 웨어러블 디바이스 | 미확인 | 미확인 | 시각 장애인 | 미확인 |\n| 자사 (자사) | AI 기반 개인 맞춤형 웨어러블 | 미확인 | 사용자 친화적 | 시각 장애인 | 미확인 |\n\n**② 강점·약점**\n\n| 대상 | 강점 | 약점 |\n|---|---|---|\n| Aira (직접) | 즉각적인 지원 | 비용 부담 |\n| OrCam (직접) | 다양한 언어 지원 | 비용이 높음 |\n| Seeing AI (직접) | 접근성 높음 | 스마트폰 의존 |\n| Google Maps (간접) | 광범위한 사용자 기반 | 시각 장애인 맞춤형 아님 |\n| Apple Maps (간접) | 애플 생태계와 통합 | 시각 장애인 맞춤형 아님 |\n| Horus (잠재) | 미확인 | 미확인 |\n| 자사 (자사) | 개인 맞춤형 솔루션 | 미확인 |\n\n### 포지셔닝 맵 (가격 × 기능)\n\n| 대상 | 가격 (0~10) | 기능 (0~10) |\n|---|---|---|\n| Aira | 7.0 | 9.0 |\n| OrCam | 9.0 | 8.0 |\n| Seeing AI | 1.0 | 6.0 |\n| Google Maps | 1.0 | 5.0 |\n| Apple Maps | 1.0 | 5.0 |\n| Horus | 5.0 | 7.0 |\n| 자사 | 4.0 | 9.0 |\n\n## 5. 서비스 컨셉·기능 정의서\n\n### Value Proposition Canvas\n\n**고객 프로필**\n| 항목 | 내용 |\n|---|---|\n| Customer Jobs | 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 기기를 사용하고 싶다., 일상적인 활동에서 독립성을 높이고 싶다., 기술을 통해 사회적 상호작용을 증진시키고 싶다. |\n| Pains | 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다., 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다., 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다. |\n| Gains | 실시간으로 장애물, 신호, 경로 정보를 인식할 수 있는 기술이 필요하다., 독립적인 이동을 지원하는 보다 직관적이고 사용하기 쉬운 웨어러블 기기를 원한다., 개인의 필요에 맞춘 맞춤형 솔루션을 기대한다. |\n\n**가치 지도**\n| 항목 | 내용 |\n|---|---|\n| Products & Services | AI 기반 웨어러블 기기, 사용자 맞춤형 음성 안내 시스템, 사용자 친화적인 터치 인터페이스 |\n| Pain Relievers | 실시간 장애물 인식 기능, 직관적인 사용자 인터페이스, 사용자 교육 프로그램 |\n| Gain Creators | 독립적인 이동 지원, 사회적 상호작용 증진, 개인 맞춤형 기능 제공 |\n\n**Fit 검증**\n\n고객의 독립적인 이동 욕구와 제품의 실시간 인식 기능이 잘 맞아떨어짐.\n\n### 핵심 기능 (5개)\n\n| 기능 | 사용자 임팩트 | 실현가능성 |\n|---|---|---|\n| 실시간 장애물 인식 | 사용자가 안전하게 이동할 수 있도록 지원 | 기술적으로 구현 가능 |\n| 사용자 맞춤형 음성 안내 | 개인의 필요에 맞춘 정보 제공 | AI 기술 활용 가능 |\n| 직관적인 터치 인터페이스 | 사용자 친화적인 경험 제공 | UI/UX 설계로 가능 |\n| 사용자 교육 프로그램 | 기기 사용법을 쉽게 안내 | 온라인 교육 자료 제작 가능 |\n| 데이터 분석 서비스 | 사용자 행동 분석을 통한 맞춤형 서비스 제공 | 데이터 수집 및 분석 시스템 구축 가능 |\n\n### Use Case 3종\n\n| Actor | 시나리오 | 기대 결과 |\n|---|---|---|\n| 이준호 | 이준호는 출퇴근 시 장애물 인식을 위해 기기를 착용한다. | 기기가 실시간으로 장애물을 인식하고 안내하여 안전하게 이동한다. |\n| 김영희 | 김영희는 가게 운영을 위해 외출 시 기기를 사용한다. | 기기가 신호와 경로 정보를 제공하여 안전하게 이동한다. |\n| 이준호 | 이준호는 기기를 통해 주변 환경을 인식하고 사회적 상호작용을 시도한다. | 기기가 주변 사람들과의 상호작용을 도와준다. |\n\n## 6. 개발 로드맵·PRD\n\n### MVP 범위\n\nMVP는 실시간 장애물 인식과 사용자 맞춤형 음성 안내 기능을 포함하며, 직관적인 터치 인터페이스를 통해 사용자 경험을 향상시킵니다. 데이터 분석 서비스는 초기 단계에서 제외됩니다.\n\n### MOSCOW\n\n| 구분 | 기능 |\n|---|---|\n| Must have | 실시간 장애물 인식, 사용자 맞춤형 음성 안내, 직관적인 터치 인터페이스 |\n| Should have | 사용자 교육 프로그램, 데이터 분석 서비스 |\n| Could have | — |\n| Won't have (이번 범위 제외) | 고급 기능 추가, 다양한 언어 지원 |\n\n### Kano Model\n\n| 분류 | 기능 |\n|---|---|\n| Basic (당연) | 실시간 장애물 인식, 사용자 맞춤형 음성 안내 |\n| Performance (성능) | 직관적인 터치 인터페이스, 사용자 교육 프로그램 |\n| Excitement (매력) | 데이터 분석 서비스 |\n\n### Epic – User Story – Acceptance Criteria (INVEST · Given-When-Then)\n\n#### Epic: 기본 기능 개발\n\n- **Story**: As a 사용자, I want 실시간 장애물 인식 기능을 사용하고 싶다, So that 안전하게 이동할 수 있다.\n  - **Given** 사용자가 기기를 착용하고 있다.\n  - **When** 주변에 장애물이 있을 때.\n  - **Then** 기기가 장애물을 인식하고 안내한다.\n\n- **Story**: As a 사용자, I want 사용자 맞춤형 음성 안내를 받고 싶다, So that 필요한 정보를 쉽게 얻을 수 있다.\n  - **Given** 사용자가 기기를 착용하고 있다.\n  - **When** 기기가 주변 정보를 인식할 때.\n  - **Then** 기기가 음성으로 정보를 안내한다.\n\n#### Epic: 사용자 경험 개선\n\n- **Story**: As a 사용자, I want 직관적인 터치 인터페이스를 사용하고 싶다, So that 쉽게 기기를 조작할 수 있다.\n  - **Given** 사용자가 기기를 착용하고 있다.\n  - **When** 기기를 조작할 때.\n  - **Then** 기기가 직관적으로 반응한다.\n\n- **Story**: As a 사용자, I want 사용자 교육 프로그램을 통해 기기를 배우고 싶다, So that 쉽게 사용할 수 있다.\n  - **Given** 사용자가 기기를 구매했다.\n  - **When** 사용자가 교육 프로그램에 참여할 때.\n  - **Then** 기기가 사용법을 쉽게 안내한다.\n\n### 마일스톤\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 프로토타입 개발 | 2024년 1분기 | 기본 기능이 포함된 프로토타입 완성 |\n| 베타 테스트 | 2024년 2분기 | 사용자 피드백을 통한 기능 개선 |\n| 정식 출시 | 2024년 3분기 | 상용 제품 출시 및 판매 시작 |\n\n### KPI\n\n| 지표 | 목표(가정 포함) |\n|---|---|\n| 판매량 | 가정: 첫 6개월 내 500대 판매 |\n| 구독자 수 | 가정: 첫 해 200명 구독자 확보 |\n| 고객 만족도 | 가정: 80% 이상의 고객 만족도 |\n\n### 와이어프레임 (구조 스케치 — 실제 디자인 아님)\n\n**메인 화면**\n\n```\n┌───────────────┐\n│   웨어러블 기기   │\n│   [시작하기]     │\n│   [설정]        │\n│   [도움말]      │\n└───────────────┘\n```\n\n**핵심 기능 화면**\n\n```\n┌───────────────┐\n│   장애물 인식    │\n│   [음성 안내]    │\n│   [환경 정보]    │\n└───────────────┘\n```\n\n**결과/완료 화면**\n\n```\n┌───────────────┐\n│   이동 완료      │\n│   [다시 시작]    │\n│   [피드백]       │\n└───────────────┘\n```\n\n## 7. 발표 요약\n\n본 기획안의 핵심은 다음과 같다.\n\n- 정부 지원 정책을 활용하여 제품 개발 및 마케팅 전략을 수립해야 합니다.\n- AI 기반 기술을 통해 사용자 맞춤형 솔루션을 지속적으로 개선해야 합니다.\n- 소비자 요구에 맞춘 다양한 가격대의 제품을 제공하여 시장 점유율을 확대해야 합니다.\n\n## 참고 — 기존 14섹션 기획서\n\n아래는 동일 실행에서 생성된 서술형 기획서다(KOSENA 산출물과 중복 서술 포함).\n\n# 시각 장애인 거동 보조 웨어러블 머신 기획서\n\n## 프로젝트 개요\n시각 장애인을 위한 거동 보조 웨어러블 머신은 사용자가 주변 환경을 인식하고 안전하게 이동할 수 있도록 돕는 혁신적인 기술입니다. 이 기기는 시각 장애인의 독립적인 이동을 지원하며, 보다 나은 삶의 질을 제공합니다.\n\n## 추진 배경\n시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다. 이러한 시장 성장에 따라 시각 장애인을 위한 보다 혁신적이고 효율적인 이동 보조 기기의 필요성이 증가하고 있습니다.\n\n## 문제 정의\n시각 장애인들은 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵고, 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한됩니다. 또한, 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다는 문제를 겪고 있습니다.\n\n## 목표 사용자\n우리의 목표 사용자는 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자입니다. 이들은 일상생활에서의 자율성을 높이기 위해 새로운 기술을 활용하고자 하는 상황에 처해 있습니다.\n\n## 시장 및 산업 분석\n\n시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년에는 108억 달러에 이를 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 추정됩니다. 이 시장은 개인의 독립성과 이동성을 향상시키기 위한 다양한 하드웨어 및 소프트웨어 솔루션을 포함하고 있습니다. 개인 맞춤형 시각 보조 기기의 개발이 증가하고 있으며, 이는 사용자의 고유한 요구를 충족시키는 데 중점을 두고 있습니다. AI 기반 도구와 IoT 기술의 발전이 시각 장애인을 위한 보조 기술의 혁신을 이끌고 있으며, 시각 장애인을 위한 보조 기술의 접근성과 사용성을 높이기 위한 공공 정책과 교육 이니셔티브가 강화되고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 시각 장애인을 위한 보조 기술에 대한 공공 정책과 교육 이니셔티브가 강화되고 있음 | 정부의 지원 정책을 활용하여 보조 기술의 개발 및 배급을 촉진할 수 있는 기회 | 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있음 | 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축해야 함 |\n| Economic | 시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상됨 | 시장의 성장에 따라 새로운 제품과 서비스 개발을 통해 수익을 극대화할 수 있는 기회 | 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있음 | 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공해야 함 |\n| Social | 시각 장애인들은 독립적인 이동을 원하며, 사용자 친화적인 웨어러블 기기에 대한 수요가 증가하고 있음 | 사회적 인식의 변화는 보조 기술의 수요를 증가시킬 수 있는 기회 | 사회적 편견이나 차별이 여전히 존재할 수 있음 | 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성을 홍보해야 함 |\n| Technological | AI 기반 도구와 IoT 기술의 발전이 보조 기술의 혁신을 이끌고 있음 | 기술 혁신을 통해 사용자 맞춤형 솔루션을 제공할 수 있는 기회 | 기술적 결함이나 사용자 경험의 부족으로 제품의 신뢰성이 저하될 수 있음 | 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요함 |\n| Environmental | 보조 기술의 개발은 환경적 지속 가능성을 고려해야 함 | 환경 친화적인 제품 개발을 통해 긍정적인 이미지를 구축할 수 있는 기회 | 환경 규제가 강화될 경우, 생산 비용이 증가할 수 있음 | 지속 가능한 자원을 활용한 제품 개발 및 환경 규제 준수가 필요함 |\n| Legal | 보조 기술에 대한 법적 규제가 강화되고 있음 | 법적 규제를 준수함으로써 시장에서의 신뢰성을 높일 수 있음 | 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있음 | 법률 전문가와 협력하여 규제 준수를 철저히 해야 함 |\n\n## SWOT 분석\n- **강점**: AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공, 웨어러블 기기를 통한 직관적이고 사용자 친화적인 인터페이스, 비용 효율적인 솔루션으로 접근성 향상.\n- **약점**: 기술적 결함이나 사용자 경험 부족으로 인한 신뢰성 저하, 지속적인 연구 개발 필요로 인한 비용 부담.\n- **기회**: 웨어러블 기술 발전으로 혁신적 이동 보조 기기 개발 가능, AI 기반 솔루션으로 시장에서 차별화된 경쟁력 확보, 시각 장애인을 위한 공공 정책 및 교육 이니셔티브 강화.\n- **위협**: Aira, OrCam, Seeing AI와 같은 경쟁사의 강력한 존재, 기술 발전 속도에 따른 시장 변화에 대한 적응 필요, 사용자 요구의 다양성으로 인한 지속적인 제품 개선 필요.\n\n## 제안 서비스\n\n우리의 서비스는 AI 기반의 개인 맞춤형 웨어러블 기기로, 시각 장애인의 독립적인 이동을 지원하며, 기존 솔루션의 한계를 극복하는 데 중점을 둡니다. 이 기기는 실시간으로 장애물, 신호, 경로 정보를 인식하여 사용자가 안전하게 이동할 수 있도록 돕습니다. 예를 들어, 사용자가 길을 걷다가 보행 신호가 바뀌었을 때, 기기는 음성 안내를 통해 신호 변화에 대한 정보를 제공합니다. 또한, 사용자가 특정 장소로 이동할 때, 기기는 주변 장애물의 위치를 실시간으로 알려주어 안전한 경로를 선택할 수 있도록 지원합니다. 이러한 기능들은 사용자가 보다 독립적으로 이동할 수 있도록 도와줍니다.\n\n## 핵심 기능\n제안하는 웨어러블 머신은 실시간 장애물 인식, 음성 안내 시스템, 사용자 맞춤형 설정 기능을 포함하여, 사용자가 보다 직관적으로 기기를 조작할 수 있도록 설계되었습니다.\n\n## 차별성\n\n우리 서비스는 AI 및 머신러닝 기술을 활용하여 사용자 맞춤형 솔루션을 제공합니다. 경쟁사인 Aira는 실시간 비디오 지원을 통해 즉각적인 도움을 제공하지만, 인터넷 연결이 필수적이어서 접근성에 제한이 있습니다. OrCam은 비접촉식 인식으로 사용자 편의성을 높이지만, 높은 비용이 일반 사용자에게 부담이 될 수 있습니다. Seeing AI는 무료로 제공되어 접근성이 높지만, 스마트폰에 의존해야 하므로 기기 사용이 필수입니다. \n\n우리의 웨어러블 기기는 이러한 기존 솔루션의 한계를 극복하며, 직관적이고 사용자 친화적인 인터페이스를 제공합니다. 또한, 비용 효율적인 솔루션으로 접근성을 높여, 시각 장애인의 독립적인 이동을 지원하는 데 중점을 둡니다. 이러한 차별화 요소를 통해 경쟁사와의 명확한 구분을 이루고 있습니다.\n\n## 수익 모델\n수익원으로는 하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력을 통해 추가 수익을 창출할 계획입니다. 하드웨어는 일회성 구매로 제공되며, 소프트웨어는 월간 또는 연간 구독 모델로 운영됩니다.\n\n## 기대효과\n이 서비스를 통해 시각 장애인들은 보다 안전하고 독립적인 이동을 할 수 있으며, 삶의 질이 향상될 것으로 기대됩니다. 또한, 사용자 맞춤형 솔루션을 제공함으로써 고객 만족도를 높이고, 시장에서의 경쟁력을 강화할 수 있습니다.\n\n## 추진 계획\n프로젝트는 시장 조사, 프로토타입 개발, 사용자 테스트, 제품 출시의 단계로 진행되며, 각 단계에서 사용자 피드백을 반영하여 지속적으로 개선할 계획입니다.\n\n## 위험요인 및 대응방안\n- **기술적 리스크**: 기술적 결함이나 사용자 경험 부족으로 제품의 신뢰성이 저하될 수 있습니다. 이를 위해 철저한 품질 관리와 사용자 피드백을 반영한 지속적인 개선이 필요합니다.\n- **시장 리스크**: 경제적 불황이나 소비자 지출 감소는 시장 성장에 부정적인 영향을 미칠 수 있습니다. 비용 효율적인 솔루션을 개발하고, 다양한 가격대의 제품을 제공하여 소비자 기반을 확대해야 합니다.\n- **법적 리스크**: 법적 규제를 준수하지 않을 경우, 벌금이나 법적 제재를 받을 위험이 있습니다. 법률 전문가와 협력하여 규제 준수를 철저히 하고, 법적 변화에 대한 지속적인 모니터링이 필요합니다.\n- **운영 리스크**: 정치적 불안정성이나 정책 변화가 기업의 운영에 부정적인 영향을 미칠 수 있습니다. 정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 운영 환경을 조성해야 합니다.\n- **사회적 리스크**: 사회적 편견이나 차별이 여전히 존재할 수 있으며, 이는 기술 수용에 부정적인 영향을 미칠 수 있습니다. 사회적 인식 개선을 위한 캠페인 및 교육 프로그램을 통해 기술의 필요성과 이점을 홍보해야 합니다.\n\n## 참고자료\n\n- 시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지) — https://www.theinsightpartners.com/ko/reports/assistive-technologies-for-visually-impaired-market\n- 시각 장애 시장 규모를 위한 보조 기술(2032년) — https://www.kingsresearch.com/ko/assistive-technologies-for-visually-impaired-market-96\n- 시각 장애 시장 동향, 점유율 및 예측, 2025-2032년 — https://www.coherentmarketinsights.com/ko/%EC%8B%9C%EA%B0%81%EC%9E%A5%EC%95%A0%EC%8B%9C%EC%9E%A5-4337\n- 시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033 — https://www.marketgrowthreports.com/ko/market-reports/assistive-technologies-for-visual-impairment-market-111438\n- 보조 기술 시장 규모, 성장 보고서 2035 — https://www.marketresearchfuture.com/ko/reports/assistive-technology-market-29777\n- 장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스 — http://www.e-patentnews.com/12138\n- 시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년) — https://www.researchnester.com/kr/reports/assistive-technologies-for-visually-impaired-market/8531\n- 시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ... — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002670057\n\n## AI 활용 로그\n\n# AI 활용 로그\n\n> KOSENA 요구(p4): AI 응답을 그대로 쓰지 않고 **검증·수정·재구성**한 과정을 프롬프트·응답·채택 여부로 남긴다.\n\n> 총 18건 · 채택 17 · 미채택 1 · 표준 5단 구조 프롬프트 4건\n\n\n> **무엇을 남기고 무엇을 안 남기는가**: system 프롬프트(코드로 버전 고정)·입력 목록·응답 산출물·검증 결과·채택 여부를 남긴다. **user 프롬프트 원문은 남기지 않는다** — 앞 단계 결과를 기계적으로 이어 붙인 것이라 입력 목록과 중복이고, 웹검색 스니펫이 그대로 실려 로그가 비대해지기 때문이다.\n\n\n| Agent | 역할 | 프롬프트(5단) | 입력 | 산출 | 상태 | 채택 | 비고 |\n|---|---|---|---|---|---|---|---|\n| `research` | research_analysis 담당 | `RESEARCH_SYSTEM` — | structured_input, web_search | research_analysis | complete | 채택 |  |\n| `competitor` | competitor_analysis 담당 | `COMPETITOR_SYSTEM` — | research_analysis | competitor_analysis | complete | 채택 |  |\n| `customer` | customer_analysis 담당 | `CUSTOMER_SYSTEM` — | research_analysis | customer_analysis | complete | 채택 |  |\n| `pestel` | pestel_analysis 담당 | `PESTEL_SYSTEM` — | research_analysis | pestel_analysis | complete | 채택 |  |\n| `swot` | swot_analysis 담당 | `SWOT_SYSTEM` — | research_analysis, competitor_analysis | swot_analysis | complete | 채택 |  |\n| `business_model` | business_model_analysis 담당 | `BIZMODEL_SYSTEM` — | research_analysis | business_model_analysis | complete | 채택 |  |\n| `risk` | risk_analysis 담당 | `RISK_SYSTEM` — | research_analysis, pestel_analysis | risk_analysis | complete | 채택 |  |\n| `kosena_industry` | 산업 분석 전략가 | `KOSENA_INDUSTRY_SYSTEM` ✅ | pestel_analysis, research_analysis, competitor_analysis, swot_analysis | `kosena`: critical_uncertainties, porter, value_chain, ksf, implications | complete | 채택 |  |\n| `kosena_model` | 린 스타트업 코치 | `KOSENA_MODEL_SYSTEM` ✅ | research_analysis, customer_analysis, business_model_analysis, kosena.ksf, kosena.implications | `kosena`: hmw, ideas, shortlisted_concepts, selected_concept, lean_canvas, key_hypotheses | complete | 채택 |  |\n| `kosena_research` | 데이터 기반 서비스 기획자 | `KOSENA_RESEARCH_SYSTEM` ✅ | research_analysis, customer_analysis, competitor_analysis | `kosena`: personas, cjm, market_sizing, competitor_groups, comparison_criteria, competitor_comparison, positioning_map | complete | 채택 |  |\n| `kosena_roadmap` | 프로덕트 오너 | `KOSENA_ROADMAP_SYSTEM` ✅ | customer_analysis, business_model_analysis, risk_analysis, kosena.lean_canvas, kosena.personas | `kosena`: vpc, core_features, use_cases, moscow, kano, mvp_scope, epics, milestones, kpis, wireframes | complete | 채택 |  |\n| `research_gap` | 근거 공백 보강 조사자 | `RESEARCH_GAP_SYSTEM` — | evidence_gaps | `evidence_registry`: evidence_registry, dynamic_research | complete | 채택 |  |\n| `draft` | 기획서 작성자 | `DRAFT_WRITER_SYSTEM` — | research_analysis, competitor_analysis, customer_analysis, swot_analysis, business_model_analysis, risk_analysis, pestel_analysis | `draft`: draft | complete | 채택 |  |\n| `reviewer` | 기획서 심사자 | `REVIEWER_SYSTEM` — | draft | `review_result`: review_result, initial_review_result | complete | 채택 |  |\n| `polish` | 일관성 편집자 | `EDITOR_SYSTEM` — | final_draft | `final_draft`: final_draft | complete | **미채택** | 편집 생략: 내용 이슈만·구조 정상(revision=section) |\n| `final_reviewer` | 최종본 심사자 | `REVIEWER_SYSTEM` — | final_draft | `final_review_result`: final_review_result, best_version | complete | 채택 |  |\n| `verify` | 근거 일치성 검증자 | `VERIFY_SYSTEM` — | final_draft, evidence_registry | `verification_result`: verification_result | complete | 채택 |  |\n| `section_revise` | 기획서 재작성 | `SECTION_REVISER_SYSTEM` — | review_result.issues, final_draft | `final_draft`: final_draft | complete | 채택 | 전략=section |\n\n## 검증 절차\n\n- 모든 Agent 출력은 `_validate()` 로 **스키마를 강제**한다(누락 키는 중립값, 더미 문구 차단).\n- LLM 실패는 예외로 터뜨리지 않고 fallback 으로 흡수하되 `status` 에 **정직하게 표기**한다.\n- Reviewer 가 구조화 issue(`target_section_id`·`severity`)로 지목하면 해당 섹션만 재작성한다.\n- 재작성본이 초안보다 낮게 평가되면 **초안을 되돌려 채택**한다(`select_best`) — AI 응답을 그대로 쓰지 않는다는 가장 분명한 증거다.\n- 최종 문서의 주장은 수집한 근거와 대조 검증한다(`verify`, 주장별 `evidence_ids`).\n\n\n## 부록 — 근거 출처\n\n> **검색 기준일: 2026-07-28** · 아래 근거는 그 시점의 웹 검색 결과이며, 이후 변경된 내용은 반영되지 않는다.\n> 도메인 규칙으로 분류한 출처 유형에 따라 **정부·공공 → 학술 → 언론 → 커뮤니티 순으로 정렬**했다(우선 수집이 아니라 우선 정렬이다 — 검색은 공식기관 도메인을 따로 겨냥하지 않는다). 출처 유형은 **권위성 힌트일 뿐 신뢰도 판정이 아니며**, 기업 공식 사이트는 판단을 보류해 '기타'로 남는다.\n> ⚠️ 이 목록은 **실행 전체에서 수집한 출처**다 — KOSENA 항목별 근거 연결은 미구현이다.\n\n| ID | 유형 | 제목 | 발행일 | 조회일 | 인용된 주장 수 |\n|---|---|---|---|---|---|\n| ev8 | 정부·공공 | 시각장애인의 라이프 사이클을 지원하는 인공지능 웨어러블 ... | 미상 | 2026-07-28 | 0 |\n| ev13 | 정부·공공 | 건강관리 웨어러블 기기 사용자 경험 조사: 초점집단인터뷰 | 미상 | 2026-07-28 | 0 |\n| ev12 | 학술·연구 | [보고서]장애인 사용자 경험을 고려한 제품 및 서비스 설계 가이드라인 개발 | 미상 | 2026-07-28 | 0 |\n| ev15 | 언론 | '시각장애인에 희망의 빛을'…삼성 시각보조 솔루션 빛을 보다 | 미상 | 2026-07-28 | 0 |\n| ev1 | 기타 | 시각 장애인을 위한 보조 기술 시장 규모, 동향, 수요, 성장 및 기회 (2034년까지) | 미상 | 2026-07-28 | 1 |\n| ev2 | 기타 | 시각 장애 시장 규모를 위한 보조 기술(2032년) | 미상 | 2026-07-28 | 0 |\n| ev3 | 기타 | 시각 장애 시장 동향, 점유율 및 예측, 2025-2032년 | 미상 | 2026-07-28 | 0 |\n| ev4 | 기타 | 시각 장애 시장을위한 보조 기술 | 산업 분석 보고서, 2033 | 미상 | 2026-07-28 | 0 |\n| ev5 | 기타 | 보조 기술 시장 규모, 성장 보고서 2035 | 미상 | 2026-07-28 | 0 |\n| ev6 | 기타 | 장애를 넘어, 웨어러블 기술로 열리는 새로운 일상... 사회적 약자 자립, 삶의 질 향상:특허뉴스 | 미상 | 2026-07-28 | 0 |\n| ev7 | 기타 | 시각 장애인을 위한 보조 기술 시장 규모 및 성장 전망 (2035년) | 미상 | 2026-07-28 | 0 |\n| ev9 | 기타 | 시각 장애인들의 삶을 바꿔 줄 강력한 웨어러블 디바이스 | 미상 | 2026-07-28 | 0 |\n| ev10 | 기타 | CES에서 보여준 장애인 보조기술의 미래 | 미상 | 2026-07-28 | 0 |\n| ev11 | 기타 | 시각장애인분들 대상 웨어러블기기 사용성평가-20~40대 중증 ... | 미상 | 2026-07-28 | 0 |\n| ev14 | 기타 | 영국 GiveVision과 시각장애인을 위한 웨어러블 기기에 대한 고찰 | 미상 | 2026-07-28 | 0 |\n| ev16 | 기타 | Hands-On With Rokid's Futuristic AR Smart Glasses - bgr.com | Thu, 04 Sep 2025 08:05:27 GMT | 2026-07-28 | 0 |\n| ev17 | 기타 | Can Lens Technology Break Through with AI in the Post-Apple Era? - 36Kr | Thu, 04 Sep 2025 13:38:57 GMT | 2026-07-28 | 0 |\n| ev18 | 기타 | Rokid Glasses Raise Over $1M in First Week, Proving Strong Demand for Display-clad Smart Glasses - Road to VR | Mon, 01 Sep 2025 13:19:31 GMT | 2026-07-28 | 0 |\n| ev19 | 기타 | How families are using tech to ease grandma's caregiving bills — and the burden on her loved ones - Business Insider | Sun, 12 Jul 2026 08:05:01 GMT | 2026-07-28 | 0 |\n\n## 부록 — 사실 검증 요약 (검색 스니펫 기준)\n\n> **검증 범위**: 문서의 사실 주장을 수집한 **검색 요약 근거**와 대조해 판정한다. 출처 URL 의 **원문 사실성은 재검증하지 않는다**. 따라서 '근거 미확인'은 거짓이라는 뜻이 아니라, 현재 수집된 근거에서 확인하지 못했다는 뜻이다 — 수치·통계는 원문에서 직접 확인해야 한다.\n\n사실 주장 1건 중 근거 확인 1건 · 주장별 근거 연결 1/1건\n\n| 판정 | 건수 | 뜻 |\n|---|---|---|\n| 근거 확인 | 1 | 수집한 검색 요약 근거와 일치 |\n| 근거 미확인 | 0 | **거짓이라는 뜻이 아니다** — 현재 근거에서 확인하지 못함 |\n| 반대 근거 | 0 | 근거가 주장과 반대 방향 |\n| 판단 불가 | 0 | 근거가 모호해 판정 보류 |\n| 검증 대상 아님 | 0 | 추론·제안 주장(사실 주장만 검증한다) |\n\n### 주장별 판정\n\n| 주장 | 유형 | 판정 | 근거 ID |\n|---|---|---|---|\n| 시각 장애인을 위한 보조 기술 시장은 2025년 56억 6천만 달러에서 2034년 108억 달러로 성장할 것으로 예상되며, 연평균 7.45%의 성장률을 기록할 것으로 보입니다. | 사실 | 근거 확인 | ev1 |\n\n## KOSENA 준수 현황 (구조 자체점검)\n\n> 이 표는 KOSENA 가 요구하는 **필수 구조와 산출물의 존재 여부**를 코드로 결정적 점검한 결과다(LLM 판정 아님). 분석 내용의 타당성과 프레임워크 간 일관성은 포함하지 않으며, Reviewer 와 사람 검토가 추가로 필요하다.\n\nKOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n\n| 모듈 | 항목 | 상태 | 근거(쪽) | 비고 |\n|---|---|---|---|---|\n| M1 | PESTEL 6영역 | 충족 | p7 | 6개 영역 |\n| M1 | Critical Uncertainties Top 3 | 충족 | p7 | Top 3 선별됨 |\n| M1 | Porter/SWOT/Value Chain 중 2개 이상 | 충족 | p8 | SWOT + Porter + Value Chain |\n| M1 | KSF 5개 | 충족 | p8 | 5개 |\n| M1 | 설계 시사점 3가지 | 충족 | p8 | 3개 |\n| M1 | HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개 | 충족 | p9 | HMW 5개 · 아이디어 27개 → 압축 3개 → 컨셉 1개 |\n| M1 | Lean Canvas 9블록 | 충족 | p10 | 9블록 |\n| M1 | 핵심 가설 3개 | 충족 | p10 | 3개 |\n| M2 | 페르소나 2종 × 필수 5항목 | 충족 | p12 | 2종 · 필수 5항목 충족 |\n| M2 | CJM 5단계 × 4항목 + Opportunity | 충족 | p12 | 5단계 × 4항목 |\n| M2 | TAM·SAM·SOM | 충족 | p13 | TAM·SAM·SOM |\n| M2 | Top-down · Bottom-up 교차검증 | 충족 | p13 | Top-down + Bottom-up |\n| M2 | 경쟁사 직접3·간접2·잠재1 | 충족 | p14 | 직접3 · 간접2 · 잠재1 |\n| M2 | 비교 항목 10개 이상 + 경쟁사 비교표 | 충족 | p14 | 기준 10개 · 비교표 7행 |\n| M2 | 2축 포지셔닝 맵 | 충족 | p14 | 가격 × 기능 |\n| M2 | VPC 6영역 + Fit | 충족 | p15 | 고객 프로필 3 + 가치 지도 3 |\n| M2 | 핵심 기능 5~7개 | 충족 | p15 | 5개 |\n| M2 | Use Case 3종 | 충족 | p15 | 3종 |\n| M3 | MOSCOW 4구분(Won't 명시) | 충족 | p17 | Must/Should/Could/Won't |\n| M3 | Kano 3분류 | 충족 | p17 | 3분류 |\n| M3 | MVP 범위 | 충족 | p17 | 범위 정의됨 |\n| M3 | Epic-Story-AC (Given-When-Then) | 충족 | p18 | Epic 2 · Story 4 · AC 전부 Given-When-Then |\n| M3 | 마일스톤 · KPI | 충족 | p3 | 마일스톤 + KPI |\n| M3 | 와이어프레임 2~3개 화면 | 충족 | p5 | 3개 화면 |\n| 공통 | 출처 명시 (실행 전체 · 항목별 연결 아님) | 충족 | p4 | 출처 19건(주장 연결 1건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현 |\n| 공통 | AI 활용 로그(프롬프트·응답·채택 여부) | 충족 | p4 | 18건 · 전부 프롬프트·입력·산출·검증·채택 기록 |\n| 공통 | 정량 주장의 가설·추정 표기 | 충족 | p4 | 가설·추정 표기 있음 |\n| 공통 | 본문 A4 30~50쪽 | 부분 | p4 | 약 13.3쪽(추정) — 30~50쪽 필요 |\n",
+  "kosena_deck": "# 시각 장애인 거동 보조 웨어러블 머신\n\n## 문제 정의 · 목표 사용자\n\n**문제**\n\n보행 중 장애물·신호·경로 정보를 실시간으로 알기 어려워 독립적인 이동이 제한된다\n\n**목표 사용자**\n\n20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자\n\n## 거시환경 — Critical Uncertainties\n\n- Political\n- Economic\n- Technological\n\n## 산업 구조 — Porter's Five Forces\n\n| Force | 강도 |\n|---|---|\n| rivalry | 높음 |\n| new_entrants | 중간 |\n| substitutes | 중간 |\n| buyer_power | 중간 |\n| supplier_power | 낮음 |\n\n## 핵심 성공요인 (KSF)\n\n- AI 및 머신러닝 기술을 활용한 개인 맞춤형 솔루션 제공\n- 사용자 친화적인 웨어러블 기기 개발\n- 비용 효율적인 제품 라인업 구축\n- 정부 정책 및 교육 이니셔티브와의 협력\n- 지속적인 기술 혁신 및 품질 관리\n\n## 설계 시사점\n\n- 정부 지원 정책을 활용하여 제품 개발 및 마케팅 전략을 수립해야 합니다.\n- AI 기반 기술을 통해 사용자 맞춤형 솔루션을 지속적으로 개선해야 합니다.\n- 소비자 요구에 맞춘 다양한 가격대의 제품을 제공하여 시장 점유율을 확대해야 합니다.\n\n## 서비스 컨셉\n\nAI 기반 장애물 인식 기능을 갖춘 웨어러블 기기는 시각 장애인의 독립적인 이동을 지원하는 데 가장 효과적이며, 기술적으로도 실현 가능성이 높고 시장에서의 수요가 크기 때문에 최종 서비스 컨셉으로 선택하였다.\n\n## Lean Canvas 핵심\n\n| 항목 | 내용 |\n|---|---|\n| Problem | 1. 보행 중 장애물이나 신호를 인식하기 어려워 안전한 이동이 어렵다. 2. 기존 보조 기기가 제공하는 정보의 한계로 인해 독립적인 이동이 제한된다. 3. 사용자 친화적이지 않은 인터페이스로 인해 기기 사용이 복잡하고 불편하다. |\n| Customer | 20대 후반에서 60대 초반의 시각 장애인으로, 독립적인 이동을 원하는 사용자. |\n| UVP | AI 기반 웨어러블 기기로 시각 장애인의 독립적인 이동을 지원합니다. |\n| Solution | 1. 실시간 장애물 인식 기능. 2. 사용자 맞춤형 음성 안내 시스템. 3. 사용자 친화적인 터치 인터페이스. |\n| Revenue | 하드웨어 판매, 소프트웨어 구독 서비스, 데이터 분석 서비스, 파트너십 및 협력. |\n\n## 페르소나\n\n- 이준호\n- 김영희\n\n## 고객 여정 (CJM)\n\n| 단계 | Pain Point |\n|---|---|\n| 인지 | 정보의 부족으로 인해 선택의 어려움 |\n| 고려 | 제품의 기능과 가격에 대한 불확실성 |\n| 구매 | 결제 과정의 복잡함 |\n| 사용 | 사용법이 복잡해 적응이 어려움 |\n| 재사용/이탈 | 기대에 미치지 못하는 성능 |\n\n## 시장 규모 (추정)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 108억 달러 (2034년 예상) |\n| SAM | 추정 10억 달러 (시각 장애인 보조 기기 시장의 10%) |\n| SOM | 추정 1억 달러 (1~3년차 점유 가능 시장의 1%) |\n| Top-down | 56억 6천만 달러 × 10% = 5억 6천 6백만 달러 |\n| Bottom-up | 100만 명 × 100달러 × 5회 = 5억 달러 |\n\n## 경쟁사 비교\n\n| 대상 | 가격 | 강점 | 약점 |\n|---|---|---|---|\n| Aira (직접) | 월 29.99달러 | 즉각적인 지원 | 비용 부담 |\n| OrCam (직접) | 약 4천달러 | 다양한 언어 지원 | 비용이 높음 |\n| Seeing AI (직접) | 무료 | 접근성 높음 | 스마트폰 의존 |\n| Google Maps (간접) | 무료 | 광범위한 사용자 기반 | 시각 장애인 맞춤형 아님 |\n| Apple Maps (간접) | 무료 | 애플 생태계와 통합 | 시각 장애인 맞춤형 아님 |\n| Horus (잠재) | 미확인 | 미확인 | 미확인 |\n| 자사 (자사) | 미확인 | 개인 맞춤형 솔루션 | 미확인 |\n\n## 경쟁 포지셔닝\n\n| 대상 | X | Y |\n|---|---|---|\n| Aira | 7.0 | 9.0 |\n| OrCam | 9.0 | 8.0 |\n| Seeing AI | 1.0 | 6.0 |\n| Google Maps | 1.0 | 5.0 |\n| Apple Maps | 1.0 | 5.0 |\n| Horus | 5.0 | 7.0 |\n| 자사 | 4.0 | 9.0 |\n\n## 가치 제안 (VPC Fit)\n\n고객의 독립적인 이동 욕구와 제품의 실시간 인식 기능이 잘 맞아떨어짐.\n\n## 핵심 기능\n\n- 실시간 장애물 인식\n- 사용자 맞춤형 음성 안내\n- 직관적인 터치 인터페이스\n- 사용자 교육 프로그램\n- 데이터 분석 서비스\n\n## MVP 범위\n\nMVP는 실시간 장애물 인식과 사용자 맞춤형 음성 안내 기능을 포함하며, 직관적인 터치 인터페이스를 통해 사용자 경험을 향상시킵니다. 데이터 분석 서비스는 초기 단계에서 제외됩니다.\n\n## 우선순위 (MOSCOW)\n\n| 구분 | 기능 |\n|---|---|\n| Must | 실시간 장애물 인식, 사용자 맞춤형 음성 안내, 직관적인 터치 인터페이스 |\n| Won't | 고급 기능 추가, 다양한 언어 지원 |\n\n## 개발 로드맵\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 프로토타입 개발 | 2024년 1분기 | 기본 기능이 포함된 프로토타입 완성 |\n| 베타 테스트 | 2024년 2분기 | 사용자 피드백을 통한 기능 개선 |\n| 정식 출시 | 2024년 3분기 | 상용 제품 출시 및 판매 시작 |\n\n## KPI\n\n| 지표 | 목표 |\n|---|---|\n| 판매량 | 가정: 첫 6개월 내 500대 판매 |\n| 구독자 수 | 가정: 첫 해 200명 구독자 확보 |\n| 고객 만족도 | 가정: 80% 이상의 고객 만족도 |\n\n## 한계와 다음 단계\n\n- 정량 주장은 웹 리서치 기반 **가설·추정**이며 인터뷰·설문으로 검증되지 않았습니다.\n- KOSENA 자체 판정: KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n- 다음 단계: 페르소나 인터뷰, 시장 규모 1차 자료 확인, MVP 사용성 테스트\n",
+  "ai_usage_log": [
+    {
+      "agent": "research",
+      "role": "research_analysis 담당",
+      "prompt": {
+        "template": "RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1639
+      },
+      "inputs": [
+        "structured_input",
+        "web_search"
+      ],
+      "output": {
+        "artifact": "research_analysis",
+        "target_sections": [
+          "market_analysis"
+        ],
+        "evidence_ids": [
+          "ev1",
+          "ev2",
+          "ev3",
+          "ev4",
+          "ev5",
+          "ev6",
+          "ev7",
+          "ev8",
+          "ev9",
+          "ev10",
+          "ev11",
+          "ev12",
+          "ev13",
+          "ev14",
+          "ev15"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "competitor",
+      "role": "competitor_analysis 담당",
+      "prompt": {
+        "template": "COMPETITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 717
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "competitor_analysis",
+        "target_sections": [
+          "differentiation"
+        ],
+        "evidence_ids": [
+          "ev16",
+          "ev17",
+          "ev18",
+          "ev19"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "customer",
+      "role": "customer_analysis 담당",
+      "prompt": {
+        "template": "CUSTOMER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 399
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "customer_analysis",
+        "target_sections": [
+          "target_user"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "pestel",
+      "role": "pestel_analysis 담당",
+      "prompt": {
+        "template": "PESTEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1265
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "pestel_analysis",
+        "target_sections": [
+          "pestel"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "swot",
+      "role": "swot_analysis 담당",
+      "prompt": {
+        "template": "SWOT_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 252
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": "swot_analysis",
+        "target_sections": [
+          "swot"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "business_model",
+      "role": "business_model_analysis 담당",
+      "prompt": {
+        "template": "BIZMODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 347
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "business_model_analysis",
+        "target_sections": [
+          "revenue_model"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "risk",
+      "role": "risk_analysis 담당",
+      "prompt": {
+        "template": "RISK_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 343
+      },
+      "inputs": [
+        "research_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": "risk_analysis",
+        "target_sections": [
+          "risk"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_industry",
+      "role": "산업 분석 전략가",
+      "prompt": {
+        "template": "KOSENA_INDUSTRY_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1465
+      },
+      "inputs": [
+        "pestel_analysis",
+        "research_analysis",
+        "competitor_analysis",
+        "swot_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "critical_uncertainties",
+          "porter",
+          "value_chain",
+          "ksf",
+          "implications"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_model",
+      "role": "린 스타트업 코치",
+      "prompt": {
+        "template": "KOSENA_MODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1852
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "business_model_analysis",
+        "kosena.ksf",
+        "kosena.implications"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "hmw",
+          "ideas",
+          "shortlisted_concepts",
+          "selected_concept",
+          "lean_canvas",
+          "key_hypotheses"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_research",
+      "role": "데이터 기반 서비스 기획자",
+      "prompt": {
+        "template": "KOSENA_RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 2474
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "personas",
+          "cjm",
+          "market_sizing",
+          "competitor_groups",
+          "comparison_criteria",
+          "competitor_comparison",
+          "positioning_map"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_roadmap",
+      "role": "프로덕트 오너",
+      "prompt": {
+        "template": "KOSENA_ROADMAP_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1940
+      },
+      "inputs": [
+        "customer_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "kosena.lean_canvas",
+        "kosena.personas"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "vpc",
+          "core_features",
+          "use_cases",
+          "moscow",
+          "kano",
+          "mvp_scope",
+          "epics",
+          "milestones",
+          "kpis",
+          "wireframes"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "research_gap",
+      "role": "근거 공백 보강 조사자",
+      "prompt": {
+        "template": "RESEARCH_GAP_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1066
+      },
+      "inputs": [
+        "evidence_gaps"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "evidence_registry",
+        "produced_fields": [
+          "evidence_registry",
+          "dynamic_research"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "draft",
+      "role": "기획서 작성자",
+      "prompt": {
+        "template": "DRAFT_WRITER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1668
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis",
+        "customer_analysis",
+        "swot_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "draft",
+        "produced_fields": [
+          "draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "reviewer",
+      "role": "기획서 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "review_result",
+        "produced_fields": [
+          "review_result",
+          "initial_review_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "polish",
+      "role": "일관성 편집자",
+      "prompt": {
+        "template": "EDITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 373
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": false,
+      "note": "편집 생략: 내용 이슈만·구조 정상(revision=section)"
+    },
+    {
+      "agent": "final_reviewer",
+      "role": "최종본 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_review_result",
+        "produced_fields": [
+          "final_review_result",
+          "best_version"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "verify",
+      "role": "근거 일치성 검증자",
+      "prompt": {
+        "template": "VERIFY_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 2317
+      },
+      "inputs": [
+        "final_draft",
+        "evidence_registry"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "verification_result",
+        "produced_fields": [
+          "verification_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "section_revise",
+      "role": "기획서 재작성",
+      "prompt": {
+        "template": "SECTION_REVISER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 909
+      },
+      "inputs": [
+        "review_result.issues",
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ],
+        "revised_sections": [
+          "market_analysis",
+          "service",
+          "differentiation"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete",
+        "reviewer_rescored": true
+      },
+      "adopted": true,
+      "note": "전략=section"
+    }
+  ]
+}

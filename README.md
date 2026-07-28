@@ -9,6 +9,10 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 
 > 이 문서는 **실제 구현된 현재 상태**를 설명합니다. 초기 12-Agent 풀버전 구상과 13일 압축 계획, 잘라낸 범위는 [`ROADMAP.md`](ROADMAP.md)를, 상세 명세는 [`docs/PRD.md`](docs/PRD.md)를 참고하세요.
 
+> 🔒 **제출·발표 기준 코드 동결: `v1.0.0-submission`** (2026-07-28) · 테스트 667개 · 커버리지 96.77%
+> · 실 LLM 실측 KOSENA **27/28**. 동결 지점·측정 메타데이터·알려진 한계·**수치를 말할 때 지킬 것**은
+> [`docs/동결_기록.md`](docs/동결_기록.md) 에 한 장으로 모아 두었습니다.
+
 ---
 
 ## 1. 무엇을 하나
@@ -123,7 +127,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 - **AI 활용 로그** — Agent별 프롬프트·입력·산출·검증·**채택 여부**를 별도 파일로 첨부. 재작성본이 초안보다
   낮아 되돌린 기록(`best_version`)이 "AI 응답을 그대로 쓰지 않았다"는 증거가 된다
 - **비교 harness** — 단일 vs 멀티(`run_compare.py`), 다중 모델(`run_multimodel.py`), 직렬 vs 병렬(`run_parallel_bench.py`) 재현 가능한 실험
-- **회귀 테스트** — `pytest` **658개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 하한 90%
+- **회귀 테스트** — `pytest` **667개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 **96.77%**(하한 90%)
 
 ---
 
@@ -139,7 +143,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 | 관측성 | 자체 usage 집계 (토큰·추정 비용·지연) |
 | 산출물 | python-docx (.docx), python-pptx (.pptx), Markdown, JSON |
 | Frontend | 자체완결 HTML (인라인 CSS/JS). **외부 CDN·빌드 도구를 쓰지 않는다** — FastAPI 가 그대로 서빙해 빌드·CORS·별도 배포가 불필요하고, 폐쇄망에서도 동작하며, CDN 의 가용성·버전 변동·공급망 위험을 끌어들이지 않는다. 대가는 **JS 자동 테스트 부재**(수동 확인 의존) |
-| 테스트 | pytest (658개) · ruff · GitHub Actions CI 4게이트 |
+| 테스트 | pytest (667개) · ruff · GitHub Actions CI 4게이트 |
 
 ---
 
@@ -337,7 +341,7 @@ app/
  ├─ prompts/templates.py    # 프롬프트 템플릿
  ├─ schemas/state.py        # State·입출력 스키마
  └─ static/index.html       # 최소 UI(입력/결과/최종/이력)
-tests/                      # pytest 658개 (LLM 호출 없이 검증 로직·라우트 테스트)
+tests/                      # pytest 667개 (LLM 호출 없이 검증 로직·라우트 테스트)
 run_compare.py              # 단일 vs 멀티 비교실험 CLI
 run_multimodel.py           # 생성 모델별 비교실험 CLI
 run_parallel_bench.py       # 직렬 vs 병렬 비교실험 CLI (wall time·품질·비용)
@@ -369,7 +373,7 @@ Multi-Agent 22노드(직렬·병렬) · 조건부 분기 · 실패 격리 · 웹
 - **사실 검증은 검색 요약 기준**입니다. URL 원문의 사실성은 재검증하지 않습니다.
   `unsupported` 는 '거짓'이 아니라 '현재 근거에서 확인하지 못함'입니다.
 - **출처 검사는 실행 전체 기준**입니다. KOSENA 산출물의 항목별 근거 연결은 미구현입니다.
-- **본문 분량이 요건(A4 30~50쪽) 미달**입니다(약 12.2쪽). 분량을 위한 분량은 넣지 않았습니다 —
+- **본문 분량이 요건(A4 30~50쪽) 미달**입니다(실 LLM 실측 약 13.0쪽). 분량을 위한 분량은 넣지 않았습니다 —
   근거는 [`docs/kosena-compliance.md`](docs/kosena-compliance.md)에 있습니다.
 - **이력은 비영속**입니다(SQLite 파일 → 컨테이너 재시작 시 소실).
 - **인터뷰·설문 등 1차 자료는 만들 수 없습니다.** 지어내지 않고 **가설임을 명시**하며,
