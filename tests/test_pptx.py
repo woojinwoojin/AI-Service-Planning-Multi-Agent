@@ -81,3 +81,29 @@ def test_export_pptx_endpoint():
     assert r.status_code == 200
     assert "presentationml" in r.headers["content-type"]
     assert r.content[:2] == b"PK"
+
+
+def test_table_followed_by_body_text_in_same_section():
+    """표 **다음에 본문이 오는** 문서가 변환된다 (2026-07-28 실제 500 회귀).
+
+    `Inches()` 는 int 서브클래스(Emu)이고 파이썬 `+` 는 서브클래스를 유지하지 않으므로,
+    `add_table` 이 `self.top` 을 순수 int 로 만들면 뒤따르는 `_render_text_chunk` 의
+    `self.top.inches` 가 AttributeError 로 터진다.
+
+    기존 MD 는 표 바로 뒤가 새 H2(=새 슬라이드로 top 초기화)여서 이 조합을 비껴갔다.
+    실 LLM KOSENA 문서(표 뒤에 설명 문단이 이어짐)에서 `/export/pptx` 가 500 이 됐다.
+    """
+    md = (
+        "# 문서\n\n## 표가 있는 섹션\n"
+        "| 항목 | 값 |\n|---|---|\n| A | 1 |\n| B | 2 |\n\n"
+        "표 아래에 이어지는 설명 문단이다.\n"
+        "- 표 뒤 불릿 하나\n"
+    )
+    prs = pptx_export.build_pptx(md)                 # 여기서 터지면 회귀
+    body = "\n".join(_texts(s) for s in prs.slides)
+    assert "표 아래에 이어지는 설명 문단이다." in body
+    assert any(sh.has_table for s in prs.slides for sh in s.shapes)
+
+    c = TestClient(app)
+    r = c.post("/export/pptx", json={"project_name": "표뒤본문", "markdown": md})
+    assert r.status_code == 200

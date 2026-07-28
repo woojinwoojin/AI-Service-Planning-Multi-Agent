@@ -226,7 +226,12 @@ class _Deck:
                     cell.fill.fore_color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
                 para = cell.text_frame.paragraphs[0]
                 _add_runs(para, row[j] if j < len(row) else "", 11, _INK)
-        self.top = self.top + h + Inches(0.15)
+        # ⚠️ `Inches()` 는 int 서브클래스(Emu)를 돌려주는데 파이썬 `+` 는 서브클래스를 유지하지
+        # 않는다 — `self.top + h + Inches(0.15)` 의 결과는 **평범한 int** 가 되어 `.inches` 를
+        # 잃는다. 그러면 표 **다음에** 본문이 오는 문서에서 `_render_text_chunk` 의
+        # `self.top.inches` 가 AttributeError 로 터졌다(실 LLM KOSENA 문서에서 /export/pptx 500).
+        # 그래서 다른 자리(199행)와 같은 방식으로 다시 Length 로 감싼다.
+        self.top = Inches(self.top.inches + h.inches + 0.15)
 
 
 def build_pptx(markdown: str, title: str = "") -> Presentation:
