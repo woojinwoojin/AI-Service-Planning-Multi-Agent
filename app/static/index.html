@@ -71,11 +71,22 @@
   @keyframes sp { to { transform:rotate(360deg); } }
   .err { color:var(--warn); font-weight:600; }
 
-  /* 결과·이력 표 — 명확한 아웃라인 + 줄무늬 (아웃라인 없어 안 보이던 문제 해결) */
-  #results table, #history table { border-collapse:collapse; width:100%; margin:.2em 0; font-size:13px; border:1px solid var(--line); }
-  #results th, #results td, #history th, #history td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
-  #results th, #history th { background:var(--brand-weak); color:var(--brand); font-weight:700; white-space:nowrap; }
-  #results tbody tr:nth-child(even), #history tbody tr:nth-child(even) { background:#fafbff; }
+  /* 결과·이력·KOSENA 표 — 명확한 아웃라인 + 줄무늬 (아웃라인 없어 안 보이던 문제 해결) */
+  /* ⚠️ #kosenaBody 를 빠뜨리면 STEP 4 카드(준수 점검 5열·AI 활용 로그 7열)가 **무스타일**이 된다.
+     #kosenaCard 는 #resultCard 의 형제라서 `#results table` 이 걸리지 않는다 — 실제로 그래서
+     글씨 크기가 기본 UA 값으로 튀고 폭 제한이 없어 표가 화면 밖으로 넘쳤다(2026-07-28 확인).
+     새 카드에 표를 추가하면 이 선택자에도 반드시 함께 넣을 것. */
+  #results table, #history table, #kosenaBody table { border-collapse:collapse; width:100%; margin:.2em 0; font-size:13px; border:1px solid var(--line); }
+  #results th, #results td, #history th, #history td,
+  #kosenaBody th, #kosenaBody td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  #results th, #history th, #kosenaBody th { background:var(--brand-weak); color:var(--brand); font-weight:700; white-space:nowrap; }
+  #results tbody tr:nth-child(even), #history tbody tr:nth-child(even),
+  #kosenaBody tbody tr:nth-child(even) { background:#fafbff; }
+  /* 열이 많은 표는 페이지를 밀어내지 말고 **자기 영역 안에서** 가로 스크롤한다.
+     표는 JS 가 만들므로 감싸는 div 를 새로 넣지 않고 details 요소를 스크롤 컨테이너로 쓴다. */
+  #kosenaBody details { overflow-x:auto; }
+  /* 긴 URL·evidence id 나열처럼 띄어쓰기 없는 문자열이 셀을 무한히 늘리는 것을 막는다. */
+  #kosenaBody td { word-break:break-word; overflow-wrap:anywhere; }
 
   /* 결과 탭 */
   .tabs { display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line); margin:6px 0 16px; }
