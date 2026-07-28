@@ -50,7 +50,7 @@ from app.agents import (
     verifier,
 )
 from app.schemas import artifact
-from app.schemas.state import ProjectState
+from app.schemas.state import ProjectState, merge_kosena
 
 # 이 점수 이상이면 재작성 생략
 PASS_SCORE = 90
@@ -362,6 +362,12 @@ def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     노드는 이제 '자기 새 값만' 반환한다(병렬 reducer 대응). LangGraph 안에서는 reducer 가
     자동 누적하지만, 그래프 밖(예: /revise, rerun_finalizers, stream 재구성)에서는
     dict.update 가 덮어써 이전 값이 사라진다. 여기서 reducer-list 필드(logs·timing_events)를 누적 병합한다.
+
+    ⚠️ **`ProjectState` 의 reducer 필드가 늘어나면 여기도 함께 늘려야 한다.** 그러지 않으면
+    그래프 안에서는 누적되는 값이 `/run/stream`(UI 경로)에서만 조용히 사라진다 — 실제로
+    `kosena` 가 빠져 있어서 UI 실행이 KOSENA 준수 11/28 을 내고 있었다(스크립트 경유 `/run` 은
+    28/28 키 정상). 현재 reducer 필드는 5개다: logs · timing_events · evidence_registry ·
+    artifacts · kosena. `tests/test_stream_reducer_parity.py` 가 이 대응을 고정한다.
     """
     merged = {k: list(state.get(k) or []) + list(update[k] or [])
               for k in ("logs", "timing_events", "evidence_registry") if k in update}
@@ -370,6 +376,11 @@ def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     if "artifacts" in update:
         merged["artifacts"] = artifact.merge_artifacts(state.get("artifacts") or [],
                                                        update["artifacts"] or [])
+    # kosena 는 KOSENA Agent 4개가 **각자 자기 키만** 넣고 reducer 가 합치는 필드다
+    # (kosena_industry.py 참고). 그래프 밖에서 덮어쓰면 마지막 노드(kosena_roadmap)의
+    # 10개 키만 남아 M1·M2 산출물이 통째로 사라진다. 그래프 안과 같은 reducer 를 그대로 쓴다.
+    if "kosena" in update:
+        merged["kosena"] = merge_kosena(state.get("kosena") or {}, update["kosena"] or {})
     state.update(update)
     state.update(merged)   # reducer-list 필드는 덮어쓰기 대신 누적으로 교정
     return state
