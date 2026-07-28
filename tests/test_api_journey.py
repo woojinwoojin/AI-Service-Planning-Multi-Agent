@@ -249,6 +249,60 @@ def test_revise_unknown_project_id_returns_404(client):
     assert client.get("/projects").json()["projects"] == []     # 신규 레코드가 생기지 않았다
 
 
+def test_revise_does_not_erase_original_run_failures(client, monkeypatch):
+    """수정 한 번으로 **실패한 실행이 성공으로 바뀌면 안 된다** (2026-07-28 실제 사고).
+
+    `/revise` 는 재작성 구간만 계측하려고 `logs` 를 비운 채 들어온다. `_assess_quality` 는
+    로그에서 실패를 읽으므로 그대로 덮어쓰면 원 실행의 `fallback_nodes` 가 사라지고
+    `run_status` 가 `success` 로 올라갔다 — 배포된 실행에서 KOSENA Agent 3개가 빈 결과를
+    냈는데 기록은 `success` 로 남아 **원인을 복구할 수 없었다.**
+    """
+    from app.api import routes
+    from app.services import store
+
+    run = client.post("/run", json={"project_name": "실패보존", "problem": "P"}).json()
+
+    # 원 실행이 degraded 였던 상황을 만든다(저장 기록에 실패 사실이 남아 있는 상태).
+    pid = run["project_id"]
+    state = dict(store.get_project(pid)["state"])
+    state.update({"run_status": "degraded",
+                  "fallback_nodes": ["kosena_industry", "kosena_research"],
+                  "fallback_reasons": {"kosena_industry": "형식", "kosena_research": "혼잡"},
+                  "failed_nodes": []})
+    assert store.update_run(pid, state)
+
+    monkeypatch.setattr(routes.draft_writer, "revise", lambda s: {
+        "final_draft": "# 실패보존 기획서\n수정본", "revision_count": 1, "logs": ["[revise] ok"]})
+    body = client.post("/revise", json={
+        "project_name": "실패보존", "draft": run["final_draft"],
+        "revision_request": "정리", "project_id": pid}).json()
+
+    assert body["run_status"] != "success", "수정이 실패를 성공으로 덮었다"
+    assert set(body["fallback_nodes"]) >= {"kosena_industry", "kosena_research"}
+    assert body["fallback_reasons"]["kosena_industry"] == "형식"
+    # 저장된 기록에도 남아야 한다 — 화면만 맞고 기록이 지워지면 사후 진단이 불가능하다.
+    saved = store.get_project(pid)["state"]
+    assert saved["run_status"] != "success"
+    assert set(saved["fallback_nodes"]) >= {"kosena_industry", "kosena_research"}
+
+
+def test_revise_still_reports_new_failures(client, monkeypatch):
+    """반대 방향도 지켜야 한다 — 재작성 구간에서 **새로 생긴** 실패는 표기돼야 한다."""
+    from app.api import routes
+
+    run = client.post("/run", json={"project_name": "새실패", "problem": "P"}).json()
+
+    def boom(_state):
+        raise RuntimeError("revise 폭발")
+
+    monkeypatch.setattr(routes.draft_writer, "revise", boom)
+    body = client.post("/revise", json={
+        "project_name": "새실패", "draft": run["final_draft"],
+        "revision_request": "정리", "project_id": run["project_id"]}).json()
+    assert body["run_status"] in ("failed", "degraded")
+    assert "revise" in body["failed_nodes"]
+
+
 def test_projects_limit_is_bounded(client):
     """D-4: /projects limit 은 1~100 범위. 벗어나면 422(통일 오류 형식)."""
     client.post("/run", json={"project_name": "경계", "problem": "P"})
