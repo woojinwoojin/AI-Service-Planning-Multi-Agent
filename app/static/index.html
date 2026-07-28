@@ -247,7 +247,7 @@
     <textarea id="revreq" placeholder="예: 차별성 섹션을 경쟁 서비스와 비교해 더 구체적으로"></textarea>
     <div class="btns">
       <button id="revBtn" onclick="reviseDraft()">수정 반영</button>
-      <span class="muted">현재 기획서에 요청을 1회 반영해 다시 씁니다</span>
+      <span class="muted" id="revHint">현재 기획서에 요청을 1회 반영해 다시 씁니다</span>
     </div>
   </section>
 
@@ -1071,6 +1071,9 @@ async function reviseDraft() {
   if (!req) { alert("수정 요청을 입력하세요."); return; }
   const btn = document.getElementById("revBtn");
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span>반영 중…';
+  // 이전 '반영 완료' 문구가 남아 있으면 이번 요청의 결과로 오해된다.
+  const hint0 = document.getElementById("revHint");
+  if (hint0) hint0.textContent = "수정 요청을 반영하는 중입니다… (Agent 재작성 + 재평가 + 근거 검증)";
   try {
     const body = {
       project_name: lastRun.structured_input?.project_name || "",
@@ -1094,7 +1097,20 @@ async function reviseDraft() {
     showLogs(lastRun.logs);
     loadHistory();
     document.getElementById("revreq").value = "";
+    // 성공했는데 **화면에 아무 신호가 없어서** 무반응처럼 보였다(2026-07-28 실제 신고 — 서버
+    // 로그에는 POST /revise 200 이 4건 찍혀 있었다). 문서가 제자리에서 갱신되고, 더미 모드에서는
+    // 바뀐 내용이 거의 같아 육안으로 구분되지 않는다. 그래서 '무엇이 일어났는지'를 말해 준다.
+    const hint = document.getElementById("revHint");
+    if (hint) {
+      const sc = (d.final_review_result || {}).total_score;
+      hint.innerHTML = `✅ <b>반영 완료</b> — 재작성 ${d.revision_count ?? "?"}회`
+        + (sc != null ? ` · 최종 점수 ${esc(String(sc))}` : "")
+        + `. 위 기획서가 갱신되었습니다.`;
+    }
+    document.getElementById("finalCard").scrollIntoView({behavior:"smooth"});
   } catch (e) {
+    // 실패했는데 힌트가 '반영 중…' 으로 멈춰 있으면 **거짓 정보**가 된다(진행 중으로 읽힌다).
+    if (hint0) hint0.textContent = "반영에 실패했습니다. 요청을 줄이거나 잠시 후 다시 시도해 주세요.";
     alert("수정 실패: " + e.message);
   } finally {
     btn.disabled = false; btn.textContent = "수정 반영";
