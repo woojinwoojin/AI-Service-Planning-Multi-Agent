@@ -1,0 +1,53 @@
+{
+  "measured_at_utc": "2026-07-28T01:37:14+00:00",
+  "project_id": 6,
+  "topic": "AI 기반 대학생 진로 설계 서비스",
+  "model": "gpt-4o-mini",
+  "provider": "openai",
+  "workflow_mode": "parallel",
+  "run_status": "success",
+  "elapsed_sec": 174.0,
+  "cost_usd": 0.0217,
+  "llm_calls": 18,
+  "total_tokens": 107327,
+  "fallback_calls": 0,
+  "fallback_nodes": [],
+  "timing_coverage": 0.952,
+  "timing_coverage_active": 0.958,
+  "kosena": {
+    "ok": 27,
+    "partial": 1,
+    "missing": 0,
+    "total": 28,
+    "data_source": "real",
+    "unmet": [
+      "doc_length"
+    ]
+  },
+  "evidence_count": 19,
+  "evidence_with_retrieved_at": 19,
+  "evidence_with_published_date": 3,
+  "source_type_counts": {
+    "government": 3,
+    "unknown": 12,
+    "academic": 4
+  },
+  "verification": {
+    "scope": "search_snippet_only",
+    "total": 5,
+    "supported": 5,
+    "evidence_linked": 5,
+    "support_rate": 1.0
+  },
+  "quality_gate": {
+    "release_ready": false,
+    "score": 72,
+    "blocking_reasons": [
+      "score",
+      "major_issues"
+    ]
+  },
+  "best_version": "draft",
+  "reverted_from_revision": true,
+  "ai_log_entries": 18
+}
