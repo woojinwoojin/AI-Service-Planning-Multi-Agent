@@ -1,4 +1,4 @@
-# architecture — 발표용 구조도 (도판 6매)
+# architecture — 발표용 구조도 (도판 8매)
 
 `.mmd` = Mermaid 원본. **모든 도판은 코드에서 직접 대조해 그렸고**, 파일 첫 줄 주석에 근거가 되는
 파일·줄 번호를 적어 뒀다. 질문이 오면 그 자리를 열 수 있어야 그림이 주장이 된다.
@@ -11,6 +11,11 @@
 | `04-artifact-contract.mmd` | Artifact Contract(Dual Write · 3 읽기 모드) | `app/schemas/artifact.py:49–59` |
 | `05-evidence-verify.mmd` | Evidence Registry → 사실 검증 | `app/services/evidence.py`, `app/agents/verifier.py:26,78–106` |
 | `06-cicd.mmd` | 형상관리·배포(CI 4게이트 → 승인 → Cloud Run) | `.github/workflows/ci.yml`, `deploy-cloudrun.yml` |
+| `07-persona-templates.mmd` | 페르소나 템플릿 설계도(A형·B형 + 공통 주입 블록 2개) | `app/prompts/templates.py:16–29·31–53·122–152` |
+| `08-static-cdn.mmd` | 정적 리소스 제공 구조(현재 CDN 미사용 / 향후 분리) | `app/main.py:18·73–88`, `docs/평가기준_매핑표.md:186–193` |
+
+> 도판 7·8 은 공식 발표 목차의 **02 생성형 AI 핵심기술**(페르소나 템플릿 설계도)과
+> **03 아키텍처 및 설계도**(정적 리소스 CDN 구성도)가 명시 요구 항목이라 추가했다.
 
 ## 렌더링
 
@@ -30,6 +35,8 @@ Mermaid 를 지원하는 곳(GitHub Markdown · VS Code Mermaid 확장 · mermai
 | 4 | 배포는 **`ARTIFACT_READ_MODE=legacy`** 다 → *"모든 Agent 가 Artifact Contract 만으로 통신한다"* 는 **과장**. `artifact_only` 는 검증 전용이며 운영 금지 |
 | 5 | 검증 범위는 **검색 요약 기준**(`search_snippet_only`), URL 원문 미검증. 출처 검사는 **실행 전체 존재 검사**이며 항목별 연결은 미구현 |
 | 6 | "승인 없이 자동 배포된다"와 "승인 없이는 배포 불가"는 **둘 다 틀리다**(승인 게이트 있음 + `can_admins_bypass=true`) |
+| 7 | 프롬프트 규칙만으로는 날조를 **100% 막지 못한다**(`templates.py:22` 주석). 뒤단 verifier 와 **2겹**으로 쓴다 — 이 그림만 띄우고 "날조를 차단한다"고 말하면 과장 |
+| 8 | CDN 미사용은 **의도적 판단**이지 누락이 아니다(빌드·CORS 불필요 · 폐쇄망 동작 · 공급망 위험 회피). 대가는 **JS 자동 테스트가 없다**는 것이고 함께 말해야 한다 |
 
 ## 이 작업 중 발견한 문서 오류
 
