@@ -49,7 +49,8 @@ jobs:
       - name: Ruff (lint)
         run: ruff check .
 
-      # 커버리지 하한: 2026-07-26 실측 96%(app/ 전체, 320 tests) 기준으로 90%를 바닥으로 둔다.
+      # 커버리지 하한: 실측 96%(app/ 전체) 기준으로 90%를 바닥으로 둔다.
+      # (테스트 개수는 적지 않는다 — 늘어날 때마다 주석이 낡는다. 현재 개수는 CI 로그에 찍힌다.)
       # 여유 6%p는 플랫폼(Linux/Windows) 분기 차이와 신규 코드용. 하한을 올릴 땐 실측 후에.
       - name: Pytest (+ coverage floor)
         run: pytest -q --cov=app --cov-report=term-missing --cov-fail-under=90

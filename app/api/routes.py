@@ -103,11 +103,22 @@ def project_detail(project_id: int) -> dict:
 @router.post("/suggest", tags=["입력 보조"], summary="입력 자동완성",
              responses=error_responses(400))
 def suggest_input(payload: SuggestInput) -> dict:
-    """프로젝트명(+메모+기존 입력)으로 '빈 항목만' 초안을 추천(사용자 입력은 보존·문맥 활용)."""
+    """프로젝트명(+메모+기존 입력)으로 '빈 항목만' 초안을 추천(사용자 입력은 보존·문맥 활용).
+
+    이 경로도 **LLM 을 1회 호출한다.** 전체 실행보다 훨씬 싸지만 공개 주소에서는 무제한으로
+    불릴 수 있어, 상한(`public_guard.LIGHT_PATHS`)과 **비용 집계** 대상에 함께 넣는다.
+    그전에는 둘 다 빠져 있어 자동완성 비용이 일일 누계에 잡히지 않았다(외부 리뷰 P0).
+    """
     if not payload.project_name.strip():
         raise HTTPException(status_code=400, detail="프로젝트명을 입력하세요.")
-    return suggest.suggest_fields(payload.project_name, payload.memo, payload.model,
-                                  payload.existing, payload.compare)
+    # usage 는 contextvar 기반이라 요청 단위로 격리된다 — 여기서 열고 끝나면 이 호출의 비용만 잡힌다.
+    usage.start()
+    try:
+        return suggest.suggest_fields(payload.project_name, payload.memo, payload.model,
+                                      payload.existing, payload.compare)
+    finally:
+        # 실패해도 이미 태운 비용은 센다(예외로 빠져나가면 공짜가 되는 구멍을 막는다).
+        public_guard.record_cost((usage.summary() or {}).get("est_cost_usd") or 0.0)
 
 
 def _record_public_cost(state: dict) -> None:
@@ -382,9 +393,22 @@ def export_ai_log(payload: AiLogExportInput) -> Response:
 
 @router.post("/run/save", tags=["실행"], summary="실행 + 산출물(.md/.docx/.pptx/.json) 저장")
 def run_and_save(payload: ProjectInput) -> dict:
-    """워크플로 실행 후 최종 기획서(.md/.docx/.pptx)와 전체 실행 결과(.json)를 저장."""
+    """워크플로 실행 후 최종 기획서(.md/.docx/.pptx)와 전체 실행 결과(.json)를 저장.
+
+    **공개 배포에서는 끈다**(`ENABLE_SERVER_SAVE=0`). 이 경로는 전체 워크플로를 돌리는 데다
+    결과를 **서버 로컬 디스크에 쓴다** — 공개 주소에서 반복 호출되면 비용과 디스크가 함께 는다.
+    화면은 이 경로를 쓰지 않으므로(내보내기는 브라우저가 받는다) 꺼도 기능 손실이 없다.
+    로컬·CI 에서는 기본 켜짐이라 기존 동작·테스트는 그대로다.
+
+    ⚠️ 이중 방어다: 꺼져 있지 않더라도 `public_guard.GUARDED_PATHS` 에 포함돼 상한을 받고,
+    끝나면 `_record_public_cost` 로 일일 비용에 더한다(그전에는 **비용이 집계조차 되지 않았다**
+    — 외부 리뷰 P0).
+    """
+    if not public_guard.server_save_enabled():
+        raise HTTPException(status_code=404, detail="Not Found")
     state = run_workflow(payload.to_state_input())
     state["verification_summary"] = reliability.summary()
+    _record_public_cost(state)
     final = reliability.append_disclaimer(state.get("final_draft", ""))  # 내보내기 문서에 한계 문구
     saved_md = save_markdown(payload.project_name, final)
     saved_json = save_run_json(payload.project_name, state)

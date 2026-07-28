@@ -147,7 +147,9 @@
 <header>
   <div>
     <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
-    <p>Research → Competitor → PESTEL → SWOT → 수익모델 → 리스크 → Draft → Reviewer · 여러 AI Agent가 협업해 기획서를 만듭니다</p>
+    <!-- 배너는 **현재 구조**를 말해야 한다. 옛 배너는 분석 Agent 이름만 늘어놓아 KOSENA 기획·
+         근거 검증 단계가 빠져 있었다(외부 리뷰). 단계 이름은 코드의 STAGES 와 같은 수준으로 유지. -->
+    <p>근거 수집 → 전문 분석 → KOSENA 기획 → Reviewer 비평·수정 → 근거 검증 · 여러 AI Agent가 근거와 산출물을 공유하며 기획서와 발표자료를 만듭니다</p>
   </div>
   <!-- 관리자(데모 도구) 링크를 여기 두지 않는다. `/admin` 은 `ENABLE_DEMO_TOOLS=1` 이 아니면
        "존재하지 않는 것처럼" 404 를 주는데(app/main.py 의 운영 안전 게이트), 링크는 조건 없이
@@ -162,6 +164,14 @@
   <section class="card" id="inputCard">
     <div class="step">STEP 1 · 입력</div>
     <h2>사업 아이디어</h2>
+    <!-- 공개 데모 고지. 이력(`/projects`)은 **인증이 없어 누구나 목록·상세를 볼 수 있다** —
+         제출 범위에서 사용자 인증까지 넣는 것은 위험이 커서, 대신 입력 전에 분명히 알린다.
+         이 문구를 지우려면 소유권·인증이 먼저 들어와야 한다. -->
+    <div class="notice" style="margin-bottom:12px">
+      ⚠ <b>수업용 공개 데모입니다.</b> 입력한 내용은 <b>인증 없이 누구나 이력에서 볼 수 있습니다</b> —
+      개인정보·회사 기밀·비공개 아이디어를 넣지 마세요. 저장된 이력은 서비스 재시작 시 사라질 수 있으니
+      필요한 결과는 내려받아 두세요.
+    </div>
     <label>프로젝트명 *</label>
     <div class="row" style="align-items:stretch">
       <div style="flex:1 1 auto"><input id="project_name" placeholder="예: AI 기반 대학생 진로 설계 서비스" /></div>
@@ -1041,8 +1051,22 @@ function runWorkflow() {
   );
 }
 
+// 버튼이 **아무 반응 없이** 죽는 것을 막는다. `if (!lastRun) return;` 은 사용자에게 '고장'으로
+// 보인다 — 실제로 수정 반영 버튼이 무반응이라는 신고가 있었다(2026-07-28). 무엇을 해야 하는지
+// 말해 주고, 콘솔에도 남겨 원인을 추적할 수 있게 한다.
+function requireRun(label) {
+  if (lastRun && String(lastRun.final_draft || "").trim()) return true;
+  console.warn(`[${label}] lastRun 이 비어 있어 중단`, {hasLastRun: !!lastRun,
+    draftLen: String((lastRun || {}).final_draft || "").length});
+  alert(`${label}을 하려면 기획서가 먼저 있어야 합니다.\n\n`
+    + `· 위에서 '기획서 생성'을 실행하거나\n`
+    + `· 이력에서 '불러오기'로 저장된 프로젝트를 여세요.\n\n`
+    + `(페이지를 새로고침하면 화면의 실행 결과가 초기화됩니다)`);
+  return false;
+}
+
 async function reviseDraft() {
-  if (!lastRun) return;
+  if (!requireRun("수정 반영")) return;
   const req = document.getElementById("revreq").value.trim();
   if (!req) { alert("수정 요청을 입력하세요."); return; }
   const btn = document.getElementById("revBtn");
@@ -1085,7 +1109,7 @@ function download(filename, text, type) {
 }
 function slug(s){ return (s||"plan").replace(/[^0-9A-Za-z가-힣]+/g,"-").replace(/^-|-$/g,"") || "plan"; }
 function downloadMd() {
-  if (!lastRun) return;
+  if (!requireRun(".md 다운로드")) return;
   // 내보내기 문서(MD)에도 화면·DOCX·JSON과 동일한 한계 문구를 붙인다(단일 소스: verification_summary.note)
   const note = ((lastRun.verification_summary)||{}).note || "";
   let md = lastRun.final_draft || "";
@@ -1093,14 +1117,14 @@ function downloadMd() {
   download(slug(lastRun.structured_input?.project_name)+".md", md, "text/markdown");
 }
 function downloadJson() {
-  if (!lastRun) return;
+  if (!requireRun(".json 다운로드")) return;
   download(slug(lastRun.structured_input?.project_name)+".json", JSON.stringify(lastRun, null, 2), "application/json");
 }
 // 서버 변환이 필요한 내보내기 공통 처리(docx·pptx·AI로그 md).
 // 다른 점은 엔드포인트·본문·파일명뿐이라 한 곳에 모은다 — KOSENA 산출물이 추가되면서
 // 같은 코드가 5벌이 될 상황이었고, fallback 경고를 한 군데서 빠뜨리기 쉬웠다.
 async function exportViaServer({path, body, filename, label}) {
-  if (!lastRun) return;
+  if (!requireRun(label + " 내보내기")) return;
   // item 9: fallback/더미가 섞인 결과를 정식 산출물로 내려받기 전 경고
   if ((lastRun.run_status || "success") !== "success") {
     if (!confirm(`이 실행은 일부 Agent가 fallback/더미로 처리되었습니다(신뢰도 주의). 그래도 ${label}로 내려받을까요?`)) return;

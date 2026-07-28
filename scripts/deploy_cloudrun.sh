@@ -40,6 +40,9 @@ MAX_RUNS_PER_IP="${PUBLIC_MAX_RUNS_PER_IP:-5}"
 IP_WINDOW_SEC="${PUBLIC_IP_WINDOW_SEC:-3600}"
 MAX_RUNS_PER_DAY="${PUBLIC_MAX_RUNS_PER_DAY:-100}"
 MAX_COST_PER_DAY="${PUBLIC_MAX_COST_PER_DAY_USD:-2.0}"
+# 자동완성(/suggest)은 LLM 1콜이라 전체 실행과 다른 바구니로 센다 — 같이 세면 자동완성 몇 번에
+# 기획서 생성 한도가 마른다. 값은 넉넉히 두고, 돈에 대한 보증은 일일 비용 상한이 한다.
+MAX_SUGGESTIONS_PER_IP="${PUBLIC_MAX_SUGGESTIONS_PER_IP:-20}"
 
 create_secret() {   # 이름, 값
   local name="$1" value="$2"
@@ -81,9 +84,9 @@ gcloud run deploy "$SERVICE" \
   --min-instances=0 \
   --concurrency=8 \
   --cpu=1 --memory=1Gi \
-  --timeout=600 \
+  --timeout=900 \
   --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY:latest,TAVILY_API_KEY=TAVILY_API_KEY:latest" \
-  --set-env-vars="^@^USE_DUMMY=0@LLM_PROVIDER=openai@OPENAI_MODEL=gpt-4o-mini@WORKFLOW_MODE=parallel@ENABLE_DEMO_TOOLS=0@ARTIFACT_READ_MODE=legacy@PUBLIC_MAX_RUNS_PER_IP=${MAX_RUNS_PER_IP}@PUBLIC_IP_WINDOW_SEC=${IP_WINDOW_SEC}@PUBLIC_MAX_RUNS_PER_DAY=${MAX_RUNS_PER_DAY}@PUBLIC_MAX_COST_PER_DAY_USD=${MAX_COST_PER_DAY}"
+  --set-env-vars="^@^USE_DUMMY=0@LLM_PROVIDER=openai@OPENAI_MODEL=gpt-4o-mini@WORKFLOW_MODE=parallel@ENABLE_DEMO_TOOLS=0@ENABLE_SERVER_SAVE=0@ARTIFACT_READ_MODE=legacy@PUBLIC_MAX_RUNS_PER_IP=${MAX_RUNS_PER_IP}@PUBLIC_IP_WINDOW_SEC=${IP_WINDOW_SEC}@PUBLIC_MAX_RUNS_PER_DAY=${MAX_RUNS_PER_DAY}@PUBLIC_MAX_COST_PER_DAY_USD=${MAX_COST_PER_DAY}@PUBLIC_MAX_SUGGESTIONS_PER_IP=${MAX_SUGGESTIONS_PER_IP}"
 
 URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
 echo
