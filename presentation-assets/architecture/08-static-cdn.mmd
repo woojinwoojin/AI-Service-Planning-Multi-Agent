@@ -7,45 +7,38 @@
 %%   app/static/index.html  <link>·<script src> 매치 0건 -> CSS/JS 전량 인라인
 %%   설계 판단 근거      docs/평가기준_매핑표.md:186-193
 %% ⚠️ StaticFiles 마운트조차 쓰지 않는다 — 파일 2개를 FileResponse 로 직접 반환한다.
+%% 발표에서 함께 말할 것(도판에는 넣지 않는다 — docs/발표_슬라이드_구성.md 03 절에 전문):
+%%   · CDN 미사용은 의도적 판단: 빌드·CORS 불필요 / 폐쇄망 동작 / 공급망·가용성 위험 회피
+%%   · 대가: JS 자동 테스트가 없다(node 미설치) — 화면은 사람이 확인해야 한다
+%%   · max-instances=1 은 필수 제약 — public_guard 카운터가 프로세스 메모리다
 flowchart TB
-    subgraph NOW["현재 (제출 버전) — CDN 미사용 · 외부 요청 0건"]
+    subgraph NOW["현재 (제출 버전) — CDN 미사용"]
         direction TB
         U1["브라우저"]
-        CR1["Cloud Run · asia-northeast3<br/>ai-planning-agent<br/>max-instances=1 · concurrency=8"]
-        F1["FastAPI<br/>app/main.py"]
-        S1["app/static/index.html<br/><b>CSS·JS 전량 인라인</b><br/>외부 &lt;link&gt;·&lt;script src&gt; 0건"]
-        A1["/run · /run/stream · /revise<br/>/export/* · /projects"]
+        CR1["Cloud Run · asia-northeast3<br/>max-instances=1"]
+        F1["FastAPI"]
+        S1["index.html<br/><b>CSS·JS 인라인</b><br/>외부 요청 0건"]
+        A1["/run · /run/stream<br/>/export · /projects"]
 
-        U1 -->|"HTTPS · 문서 요청 1회"| CR1
-        CR1 --> F1
-        F1 -->|"FileResponse"| S1
+        U1 -->|"문서 요청 1회"| CR1 --> F1
+        F1 -->|FileResponse| S1
         F1 --> A1
-        S1 -.->|"같은 오리진으로 호출<br/>CORS 설정 불필요"| A1
+        S1 -.->|"같은 오리진<br/>CORS 불필요"| A1
     end
 
-    NOW --> WHY
-
-    WHY["<b>왜 CDN 을 쓰지 않았는가</b> (의도적 판단)<br/>① 빌드·CORS·별도 배포 파이프라인이 불필요<br/>② 폐쇄망·오프라인에서도 그대로 동작<br/>③ 외부 CDN 은 가용성·버전 변동·공급망 위험을 끌어들인다<br/>백엔드가 이 프로젝트의 주인공 → 프런트 복잡도를 의도적으로 낮게 유지<br/><br/><b>대가</b>: JS 자동 테스트가 없다(환경에 node 미설치)<br/>→ 화면 변경은 브라우저 수동 확인. 테스트 전부 통과 상태에서 화면이 깨진 적 2회"]
+    NOW --> WHY["<b>CDN 미사용 — 의도적 판단</b><br/>빌드·CORS 불필요 · 폐쇄망 동작 · 공급망 위험 회피<br/>대가: JS 자동 테스트 없음"]
 
     WHY --> FUTURE
 
-    subgraph FUTURE["실서비스화 단계 (계획) — 정적/동적 분리"]
+    subgraph FUTURE["실서비스화 (계획) — 정적/동적 분리"]
         direction TB
-        U2["브라우저"]
-        CDN["Cloud CDN<br/>엣지 캐시 · TLS 종료"]
-        GCS["Cloud Storage<br/>index.html · CSS · JS<br/>해시 파일명 + 장기 캐시"]
-        CR2["Cloud Run<br/>API 전용 · 오토스케일"]
-        DB["Cloud SQL<br/>이력 영속화"]
-
-        U2 --> CDN
-        CDN -->|"정적 리소스 · 캐시 히트"| GCS
-        U2 -->|"/api/* 는 캐시 우회"| CR2
-        CR2 --> DB
+        U2["브라우저"] --> CDN["Cloud CDN<br/>엣지 캐시"]
+        CDN -->|"정적 · 캐시 히트"| GCS["Cloud Storage<br/>해시 파일명"]
+        U2 -->|"/api/* 캐시 우회"| CR2["Cloud Run<br/>API 전용"]
+        CR2 --> DB["Cloud SQL"]
     end
 
-    FUTURE --> COND
-
-    COND["<b>분리를 지금 하지 않은 이유</b><br/>정적 리소스가 파일 2개뿐이고 트래픽이 단일 인스턴스 범위<br/>→ CDN 도입 이득 &lt; 배포 경로 2개가 생기는 위험<br/>⚠️ 현재 max-instances=1 은 필수 제약이다 — public_guard 카운터가<br/>프로세스 메모리라 인스턴스가 늘면 공개 상한이 인스턴스 수만큼 곱해진다"]
+    FUTURE --> COND["<b>지금 분리하지 않은 이유</b><br/>정적 파일 2개 · 단일 인스턴스 범위<br/>→ 도입 이득 &lt; 배포 경로 2개의 위험"]
 
     classDef now fill:#eef6ff,stroke:#2b6cb0,stroke-width:2px
     classDef future fill:#f0fff4,stroke:#2f855a,stroke-dasharray: 5 3
