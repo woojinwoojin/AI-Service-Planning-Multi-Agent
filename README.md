@@ -283,6 +283,15 @@ bash scripts/deploy_cloudrun.sh      # Secret Manager 등록 + Cloud Run 배포 
 
 `--source .` 를 쓰므로 **로컬 Docker 데몬이 필요 없습니다**(Cloud Build 가 이미지를 만듭니다).
 
+## 라이선스
+
+이 프로젝트는 **MIT 라이선스**로 공개합니다 — [`LICENSE`](LICENSE).
+
+의존 패키지는 모두 각자의 라이선스를 따릅니다(전체 목록은 [`requirements.txt`](requirements.txt)).
+저장소에는 제3자 코드·이미지·폰트를 포함하지 않았고, 외부 라이브러리는 전부 패키지 참조로만
+씁니다 — 프런트엔드도 CDN·빌드 도구 없이 `app/static/index.html` 한 파일에 인라인되어 있습니다
+(판단 근거는 [`docs/평가기준_매핑표.md`](docs/평가기준_매핑표.md)).
+
 ### 두 경로 공통 주의
 
 - **`--max-instances=1` 은 필수**입니다. `public_guard` 의 요청·비용 카운터가 프로세스 메모리라,
