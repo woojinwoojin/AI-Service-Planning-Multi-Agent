@@ -1,26 +1,35 @@
-name: Cloud Run 배포 (수동 트리거)
+name: Cloud Run CD (main 자동 + 수동 트리거)
 
-# **사람이 버튼을 눌러야만 도는 수동 트리거 배포.** push 트리거를 일부러 두지 않았다 —
-# 실 LLM 키가 붙은 공개 서비스라, main 이 움직일 때마다 자동 배포되면 비용·노출이
-# 사람의 확인 없이 바뀐다.
+# **main 에 머지되면 배포 파이프라인이 자동으로 이어지는 승인형 CD.**
 #
-# 흐름: 게이트(ruff + pytest) → GCP 인증 → Cloud Run 새 Revision → 원격 /health 확인.
+# 흐름: 게이트(ruff + pytest) → [승인 대기] → GCP 인증 → Cloud Run 새 Revision → 원격 /health.
 # 게이트가 실패하면 배포 잡은 아예 시작하지 않는다(`needs`).
 #
-# ⚠️ **이름을 '승인형'이라고 하지 않은 이유.** `environment: production` 을 선언하는 것만으로는
-# 승인 절차가 생기지 않는다. 저장소 설정 → Environments → production 에 **Required reviewers**
-# 보호 규칙을 걸어야 그 잡이 승인 대기로 멈춘다. 그래서 단계별 정확한 명칭은 이렇다:
+# ⚠️ **'자동'의 정확한 범위.** 트리거와 파이프라인 진행은 자동이지만, 실서비스에 반영되는
+# 마지막 단계에는 사람 승인이 남아 있다 — `environment: production` 에 **Required reviewers**
+# 가 걸려 있어서 배포 잡이 승인 대기로 멈춘다. 실 LLM 키가 붙은 공개 서비스라 이 게이트는
+# 일부러 남겼다(main 이 움직일 때마다 비용·노출이 사람 확인 없이 바뀌지 않게).
+# 완전 무인 배포로 바꾸려면 저장소 설정 → Environments → production 에서 Required reviewers
+# 를 지워야 한다 — **코드 변경이 아니라 저장소 설정이다.**
+# 그래서 발표·문서에서 "승인 없이 배포된다"고 말하면 틀린다. 또 `can_admins_bypass=true` 라
+# "승인 없이는 절대 배포 불가"도 틀린다(관리자는 우회할 수 있다).
 #
-#   지금                        : 수동 트리거형 Cloud Run 배포 워크플로
-#   Required reviewers 설정 후  : 승인형 Cloud Run CD
-#   실제 dispatch 성공 후       : 검증된 승인형 Cloud Run CD
-#
-# (비공개 저장소는 요금제에 따라 Required reviewers 를 못 쓸 수 있으니 플랜도 확인해야 한다.)
-#
-# ⚠️ 이 워크플로는 **아직 실제로 실행해 검증하지 않았다.** 시크릿·WIF 설정은 저장소 관리자만
-# 할 수 있고, 그 전에는 설정 확인 단계에서 명확한 메시지와 함께 실패한다(가짜 성공을 만들지 않는다).
+# 검증 이력: 2026-07-28 dispatch 로 전 경로 성공(WIF 인증 → Cloud Build → Revision
+# ai-planning-agent-00003-7bs → 원격 /health ok). 그전까지 두 번 실패했고 둘 다 이 파일의
+# 결함이었다 — `if: ${{ secrets.X }}`(steps.if 에서 secrets 를 못 본다) 와 ruff 미설치(exit 127).
+# **이 워크플로는 PR CI 에서 돌지 않으므로 YAML 파싱만으로는 검증되지 않는다.**
 
 on:
+  # main 머지 → 자동 배포. 문서만 바뀐 커밋으로는 Cloud Build 를 돌리지 않는다
+  # (이미지 동작이 같은데 Revision 과 빌드 비용만 늘어난다).
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'presentation-assets/**'
+      - '.gitignore'
+  # 되돌리기·재배포·더미 확인용 수동 경로는 남겨 둔다.
   workflow_dispatch:
     inputs:
       confirm:
@@ -53,8 +62,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: 오타 배포 방지 — confirm 입력 확인
-        if: ${{ inputs.confirm != 'deploy' }}
+      # `github.event_name` 조건이 **필수다.** push 트리거에는 `inputs` 가 없어
+      # `inputs.confirm` 이 빈 값이 되고, 조건이 항상 참이 되어 **자동 배포가 전부
+      # 이 단계에서 죽는다.** 오타 방지는 사람이 직접 누르는 경로에만 의미가 있다.
+      - name: 오타 배포 방지 — confirm 입력 확인 (수동 트리거에만 적용)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm != 'deploy' }}
         run: |
           echo "::error title=확인 문자열 불일치::'deploy' 를 정확히 입력해야 진행한다(받은 값: '${{ inputs.confirm }}')."
           exit 1
@@ -134,6 +146,12 @@ jobs:
         id: deploy
         env:
           PROJECT: ${{ secrets.GCP_PROJECT }}
+          # push(자동 배포) 에는 `inputs` 가 없어 이 식이 '0' = **실 모드**로 떨어진다. 의도한 값이다
+          # — 자동 배포는 항상 실서비스 구성으로 올라간다.
+          # ⚠️ `dummy_mode` 를 켜고 수동 배포하면 **공개 URL 이 더미로 덮인다**(2026-07-28 에 실제로
+          # 그렇게 됐다). 더미로 확인한 뒤에는 실 모드로 되돌려야 한다 — main 에 아무 코드 커밋이
+          # 머지되면 자동으로 되돌아가고, 급하면 `confirm=deploy` + dummy_mode 끄고 재-dispatch 한다.
+          # 현재 모드는 `/health` 의 `dummy_mode` 필드로 확인한다(배포 성공 ≠ 실 모드).
           USE_DUMMY: ${{ inputs.dummy_mode && '1' || '0' }}
         run: |
           set -euo pipefail
@@ -180,6 +198,9 @@ jobs:
         env:
           URL: ${{ steps.deploy.outputs.url }}
           REV: ${{ steps.deploy.outputs.revision }}
+          # 요약에는 **실제로 넘긴 값**을 적는다. `inputs.dummy_mode` 를 그대로 쓰면 push 배포에서
+          # 빈 칸으로 나와, 실 모드로 올라간 것을 알 수 없다.
+          USE_DUMMY: ${{ inputs.dummy_mode && '1' || '0' }}
         run: |
           {
             echo "## Cloud Run 배포"
@@ -190,7 +211,13 @@ jobs:
             echo "| Revision | \`${REV:-생성 안 됨}\` |"
             echo "| URL | ${URL:-없음} |"
             echo "| Git commit | \`${GITHUB_SHA}\` |"
-            echo "| 더미 모드 | ${{ inputs.dummy_mode }} |"
+            echo "| 트리거 | ${GITHUB_EVENT_NAME} |"
+            if [ "$USE_DUMMY" = "1" ]; then
+              echo "| 실행 모드 | ⚠️ **더미**(USE_DUMMY=1) — 공개 URL 이 더미로 덮였다. 실 모드로 되돌릴 것 |"
+            else
+              echo "| 실행 모드 | 실 LLM (USE_DUMMY=0) |"
+            fi
             echo ""
             echo "Revision ↔ commit 대응을 남기는 이유: 배포된 것이 어느 소스인지 나중에 확인해야 한다."
+            echo "실제 반영 여부는 \`/health\` 의 \`dummy_mode\` 로 확인한다 — 배포 성공 ≠ 실 모드."
           } >> "$GITHUB_STEP_SUMMARY"
