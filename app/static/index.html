@@ -138,7 +138,12 @@
     <h1>AI 서비스 기획 보조 · Multi-Agent</h1>
     <p>Research → Competitor → PESTEL → SWOT → 수익모델 → 리스크 → Draft → Reviewer · 여러 AI Agent가 협업해 기획서를 만듭니다</p>
   </div>
-  <a href="/admin" class="admin-link">🧪 관리자</a>
+  <!-- 관리자(데모 도구) 링크를 여기 두지 않는다. `/admin` 은 `ENABLE_DEMO_TOOLS=1` 이 아니면
+       "존재하지 않는 것처럼" 404 를 주는데(app/main.py 의 운영 안전 게이트), 링크는 조건 없이
+       렌더돼서 **공개 배포에 눌러도 404 인 버튼**이 보였다(2026-07-28 확인).
+       조건부로 숨기려면 화면이 서버 설정을 읽어야 하지만 이 페이지는 /health 를 읽지 않으므로
+       그러려면 새 JS 가 필요하다 — 이 프로젝트는 JS 자동 테스트가 없어(node 미설치) 그 변경의
+       위험이 이득보다 크다고 판단했다. 데모 도구가 필요하면 `/admin` 을 직접 입력한다. -->
 </header>
 <main>
 

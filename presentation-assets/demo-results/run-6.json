@@ -1,0 +1,2463 @@
+{
+  "structured_input": {
+    "project_name": "AI 기반 대학생 진로 설계 서비스",
+    "description": "대학생이 전공·관심사·역량을 입력하면 진로 경로와 필요한 학습·경험을 설계해 주는 AI 서비스",
+    "target_user": "진로를 구체화하지 못한 대학교 2~3학년",
+    "problem": "진로 정보가 흩어져 있고, 자신에게 맞는 경로와 준비 순서를 판단하기 어렵다",
+    "keywords": [
+      "진로 설계",
+      "대학생",
+      "역량 진단",
+      "커리어"
+    ],
+    "target_market": "진로를 구체화하지 못한 대학교 2~3학년"
+  },
+  "research_result": {
+    "market_overview": "AI 기반 진로 설계 서비스는 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로, 특히 2~3학년 학생들이 직면하는 진로 정보의 부족과 맞춤형 경로 설계의 필요성을 충족할 수 있는 잠재력을 가지고 있습니다. 현재 대학생 진로 관련 서비스 시장은 빠르게 성장하고 있으며, AI 기술의 발전으로 인해 개인화된 진로 상담 및 경로 설계 서비스의 수요가 증가하고 있습니다.",
+    "industry_trends": [
+      "AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요 증가",
+      "대학생들이 진로에 대한 불확실성을 느끼며, 이를 해결하기 위한 다양한 프로그램과 서비스가 등장",
+      "데이터 기반의 진로 설계 및 역량 진단 서비스의 발전",
+      "글로벌 진로 지도 플랫폼 시장은 2026년 19억 4천만 달러에서 시작하여 2035년까지 39억 6천만 달러에 이를 것으로 예상되며, 연평균 성장률(CAGR)은 8.2%에 달할 것으로 보임"
+    ],
+    "customer_needs": [
+      "진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움",
+      "자신의 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구의 필요성",
+      "AI를 통한 맞춤형 진로 상담을 통해 보다 명확한 경로를 제시받고자 하는 욕구"
+    ],
+    "competitors": [
+      {
+        "name": "Career Compass",
+        "features": "AI 기반의 맞춤형 진로 상담, 성적 및 생활기록부 분석, 취업 로드맵 제안"
+      },
+      {
+        "name": "Young熊+",
+        "features": "전공 정보 및 수강 현황 분석, 비교과 프로그램 추천, 졸업생의 학습 이력 분석"
+      },
+      {
+        "name": "커리어넷",
+        "features": "심리검사 데이터와 직업정보를 결합하여 맞춤형 정보 제공"
+      }
+    ],
+    "opportunities": [
+      "AI 기술의 발전으로 개인화된 진로 설계 서비스의 품질 향상",
+      "대학생들의 진로 설계에 대한 관심 증가로 인한 시장 확장 가능성",
+      "대학 및 관련 기관과의 협력을 통한 서비스 확장"
+    ],
+    "risks": [
+      "AI 기술의 신뢰성 및 정확성에 대한 우려",
+      "진로 설계에 대한 개인의 요구와 기대를 충족하지 못할 경우 사용자 이탈 가능성",
+      "경쟁 서비스의 증가로 인한 시장 포화",
+      "43%의 농촌 사용자는 플랫폼 채택을 제한하는 연결 문제에 직면하고 있음"
+    ],
+    "sources": [
+      "진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035] — https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217",
+      "대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258",
+      "대학생의 진로역량 개발을 위한 교육 요구도 분석 — http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf",
+      "미래사회와 진로설계 — http://kocw-n.xcache.kinxcdn.com/data/document/2024/hansung/jangmyunghee0106/11.pdf",
+      "대학생의 진로준비도가 초기 노동시장 성과에 미치는 영향 분석 — https://krivet.re.kr/repository/bitstream/202405/6862/2/KC1819_fulltext.pdf",
+      "AI 진로 검사 서비스 — https://www.itdaa.net/personality_introductions/career?ref=home_mobile_quick_menu",
+      "AI 에이전트 기반 보건의료정보 전공 도메인 특화 맞춤형 진로 취업 지원 ... — http://journal.dcs.or.kr/xml/49357/49357.pdf",
+      "[돈 버는 설문] “10명 중 7명은 사용 중” AI 서비스 일상 필수 파트너 됐다 — https://news.sktelecom.com/221378",
+      "[AI가 바꾸는 진로 설계]① AI로 발견하는 숨겨진 잠재력, 학생 ... — https://edumorning.com/articles/254",
+      "일상 속에 자리잡은 AI, 소비자들의 만족도와 신뢰도는 부정적 - 픽플리 블로그: 소비자 데이터 트렌드 리포트 & 데이터 활용 팁 — https://pickply.com/blog/ai-consumer-satisfaction-trust",
+      "Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담 — https://career.restyart.com",
+      "인공지능 기반 진로/진학 서비스 프로토타입 개발 연구 — http://journal.dcs.or.kr/xml/40124/40124.pdf",
+      "AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE — https://webzine.dankook.ac.kr/news/articleView.html?idxno=465",
+      "대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903",
+      "머 리 말 — https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf",
+      "https://career.restyart.com",
+      "http://journal.dcs.or.kr/xml/40124/40124.pdf",
+      "https://webzine.dankook.ac.kr/news/articleView.html?idxno=465",
+      "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903",
+      "https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf"
+    ],
+    "source_objects": [
+      {
+        "title": "Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담",
+        "url": "https://career.restyart.com",
+        "snippet": "자세히 보기 →\n\n### 장기 취업 & 성장 로드맵\n\n대학 졸업 이후 취업 유망 직무·자격 요건까지 시뮬레이션합니다. AI 진로 상담 결과를 바탕으로 단계별 마일스톤과 핵심 역량 개발 계획을 설계하세요.\n\n자세히 보기 →\n\n## 자주 묻는 질문\n\nCareer Compass AI 진로 상담은 무엇인가요?\n:   성적·생활기록부·성향 데이터를 AI가 분석해 맞춤형 진로 계획, 학교·학과 매칭, 취업 로드맵을 제안하는 서비스입니다. 목표 계획, 성적 분석, 학교 정보, AI 채팅 상담을 한곳에서 이용할 수 있습니다.\n\n어떤 학생·학부모에",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:14+00:00"
+      },
+      {
+        "title": "인공지능 기반 진로/진학 서비스 프로토타입 개발 연구",
+        "url": "http://journal.dcs.or.kr/xml/40124/40124.pdf",
+        "snippet": "service and AI-based personalized service based on collected data. The data-based service component includes ① a program to manage the trend of learners' academic achievements and triggers for grade changes, ② a program to manage students' competencies, ③ a program to manage subject-related outputs/",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:14+00:00"
+      },
+      {
+        "title": "AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE",
+        "url": "https://webzine.dankook.ac.kr/news/articleView.html?idxno=465",
+        "snippet": "'Young熊+' 내 「전공 라운지(Major Lounge)」에서는 ▲전공 정보 및 수강 현황 ▲연관 교과목 및 교재 분석 ▲역량 강화를 위한 비교과 프로그램 추천 ▲개인 맞춤형 교과·비교과 키워드 추천 등의 기능을 제공한다. 또한 「잡 라운지(Job Lounge)」는 ▲관심 기업에 입사한 졸업생의 학습 이력 분석 ▲채용 정보 통합 제공 ▲선배 인터뷰 콘텐츠 등 학생들의 진로 설계를 지원한다.\n\n이번에 개발된 'Young熊+'는 우리 대학의 AI 기반 맞춤형 교육·지원 시스템인 '단아이(Dan.i)'의 빅데이터 분석과 AI 기술을 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T01:37:14+00:00"
+      },
+      {
+        "title": "대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용",
+        "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903",
+        "snippet": "영문\n\n@article{ART003215903,  \nauthor={Saebome Baek and Gayoung Yun and Soojeong Jeong},  \ntitle={Design and Implementation of an AI-Integrated Career Development Program for College Students},  \njournal={Journal of Korean Association for Educational Information and Media},  \nissn={1229-7291},  \nyear=",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "government",
+        "retrieved_at": "2026-07-28T01:37:14+00:00"
+      },
+      {
+        "title": "머 리 말",
+        "url": "https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf",
+        "snippet": "보다 생생한 직업정보를 커리 어넷 이용자에게 제공할 수 있을 것이다. 다만 이를 위해서는 잡코리아와 같은 구인 업체와의 협약 등에 대한 작업이 사전 검토되어야 할 것이다. 마지막으로, 커리어넷의 활용 측면에서 제시해 보면 다음과 같다. 커리어 넷에서 수집되는 여러 개인의 심리검사 데이터가 존재하는데, 이러한 개인의 심리검사 데이터를 인공지능(AI) 모델과 연계하면 커리어넷을 이용하는 이용자에게 맞춤형 정보 제공이 가능하다. 특히 기존의 직업백과나 구인 정보에 기반한 임베딩 데이터와 이용자의 심리검사 데이터를 통합 분석하면, 이용자의",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T01:37:14+00:00"
+      },
+      {
+        "title": "진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035]",
+        "url": "https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217",
+        "snippet": "시장 규모 및 성장:글로벌 진로 지도 플랫폼 시장의 성장은 2026년 19억 4천만 달러에서 시작하여 2026년부터 2035년까지 연평균 성장률(CAGR) 8.2%로 2035년까지 39억 6천만 달러에 이를 것으로 예상됩니다.\n 주요 시장 동인:72%의 기관과 64%의 학생이 기존 방법보다 온라인 지도 플랫폼을 선호함에 따라 디지털 진로 도구 채택이 증가하고 있습니다.\n 주요 시장 제한:신흥 지역의 제한된 디지털 인프라는 접근성에 영향을 미치며, 43%의 농촌 사용자는 플랫폼 채택을 제한하는 연결 문제에 직면하고 있습니다.\n 새로운",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:31+00:00"
+      },
+      {
+        "title": "대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계",
+        "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258",
+        "snippet": "graduates of higher education institutions is mainly used for policy formulation andevaluation at the government level and its content is limited to quantitative information by thenumber of employed persons. Therefore, there is an indication that it is not being effectively usedto raise the employme",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "government",
+        "retrieved_at": "2026-07-28T01:37:31+00:00"
+      },
+      {
+        "title": "대학생의 진로역량 개발을 위한 교육 요구도 분석",
+        "url": "http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf",
+        "snippet": "취업의 현황과 전략 4.882 4 기업 비즈니스 매너 4.536 7 인턴십(직장체험) 준비 실제 5.261 2 기업이 요구하는 기초직무능력 4.817 5 직장 생활의 현실과 적응전략 4.210 9 진로설계․탐색 및 직업관 정립 바람직한 대학생활 적응 및 설계 3.611 15 직업 생활의 의미 및 직업윤리 3.189 16 직업심리검사를 통한 자기이해 3.997 12 진로 의사결정 방법 3.720 14 전공별 진출 가능 취업 분야 탐색 4.154 11 직업세계의 변화와 고용시장 동향 4.479 8 효과적인 대인관계와 인적 네트워크 구성",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:31+00:00"
+      },
+      {
+        "title": "미래사회와 진로설계",
+        "url": "http://kocw-n.xcache.kinxcdn.com/data/document/2024/hansung/jangmyunghee0106/11.pdf",
+        "snippet": "미래사회와진로설계 미래사회와진로설계 Future Society and Career Design 취업난에허덕이는청년... 디딤돌이될‘청년일자리10대사업’은 고용노동부는2024년청년일자리사업을통해‘재학–구직–취업’ 단계별상황에맞춰청년들이원하는맞춤형지원을강화하고자2024년청년 일자리10대사업을진행한다고밝혔다. 고용노동부에서발표한‘청년일자리10대사업’에는‘대학재학생맞춤형고용서비스’를통해1:1 상담을 기반으로저학년부터진로, 직업의탐색과설계지원(빌드업프로젝트), 고학년에는취업활동계획수립, 훈련ㆍ일경험연계등직무역량의향상을 지원(점프업프로젝트)하",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:31+00:00"
+      },
+      {
+        "title": "대학생의 진로준비도가 초기 노동시장 성과에 미치는 영향 분석",
+        "url": "https://krivet.re.kr/repository/bitstream/202405/6862/2/KC1819_fulltext.pdf",
+        "snippet": "‘진로 및 취·창업 서비스 경험’은 2018～2021학년도에 학교 내 진로 및 취·창업 서비스 10개 항목11)별 1회 이상 참여한 경우 ‘1’, 참여하지 않은 경우 ‘0’으로 코딩하여 10개 항목을 합산하여 사용하였다. 이 외에 선행연구에 근거하여 종속변수에 영향을 미칠 수 있는 개인특성 변수와 가구특성 변수, 학교특성 변수를 선정하여 분석 시 통제변수로 모형에 투입하였다. 구체적으로 개인특성 과 관련해서 ‘성별’, ‘계열/학부’, ‘학업성취도’, ‘대학생활 만족도’, ‘자기이해’를 통제변수로 설정 하였다(길혜지, 최윤미, 201",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T01:37:31+00:00"
+      },
+      {
+        "title": "AI 진로 검사 서비스",
+        "url": "https://www.itdaa.net/personality_introductions/career?ref=home_mobile_quick_menu",
+        "snippet": "AI 진로 검사 서비스 … 이용 후기 98% 사용자 만족도 4.9 평균 평점 (5점 만점) 오픈 이벤트로 기본 검사는 5,000원으로 제공됩니다. 이벤트 종료 후 12,000원으로 제공될",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:33+00:00"
+      },
+      {
+        "title": "AI 에이전트 기반 보건의료정보 전공 도메인 특화 맞춤형 진로 취업 지원 ...",
+        "url": "http://journal.dcs.or.kr/xml/49357/49357.pdf",
+        "snippet": "1학년 2학기, 2학년 1학기, 2학년 2학기 크게 4분기로 나누 어 학기별 로드맵을 제시했다. 졸업생 및 편입생의 경우 4학 년까지 제시하거나 3-4개월 단위로 로드맵이 제시되었으며, 최종적으로 코칭 추천 상황에서 자격증 종류 및 솔루션 실행 에 대한 구체적인 방안과 심리적 지지를 포함했다. 이후 이용자 만족도 조사에서는 Likert 5점 척도를 사용하 여 매우 그렇다 5점, 전혀 아니다 1점의 기준을 적용하여 평 가했다. 이해의 명확성 및 용이성이 평균 4.52점(±0.65), 문 항의 적합성이 평균 4.16점(±0.79)으로 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:33+00:00"
+      },
+      {
+        "title": "[돈 버는 설문] “10명 중 7명은 사용 중” AI 서비스 일상 필수 파트너 됐다",
+        "url": "https://news.sktelecom.com/221378",
+        "snippet": "주로 사용하는 생성형 AI 서비스 개수를 묻는 질문에 '1개'를 사용한다고 답한 응답자가 45.8%(550명)로 가장 많았다. 반면, '4~5개 이상' 사용자는 8.4%(",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:33+00:00"
+      },
+      {
+        "title": "[AI가 바꾸는 진로 설계]① AI로 발견하는 숨겨진 잠재력, 학생 ...",
+        "url": "https://edumorning.com/articles/254",
+        "snippet": "이 그래프에 따르면 초등학생 20.4%, 중학생 40.0%, 고등학생 29.0%가 희망 직업을 아직 정하지 못했다고 응답했다. 이는 교육부와 한국직업능력연구원이",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:33+00:00"
+      },
+      {
+        "title": "일상 속에 자리잡은 AI, 소비자들의 만족도와 신뢰도는 부정적 - 픽플리 블로그: 소비자 데이터 트렌드 리포트 & 데이터 활용 팁",
+        "url": "https://pickply.com/blog/ai-consumer-satisfaction-trust",
+        "snippet": "AI 기술은 이제 더 이상 ‘특별한 것’이 아니라, ‘우리의 일상 깊숙이 자리 잡은 필수 요소’가 되었습니다. 픽플리에서 진행된 <기업의 AI 사용에 대해 어떻게 생각하시나요?> 설문조사 프로젝트에 참여한 응답자 중 89.7%(899명)가 “AI 기술이나 서비스를 경험해본 적이 있다”고 답변하였습니다. 이는 AI가 다양한 방식으로 우리의 삶에 스며들어 사용되고 있음을 보여주는데요.\n\n또한, AI 사용 경험이 있는 소비자 중 79.2%(712명)는 검색 및 정보 탐색을 목적으로 AI를 사용하고 있음을 확인할 수 있었습니다. 온라인에서",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T01:37:33+00:00"
+      }
+    ]
+  },
+  "competitor_result": {
+    "competitors": [
+      {
+        "name": "Career Compass",
+        "description": "AI 기반의 맞춤형 진로 상담 서비스로, 성적 및 생활기록부 분석을 통해 취업 로드맵을 제안합니다.",
+        "strengths": [
+          "AI 기술을 활용한 데이터 분석으로 개인 맞춤형 진로 계획 제공",
+          "단계별 마일스톤과 핵심 역량 개발 계획 설계 가능"
+        ],
+        "weaknesses": [
+          "AI의 신뢰성 및 정확성에 대한 우려",
+          "사용자 맞춤형 서비스의 한계로 인한 사용자 이탈 가능성"
+        ]
+      },
+      {
+        "name": "Young熊+",
+        "description": "전공 정보 및 수강 현황 분석을 통해 비교과 프로그램을 추천하는 서비스입니다.",
+        "strengths": [
+          "졸업생의 학습 이력 분석을 통한 실질적인 진로 정보 제공",
+          "개인 맞춤형 교과 및 비교과 키워드 추천 기능"
+        ],
+        "weaknesses": [
+          "특정 대학에 국한된 서비스로 인한 시장 접근성 제한",
+          "AI 기술의 발전에 따른 지속적인 업데이트 필요"
+        ]
+      },
+      {
+        "name": "커리어넷",
+        "description": "심리검사 데이터와 직업 정보를 결합하여 맞춤형 정보를 제공하는 플랫폼입니다.",
+        "strengths": [
+          "심리검사 데이터를 통한 개인 맞춤형 정보 제공",
+          "직업 정보와의 결합으로 보다 폭넓은 진로 탐색 가능"
+        ],
+        "weaknesses": [
+          "데이터의 신뢰성 문제로 인한 사용자 신뢰도 저하",
+          "기술적 한계로 인한 개인화 서비스의 부족"
+        ]
+      }
+    ],
+    "positioning": "AI 기반 진로 설계 서비스는 대학생들이 맞춤형 진로 상담과 경로 설계를 통해 진로 불확실성을 해소하는 데 중점을 두고 있습니다.",
+    "differentiation": [
+      "AI 기술을 활용한 초개인화된 진로 설계 기능 제공",
+      "다양한 데이터 소스를 통합하여 보다 정확한 진로 정보 제공",
+      "전문 상담사와의 1:1 온라인 상담 서비스 연계"
+    ]
+  },
+  "customer_result": {
+    "target_persona": "대학교 2~3학년 학생으로, 진로에 대한 불확실성을 느끼며 자신에게 맞는 경로를 찾고자 하는 이들.",
+    "pain_points": [
+      "진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움",
+      "자신의 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구의 부족",
+      "AI를 통한 맞춤형 진로 상담의 부재로 인해 명확한 경로를 제시받지 못함"
+    ],
+    "needs": [
+      "진로에 대한 통합적이고 구체적인 정보 제공",
+      "자신의 전공과 관심사에 맞는 맞춤형 학습 및 경험 설계 도구",
+      "AI 기반의 개인화된 진로 상담 서비스"
+    ],
+    "jobs_to_be_done": [
+      "전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획하기",
+      "진로에 대한 불확실성을 해소하고 명확한 목표를 설정하기",
+      "AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻기"
+    ]
+  },
+  "swot_result": {
+    "strengths": [
+      "AI 기반의 개인 맞춤형 진로 상담 서비스",
+      "대학생 진로 정보 부족 문제 해결",
+      "빠르게 성장하는 시장에서의 기회"
+    ],
+    "weaknesses": [
+      "AI 기술의 신뢰성 및 정확성에 대한 우려",
+      "사용자 맞춤형 서비스의 한계로 인한 이탈 가능성",
+      "경쟁 서비스와의 차별화 필요"
+    ],
+    "opportunities": [
+      "AI 기술 발전으로 서비스 품질 향상",
+      "대학생들의 진로 설계 관심 증가",
+      "대학 및 기관과의 협력을 통한 시장 확장"
+    ],
+    "threats": [
+      "경쟁 서비스의 증가로 인한 시장 포화",
+      "농촌 지역의 연결 문제로 인한 접근성 제한",
+      "개인의 요구를 충족하지 못할 경우 사용자 이탈"
+    ]
+  },
+  "business_model_result": {
+    "revenue_streams": [
+      "구독 모델",
+      "프리미엄 서비스",
+      "제휴 프로그램",
+      "광고 수익"
+    ],
+    "pricing": "기본 서비스는 무료로 제공하되, 프리미엄 기능(심층 분석, 개인 맞춤형 상담 등)을 월 구독료로 제공하거나 일회성 과금 모델을 통해 수익을 창출할 수 있습니다.",
+    "cost_structure": [
+      "AI 기술 개발 및 유지 비용",
+      "서버 및 데이터 저장 비용",
+      "마케팅 및 고객 확보 비용",
+      "인력 비용(상담사 및 개발자)"
+    ],
+    "key_metrics": [
+      "사용자 수 및 성장률",
+      "구독 전환율",
+      "사용자 만족도 및 피드백",
+      "서비스 이용 빈도"
+    ]
+  },
+  "risk_result": {
+    "risks": [
+      {
+        "category": "기술",
+        "description": "AI 기술의 신뢰성 및 정확성에 대한 우려가 사용자에게 부정적인 영향을 미칠 수 있음.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "지속적인 기술 개발과 사용자 교육을 통해 신뢰를 구축해야 함."
+      },
+      {
+        "category": "시장",
+        "description": "진로 설계에 대한 개인의 요구와 기대를 충족하지 못할 경우 사용자 이탈 가능성.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "고객의 피드백을 적극적으로 반영하여 서비스 품질을 지속적으로 개선하고, 사용자 맞춤형 솔루션을 제공해야 함."
+      },
+      {
+        "category": "시장",
+        "description": "경쟁 서비스의 증가로 인한 시장 포화.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "차별화된 서비스 제공 및 마케팅 전략을 통해 경쟁력을 강화해야 함."
+      },
+      {
+        "category": "법규",
+        "description": "개인정보 보호 및 데이터 사용과 관련된 법률 준수의 필요성.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "법률 자문을 통해 규제 변화에 신속하게 대응하고, 서비스 운영의 법적 리스크를 최소화해야 함."
+      },
+      {
+        "category": "운영",
+        "description": "농촌 지역의 사용자들이 플랫폼을 채택하는 데 어려움을 겪을 경우, 시장 확장에 제약이 될 수 있음.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "접근성 문제를 해결하기 위해 오프라인 서비스나 대안적인 접근 방식을 고려해야 함."
+      }
+    ]
+  },
+  "pestel_result": {
+    "Political": {
+      "content": "대학생 진로 설계 서비스는 정부의 청년 일자리 정책과 관련이 깊습니다. 정부는 청년들의 진로 탐색과 취업 지원을 강화하기 위한 다양한 프로그램을 추진하고 있으며, 이러한 정책은 AI 기반 진로 설계 서비스의 수요를 촉진할 수 있습니다.",
+      "opportunity": "정부의 지원 정책과 협력하여 서비스의 신뢰성을 높이고, 사용자 기반을 확장할 수 있는 기회가 존재합니다.",
+      "threat": "정치적 불안정이나 정책 변화가 서비스 운영에 영향을 미칠 수 있으며, 특히 예산 삭감이나 정책 방향 전환이 위협이 될 수 있습니다.",
+      "response": "정책 변화에 민감하게 반응하고, 정부와의 협력을 통해 안정적인 운영 기반을 마련하는 것이 필요합니다."
+    },
+    "Economic": {
+      "content": "AI 기반 진로 설계 서비스 시장은 2026년부터 2035년까지 연평균 성장률(CAGR) 8.2%로 성장할 것으로 예상됩니다. 이는 대학생들의 진로 설계에 대한 관심 증가와 맞물려 있습니다.",
+      "opportunity": "경제 성장에 따라 대학생들의 진로 설계 서비스에 대한 지출이 증가할 가능성이 있으며, 이는 시장 확장을 위한 기회로 작용할 수 있습니다.",
+      "threat": "경제 불황이나 실업률 증가가 대학생들의 소비 여력을 감소시킬 수 있으며, 이는 서비스 이용에 부정적인 영향을 미칠 수 있습니다.",
+      "response": "경제 상황에 따라 가격 정책을 유연하게 조정하고, 다양한 가격대의 서비스를 제공하여 소비자 접근성을 높이는 전략이 필요합니다."
+    },
+    "Social": {
+      "content": "대학생들은 진로에 대한 불확실성을 느끼고 있으며, 이에 따라 맞춤형 진로 상담 서비스에 대한 수요가 증가하고 있습니다. 이는 사회적 트렌드로 자리잡고 있습니다.",
+      "opportunity": "대학생들의 진로 설계에 대한 관심이 높아짐에 따라, 맞춤형 서비스 제공을 통해 고객층을 확대할 수 있는 기회가 있습니다.",
+      "threat": "사회적 기대에 부응하지 못할 경우 사용자 이탈이 발생할 수 있으며, 이는 서비스의 지속 가능성에 위협이 될 수 있습니다.",
+      "response": "고객의 피드백을 적극적으로 반영하여 서비스 품질을 지속적으로 개선하고, 사용자 맞춤형 솔루션을 제공하는 것이 중요합니다."
+    },
+    "Technological": {
+      "content": "AI 기술의 발전은 개인화된 진로 상담 및 경로 설계 서비스의 품질을 향상시키고 있습니다. 데이터 기반의 서비스가 발전하면서 사용자 경험이 개선되고 있습니다.",
+      "opportunity": "AI 기술을 활용하여 더욱 정교하고 개인화된 서비스를 제공함으로써 경쟁력을 강화할 수 있는 기회가 있습니다.",
+      "threat": "AI 기술의 신뢰성 및 정확성에 대한 우려가 사용자에게 부정적인 영향을 미칠 수 있으며, 이는 서비스의 채택에 장애가 될 수 있습니다.",
+      "response": "AI 기술의 신뢰성을 높이기 위해 지속적인 기술 개발과 사용자 교육을 통해 신뢰를 구축하는 것이 필요합니다."
+    },
+    "Environmental": {
+      "content": "디지털 진로 도구의 채택이 증가하고 있지만, 일부 지역에서는 연결 문제로 인해 접근성이 제한되고 있습니다. 이는 서비스 이용에 영향을 미칠 수 있습니다.",
+      "opportunity": "디지털 인프라가 부족한 지역을 대상으로 한 맞춤형 서비스 개발이 새로운 시장을 창출할 수 있는 기회가 될 수 있습니다.",
+      "threat": "농촌 지역의 사용자들이 플랫폼을 채택하는 데 어려움을 겪을 경우, 시장 확장에 제약이 될 수 있습니다.",
+      "response": "접근성 문제를 해결하기 위해 오프라인 서비스나 대안적인 접근 방식을 고려하여 다양한 사용자층을 확보하는 전략이 필요합니다."
+    },
+    "Legal": {
+      "content": "AI 기반 진로 설계 서비스는 개인정보 보호 및 데이터 사용과 관련된 법률을 준수해야 합니다. 이는 서비스 운영에 중요한 요소입니다.",
+      "opportunity": "법률을 준수함으로써 사용자 신뢰를 구축하고, 법적 문제를 예방할 수 있는 기회가 있습니다.",
+      "threat": "법적 규제가 강화될 경우, 서비스 운영에 추가적인 비용이 발생할 수 있으며, 이는 수익성에 영향을 미칠 수 있습니다.",
+      "response": "법률 자문을 통해 규제 변화에 신속하게 대응하고, 서비스 운영의 법적 리스크를 최소화하는 전략이 필요합니다."
+    }
+  },
+  "draft": "# AI 기반 대학생 진로 설계 서비스 기획서\n\n## 프로젝트 개요\nAI 기반 대학생 진로 설계 서비스는 대학생이 자신의 전공, 관심사, 역량을 입력하면 맞춤형 진로 경로와 필요한 학습 및 경험을 설계해주는 혁신적인 AI 서비스입니다. 이 서비스는 특히 진로를 구체화하지 못한 대학교 2~3학년 학생들에게 유용합니다.\n\n## 추진 배경\n대학생들은 진로에 대한 불확실성을 느끼고 있으며, 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려운 상황입니다. AI 기술의 발전과 함께 개인화된 진로 상담 서비스의 수요가 증가하고 있으며, 이러한 필요를 충족하기 위해 본 서비스의 개발이 필요합니다.\n\n## 문제 정의\n대학생들은 진로 정보가 흩어져 있어 자신에게 맞는 경로와 준비 순서를 판단하기 어렵습니다. 또한, 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구가 부족하며, AI를 통한 맞춤형 진로 상담이 부재하여 명확한 경로를 제시받지 못하고 있습니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 진로를 구체화하지 못한 대학교 2~3학년 학생들입니다. 이들은 진로에 대한 불확실성을 느끼며, 자신에게 맞는 경로를 찾고자 하는 욕구가 강합니다.\n\n## 시장 및 산업 분석\nAI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다. AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요가 증가하고 있으며, 데이터 기반의 진로 설계 및 역량 진단 서비스가 발전하고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 정부의 청년 일자리 정책과 관련이 깊음 | 정부 지원 정책과 협력하여 신뢰성 및 사용자 기반 확장 | 정치적 불안정이나 정책 변화가 서비스 운영에 영향 | 정책 변화에 민감하게 반응하고 정부와 협력 |\n| Economic | 시장은 2026년부터 2035년까지 연평균 성장률 8.2% 예상 | 경제 성장에 따라 대학생들의 지출 증가 가능성 | 경제 불황이나 실업률 증가가 소비 여력 감소 | 가격 정책을 유연하게 조정하고 다양한 가격대 제공 |\n| Social | 대학생들의 진로에 대한 불확실성 증가 | 맞춤형 서비스 제공을 통해 고객층 확대 | 사회적 기대에 부응하지 못할 경우 사용자 이탈 | 고객 피드백을 반영하여 서비스 품질 개선 |\n| Technological | AI 기술 발전으로 서비스 품질 향상 | 더욱 정교하고 개인화된 서비스 제공 가능 | AI 기술 신뢰성 및 정확성 우려 | 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축 |\n| Environmental | 일부 지역에서 연결 문제로 접근성 제한 | 디지털 인프라 부족 지역을 대상으로 한 서비스 개발 | 농촌 지역 사용자 채택 어려움 | 오프라인 서비스나 대안적 접근 방식 고려 |\n| Legal | 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 | 법률 준수로 사용자 신뢰 구축 | 법적 규제가 강화될 경우 추가 비용 발생 | 법률 자문을 통해 규제 변화에 신속 대응 |\n\n## SWOT 분석\n- **강점**: AI 기반의 개인 맞춤형 진로 상담 서비스, 대학생 진로 정보 부족 문제 해결, 빠르게 성장하는 시장에서의 기회\n- **약점**: AI 기술의 신뢰성 및 정확성에 대한 우려, 사용자 맞춤형 서비스의 한계로 인한 이탈 가능성, 경쟁 서비스와의 차별화 필요\n- **기회**: AI 기술 발전으로 서비스 품질 향상, 대학생들의 진로 설계 관심 증가, 대학 및 기관과의 협력을 통한 시장 확장\n- **위협**: 경쟁 서비스의 증가로 인한 시장 포화, 농촌 지역의 연결 문제로 인한 접근성 제한, 개인의 요구를 충족하지 못할 경우 사용자 이탈\n\n## 제안 서비스\n본 서비스는 대학생들이 자신의 전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획할 수 있도록 돕는 AI 기반의 진로 설계 플랫폼입니다. 사용자는 AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻을 수 있습니다.\n\n## 핵심 기능\n서비스는 사용자가 입력한 전공, 관심사, 역량을 기반으로 맞춤형 진로 경로를 제시하며, 필요한 학습 및 경험을 설계하는 기능을 포함합니다. 또한, 전문 상담사와의 1:1 온라인 상담 서비스도 연계하여 제공할 예정입니다.\n\n## 차별성\n경쟁사와의 차별화된 점은 AI 기술을 활용한 초개인화된 진로 설계 기능을 제공하며, 다양한 데이터 소스를 통합하여 보다 정확한 진로 정보를 제공합니다. 또한, 전문 상담사와의 상담 서비스를 통해 사용자 맞춤형 솔루션을 제공합니다.\n\n## 수익 모델\n본 서비스는 기본 서비스는 무료로 제공하되, 프리미엄 기능(심층 분석, 개인 맞춤형 상담 등)을 월 구독료로 제공하거나 일회성 과금 모델을 통해 수익을 창출할 수 있습니다. 추가적으로 제휴 프로그램과 광고 수익도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 대학생들이 진로에 대한 불확실성을 해소하고 명확한 목표를 설정하는 데 기여할 것입니다. 또한, AI 기반의 개인 맞춤형 진로 상담을 통해 사용자 만족도를 높이고, 지속 가능한 서비스로 자리잡을 것으로 기대됩니다.\n\n## 추진 계획\n서비스 개발은 단계별로 진행되며, 초기 단계에서는 프로토타입을 개발하고 사용자 피드백을 반영하여 개선할 계획입니다. 이후 마케팅 전략을 통해 사용자 기반을 확장하고, 지속적인 서비스 개선을 통해 시장에서의 경쟁력을 강화할 것입니다.\n\n## 위험요인 및 대응방안\n- **기술**: AI 기술의 신뢰성 및 정확성에 대한 우려 (중, 중) → 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축\n- **시장**: 개인의 요구와 기대를 충족하지 못할 경우 사용자 이탈 가능성 (중, 중) → 고객 피드백을 반영하여 서비스 품질 개선\n- **시장**: 경쟁 서비스의 증가로 인한 시장 포화 (중, 중) → 차별화된 서비스 제공 및 마케팅 전략 강화\n- **법규**: 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 (중, 중) → 법률 자문을 통해 규제 변화에 신속 대응\n- **운영**: 농촌 지역 사용자 채택 어려움 (중, 중) → 접근성 문제 해결을 위해 오프라인 서비스나 대안적 접근 방식 고려\n\n## 참고자료\n\n- Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담 — https://career.restyart.com\n- 인공지능 기반 진로/진학 서비스 프로토타입 개발 연구 — http://journal.dcs.or.kr/xml/40124/40124.pdf\n- AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE — https://webzine.dankook.ac.kr/news/articleView.html?idxno=465\n- 대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903\n- 머 리 말 — https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf\n- 진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035] — https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217\n- 대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258\n- 대학생의 진로역량 개발을 위한 교육 요구도 분석 — http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf",
+  "review_result": {
+    "total_score": 72,
+    "section_scores": {
+      "problem_clarity": 18,
+      "market_validity": 10,
+      "solution_specificity": 15,
+      "differentiation": 17,
+      "feasibility": 12
+    },
+    "strengths": [
+      "문제 정의가 명확하여 대학생의 진로 문제를 잘 설명하고 있다.",
+      "AI 기술을 활용한 개인 맞춤형 서비스의 필요성을 잘 강조하고 있다.",
+      "차별화된 서비스 제공을 통해 사용자 맞춤형 솔루션을 제시하고 있다."
+    ],
+    "weaknesses": [
+      "시장 및 산업 분석에서 구체적인 수치나 데이터가 부족하다.",
+      "수익 모델에 대한 구체적인 실행 계획이 부족하다."
+    ],
+    "unsupported_claims": [
+      "AI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 구체적인 시장 규모와 성장률에 대한 데이터를 추가하십시오.",
+      "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "AI 기반 진로 설계 서비스 시장의 성장에 대한 주장이 구체적인 데이터 없이 제시됨.",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 AI 기반 진로 설계 서비스 시장의 구체적인 성장률과 규모에 대한 데이터를 추가하십시오."
+      },
+      {
+        "issue_type": "insufficient_evidence",
+        "severity": "major",
+        "target_section_id": "revenue_model",
+        "description": "수익 모델에 대한 구체적인 실행 계획이 부족함.",
+        "revision_instruction": "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+      }
+    ]
+  },
+  "initial_review_result": {
+    "total_score": 72,
+    "section_scores": {
+      "problem_clarity": 18,
+      "market_validity": 10,
+      "solution_specificity": 15,
+      "differentiation": 17,
+      "feasibility": 12
+    },
+    "strengths": [
+      "문제 정의가 명확하여 대학생의 진로 문제를 잘 설명하고 있다.",
+      "AI 기술을 활용한 개인 맞춤형 서비스의 필요성을 잘 강조하고 있다.",
+      "차별화된 서비스 제공을 통해 사용자 맞춤형 솔루션을 제시하고 있다."
+    ],
+    "weaknesses": [
+      "시장 및 산업 분석에서 구체적인 수치나 데이터가 부족하다.",
+      "수익 모델에 대한 구체적인 실행 계획이 부족하다."
+    ],
+    "unsupported_claims": [
+      "AI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 구체적인 시장 규모와 성장률에 대한 데이터를 추가하십시오.",
+      "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "AI 기반 진로 설계 서비스 시장의 성장에 대한 주장이 구체적인 데이터 없이 제시됨.",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 AI 기반 진로 설계 서비스 시장의 구체적인 성장률과 규모에 대한 데이터를 추가하십시오."
+      },
+      {
+        "issue_type": "insufficient_evidence",
+        "severity": "major",
+        "target_section_id": "revenue_model",
+        "description": "수익 모델에 대한 구체적인 실행 계획이 부족함.",
+        "revision_instruction": "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+      }
+    ]
+  },
+  "final_draft": "# AI 기반 대학생 진로 설계 서비스 기획서\n\n## 프로젝트 개요\nAI 기반 대학생 진로 설계 서비스는 대학생이 자신의 전공, 관심사, 역량을 입력하면 맞춤형 진로 경로와 필요한 학습 및 경험을 설계해주는 혁신적인 AI 서비스입니다. 이 서비스는 특히 진로를 구체화하지 못한 대학교 2~3학년 학생들에게 유용합니다.\n\n## 추진 배경\n대학생들은 진로에 대한 불확실성을 느끼고 있으며, 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려운 상황입니다. AI 기술의 발전과 함께 개인화된 진로 상담 서비스의 수요가 증가하고 있으며, 이러한 필요를 충족하기 위해 본 서비스의 개발이 필요합니다.\n\n## 문제 정의\n대학생들은 진로 정보가 흩어져 있어 자신에게 맞는 경로와 준비 순서를 판단하기 어렵습니다. 또한, 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구가 부족하며, AI를 통한 맞춤형 진로 상담이 부재하여 명확한 경로를 제시받지 못하고 있습니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 진로를 구체화하지 못한 대학교 2~3학년 학생들입니다. 이들은 진로에 대한 불확실성을 느끼며, 자신에게 맞는 경로를 찾고자 하는 욕구가 강합니다.\n\n## 시장 및 산업 분석\nAI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다. AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요가 증가하고 있으며, 데이터 기반의 진로 설계 및 역량 진단 서비스가 발전하고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 정부의 청년 일자리 정책과 관련이 깊음 | 정부 지원 정책과 협력하여 신뢰성 및 사용자 기반 확장 | 정치적 불안정이나 정책 변화가 서비스 운영에 영향 | 정책 변화에 민감하게 반응하고 정부와 협력 |\n| Economic | 시장은 2026년부터 2035년까지 연평균 성장률 8.2% 예상 | 경제 성장에 따라 대학생들의 지출 증가 가능성 | 경제 불황이나 실업률 증가가 소비 여력 감소 | 가격 정책을 유연하게 조정하고 다양한 가격대 제공 |\n| Social | 대학생들의 진로에 대한 불확실성 증가 | 맞춤형 서비스 제공을 통해 고객층 확대 | 사회적 기대에 부응하지 못할 경우 사용자 이탈 | 고객 피드백을 반영하여 서비스 품질 개선 |\n| Technological | AI 기술 발전으로 서비스 품질 향상 | 더욱 정교하고 개인화된 서비스 제공 가능 | AI 기술 신뢰성 및 정확성 우려 | 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축 |\n| Environmental | 일부 지역에서 연결 문제로 접근성 제한 | 디지털 인프라 부족 지역을 대상으로 한 서비스 개발 | 농촌 지역 사용자 채택 어려움 | 오프라인 서비스나 대안적 접근 방식 고려 |\n| Legal | 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 | 법률 준수로 사용자 신뢰 구축 | 법적 규제가 강화될 경우 추가 비용 발생 | 법률 자문을 통해 규제 변화에 신속 대응 |\n\n## SWOT 분석\n- **강점**: AI 기반의 개인 맞춤형 진로 상담 서비스, 대학생 진로 정보 부족 문제 해결, 빠르게 성장하는 시장에서의 기회\n- **약점**: AI 기술의 신뢰성 및 정확성에 대한 우려, 사용자 맞춤형 서비스의 한계로 인한 이탈 가능성, 경쟁 서비스와의 차별화 필요\n- **기회**: AI 기술 발전으로 서비스 품질 향상, 대학생들의 진로 설계 관심 증가, 대학 및 기관과의 협력을 통한 시장 확장\n- **위협**: 경쟁 서비스의 증가로 인한 시장 포화, 농촌 지역의 연결 문제로 인한 접근성 제한, 개인의 요구를 충족하지 못할 경우 사용자 이탈\n\n## 제안 서비스\n본 서비스는 대학생들이 자신의 전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획할 수 있도록 돕는 AI 기반의 진로 설계 플랫폼입니다. 사용자는 AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻을 수 있습니다.\n\n## 핵심 기능\n서비스는 사용자가 입력한 전공, 관심사, 역량을 기반으로 맞춤형 진로 경로를 제시하며, 필요한 학습 및 경험을 설계하는 기능을 포함합니다. 또한, 전문 상담사와의 1:1 온라인 상담 서비스도 연계하여 제공할 예정입니다.\n\n## 차별성\n경쟁사와의 차별화된 점은 AI 기술을 활용한 초개인화된 진로 설계 기능을 제공하며, 다양한 데이터 소스를 통합하여 보다 정확한 진로 정보를 제공합니다. 또한, 전문 상담사와의 상담 서비스를 통해 사용자 맞춤형 솔루션을 제공합니다.\n\n## 수익 모델\n본 서비스는 기본 서비스는 무료로 제공하되, 프리미엄 기능(심층 분석, 개인 맞춤형 상담 등)을 월 구독료로 제공하거나 일회성 과금 모델을 통해 수익을 창출할 수 있습니다. 추가적으로 제휴 프로그램과 광고 수익도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 대학생들이 진로에 대한 불확실성을 해소하고 명확한 목표를 설정하는 데 기여할 것입니다. 또한, AI 기반의 개인 맞춤형 진로 상담을 통해 사용자 만족도를 높이고, 지속 가능한 서비스로 자리잡을 것으로 기대됩니다.\n\n## 추진 계획\n서비스 개발은 단계별로 진행되며, 초기 단계에서는 프로토타입을 개발하고 사용자 피드백을 반영하여 개선할 계획입니다. 이후 마케팅 전략을 통해 사용자 기반을 확장하고, 지속적인 서비스 개선을 통해 시장에서의 경쟁력을 강화할 것입니다.\n\n## 위험요인 및 대응방안\n- **기술**: AI 기술의 신뢰성 및 정확성에 대한 우려 (중, 중) → 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축\n- **시장**: 개인의 요구와 기대를 충족하지 못할 경우 사용자 이탈 가능성 (중, 중) → 고객 피드백을 반영하여 서비스 품질 개선\n- **시장**: 경쟁 서비스의 증가로 인한 시장 포화 (중, 중) → 차별화된 서비스 제공 및 마케팅 전략 강화\n- **법규**: 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 (중, 중) → 법률 자문을 통해 규제 변화에 신속 대응\n- **운영**: 농촌 지역 사용자 채택 어려움 (중, 중) → 접근성 문제 해결을 위해 오프라인 서비스나 대안적 접근 방식 고려\n\n## 참고자료\n\n- Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담 — https://career.restyart.com\n- 인공지능 기반 진로/진학 서비스 프로토타입 개발 연구 — http://journal.dcs.or.kr/xml/40124/40124.pdf\n- AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE — https://webzine.dankook.ac.kr/news/articleView.html?idxno=465\n- 대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903\n- 머 리 말 — https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf\n- 진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035] — https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217\n- 대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258\n- 대학생의 진로역량 개발을 위한 교육 요구도 분석 — http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf",
+  "revision_count": 1,
+  "revision_strategy": "section",
+  "revised_section_ids": [
+    "market_analysis",
+    "revenue_model"
+  ],
+  "revision_fallback_reason": null,
+  "polish_applied": false,
+  "polish_skip_reason": "내용 이슈만·구조 정상(revision=section)",
+  "best_version": "draft",
+  "reverted_from_revision": true,
+  "final_review_result": {
+    "total_score": 72,
+    "section_scores": {
+      "problem_clarity": 18,
+      "market_validity": 10,
+      "solution_specificity": 15,
+      "differentiation": 17,
+      "feasibility": 12
+    },
+    "strengths": [
+      "문제 정의가 명확하여 대학생의 진로 문제를 잘 설명하고 있다.",
+      "AI 기술을 활용한 개인 맞춤형 서비스의 필요성을 잘 강조하고 있다.",
+      "차별화된 서비스 제공을 통해 사용자 맞춤형 솔루션을 제시하고 있다."
+    ],
+    "weaknesses": [
+      "시장 및 산업 분석에서 구체적인 수치나 데이터가 부족하다.",
+      "수익 모델에 대한 구체적인 실행 계획이 부족하다."
+    ],
+    "unsupported_claims": [
+      "AI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 구체적인 시장 규모와 성장률에 대한 데이터를 추가하십시오.",
+      "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "AI 기반 진로 설계 서비스 시장의 성장에 대한 주장이 구체적인 데이터 없이 제시됨.",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 AI 기반 진로 설계 서비스 시장의 구체적인 성장률과 규모에 대한 데이터를 추가하십시오."
+      },
+      {
+        "issue_type": "insufficient_evidence",
+        "severity": "major",
+        "target_section_id": "revenue_model",
+        "description": "수익 모델에 대한 구체적인 실행 계획이 부족함.",
+        "revision_instruction": "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+      }
+    ]
+  },
+  "verification_result": {
+    "claims": [
+      {
+        "id": "c1",
+        "claim": "AI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev6"
+        ]
+      },
+      {
+        "id": "c2",
+        "claim": "대학생들은 진로에 대한 불확실성을 느끼고 있다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev18"
+        ]
+      },
+      {
+        "id": "c3",
+        "claim": "AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요가 증가하고 있다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev6"
+        ]
+      },
+      {
+        "id": "c4",
+        "claim": "2026년부터 2035년까지 연평균 성장률 8.2%가 예상된다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev6"
+        ]
+      },
+      {
+        "id": "c5",
+        "claim": "대학생들은 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어렵다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev18"
+        ]
+      }
+    ],
+    "supported": 5,
+    "total": 5,
+    "support_rate": 1.0,
+    "unsupported": [],
+    "contradicted": [],
+    "evidence_linked": 5,
+    "claim_type_counts": {
+      "inference": 0,
+      "proposal": 0,
+      "fact": 5
+    },
+    "fact_total": 5,
+    "fact_supported": 5,
+    "fact_support_rate": 1.0,
+    "evidence_link_rate": 1.0,
+    "verification_scope": "search_snippet_only"
+  },
+  "verification_summary": {
+    "scope": "search_snippet_only",
+    "original_document_checked": false,
+    "fact_check_completed": false,
+    "note": "본 기획서는 근거 추적성(참고 출처 표시)은 보장하지만, 출처 URL의 원문 사실성은 재검증하지 않았습니다. 검증 판정은 수집된 검색 요약 근거와의 일치 여부이며, 수치·통계 등 정량 정보는 원문에서 직접 확인하시기 바랍니다."
+  },
+  "quality_gate": {
+    "release_ready": false,
+    "checks": {
+      "score": false,
+      "critical_issues": true,
+      "major_issues": false,
+      "structure": true,
+      "evidence": true,
+      "contradicted_claims": true
+    },
+    "blocking_reasons": [
+      "score",
+      "major_issues"
+    ],
+    "na_checks": [],
+    "warnings": [],
+    "metrics": {
+      "score": 72,
+      "critical_count": 0,
+      "major_count": 2,
+      "structure_valid": true,
+      "evidence_coverage": 1.0,
+      "contradicted_count": 0,
+      "fact_total": 5,
+      "verifiable_claims": true
+    },
+    "thresholds": {
+      "score_min": 80,
+      "major_max": 1,
+      "evidence_coverage_min": 0.8,
+      "calibrated": false
+    },
+    "unresolved_issues": [
+      {
+        "severity": "major",
+        "section_id": "market_analysis",
+        "section_title": "시장 및 산업 분석",
+        "issue_type": "unsupported_claim",
+        "instruction": "시장 및 산업 분석 섹션에서 AI 기반 진로 설계 서비스 시장의 구체적인 성장률과 규모에 대한 데이터를 추가하십시오."
+      },
+      {
+        "severity": "major",
+        "section_id": "revenue_model",
+        "section_title": "수익 모델",
+        "issue_type": "insufficient_evidence",
+        "instruction": "수익 모델 섹션에서 프리미엄 기능의 가격 책정 및 예상 수익에 대한 구체적인 계획을 제시하십시오."
+      }
+    ]
+  },
+  "evidence_registry": [
+    {
+      "url": "https://career.restyart.com",
+      "title": "Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담",
+      "snippet": "자세히 보기 →\n\n### 장기 취업 & 성장 로드맵\n\n대학 졸업 이후 취업 유망 직무·자격 요건까지 시뮬레이션합니다. AI 진로 상담 결과를 바탕으로 단계별 마일스톤과 핵심 역량 개발 계획을 설계하세요.\n\n자세히 보기 →\n\n## 자주 묻는 질문\n\nCareer Compass AI 진로 상담은 무엇인가요?\n:   성적·생활기록부·성향 데이터를 AI가 분석해 맞춤형 진로 계획, 학교·학과 매칭, 취업 로드맵을 제안하는 서비스입니다. 목표 계획, 성적 분석, 학교 정보, AI 채팅 상담을 한곳에서 이용할 수 있습니다.\n\n어떤 학생·학부모에",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:14+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 진로 설계 대학생 역량 진단 커리어 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev1"
+    },
+    {
+      "url": "http://journal.dcs.or.kr/xml/40124/40124.pdf",
+      "title": "인공지능 기반 진로/진학 서비스 프로토타입 개발 연구",
+      "snippet": "service and AI-based personalized service based on collected data. The data-based service component includes ① a program to manage the trend of learners' academic achievements and triggers for grade changes, ② a program to manage students' competencies, ③ a program to manage subject-related outputs/",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:14+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 진로 설계 대학생 역량 진단 커리어 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev2"
+    },
+    {
+      "url": "https://webzine.dankook.ac.kr/news/articleView.html?idxno=465",
+      "title": "AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE",
+      "snippet": "'Young熊+' 내 「전공 라운지(Major Lounge)」에서는 ▲전공 정보 및 수강 현황 ▲연관 교과목 및 교재 분석 ▲역량 강화를 위한 비교과 프로그램 추천 ▲개인 맞춤형 교과·비교과 키워드 추천 등의 기능을 제공한다. 또한 「잡 라운지(Job Lounge)」는 ▲관심 기업에 입사한 졸업생의 학습 이력 분석 ▲채용 정보 통합 제공 ▲선배 인터뷰 콘텐츠 등 학생들의 진로 설계를 지원한다.\n\n이번에 개발된 'Young熊+'는 우리 대학의 AI 기반 맞춤형 교육·지원 시스템인 '단아이(Dan.i)'의 빅데이터 분석과 AI 기술을 ",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:14+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 진로 설계 대학생 역량 진단 커리어 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev3"
+    },
+    {
+      "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903",
+      "title": "대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용",
+      "snippet": "영문\n\n@article{ART003215903,  \nauthor={Saebome Baek and Gayoung Yun and Soojeong Jeong},  \ntitle={Design and Implementation of an AI-Integrated Career Development Program for College Students},  \njournal={Journal of Korean Association for Educational Information and Media},  \nissn={1229-7291},  \nyear=",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:14+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 진로 설계 대학생 역량 진단 커리어 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev4"
+    },
+    {
+      "url": "https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf",
+      "title": "머 리 말",
+      "snippet": "보다 생생한 직업정보를 커리 어넷 이용자에게 제공할 수 있을 것이다. 다만 이를 위해서는 잡코리아와 같은 구인 업체와의 협약 등에 대한 작업이 사전 검토되어야 할 것이다. 마지막으로, 커리어넷의 활용 측면에서 제시해 보면 다음과 같다. 커리어 넷에서 수집되는 여러 개인의 심리검사 데이터가 존재하는데, 이러한 개인의 심리검사 데이터를 인공지능(AI) 모델과 연계하면 커리어넷을 이용하는 이용자에게 맞춤형 정보 제공이 가능하다. 특히 기존의 직업백과나 구인 정보에 기반한 임베딩 데이터와 이용자의 심리검사 데이터를 통합 분석하면, 이용자의",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:14+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 진로 설계 대학생 역량 진단 커리어 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev5"
+    },
+    {
+      "url": "https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217",
+      "title": "진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035]",
+      "snippet": "시장 규모 및 성장:글로벌 진로 지도 플랫폼 시장의 성장은 2026년 19억 4천만 달러에서 시작하여 2026년부터 2035년까지 연평균 성장률(CAGR) 8.2%로 2035년까지 39억 6천만 달러에 이를 것으로 예상됩니다.\n 주요 시장 동인:72%의 기관과 64%의 학생이 기존 방법보다 온라인 지도 플랫폼을 선호함에 따라 디지털 진로 도구 채택이 증가하고 있습니다.\n 주요 시장 제한:신흥 지역의 제한된 디지털 인프라는 접근성에 영향을 미치며, 43%의 농촌 사용자는 플랫폼 채택을 제한하는 연결 문제에 직면하고 있습니다.\n 새로운",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:31+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [
+        "c1",
+        "c3",
+        "c4"
+      ],
+      "evidence_id": "ev6"
+    },
+    {
+      "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258",
+      "title": "대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계",
+      "snippet": "graduates of higher education institutions is mainly used for policy formulation andevaluation at the government level and its content is limited to quantitative information by thenumber of employed persons. Therefore, there is an indication that it is not being effectively usedto raise the employme",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:31+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev7"
+    },
+    {
+      "url": "http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf",
+      "title": "대학생의 진로역량 개발을 위한 교육 요구도 분석",
+      "snippet": "취업의 현황과 전략 4.882 4 기업 비즈니스 매너 4.536 7 인턴십(직장체험) 준비 실제 5.261 2 기업이 요구하는 기초직무능력 4.817 5 직장 생활의 현실과 적응전략 4.210 9 진로설계․탐색 및 직업관 정립 바람직한 대학생활 적응 및 설계 3.611 15 직업 생활의 의미 및 직업윤리 3.189 16 직업심리검사를 통한 자기이해 3.997 12 진로 의사결정 방법 3.720 14 전공별 진출 가능 취업 분야 탐색 4.154 11 직업세계의 변화와 고용시장 동향 4.479 8 효과적인 대인관계와 인적 네트워크 구성",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:31+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev8"
+    },
+    {
+      "url": "http://kocw-n.xcache.kinxcdn.com/data/document/2024/hansung/jangmyunghee0106/11.pdf",
+      "title": "미래사회와 진로설계",
+      "snippet": "미래사회와진로설계 미래사회와진로설계 Future Society and Career Design 취업난에허덕이는청년... 디딤돌이될‘청년일자리10대사업’은 고용노동부는2024년청년일자리사업을통해‘재학–구직–취업’ 단계별상황에맞춰청년들이원하는맞춤형지원을강화하고자2024년청년 일자리10대사업을진행한다고밝혔다. 고용노동부에서발표한‘청년일자리10대사업’에는‘대학재학생맞춤형고용서비스’를통해1:1 상담을 기반으로저학년부터진로, 직업의탐색과설계지원(빌드업프로젝트), 고학년에는취업활동계획수립, 훈련ㆍ일경험연계등직무역량의향상을 지원(점프업프로젝트)하",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:31+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev9"
+    },
+    {
+      "url": "https://krivet.re.kr/repository/bitstream/202405/6862/2/KC1819_fulltext.pdf",
+      "title": "대학생의 진로준비도가 초기 노동시장 성과에 미치는 영향 분석",
+      "snippet": "‘진로 및 취·창업 서비스 경험’은 2018～2021학년도에 학교 내 진로 및 취·창업 서비스 10개 항목11)별 1회 이상 참여한 경우 ‘1’, 참여하지 않은 경우 ‘0’으로 코딩하여 10개 항목을 합산하여 사용하였다. 이 외에 선행연구에 근거하여 종속변수에 영향을 미칠 수 있는 개인특성 변수와 가구특성 변수, 학교특성 변수를 선정하여 분석 시 통제변수로 모형에 투입하였다. 구체적으로 개인특성 과 관련해서 ‘성별’, ‘계열/학부’, ‘학업성취도’, ‘대학생활 만족도’, ‘자기이해’를 통제변수로 설정 하였다(길혜지, 최윤미, 201",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:31+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev10"
+    },
+    {
+      "url": "https://www.itdaa.net/personality_introductions/career?ref=home_mobile_quick_menu",
+      "title": "AI 진로 검사 서비스",
+      "snippet": "AI 진로 검사 서비스 … 이용 후기 98% 사용자 만족도 4.9 평균 평점 (5점 만점) 오픈 이벤트로 기본 검사는 5,000원으로 제공됩니다. 이벤트 종료 후 12,000원으로 제공될",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:33+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev11"
+    },
+    {
+      "url": "http://journal.dcs.or.kr/xml/49357/49357.pdf",
+      "title": "AI 에이전트 기반 보건의료정보 전공 도메인 특화 맞춤형 진로 취업 지원 ...",
+      "snippet": "1학년 2학기, 2학년 1학기, 2학년 2학기 크게 4분기로 나누 어 학기별 로드맵을 제시했다. 졸업생 및 편입생의 경우 4학 년까지 제시하거나 3-4개월 단위로 로드맵이 제시되었으며, 최종적으로 코칭 추천 상황에서 자격증 종류 및 솔루션 실행 에 대한 구체적인 방안과 심리적 지지를 포함했다. 이후 이용자 만족도 조사에서는 Likert 5점 척도를 사용하 여 매우 그렇다 5점, 전혀 아니다 1점의 기준을 적용하여 평 가했다. 이해의 명확성 및 용이성이 평균 4.52점(±0.65), 문 항의 적합성이 평균 4.16점(±0.79)으로 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:33+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev12"
+    },
+    {
+      "url": "https://news.sktelecom.com/221378",
+      "title": "[돈 버는 설문] “10명 중 7명은 사용 중” AI 서비스 일상 필수 파트너 됐다",
+      "snippet": "주로 사용하는 생성형 AI 서비스 개수를 묻는 질문에 '1개'를 사용한다고 답한 응답자가 45.8%(550명)로 가장 많았다. 반면, '4~5개 이상' 사용자는 8.4%(",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:33+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev13"
+    },
+    {
+      "url": "https://edumorning.com/articles/254",
+      "title": "[AI가 바꾸는 진로 설계]① AI로 발견하는 숨겨진 잠재력, 학생 ...",
+      "snippet": "이 그래프에 따르면 초등학생 20.4%, 중학생 40.0%, 고등학생 29.0%가 희망 직업을 아직 정하지 못했다고 응답했다. 이는 교육부와 한국직업능력연구원이",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:33+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev14"
+    },
+    {
+      "url": "https://pickply.com/blog/ai-consumer-satisfaction-trust",
+      "title": "일상 속에 자리잡은 AI, 소비자들의 만족도와 신뢰도는 부정적 - 픽플리 블로그: 소비자 데이터 트렌드 리포트 & 데이터 활용 팁",
+      "snippet": "AI 기술은 이제 더 이상 ‘특별한 것’이 아니라, ‘우리의 일상 깊숙이 자리 잡은 필수 요소’가 되었습니다. 픽플리에서 진행된 <기업의 AI 사용에 대해 어떻게 생각하시나요?> 설문조사 프로젝트에 참여한 응답자 중 89.7%(899명)가 “AI 기술이나 서비스를 경험해본 적이 있다”고 답변하였습니다. 이는 AI가 다양한 방식으로 우리의 삶에 스며들어 사용되고 있음을 보여주는데요.\n\n또한, AI 사용 경험이 있는 소비자 중 79.2%(712명)는 검색 및 정보 탐색을 목적으로 AI를 사용하고 있음을 확인할 수 있었습니다. 온라인에서",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:33+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족, AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev15"
+    },
+    {
+      "url": "https://www.krivet.re.kr/kor/sub.do?menuSn=12&pstNo=PB0000000675",
+      "title": "보고서·자료 | 연구 | 한국직업능력연구원",
+      "snippet": "본 연구는 4차 산업혁명과 AI 기술 발전으로 인한 미래 직업세계의 불확실성과 빠른 변화에 대응하여 학생 개개인의 고유한 특성과 역량을 바탕으로 자기주도적 진로 설계 능력을 갖춘 미래 인재를 양성하는 것을 궁극적 목표로 한다. 이러한 근본적인 연구목적을 달성하기 위해, AI 기반 진로교육의 초개인화 방안을 제안하는 것을 목표로 한다. 구체적으로 초개인화 방안의 핵심 결과물로서 ‘AI 기반 초개인화 진로교육(AI based hyper-Personalized Career Education, AI-PCE) 모델’을 개발하며, 이 모델은 ",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:38+00:00",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev16"
+    },
+    {
+      "url": "https://news.unn.net/news/articleView.html?idxno=592307",
+      "title": "생성형 AI, 교육혁신에서 취업지원·사회문제 해결까지… 대학의 미래를 다시 설계하다 < 리포트 < 이슈·기획 < 기사본문 - 한국대학신문 - 411개 대학을 연결하는 '힘'",
+      "snippet": "성균관대는 AI 기반 자동 자막 생성 시스템을 LMS(i-Campus)에 도입해 글로벌 교육 환경 강화에 나섰다. AI가 강의 자막을 자동 생성하고 이를 60여 개 언어로 번역할 수 있도록 지원하면서 외국인 유학생들의 학습 접근성을 크게 높였다는 평가다. 연간 5000시간 규모의 AI 자막 생성 서비스가 제공되고 있으며, 글로벌 수업과 외국인 학생 대상 강의에서 활발히 활용되고 있다. 교수자 입장에서도 자막 제작 부담이 줄어들고, 강의 콘텐츠 제작 효율성이 높아졌다는 점에서 긍정적인 반응을 얻고 있다.\n\n■ 취업 지원도 AI 시대…",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:38+00:00",
+      "published_date": "Wed, 06 May 2026 12:55:06 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev17"
+    },
+    {
+      "url": "https://mediahub.seoul.go.kr/archives/2017685",
+      "title": "서울런에서 AI 진로설계 받고 전문 상담까지…멘토링 3종 신설",
+      "snippet": "특히 올해 처음 도입된 '미니 진로·진학 상담(온라인)'은 AI가 생성한 개인 맞춤형 리포트를 전문 진로·진학 상담교사가 1:1 온라인 상담(30분)을 통해 해설하는 서비스다.",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:38+00:00",
+      "published_date": "Fri, 03 Apr 2026 00:00:00 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [
+        "c2",
+        "c5"
+      ],
+      "evidence_id": "ev18"
+    },
+    {
+      "url": "https://www.insnews.co.kr/news/articleView.html?idxno=89720",
+      "title": "[Tech] 글로벌은 AI로 재편, 국내 인슈어테크의 미래는 < 기획일반 < 기획/연재 < 기사본문 - 한국보험신문",
+      "snippet": "인슈어테크(InsurTech)가 단순한 편의성 개선을 넘어 보험사의 운영 구조를 바꾸는 흐름으로 진화하고 있다는 평가다.\n\n국내에서도 변화의 흐름은 뚜렷하다. 보험 조회·비교 중심 서비스에서 벗어나 AI 기반 자동 심사와 보상 프로세스 혁신, 플랫폼과 결합한 임베디드 보험까지 영역이 확대되고 있다.\n\n■ ‘가입’에서 ‘운영’으로… 무게중심의 이동\n\n보험산업의 경쟁 기준도 달라지고 있다. 과거에는 상품 수와 판매 채널이 중요했다면, 이제는 얼마나 정교하게 위험을 읽고 얼마나 빠르고 정확하게 보험금을 지급하느냐가 핵심 경쟁력으로 부상하",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T01:37:38+00:00",
+      "published_date": "Sun, 29 Mar 2026 15:00:00 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "AI 기반 대학생 진로 설계 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev19"
+    }
+  ],
+  "evidence_gaps": [
+    {
+      "topic": "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족",
+      "query": "대학생 진로 설계 서비스 시장 규모 성장률"
+    },
+    {
+      "topic": "AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족",
+      "query": "AI 진로 설계 서비스 사용자 만족도 조사"
+    }
+  ],
+  "dynamic_research": {
+    "reported": 2,
+    "searches": [
+      {
+        "topic": "대학생 진로 설계 서비스의 시장 규모 및 성장률에 대한 구체적 데이터 부족",
+        "query": "대학생 진로 설계 서비스 시장 규모 성장률",
+        "hits": 5,
+        "state": "ok"
+      },
+      {
+        "topic": "AI 기반 진로 설계 서비스에 대한 사용자 만족도 조사 결과 부족",
+        "query": "AI 진로 설계 서비스 사용자 만족도 조사",
+        "hits": 5,
+        "state": "ok"
+      }
+    ],
+    "new_sources": 10,
+    "added_findings": 2,
+    "applied": true,
+    "skip_reason": null
+  },
+  "logs": [
+    "[preprocess] 입력 구조화 완료",
+    "[research] 시장조사 완료 (실제 LLM·gpt-4o-mini, 웹검색 5건, 근거공백 2건 보고)",
+    "[research_gap] 추가 조사 완료 (실제 LLM·gpt-4o-mini, 검색 2건 · 새 근거 10건 · 보강 2항목)",
+    "[business_model] 수익모델 설계 완료 (실제 LLM·gpt-4o-mini)",
+    "[competitor] 경쟁사 분석 완료 (실제 LLM·gpt-4o-mini, 웹검색 4건, 3개사)",
+    "[customer] 고객 문제 분석 완료 (실제 LLM·gpt-4o-mini, pain 3건)",
+    "[pestel] PESTEL 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[risk] 리스크 분석 완료 (실제 LLM·gpt-4o-mini, 5건)",
+    "[swot] SWOT 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[kosena_industry] 산업 분석 완료 (실제 LLM·gpt-4o-mini, Porter 5/5 · KSF 5/5 · 시사점 3/3)",
+    "[kosena_model] 비즈니스 모델 설계 완료 (실제 LLM·gpt-4o-mini, Lean Canvas 9/9 · HMW 5/5 · 아이디어 26/25+ → 압축 3/3 → 컨셉 1)",
+    "[kosena_research] 고객·시장 분석 완료 (실제 LLM·gpt-4o-mini, 페르소나 2/2 · CJM 5/5 · 비교항목 10/10+ · 비교표 6행)",
+    "[kosena_roadmap] 로드맵 설계 완료 (실제 LLM·gpt-4o-mini, 기능 5/5~7 · Use Case 3/3 · Story 2 · 와이어프레임 3)",
+    "[draft_writer] 초안 작성 완료 (실제 LLM·gpt-4o-mini)",
+    "[reviewer] 초안 평가 완료 (총점=72, 실제 LLM·gpt-4o-mini)",
+    "[draft_writer] 섹션 단위 재작성 완료 (revision=1, 2개 섹션: 시장 및 산업 분석, 수익 모델, 실제 LLM·gpt-4o-mini)",
+    "[polish] 생략 — 내용 이슈만·구조 정상(revision=section)",
+    "[final_reviewer] 최종본 재평가 완료 (총점=67, Δ-5 vs 초안, 실제 LLM·gpt-4o-mini)",
+    "[select_best] 재작성본 회귀(총점 67<72) → 초안 채택(수정 되돌림)",
+    "[verify] 근거 일치성 검증 완료 (실제 LLM·gpt-4o-mini, 사실주장 확인 5/5, 반대근거 0건, 근거연결 5건, 검색 요약 기준)"
+  ],
+  "project_id": 6,
+  "usage": {
+    "calls": 18,
+    "input_tokens": 94903,
+    "output_tokens": 12424,
+    "total_tokens": 107327,
+    "est_cost_usd": 0.0217,
+    "llm_latency_sum_ms": 180609.7,
+    "wall_time_ms": 174027.5,
+    "latency_ms": 180609.7,
+    "fallback_calls": 0
+  },
+  "run_status": "success",
+  "failed_nodes": [],
+  "fallback_nodes": [],
+  "fallback_reasons": {},
+  "workflow_mode": "parallel",
+  "timing": {
+    "workflow_mode": "parallel",
+    "wall_time_ms": 174027.5,
+    "span_ms": 172965.2,
+    "stages": {
+      "preprocess": 0.0,
+      "research": 16605.4,
+      "analysis_block": 26732.8,
+      "kosena_block": 71915.5,
+      "draft": 17397.3,
+      "initial_review": 17803.7,
+      "revise_or_finalize": 5194.6,
+      "polish": 0.2,
+      "final_review": 5755.6,
+      "verify": 4297.6
+    },
+    "nodes": {
+      "competitor": 9042.4,
+      "customer": 3887.7,
+      "pestel": 18475.2,
+      "swot": 8234.0,
+      "business_model": 2165.4,
+      "risk": 5247.1
+    },
+    "critical_path": [
+      "preprocess",
+      "research",
+      "swot",
+      "draft",
+      "reviewer",
+      "section_revise",
+      "polish",
+      "final_reviewer",
+      "verify"
+    ],
+    "stage_sum_ms": 165702.7,
+    "coverage": 0.952,
+    "coverage_active": 0.958
+  },
+  "budget": {
+    "limits": {
+      "max_llm_calls": 50,
+      "max_cost_usd": 1.0,
+      "max_wall_ms": 600000
+    },
+    "spent": {
+      "calls": 18,
+      "est_cost_usd": 0.02169,
+      "wall_time_ms": 174027.6,
+      "provider_attempts": 18
+    },
+    "exceeded": [],
+    "enforced": false
+  },
+  "state_version": 3,
+  "kosena": {
+    "critical_uncertainties": [
+      {
+        "factor": "Political",
+        "why": "정부의 청년 일자리 정책은 서비스의 수요에 직접적인 영향을 미치며, 정책 변화가 서비스 운영에 큰 영향을 줄 수 있습니다.",
+        "impact": "정책 변화에 민감하게 반응하고, 정부와의 협력을 통해 안정적인 운영 기반을 마련해야 합니다."
+      },
+      {
+        "factor": "Economic",
+        "why": "경제 성장률이 서비스 이용에 영향을 미치며, 소비 여력의 변화가 서비스 수요에 직접적인 영향을 미칠 수 있습니다.",
+        "impact": "경제 상황에 따라 가격 정책을 유연하게 조정하고, 다양한 가격대의 서비스를 제공하여 소비자 접근성을 높여야 합니다."
+      },
+      {
+        "factor": "Technological",
+        "why": "AI 기술의 발전은 서비스 품질을 향상시키고, 사용자 경험을 개선하는 데 중요한 요소입니다.",
+        "impact": "AI 기술의 신뢰성을 높이기 위해 지속적인 기술 개발과 사용자 교육을 통해 신뢰를 구축해야 합니다."
+      }
+    ],
+    "porter": {
+      "rivalry": {
+        "level": "높음",
+        "rationale": "경쟁 서비스의 증가로 인해 시장 포화 상태에 있으며, 차별화된 서비스 제공이 필수적입니다."
+      },
+      "new_entrants": {
+        "level": "중간",
+        "rationale": "AI 기술의 발전으로 신규 진입자가 시장에 쉽게 진입할 수 있지만, 기존 경쟁자와의 차별화가 필요합니다."
+      },
+      "substitutes": {
+        "level": "중간",
+        "rationale": "대학생들이 이용할 수 있는 다양한 진로 설계 서비스가 존재하여 대체 가능성이 있습니다."
+      },
+      "buyer_power": {
+        "level": "높음",
+        "rationale": "대학생들이 선택할 수 있는 서비스가 많아 가격 및 품질에 대한 요구가 높습니다."
+      },
+      "supplier_power": {
+        "level": "낮음",
+        "rationale": "AI 기술 및 데이터 제공업체의 수가 많아 공급자의 협상력이 상대적으로 낮습니다."
+      }
+    },
+    "value_chain": {
+      "inbound": "AI 기술 및 데이터 수집을 위한 파트너십 구축이 필요합니다.",
+      "operations": "효율적인 서비스 운영을 위한 AI 알고리즘 최적화가 중요합니다.",
+      "outbound": "고객 맞춤형 서비스를 제공하기 위한 마케팅 전략이 필수적입니다.",
+      "marketing": "디지털 채널을 통한 적극적인 홍보 및 사용자 피드백 수집이 필요합니다.",
+      "service": "사용자 지원 및 상담 서비스의 품질 향상이 중요합니다.",
+      "infrastructure": "기술적 인프라의 지속적인 개선이 요구됩니다.",
+      "hr": "전문 인력을 확보하여 서비스 품질을 높여야 합니다.",
+      "technology": "AI 기술의 지속적인 발전과 혁신이 필수적입니다.",
+      "procurement": "신뢰할 수 있는 데이터 공급업체와의 관계 구축이 필요합니다."
+    },
+    "ksf": [
+      "AI 기술의 신뢰성 및 정확성 확보",
+      "사용자 맞춤형 서비스 제공",
+      "정부 및 대학과의 협력 강화",
+      "효율적인 마케팅 전략 수립",
+      "지속적인 기술 개발 및 혁신"
+    ],
+    "implications": [
+      "정책 변화에 민감하게 반응하여 서비스 운영 전략을 조정해야 합니다.",
+      "AI 기술의 신뢰성을 높이기 위한 지속적인 기술 개발과 사용자 교육이 필요합니다.",
+      "다양한 가격대의 서비스를 제공하여 경제 상황에 따른 소비자 접근성을 높여야 합니다."
+    ],
+    "hmw": [
+      "어떻게 하면 대학생들이 진로 정보의 부족을 해결하고 맞춤형 경로를 설계할 수 있을까?",
+      "어떻게 하면 AI 기술을 활용하여 대학생들에게 신뢰성 있는 진로 상담 서비스를 제공할 수 있을까?",
+      "어떻게 하면 정부 및 대학과 협력하여 진로 설계 서비스를 확장할 수 있을까?",
+      "어떻게 하면 사용자 맞춤형 서비스를 통해 대학생들의 진로 선택에 대한 자신감을 높일 수 있을까?",
+      "어떻게 하면 다양한 가격대의 서비스를 제공하여 경제적 접근성을 높일 수 있을까?"
+    ],
+    "ideas": [
+      "AI 기반 진로 상담 챗봇 개발",
+      "사용자 맞춤형 진로 경로 추천 알고리즘",
+      "진로 정보 통합 플랫폼 구축",
+      "대학과의 제휴를 통한 무료 상담 제공",
+      "AI 진로 검사 서비스 제공",
+      "프리미엄 서비스로 심층 분석 제공",
+      "사용자 피드백을 통한 서비스 개선",
+      "진로 관련 온라인 커뮤니티 운영",
+      "진로 설계 워크숍 개최",
+      "모바일 앱으로 서비스 제공",
+      "AI 기반의 진로 설계 시뮬레이션 기능",
+      "사용자 맞춤형 학습 계획 제안",
+      "소셜 미디어를 통한 마케팅 전략 수립",
+      "정부 지원 프로그램과의 연계",
+      "AI 기술의 신뢰성 향상을 위한 사용자 교육",
+      "대학생 진로 설계 관련 콘텐츠 제작",
+      "사용자 경험을 개선하기 위한 UI/UX 디자인 개선",
+      "진로 관련 데이터 분석 서비스 제공",
+      "사용자 맞춤형 멘토링 프로그램 운영",
+      "진로 설계에 대한 성공 사례 공유",
+      "AI 기술을 활용한 진로 탐색 게임 개발",
+      "대학생 대상 설문조사를 통한 니즈 파악",
+      "진로 관련 세미나 및 컨퍼런스 개최",
+      "AI 기반의 진로 설계 피드백 시스템 구축",
+      "비교과 프로그램 추천 기능 추가",
+      "졸업생과의 네트워킹 이벤트 개최"
+    ],
+    "shortlisted_concepts": [
+      {
+        "concept": "AI 기반 진로 상담 챗봇 개발",
+        "feasibility": "AI 기술 발전으로 구현 가능성이 높음.",
+        "marketability": "대학생들의 진로 상담 수요 증가로 시장성 높음.",
+        "differentiation": "실시간 상담 제공으로 경쟁 서비스와 차별화.",
+        "selection_reason": "사용자 맞춤형 서비스 제공 가능성이 높아 선택됨."
+      },
+      {
+        "concept": "사용자 맞춤형 진로 경로 추천 알고리즘",
+        "feasibility": "데이터 기반 알고리즘 개발이 가능함.",
+        "marketability": "맞춤형 서비스에 대한 수요가 증가하고 있음.",
+        "differentiation": "개인화된 경로 추천으로 경쟁 우위 확보.",
+        "selection_reason": "대학생의 진로 선택에 직접적인 도움을 줄 수 있어 선택됨."
+      },
+      {
+        "concept": "AI 진로 검사 서비스 제공",
+        "feasibility": "기존 AI 검사 모델을 활용할 수 있음.",
+        "marketability": "높은 사용자 만족도로 시장성이 있음.",
+        "differentiation": "정확한 진로 검사 결과 제공으로 차별화.",
+        "selection_reason": "사용자 경험을 개선하고 서비스 신뢰성을 높일 수 있어 선택됨."
+      }
+    ],
+    "selected_concept": "AI 기반 진로 상담 챗봇 개발은 실시간으로 대학생들에게 맞춤형 진로 상담을 제공하여, 경쟁 서비스와의 차별성을 확보하고 사용자 만족도를 높일 수 있는 가능성이 크기 때문에 최종 서비스 컨셉으로 선택되었습니다.",
+    "lean_canvas": {
+      "problem": "진로 정보가 흩어져 있어 경로 선택이 어려움, 맞춤형 학습 및 경험 설계 도구 부족, AI 기반 진로 상담의 부재.",
+      "customer_segments": "진로를 구체화하지 못한 대학교 2~3학년 학생들.",
+      "uvp": "AI를 통해 개인 맞춤형 진로 상담과 경로 설계를 제공하여 대학생의 진로 선택을 지원합니다.",
+      "solution": "AI 기반 진로 상담 챗봇, 사용자 맞춤형 진로 경로 추천 알고리즘, AI 진로 검사 서비스.",
+      "channels": "대학 캠퍼스, 소셜 미디어, 온라인 광고, 제휴 프로그램.",
+      "revenue_streams": "구독 모델, 프리미엄 서비스, 제휴 프로그램, 광고 수익.",
+      "cost_structure": "AI 기술 개발 및 유지 비용, 서버 및 데이터 저장 비용, 마케팅 비용, 인력 비용.",
+      "key_metrics": "사용자 수 및 성장률, 구독 전환율, 사용자 만족도, 서비스 이용 빈도.",
+      "unfair_advantage": "AI 기술의 신뢰성 확보와 정부 및 대학과의 협력으로 경쟁 서비스와의 차별성을 유지."
+    },
+    "key_hypotheses": [
+      {
+        "hypothesis": "AI 기반 진로 상담 챗봇이 대학생들에게 유용할 것이다.",
+        "validation": "사용자 피드백 및 만족도 조사를 통해 검증.",
+        "metric": "사용자 만족도 및 피드백 점수."
+      },
+      {
+        "hypothesis": "사용자 맞춤형 진로 경로 추천 알고리즘이 효과적일 것이다.",
+        "validation": "알고리즘 테스트 및 사용자 피드백을 통해 검증.",
+        "metric": "추천 경로의 선택률."
+      },
+      {
+        "hypothesis": "AI 진로 검사 서비스가 사용자에게 높은 만족도를 줄 것이다.",
+        "validation": "서비스 이용 후 만족도 조사를 통해 검증.",
+        "metric": "사용자 만족도 점수."
+      }
+    ],
+    "personas": [
+      {
+        "name": "진로 불확실성 학생",
+        "demographics": "22세, 대학교 2학년, 월 소득 없음, 서울 거주",
+        "behavior": "일상적으로 SNS와 학습 플랫폼을 사용하며, 진로 관련 정보를 검색함. 의사결정 시 친구나 교수의 조언을 중시함.",
+        "goal": "자신의 전공과 관심사에 맞는 진로 경로를 찾고, 필요한 경험과 학습을 계획하고자 함.",
+        "pain_points": "진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움. 맞춤형 경로 설계 도구의 부족.",
+        "expectations": "AI를 통한 개인 맞춤형 진로 상담을 통해 명확한 경로를 제시받고 싶음. 복잡한 정보가 아닌 간단하고 명확한 솔루션을 원함."
+      },
+      {
+        "name": "경로 탐색 학생",
+        "demographics": "21세, 대학교 3학년, 월 소득 없음, 부산 거주",
+        "behavior": "주로 모바일 앱을 통해 정보를 탐색하며, 진로 관련 세미나에 참여함. 의사결정 시 다양한 온라인 자료를 참고함.",
+        "goal": "진로에 대한 불확실성을 해소하고 명확한 목표를 설정하고 싶음.",
+        "pain_points": "AI 기반의 맞춤형 진로 상담 서비스가 부족하여 경로 선택에 대한 자신감이 부족함.",
+        "expectations": "자신의 전공과 관심사에 맞는 맞춤형 학습 및 경험 설계 도구를 원함. AI 기술의 신뢰성을 높이길 기대함."
+      }
+    ],
+    "cjm": {
+      "stages": [
+        {
+          "stage": "인지",
+          "action": "SNS 및 친구를 통해 서비스에 대한 정보 습득",
+          "emotion": "호기심",
+          "pain_point": "정보의 신뢰성 부족",
+          "touchpoint": "소셜 미디어, 대학 커뮤니티"
+        },
+        {
+          "stage": "고려",
+          "action": "서비스 웹사이트 방문 및 기능 확인",
+          "emotion": "흥미",
+          "pain_point": "기능에 대한 이해 부족",
+          "touchpoint": "서비스 웹사이트"
+        },
+        {
+          "stage": "구매",
+          "action": "서비스 가입 및 초기 상담 요청",
+          "emotion": "기대감",
+          "pain_point": "결제 과정의 복잡함",
+          "touchpoint": "결제 페이지"
+        },
+        {
+          "stage": "사용",
+          "action": "AI 상담 서비스 이용",
+          "emotion": "불안과 기대 혼재",
+          "pain_point": "AI의 신뢰성에 대한 의구심",
+          "touchpoint": "상담 플랫폼"
+        },
+        {
+          "stage": "재사용/이탈",
+          "action": "서비스 피드백 및 재이용 결정",
+          "emotion": "만족 또는 실망",
+          "pain_point": "개인 맞춤형 서비스 부족",
+          "touchpoint": "피드백 설문"
+        }
+      ],
+      "opportunities": [
+        "AI 기술의 발전으로 개인화된 진로 설계 서비스의 품질 향상",
+        "대학생들의 진로 설계에 대한 관심 증가로 인한 시장 확장 가능성",
+        "대학 및 관련 기관과의 협력을 통한 서비스 확장"
+      ]
+    },
+    "market_sizing": {
+      "tam": "39억 6천만 달러 (2035년 예상 시장 규모)",
+      "sam": "19억 4천만 달러 (2026년 예상 시장 규모)",
+      "som": "1억 달러 (1% 점유율 가정)",
+      "top_down": "39억 6천만 달러 × 1% = 3960만 달러",
+      "bottom_up": "100만 대학생 × 100달러 (서비스 단가) × 1회 = 1억 달러",
+      "gap_reason": "top_down은 전체 시장 규모를 기반으로 한 추정치이며, bottom_up은 실제 고객 수와 단가를 기반으로 한 추정치로 차이가 발생.",
+      "assumptions": [
+        "대학생 수는 100만 명으로 추정.",
+        "서비스 단가는 100달러로 가정."
+      ]
+    },
+    "competitor_groups": {
+      "direct": [
+        "Career Compass",
+        "Young熊+",
+        "커리어넷"
+      ],
+      "indirect": [
+        "AI 진로 검사 서비스",
+        "진로 설계 프로그램"
+      ],
+      "potential": [
+        "미확인"
+      ]
+    },
+    "comparison_criteria": [
+      "기능",
+      "가격",
+      "UX",
+      "마케팅",
+      "고객획득",
+      "수익모델",
+      "인력",
+      "기술스택",
+      "신뢰성",
+      "고객지원"
+    ],
+    "competitor_comparison": [
+      {
+        "name": "Career Compass",
+        "type": "direct",
+        "features": "AI 기반 맞춤형 진로 상담, 성적 및 생활기록부 분석, 취업 로드맵 제안",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "구독 모델",
+        "strength": "AI 기술을 활용한 데이터 분석",
+        "weakness": "AI의 신뢰성 문제"
+      },
+      {
+        "name": "Young熊+",
+        "type": "direct",
+        "features": "전공 정보 및 수강 현황 분석, 비교과 프로그램 추천",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "구독 모델",
+        "strength": "졸업생의 학습 이력 분석",
+        "weakness": "특정 대학에 국한된 서비스"
+      },
+      {
+        "name": "커리어넷",
+        "type": "direct",
+        "features": "심리검사 데이터와 직업정보 결합",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "구독 모델",
+        "strength": "개인 맞춤형 정보 제공",
+        "weakness": "데이터 신뢰성 문제"
+      },
+      {
+        "name": "AI 진로 검사 서비스",
+        "type": "indirect",
+        "features": "AI 기반 진로 검사",
+        "price": "12,000원",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "단건 구매",
+        "strength": "높은 사용자 만족도",
+        "weakness": "제한된 기능"
+      },
+      {
+        "name": "진로 설계 프로그램",
+        "type": "indirect",
+        "features": "진로 설계 도구",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "미확인",
+        "strength": "미확인",
+        "weakness": "미확인"
+      },
+      {
+        "name": "자사",
+        "type": "self",
+        "features": "AI 기반 맞춤형 진로 상담 및 경로 설계",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "대학생",
+        "revenue_model": "구독 모델",
+        "strength": "초개인화된 진로 설계 기능",
+        "weakness": "미확인"
+      }
+    ],
+    "positioning_map": {
+      "x_axis": "기능성",
+      "y_axis": "가격",
+      "points": [
+        {
+          "name": "Career Compass",
+          "x": 8.0,
+          "y": 7.0
+        },
+        {
+          "name": "Young熊+",
+          "x": 7.0,
+          "y": 6.0
+        },
+        {
+          "name": "커리어넷",
+          "x": 6.0,
+          "y": 5.0
+        },
+        {
+          "name": "AI 진로 검사 서비스",
+          "x": 5.0,
+          "y": 4.0
+        },
+        {
+          "name": "진로 설계 프로그램",
+          "x": 4.0,
+          "y": 3.0
+        },
+        {
+          "name": "자사",
+          "x": 9.0,
+          "y": 5.0
+        }
+      ]
+    },
+    "vpc": {
+      "customer_profile": {
+        "customer_jobs": [
+          "전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획하기",
+          "진로에 대한 불확실성을 해소하고 명확한 목표를 설정하기",
+          "AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻기"
+        ],
+        "pains": [
+          "진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움",
+          "자신의 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구의 부족",
+          "AI를 통한 맞춤형 진로 상담의 부재로 인해 명확한 경로를 제시받지 못함"
+        ],
+        "gains": [
+          "진로에 대한 통합적이고 구체적인 정보 제공",
+          "자신의 전공과 관심사에 맞는 맞춤형 학습 및 경험 설계 도구",
+          "AI 기반의 개인화된 진로 상담 서비스"
+        ]
+      },
+      "value_map": {
+        "products_services": [
+          "AI 기반 진로 상담 챗봇",
+          "사용자 맞춤형 진로 경로 추천 알고리즘",
+          "AI 진로 검사 서비스"
+        ],
+        "pain_relievers": [
+          "진로 정보 통합 제공",
+          "개인 맞춤형 학습 및 경험 설계 도구 제공",
+          "AI 상담을 통한 경로 선택 지원"
+        ],
+        "gain_creators": [
+          "사용자 맞춤형 진로 상담 서비스",
+          "명확한 경로 제시",
+          "진로 설계에 대한 자신감 향상"
+        ]
+      },
+      "fit": "고객의 진로 설계에 대한 요구와 AI 기반 서비스의 제공이 잘 맞아떨어짐."
+    },
+    "core_features": [
+      {
+        "name": "AI 진로 상담 챗봇",
+        "impact": "사용자가 쉽게 접근하여 진로 상담을 받을 수 있음.",
+        "feasibility": "AI 기술을 활용하여 구현 가능."
+      },
+      {
+        "name": "맞춤형 경로 추천 알고리즘",
+        "impact": "개별 사용자의 전공과 관심사에 맞춘 경로를 제시.",
+        "feasibility": "데이터 분석을 통해 구현 가능."
+      },
+      {
+        "name": "AI 진로 검사 서비스",
+        "impact": "사용자의 역량을 진단하여 적합한 경로를 추천.",
+        "feasibility": "기존의 진단 도구를 활용하여 개발 가능."
+      },
+      {
+        "name": "사용자 피드백 시스템",
+        "impact": "서비스 개선을 위한 사용자 의견 수집.",
+        "feasibility": "간단한 설문 시스템으로 구현 가능."
+      },
+      {
+        "name": "모바일 최적화 인터페이스",
+        "impact": "모바일 사용자의 접근성을 높임.",
+        "feasibility": "웹 기반 플랫폼으로 구현 가능."
+      }
+    ],
+    "use_cases": [
+      {
+        "actor": "대학생",
+        "scenario": "AI 진로 상담 챗봇을 통해 진로 상담 요청",
+        "expected_result": "개인 맞춤형 진로 경로를 추천받음."
+      },
+      {
+        "actor": "대학생",
+        "scenario": "진로 검사 서비스를 통해 자신의 역량 진단",
+        "expected_result": "자신의 강점과 약점을 파악하고 경로 선택에 도움을 받음."
+      },
+      {
+        "actor": "대학생",
+        "scenario": "서비스 피드백을 통해 개선 사항 제안",
+        "expected_result": "서비스 품질이 향상되고 사용자 경험이 개선됨."
+      }
+    ],
+    "moscow": {
+      "must": [
+        "AI 진로 상담 챗봇",
+        "맞춤형 경로 추천 알고리즘",
+        "AI 진로 검사 서비스"
+      ],
+      "should": [
+        "사용자 피드백 시스템",
+        "모바일 최적화 인터페이스"
+      ],
+      "could": [],
+      "wont": [
+        "오프라인 서비스 제공"
+      ]
+    },
+    "kano": {
+      "basic": [
+        "AI 진로 상담 챗봇"
+      ],
+      "performance": [
+        "맞춤형 경로 추천 알고리즘",
+        "AI 진로 검사 서비스"
+      ],
+      "excitement": [
+        "사용자 피드백 시스템",
+        "모바일 최적화 인터페이스"
+      ]
+    },
+    "mvp_scope": "MVP는 AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘을 포함하며, 사용자 피드백 시스템을 통해 초기 사용자 경험을 개선하는 데 중점을 둡니다.",
+    "epics": [
+      {
+        "name": "AI 진로 상담 기능 개발",
+        "stories": [
+          {
+            "story": "As a 대학생, I want AI 진로 상담 챗봇을 통해 상담을 받고, So that 개인 맞춤형 진로 경로를 추천받고 싶습니다.",
+            "given": "사용자가 챗봇에 접근할 수 있는 웹사이트에 접속합니다.",
+            "when": "사용자가 상담 요청을 입력합니다.",
+            "then": "챗봇이 개인 맞춤형 진로 경로를 추천합니다."
+          }
+        ]
+      },
+      {
+        "name": "진로 검사 서비스 구현",
+        "stories": [
+          {
+            "story": "As a 대학생, I want AI 진로 검사 서비스를 이용하여 나의 역량을 진단하고, So that 적합한 진로 경로를 선택할 수 있습니다.",
+            "given": "사용자가 진로 검사 서비스에 접근합니다.",
+            "when": "사용자가 질문에 답변합니다.",
+            "then": "AI가 사용자의 역량을 분석하여 진로 경로를 추천합니다."
+          }
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "서비스 프로토타입 개발",
+        "period": "3개월",
+        "goal": "AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘의 초기 버전 출시"
+      },
+      {
+        "name": "베타 테스트 진행",
+        "period": "2개월",
+        "goal": "사용자 피드백을 통해 서비스 개선"
+      },
+      {
+        "name": "정식 서비스 런칭",
+        "period": "1개월",
+        "goal": "정식 서비스 출시 및 마케팅 시작"
+      }
+    ],
+    "kpis": [
+      {
+        "name": "사용자 수",
+        "target": "1,000명 (가정)"
+      },
+      {
+        "name": "구독 전환율",
+        "target": "10% (가정)"
+      },
+      {
+        "name": "사용자 만족도",
+        "target": "80% 이상 (가정)"
+      }
+    ],
+    "wireframes": [
+      {
+        "screen": "메인 화면",
+        "layout": "+-------------------+\n|    AI 진로 설계    |\n|  [상담 시작하기]   |\n|  [진로 검사하기]   |\n|  [피드백 남기기]   |\n+-------------------+"
+      },
+      {
+        "screen": "핵심 기능 화면",
+        "layout": "+-------------------+\n|   AI 상담 챗봇     |\n|  [질문 입력]       |\n|  [상담 결과 보기]  |\n+-------------------+"
+      },
+      {
+        "screen": "결과/완료 화면",
+        "layout": "+-------------------+\n|   진로 경로 결과   |\n|  [추천 경로 보기]  |\n|  [피드백 남기기]   |\n+-------------------+"
+      }
+    ]
+  },
+  "kosena_compliance": {
+    "total": 28,
+    "ok": 27,
+    "partial": 1,
+    "missing": 0,
+    "checks": [
+      {
+        "id": "pestel_6",
+        "module": "M1",
+        "title": "PESTEL 6영역",
+        "page": 7,
+        "status": "ok",
+        "detail": "6개 영역"
+      },
+      {
+        "id": "pestel_critical_top3",
+        "module": "M1",
+        "title": "Critical Uncertainties Top 3",
+        "page": 7,
+        "status": "ok",
+        "detail": "Top 3 선별됨"
+      },
+      {
+        "id": "frameworks_2",
+        "module": "M1",
+        "title": "Porter/SWOT/Value Chain 중 2개 이상",
+        "page": 8,
+        "status": "ok",
+        "detail": "SWOT + Porter + Value Chain"
+      },
+      {
+        "id": "ksf_5",
+        "module": "M1",
+        "title": "KSF 5개",
+        "page": 8,
+        "status": "ok",
+        "detail": "5개"
+      },
+      {
+        "id": "implications_3",
+        "module": "M1",
+        "title": "설계 시사점 3가지",
+        "page": 8,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "hmw_ideation",
+        "module": "M1",
+        "title": "HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개",
+        "page": 9,
+        "status": "ok",
+        "detail": "HMW 5개 · 아이디어 26개 → 압축 3개 → 컨셉 1개"
+      },
+      {
+        "id": "lean_canvas_9",
+        "module": "M1",
+        "title": "Lean Canvas 9블록",
+        "page": 10,
+        "status": "ok",
+        "detail": "9블록"
+      },
+      {
+        "id": "key_hypotheses_3",
+        "module": "M1",
+        "title": "핵심 가설 3개",
+        "page": 10,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "personas_2",
+        "module": "M2",
+        "title": "페르소나 2종 × 필수 5항목",
+        "page": 12,
+        "status": "ok",
+        "detail": "2종 · 필수 5항목 충족"
+      },
+      {
+        "id": "cjm",
+        "module": "M2",
+        "title": "CJM 5단계 × 4항목 + Opportunity",
+        "page": 12,
+        "status": "ok",
+        "detail": "5단계 × 4항목"
+      },
+      {
+        "id": "tam_sam_som",
+        "module": "M2",
+        "title": "TAM·SAM·SOM",
+        "page": 13,
+        "status": "ok",
+        "detail": "TAM·SAM·SOM"
+      },
+      {
+        "id": "sizing_cross_check",
+        "module": "M2",
+        "title": "Top-down · Bottom-up 교차검증",
+        "page": 13,
+        "status": "ok",
+        "detail": "Top-down + Bottom-up"
+      },
+      {
+        "id": "competitors_3_2_1",
+        "module": "M2",
+        "title": "경쟁사 직접3·간접2·잠재1",
+        "page": 14,
+        "status": "ok",
+        "detail": "직접3 · 간접2 · 잠재1"
+      },
+      {
+        "id": "comparison_criteria_10",
+        "module": "M2",
+        "title": "비교 항목 10개 이상 + 경쟁사 비교표",
+        "page": 14,
+        "status": "ok",
+        "detail": "기준 10개 · 비교표 6행"
+      },
+      {
+        "id": "positioning_map",
+        "module": "M2",
+        "title": "2축 포지셔닝 맵",
+        "page": 14,
+        "status": "ok",
+        "detail": "기능성 × 가격"
+      },
+      {
+        "id": "vpc",
+        "module": "M2",
+        "title": "VPC 6영역 + Fit",
+        "page": 15,
+        "status": "ok",
+        "detail": "고객 프로필 3 + 가치 지도 3"
+      },
+      {
+        "id": "core_features_5_7",
+        "module": "M2",
+        "title": "핵심 기능 5~7개",
+        "page": 15,
+        "status": "ok",
+        "detail": "5개"
+      },
+      {
+        "id": "use_cases_3",
+        "module": "M2",
+        "title": "Use Case 3종",
+        "page": 15,
+        "status": "ok",
+        "detail": "3종"
+      },
+      {
+        "id": "moscow",
+        "module": "M3",
+        "title": "MOSCOW 4구분(Won't 명시)",
+        "page": 17,
+        "status": "ok",
+        "detail": "Must/Should/Could/Won't"
+      },
+      {
+        "id": "kano",
+        "module": "M3",
+        "title": "Kano 3분류",
+        "page": 17,
+        "status": "ok",
+        "detail": "3분류"
+      },
+      {
+        "id": "mvp_scope",
+        "module": "M3",
+        "title": "MVP 범위",
+        "page": 17,
+        "status": "ok",
+        "detail": "범위 정의됨"
+      },
+      {
+        "id": "epic_story_ac",
+        "module": "M3",
+        "title": "Epic-Story-AC (Given-When-Then)",
+        "page": 18,
+        "status": "ok",
+        "detail": "Epic 2 · Story 2 · AC 전부 Given-When-Then"
+      },
+      {
+        "id": "milestones_kpi",
+        "module": "M3",
+        "title": "마일스톤 · KPI",
+        "page": 3,
+        "status": "ok",
+        "detail": "마일스톤 + KPI"
+      },
+      {
+        "id": "wireframes",
+        "module": "M3",
+        "title": "와이어프레임 2~3개 화면",
+        "page": 5,
+        "status": "ok",
+        "detail": "3개 화면"
+      },
+      {
+        "id": "sources_cited",
+        "module": "공통",
+        "title": "출처 명시 (실행 전체 · 항목별 연결 아님)",
+        "page": 4,
+        "status": "ok",
+        "detail": "출처 19건(주장 연결 2건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현"
+      },
+      {
+        "id": "ai_usage_log",
+        "module": "공통",
+        "title": "AI 활용 로그(프롬프트·응답·채택 여부)",
+        "page": 4,
+        "status": "ok",
+        "detail": "18건 · 전부 프롬프트·입력·산출·검증·채택 기록"
+      },
+      {
+        "id": "hypothesis_labeling",
+        "module": "공통",
+        "title": "정량 주장의 가설·추정 표기",
+        "page": 4,
+        "status": "ok",
+        "detail": "가설·추정 표기 있음"
+      },
+      {
+        "id": "doc_length",
+        "module": "공통",
+        "title": "본문 A4 30~50쪽",
+        "page": 4,
+        "status": "partial",
+        "detail": "약 13.0쪽(추정) — 30~50쪽 필요"
+      }
+    ],
+    "by_module": {
+      "M1": {
+        "ok": 8,
+        "partial": 0,
+        "missing": 0
+      },
+      "M2": {
+        "ok": 10,
+        "partial": 0,
+        "missing": 0
+      },
+      "M3": {
+        "ok": 6,
+        "partial": 0,
+        "missing": 0
+      },
+      "공통": {
+        "ok": 3,
+        "partial": 1,
+        "missing": 0
+      }
+    },
+    "unmet": [
+      "doc_length"
+    ],
+    "data_source": "real",
+    "summary": "KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0"
+  },
+  "kosena_plan": "# AI 기반 대학생 진로 설계 서비스 — 서비스 기획안 (KOSENA)\n\n> ⚠️ **본 문서의 정량 주장은 웹 리서치에 기반한 가설·추정입니다.** 인터뷰·설문 등 1차 자료로 검증되지 않았으며, 페르소나는 **가설형 페르소나**이고 TAM/SAM/SOM 은 명시한 가정 위의 **추정치**입니다. 실제 시장 점유율·고객 반응을 의미하지 않습니다.\n>\n> KOSENA 의 목표대로 *\"완벽한 기획서가 아니라 의사결정 가능한 가설\"* 을 만드는 것이 이 문서의 성격입니다. 각 가설은 시장·고객을 만나며 갱신되어야 합니다.\n\n## 개요\n\n| 항목 | 내용 |\n|---|---|\n| 프로젝트명 | AI 기반 대학생 진로 설계 서비스 |\n| 설명 | 대학생이 전공·관심사·역량을 입력하면 진로 경로와 필요한 학습·경험을 설계해 주는 AI 서비스 |\n| 목표 사용자 | 진로를 구체화하지 못한 대학교 2~3학년 |\n| 문제 | 진로 정보가 흩어져 있고, 자신에게 맞는 경로와 준비 순서를 판단하기 어렵다 |\n\n## 1. 산업·서비스 분석 보고서\n\n### Critical Uncertainties (영향력·가능성 상위 3)\n\n| 요인 | 왜 중요한가 | 서비스 영향 |\n|---|---|---|\n| Political | 정부의 청년 일자리 정책은 서비스의 수요에 직접적인 영향을 미치며, 정책 변화가 서비스 운영에 큰 영향을 줄 수 있습니다. | 정책 변화에 민감하게 반응하고, 정부와의 협력을 통해 안정적인 운영 기반을 마련해야 합니다. |\n| Economic | 경제 성장률이 서비스 이용에 영향을 미치며, 소비 여력의 변화가 서비스 수요에 직접적인 영향을 미칠 수 있습니다. | 경제 상황에 따라 가격 정책을 유연하게 조정하고, 다양한 가격대의 서비스를 제공하여 소비자 접근성을 높여야 합니다. |\n| Technological | AI 기술의 발전은 서비스 품질을 향상시키고, 사용자 경험을 개선하는 데 중요한 요소입니다. | AI 기술의 신뢰성을 높이기 위해 지속적인 기술 개발과 사용자 교육을 통해 신뢰를 구축해야 합니다. |\n\n### Porter's Five Forces\n\n| Force | 강도 | 근거 |\n|---|---|---|\n| rivalry | 높음 | 경쟁 서비스의 증가로 인해 시장 포화 상태에 있으며, 차별화된 서비스 제공이 필수적입니다. |\n| new_entrants | 중간 | AI 기술의 발전으로 신규 진입자가 시장에 쉽게 진입할 수 있지만, 기존 경쟁자와의 차별화가 필요합니다. |\n| substitutes | 중간 | 대학생들이 이용할 수 있는 다양한 진로 설계 서비스가 존재하여 대체 가능성이 있습니다. |\n| buyer_power | 높음 | 대학생들이 선택할 수 있는 서비스가 많아 가격 및 품질에 대한 요구가 높습니다. |\n| supplier_power | 낮음 | AI 기술 및 데이터 제공업체의 수가 많아 공급자의 협상력이 상대적으로 낮습니다. |\n\n### Value Chain\n\n| 활동 | 내용 |\n|---|---|\n| inbound | AI 기술 및 데이터 수집을 위한 파트너십 구축이 필요합니다. |\n| operations | 효율적인 서비스 운영을 위한 AI 알고리즘 최적화가 중요합니다. |\n| outbound | 고객 맞춤형 서비스를 제공하기 위한 마케팅 전략이 필수적입니다. |\n| marketing | 디지털 채널을 통한 적극적인 홍보 및 사용자 피드백 수집이 필요합니다. |\n| service | 사용자 지원 및 상담 서비스의 품질 향상이 중요합니다. |\n| infrastructure | 기술적 인프라의 지속적인 개선이 요구됩니다. |\n| hr | 전문 인력을 확보하여 서비스 품질을 높여야 합니다. |\n| technology | AI 기술의 지속적인 발전과 혁신이 필수적입니다. |\n| procurement | 신뢰할 수 있는 데이터 공급업체와의 관계 구축이 필요합니다. |\n\n### KSF (핵심 성공요인 5)\n\n- AI 기술의 신뢰성 및 정확성 확보\n- 사용자 맞춤형 서비스 제공\n- 정부 및 대학과의 협력 강화\n- 효율적인 마케팅 전략 수립\n- 지속적인 기술 개발 및 혁신\n\n### 서비스 설계 시사점 3\n\n- 정책 변화에 민감하게 반응하여 서비스 운영 전략을 조정해야 합니다.\n- AI 기술의 신뢰성을 높이기 위한 지속적인 기술 개발과 사용자 교육이 필요합니다.\n- 다양한 가격대의 서비스를 제공하여 경제 상황에 따른 소비자 접근성을 높여야 합니다.\n\n## 2. Lean Canvas\n\n### 9개 블록 (작성 순서 1→9)\n\n| 항목 | 내용 |\n|---|---|\n| 1. Problem | 진로 정보가 흩어져 있어 경로 선택이 어려움, 맞춤형 학습 및 경험 설계 도구 부족, AI 기반 진로 상담의 부재. |\n| 2. Customer Segments | 진로를 구체화하지 못한 대학교 2~3학년 학생들. |\n| 3. UVP | AI를 통해 개인 맞춤형 진로 상담과 경로 설계를 제공하여 대학생의 진로 선택을 지원합니다. |\n| 4. Solution | AI 기반 진로 상담 챗봇, 사용자 맞춤형 진로 경로 추천 알고리즘, AI 진로 검사 서비스. |\n| 5. Channels | 대학 캠퍼스, 소셜 미디어, 온라인 광고, 제휴 프로그램. |\n| 6. Revenue Streams | 구독 모델, 프리미엄 서비스, 제휴 프로그램, 광고 수익. |\n| 7. Cost Structure | AI 기술 개발 및 유지 비용, 서버 및 데이터 저장 비용, 마케팅 비용, 인력 비용. |\n| 8. Key Metrics | 사용자 수 및 성장률, 구독 전환율, 사용자 만족도, 서비스 이용 빈도. |\n| 9. Unfair Advantage | AI 기술의 신뢰성 확보와 정부 및 대학과의 협력으로 경쟁 서비스와의 차별성을 유지. |\n\n### 핵심 가설 3개와 검증 계획\n\n| 가설 | 검증 방법 | 판단 지표 |\n|---|---|---|\n| AI 기반 진로 상담 챗봇이 대학생들에게 유용할 것이다. | 사용자 피드백 및 만족도 조사를 통해 검증. | 사용자 만족도 및 피드백 점수. |\n| 사용자 맞춤형 진로 경로 추천 알고리즘이 효과적일 것이다. | 알고리즘 테스트 및 사용자 피드백을 통해 검증. | 추천 경로의 선택률. |\n| AI 진로 검사 서비스가 사용자에게 높은 만족도를 줄 것이다. | 서비스 이용 후 만족도 조사를 통해 검증. | 사용자 만족도 점수. |\n\n### 아이디어 발산 → 수렴 (26개 → 3개 → 1개)\n\n**HMW 질문**\n- 어떻게 하면 대학생들이 진로 정보의 부족을 해결하고 맞춤형 경로를 설계할 수 있을까?\n- 어떻게 하면 AI 기술을 활용하여 대학생들에게 신뢰성 있는 진로 상담 서비스를 제공할 수 있을까?\n- 어떻게 하면 정부 및 대학과 협력하여 진로 설계 서비스를 확장할 수 있을까?\n- 어떻게 하면 사용자 맞춤형 서비스를 통해 대학생들의 진로 선택에 대한 자신감을 높일 수 있을까?\n- 어떻게 하면 다양한 가격대의 서비스를 제공하여 경제적 접근성을 높일 수 있을까?\n\n**발산한 아이디어 26개**\n- AI 기반 진로 상담 챗봇 개발\n- 사용자 맞춤형 진로 경로 추천 알고리즘\n- 진로 정보 통합 플랫폼 구축\n- 대학과의 제휴를 통한 무료 상담 제공\n- AI 진로 검사 서비스 제공\n- 프리미엄 서비스로 심층 분석 제공\n- 사용자 피드백을 통한 서비스 개선\n- 진로 관련 온라인 커뮤니티 운영\n- 진로 설계 워크숍 개최\n- 모바일 앱으로 서비스 제공\n- AI 기반의 진로 설계 시뮬레이션 기능\n- 사용자 맞춤형 학습 계획 제안\n- 소셜 미디어를 통한 마케팅 전략 수립\n- 정부 지원 프로그램과의 연계\n- AI 기술의 신뢰성 향상을 위한 사용자 교육\n- 대학생 진로 설계 관련 콘텐츠 제작\n- 사용자 경험을 개선하기 위한 UI/UX 디자인 개선\n- 진로 관련 데이터 분석 서비스 제공\n- 사용자 맞춤형 멘토링 프로그램 운영\n- 진로 설계에 대한 성공 사례 공유\n- AI 기술을 활용한 진로 탐색 게임 개발\n- 대학생 대상 설문조사를 통한 니즈 파악\n- 진로 관련 세미나 및 컨퍼런스 개최\n- AI 기반의 진로 설계 피드백 시스템 구축\n- 비교과 프로그램 추천 기능 추가\n\n**압축 후보 3개 (실현가능성·시장성·차별성 평가)**\n\n| 후보 컨셉 | 실현가능성 | 시장성 | 차별성 | 남긴 이유 |\n|---|---|---|---|---|\n| AI 기반 진로 상담 챗봇 개발 | AI 기술 발전으로 구현 가능성이 높음. | 대학생들의 진로 상담 수요 증가로 시장성 높음. | 실시간 상담 제공으로 경쟁 서비스와 차별화. | 사용자 맞춤형 서비스 제공 가능성이 높아 선택됨. |\n| 사용자 맞춤형 진로 경로 추천 알고리즘 | 데이터 기반 알고리즘 개발이 가능함. | 맞춤형 서비스에 대한 수요가 증가하고 있음. | 개인화된 경로 추천으로 경쟁 우위 확보. | 대학생의 진로 선택에 직접적인 도움을 줄 수 있어 선택됨. |\n| AI 진로 검사 서비스 제공 | 기존 AI 검사 모델을 활용할 수 있음. | 높은 사용자 만족도로 시장성이 있음. | 정확한 진로 검사 결과 제공으로 차별화. | 사용자 경험을 개선하고 서비스 신뢰성을 높일 수 있어 선택됨. |\n\n**최종 컨셉**\n\nAI 기반 진로 상담 챗봇 개발은 실시간으로 대학생들에게 맞춤형 진로 상담을 제공하여, 경쟁 서비스와의 차별성을 확보하고 사용자 만족도를 높일 수 있는 가능성이 크기 때문에 최종 서비스 컨셉으로 선택되었습니다.\n\n## 3. 고객 리서치 패키지\n\n### 페르소나 (가설형 — 인터뷰 미검증)\n\n#### 진로 불확실성 학생\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 22세, 대학교 2학년, 월 소득 없음, 서울 거주 |\n| 행동 패턴 | 일상적으로 SNS와 학습 플랫폼을 사용하며, 진로 관련 정보를 검색함. 의사결정 시 친구나 교수의 조언을 중시함. |\n| Goal·동기 | 자신의 전공과 관심사에 맞는 진로 경로를 찾고, 필요한 경험과 학습을 계획하고자 함. |\n| Pain Point | 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움. 맞춤형 경로 설계 도구의 부족. |\n| 기대·거부 요인 | AI를 통한 개인 맞춤형 진로 상담을 통해 명확한 경로를 제시받고 싶음. 복잡한 정보가 아닌 간단하고 명확한 솔루션을 원함. |\n\n#### 경로 탐색 학생\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 21세, 대학교 3학년, 월 소득 없음, 부산 거주 |\n| 행동 패턴 | 주로 모바일 앱을 통해 정보를 탐색하며, 진로 관련 세미나에 참여함. 의사결정 시 다양한 온라인 자료를 참고함. |\n| Goal·동기 | 진로에 대한 불확실성을 해소하고 명확한 목표를 설정하고 싶음. |\n| Pain Point | AI 기반의 맞춤형 진로 상담 서비스가 부족하여 경로 선택에 대한 자신감이 부족함. |\n| 기대·거부 요인 | 자신의 전공과 관심사에 맞는 맞춤형 학습 및 경험 설계 도구를 원함. AI 기술의 신뢰성을 높이길 기대함. |\n\n### Customer Journey Map\n\n| 단계 | Action | Emotion | Pain Point | Touchpoint |\n|---|---|---|---|---|\n| 인지 | SNS 및 친구를 통해 서비스에 대한 정보 습득 | 호기심 | 정보의 신뢰성 부족 | 소셜 미디어, 대학 커뮤니티 |\n| 고려 | 서비스 웹사이트 방문 및 기능 확인 | 흥미 | 기능에 대한 이해 부족 | 서비스 웹사이트 |\n| 구매 | 서비스 가입 및 초기 상담 요청 | 기대감 | 결제 과정의 복잡함 | 결제 페이지 |\n| 사용 | AI 상담 서비스 이용 | 불안과 기대 혼재 | AI의 신뢰성에 대한 의구심 | 상담 플랫폼 |\n| 재사용/이탈 | 서비스 피드백 및 재이용 결정 | 만족 또는 실망 | 개인 맞춤형 서비스 부족 | 피드백 설문 |\n\n**Opportunity**\n- AI 기술의 발전으로 개인화된 진로 설계 서비스의 품질 향상\n- 대학생들의 진로 설계에 대한 관심 증가로 인한 시장 확장 가능성\n- 대학 및 관련 기관과의 협력을 통한 서비스 확장\n\n## 4. 시장·경쟁사 분석\n\n### TAM · SAM · SOM (추정치 — 명시한 가정 위)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 39억 6천만 달러 (2035년 예상 시장 규모) |\n| SAM | 19억 4천만 달러 (2026년 예상 시장 규모) |\n| SOM | 1억 달러 (1% 점유율 가정) |\n| Top-down 추정 | 39억 6천만 달러 × 1% = 3960만 달러 |\n| Bottom-up 추정 | 100만 대학생 × 100달러 (서비스 단가) × 1회 = 1억 달러 |\n| 두 값이 다른 이유 | top_down은 전체 시장 규모를 기반으로 한 추정치이며, bottom_up은 실제 고객 수와 단가를 기반으로 한 추정치로 차이가 발생. |\n\n**사용한 가정**\n- 대학생 수는 100만 명으로 추정.\n- 서비스 단가는 100달러로 가정.\n\n### 경쟁사 분류\n\n| 구분 | 대상 |\n|---|---|\n| 직접 경쟁자 (3) | Career Compass, Young熊+, 커리어넷 |\n| 간접 경쟁자 (2) | AI 진로 검사 서비스, 진로 설계 프로그램 |\n| 잠재 경쟁자 (1) | 미확인 |\n\n### 비교 항목 (10개)\n\n- 기능\n- 가격\n- UX\n- 마케팅\n- 고객획득\n- 수익모델\n- 인력\n- 기술스택\n- 신뢰성\n- 고객지원\n\n### 경쟁사 비교표 (6행)\n\n**① 제품·시장**\n\n| 대상 | 주요 기능 | 가격 | UX | 타깃 사용자 | 수익 모델 |\n|---|---|---|---|---|---|\n| Career Compass (직접) | AI 기반 맞춤형 진로 상담, 성적 및 생활기록부 분석, 취업 로드맵 제안 | 미확인 | 미확인 | 대학생 | 구독 모델 |\n| Young熊+ (직접) | 전공 정보 및 수강 현황 분석, 비교과 프로그램 추천 | 미확인 | 미확인 | 대학생 | 구독 모델 |\n| 커리어넷 (직접) | 심리검사 데이터와 직업정보 결합 | 미확인 | 미확인 | 대학생 | 구독 모델 |\n| AI 진로 검사 서비스 (간접) | AI 기반 진로 검사 | 12,000원 | 미확인 | 대학생 | 단건 구매 |\n| 진로 설계 프로그램 (간접) | 진로 설계 도구 | 미확인 | 미확인 | 대학생 | 미확인 |\n| 자사 (자사) | AI 기반 맞춤형 진로 상담 및 경로 설계 | 미확인 | 미확인 | 대학생 | 구독 모델 |\n\n**② 강점·약점**\n\n| 대상 | 강점 | 약점 |\n|---|---|---|\n| Career Compass (직접) | AI 기술을 활용한 데이터 분석 | AI의 신뢰성 문제 |\n| Young熊+ (직접) | 졸업생의 학습 이력 분석 | 특정 대학에 국한된 서비스 |\n| 커리어넷 (직접) | 개인 맞춤형 정보 제공 | 데이터 신뢰성 문제 |\n| AI 진로 검사 서비스 (간접) | 높은 사용자 만족도 | 제한된 기능 |\n| 진로 설계 프로그램 (간접) | 미확인 | 미확인 |\n| 자사 (자사) | 초개인화된 진로 설계 기능 | 미확인 |\n\n### 포지셔닝 맵 (기능성 × 가격)\n\n| 대상 | 기능성 (0~10) | 가격 (0~10) |\n|---|---|---|\n| Career Compass | 8.0 | 7.0 |\n| Young熊+ | 7.0 | 6.0 |\n| 커리어넷 | 6.0 | 5.0 |\n| AI 진로 검사 서비스 | 5.0 | 4.0 |\n| 진로 설계 프로그램 | 4.0 | 3.0 |\n| 자사 | 9.0 | 5.0 |\n\n## 5. 서비스 컨셉·기능 정의서\n\n### Value Proposition Canvas\n\n**고객 프로필**\n| 항목 | 내용 |\n|---|---|\n| Customer Jobs | 전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획하기, 진로에 대한 불확실성을 해소하고 명확한 목표를 설정하기, AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻기 |\n| Pains | 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려움, 자신의 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구의 부족, AI를 통한 맞춤형 진로 상담의 부재로 인해 명확한 경로를 제시받지 못함 |\n| Gains | 진로에 대한 통합적이고 구체적인 정보 제공, 자신의 전공과 관심사에 맞는 맞춤형 학습 및 경험 설계 도구, AI 기반의 개인화된 진로 상담 서비스 |\n\n**가치 지도**\n| 항목 | 내용 |\n|---|---|\n| Products & Services | AI 기반 진로 상담 챗봇, 사용자 맞춤형 진로 경로 추천 알고리즘, AI 진로 검사 서비스 |\n| Pain Relievers | 진로 정보 통합 제공, 개인 맞춤형 학습 및 경험 설계 도구 제공, AI 상담을 통한 경로 선택 지원 |\n| Gain Creators | 사용자 맞춤형 진로 상담 서비스, 명확한 경로 제시, 진로 설계에 대한 자신감 향상 |\n\n**Fit 검증**\n\n고객의 진로 설계에 대한 요구와 AI 기반 서비스의 제공이 잘 맞아떨어짐.\n\n### 핵심 기능 (5개)\n\n| 기능 | 사용자 임팩트 | 실현가능성 |\n|---|---|---|\n| AI 진로 상담 챗봇 | 사용자가 쉽게 접근하여 진로 상담을 받을 수 있음. | AI 기술을 활용하여 구현 가능. |\n| 맞춤형 경로 추천 알고리즘 | 개별 사용자의 전공과 관심사에 맞춘 경로를 제시. | 데이터 분석을 통해 구현 가능. |\n| AI 진로 검사 서비스 | 사용자의 역량을 진단하여 적합한 경로를 추천. | 기존의 진단 도구를 활용하여 개발 가능. |\n| 사용자 피드백 시스템 | 서비스 개선을 위한 사용자 의견 수집. | 간단한 설문 시스템으로 구현 가능. |\n| 모바일 최적화 인터페이스 | 모바일 사용자의 접근성을 높임. | 웹 기반 플랫폼으로 구현 가능. |\n\n### Use Case 3종\n\n| Actor | 시나리오 | 기대 결과 |\n|---|---|---|\n| 대학생 | AI 진로 상담 챗봇을 통해 진로 상담 요청 | 개인 맞춤형 진로 경로를 추천받음. |\n| 대학생 | 진로 검사 서비스를 통해 자신의 역량 진단 | 자신의 강점과 약점을 파악하고 경로 선택에 도움을 받음. |\n| 대학생 | 서비스 피드백을 통해 개선 사항 제안 | 서비스 품질이 향상되고 사용자 경험이 개선됨. |\n\n## 6. 개발 로드맵·PRD\n\n### MVP 범위\n\nMVP는 AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘을 포함하며, 사용자 피드백 시스템을 통해 초기 사용자 경험을 개선하는 데 중점을 둡니다.\n\n### MOSCOW\n\n| 구분 | 기능 |\n|---|---|\n| Must have | AI 진로 상담 챗봇, 맞춤형 경로 추천 알고리즘, AI 진로 검사 서비스 |\n| Should have | 사용자 피드백 시스템, 모바일 최적화 인터페이스 |\n| Could have | — |\n| Won't have (이번 범위 제외) | 오프라인 서비스 제공 |\n\n### Kano Model\n\n| 분류 | 기능 |\n|---|---|\n| Basic (당연) | AI 진로 상담 챗봇 |\n| Performance (성능) | 맞춤형 경로 추천 알고리즘, AI 진로 검사 서비스 |\n| Excitement (매력) | 사용자 피드백 시스템, 모바일 최적화 인터페이스 |\n\n### Epic – User Story – Acceptance Criteria (INVEST · Given-When-Then)\n\n#### Epic: AI 진로 상담 기능 개발\n\n- **Story**: As a 대학생, I want AI 진로 상담 챗봇을 통해 상담을 받고, So that 개인 맞춤형 진로 경로를 추천받고 싶습니다.\n  - **Given** 사용자가 챗봇에 접근할 수 있는 웹사이트에 접속합니다.\n  - **When** 사용자가 상담 요청을 입력합니다.\n  - **Then** 챗봇이 개인 맞춤형 진로 경로를 추천합니다.\n\n#### Epic: 진로 검사 서비스 구현\n\n- **Story**: As a 대학생, I want AI 진로 검사 서비스를 이용하여 나의 역량을 진단하고, So that 적합한 진로 경로를 선택할 수 있습니다.\n  - **Given** 사용자가 진로 검사 서비스에 접근합니다.\n  - **When** 사용자가 질문에 답변합니다.\n  - **Then** AI가 사용자의 역량을 분석하여 진로 경로를 추천합니다.\n\n### 마일스톤\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 서비스 프로토타입 개발 | 3개월 | AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘의 초기 버전 출시 |\n| 베타 테스트 진행 | 2개월 | 사용자 피드백을 통해 서비스 개선 |\n| 정식 서비스 런칭 | 1개월 | 정식 서비스 출시 및 마케팅 시작 |\n\n### KPI\n\n| 지표 | 목표(가정 포함) |\n|---|---|\n| 사용자 수 | 1,000명 (가정) |\n| 구독 전환율 | 10% (가정) |\n| 사용자 만족도 | 80% 이상 (가정) |\n\n### 와이어프레임 (구조 스케치 — 실제 디자인 아님)\n\n**메인 화면**\n\n```\n+-------------------+\n|    AI 진로 설계    |\n|  [상담 시작하기]   |\n|  [진로 검사하기]   |\n|  [피드백 남기기]   |\n+-------------------+\n```\n\n**핵심 기능 화면**\n\n```\n+-------------------+\n|   AI 상담 챗봇     |\n|  [질문 입력]       |\n|  [상담 결과 보기]  |\n+-------------------+\n```\n\n**결과/완료 화면**\n\n```\n+-------------------+\n|   진로 경로 결과   |\n|  [추천 경로 보기]  |\n|  [피드백 남기기]   |\n+-------------------+\n```\n\n## 7. 발표 요약\n\n본 기획안의 핵심은 다음과 같다.\n\n- 정책 변화에 민감하게 반응하여 서비스 운영 전략을 조정해야 합니다.\n- AI 기술의 신뢰성을 높이기 위한 지속적인 기술 개발과 사용자 교육이 필요합니다.\n- 다양한 가격대의 서비스를 제공하여 경제 상황에 따른 소비자 접근성을 높여야 합니다.\n\n## 참고 — 기존 14섹션 기획서\n\n아래는 동일 실행에서 생성된 서술형 기획서다(KOSENA 산출물과 중복 서술 포함).\n\n# AI 기반 대학생 진로 설계 서비스 기획서\n\n## 프로젝트 개요\nAI 기반 대학생 진로 설계 서비스는 대학생이 자신의 전공, 관심사, 역량을 입력하면 맞춤형 진로 경로와 필요한 학습 및 경험을 설계해주는 혁신적인 AI 서비스입니다. 이 서비스는 특히 진로를 구체화하지 못한 대학교 2~3학년 학생들에게 유용합니다.\n\n## 추진 배경\n대학생들은 진로에 대한 불확실성을 느끼고 있으며, 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어려운 상황입니다. AI 기술의 발전과 함께 개인화된 진로 상담 서비스의 수요가 증가하고 있으며, 이러한 필요를 충족하기 위해 본 서비스의 개발이 필요합니다.\n\n## 문제 정의\n대학생들은 진로 정보가 흩어져 있어 자신에게 맞는 경로와 준비 순서를 판단하기 어렵습니다. 또한, 전공과 관심사에 맞는 적절한 학습 및 경험을 설계할 수 있는 도구가 부족하며, AI를 통한 맞춤형 진로 상담이 부재하여 명확한 경로를 제시받지 못하고 있습니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 진로를 구체화하지 못한 대학교 2~3학년 학생들입니다. 이들은 진로에 대한 불확실성을 느끼며, 자신에게 맞는 경로를 찾고자 하는 욕구가 강합니다.\n\n## 시장 및 산업 분석\nAI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있으며, 대학생들이 진로를 구체화하는 데 도움을 주는 혁신적인 솔루션으로 자리잡고 있습니다. AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요가 증가하고 있으며, 데이터 기반의 진로 설계 및 역량 진단 서비스가 발전하고 있습니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 정부의 청년 일자리 정책과 관련이 깊음 | 정부 지원 정책과 협력하여 신뢰성 및 사용자 기반 확장 | 정치적 불안정이나 정책 변화가 서비스 운영에 영향 | 정책 변화에 민감하게 반응하고 정부와 협력 |\n| Economic | 시장은 2026년부터 2035년까지 연평균 성장률 8.2% 예상 | 경제 성장에 따라 대학생들의 지출 증가 가능성 | 경제 불황이나 실업률 증가가 소비 여력 감소 | 가격 정책을 유연하게 조정하고 다양한 가격대 제공 |\n| Social | 대학생들의 진로에 대한 불확실성 증가 | 맞춤형 서비스 제공을 통해 고객층 확대 | 사회적 기대에 부응하지 못할 경우 사용자 이탈 | 고객 피드백을 반영하여 서비스 품질 개선 |\n| Technological | AI 기술 발전으로 서비스 품질 향상 | 더욱 정교하고 개인화된 서비스 제공 가능 | AI 기술 신뢰성 및 정확성 우려 | 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축 |\n| Environmental | 일부 지역에서 연결 문제로 접근성 제한 | 디지털 인프라 부족 지역을 대상으로 한 서비스 개발 | 농촌 지역 사용자 채택 어려움 | 오프라인 서비스나 대안적 접근 방식 고려 |\n| Legal | 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 | 법률 준수로 사용자 신뢰 구축 | 법적 규제가 강화될 경우 추가 비용 발생 | 법률 자문을 통해 규제 변화에 신속 대응 |\n\n## SWOT 분석\n- **강점**: AI 기반의 개인 맞춤형 진로 상담 서비스, 대학생 진로 정보 부족 문제 해결, 빠르게 성장하는 시장에서의 기회\n- **약점**: AI 기술의 신뢰성 및 정확성에 대한 우려, 사용자 맞춤형 서비스의 한계로 인한 이탈 가능성, 경쟁 서비스와의 차별화 필요\n- **기회**: AI 기술 발전으로 서비스 품질 향상, 대학생들의 진로 설계 관심 증가, 대학 및 기관과의 협력을 통한 시장 확장\n- **위협**: 경쟁 서비스의 증가로 인한 시장 포화, 농촌 지역의 연결 문제로 인한 접근성 제한, 개인의 요구를 충족하지 못할 경우 사용자 이탈\n\n## 제안 서비스\n본 서비스는 대학생들이 자신의 전공과 관심사에 맞는 진로 경로를 설계하고 필요한 학습 및 경험을 계획할 수 있도록 돕는 AI 기반의 진로 설계 플랫폼입니다. 사용자는 AI를 통해 개인 맞춤형 진로 상담을 받고, 경로 선택에 대한 자신감을 얻을 수 있습니다.\n\n## 핵심 기능\n서비스는 사용자가 입력한 전공, 관심사, 역량을 기반으로 맞춤형 진로 경로를 제시하며, 필요한 학습 및 경험을 설계하는 기능을 포함합니다. 또한, 전문 상담사와의 1:1 온라인 상담 서비스도 연계하여 제공할 예정입니다.\n\n## 차별성\n경쟁사와의 차별화된 점은 AI 기술을 활용한 초개인화된 진로 설계 기능을 제공하며, 다양한 데이터 소스를 통합하여 보다 정확한 진로 정보를 제공합니다. 또한, 전문 상담사와의 상담 서비스를 통해 사용자 맞춤형 솔루션을 제공합니다.\n\n## 수익 모델\n본 서비스는 기본 서비스는 무료로 제공하되, 프리미엄 기능(심층 분석, 개인 맞춤형 상담 등)을 월 구독료로 제공하거나 일회성 과금 모델을 통해 수익을 창출할 수 있습니다. 추가적으로 제휴 프로그램과 광고 수익도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 대학생들이 진로에 대한 불확실성을 해소하고 명확한 목표를 설정하는 데 기여할 것입니다. 또한, AI 기반의 개인 맞춤형 진로 상담을 통해 사용자 만족도를 높이고, 지속 가능한 서비스로 자리잡을 것으로 기대됩니다.\n\n## 추진 계획\n서비스 개발은 단계별로 진행되며, 초기 단계에서는 프로토타입을 개발하고 사용자 피드백을 반영하여 개선할 계획입니다. 이후 마케팅 전략을 통해 사용자 기반을 확장하고, 지속적인 서비스 개선을 통해 시장에서의 경쟁력을 강화할 것입니다.\n\n## 위험요인 및 대응방안\n- **기술**: AI 기술의 신뢰성 및 정확성에 대한 우려 (중, 중) → 지속적인 기술 개발과 사용자 교육을 통해 신뢰 구축\n- **시장**: 개인의 요구와 기대를 충족하지 못할 경우 사용자 이탈 가능성 (중, 중) → 고객 피드백을 반영하여 서비스 품질 개선\n- **시장**: 경쟁 서비스의 증가로 인한 시장 포화 (중, 중) → 차별화된 서비스 제공 및 마케팅 전략 강화\n- **법규**: 개인정보 보호 및 데이터 사용 관련 법률 준수 필요 (중, 중) → 법률 자문을 통해 규제 변화에 신속 대응\n- **운영**: 농촌 지역 사용자 채택 어려움 (중, 중) → 접근성 문제 해결을 위해 오프라인 서비스나 대안적 접근 방식 고려\n\n## 참고자료\n\n- Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담 — https://career.restyart.com\n- 인공지능 기반 진로/진학 서비스 프로토타입 개발 연구 — http://journal.dcs.or.kr/xml/40124/40124.pdf\n- AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE — https://webzine.dankook.ac.kr/news/articleView.html?idxno=465\n- 대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003215903\n- 머 리 말 — https://www.krivet.re.kr/repository/bitstream/202405/6905/2/A22322_fulltext.pdf\n- 진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035] — https://www.businessresearchinsights.com/ko/market-reports/career-guidance-platform-market-118217\n- 대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계 — https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002243258\n- 대학생의 진로역량 개발을 위한 교육 요구도 분석 — http://audio.dn.naver.com/audio/ncr/1378_1/20120808145539092_PE087AXGH.pdf\n\n## AI 활용 로그\n\n# AI 활용 로그\n\n> KOSENA 요구(p4): AI 응답을 그대로 쓰지 않고 **검증·수정·재구성**한 과정을 프롬프트·응답·채택 여부로 남긴다.\n\n> 총 18건 · 채택 16 · 미채택 2 · 표준 5단 구조 프롬프트 4건\n\n\n> **무엇을 남기고 무엇을 안 남기는가**: system 프롬프트(코드로 버전 고정)·입력 목록·응답 산출물·검증 결과·채택 여부를 남긴다. **user 프롬프트 원문은 남기지 않는다** — 앞 단계 결과를 기계적으로 이어 붙인 것이라 입력 목록과 중복이고, 웹검색 스니펫이 그대로 실려 로그가 비대해지기 때문이다.\n\n\n| Agent | 역할 | 프롬프트(5단) | 입력 | 산출 | 상태 | 채택 | 비고 |\n|---|---|---|---|---|---|---|---|\n| `research` | research_analysis 담당 | `RESEARCH_SYSTEM` — | structured_input, web_search | research_analysis | complete | 채택 |  |\n| `competitor` | competitor_analysis 담당 | `COMPETITOR_SYSTEM` — | research_analysis | competitor_analysis | complete | 채택 |  |\n| `customer` | customer_analysis 담당 | `CUSTOMER_SYSTEM` — | research_analysis | customer_analysis | complete | 채택 |  |\n| `pestel` | pestel_analysis 담당 | `PESTEL_SYSTEM` — | research_analysis | pestel_analysis | complete | 채택 |  |\n| `swot` | swot_analysis 담당 | `SWOT_SYSTEM` — | research_analysis, competitor_analysis | swot_analysis | complete | 채택 |  |\n| `business_model` | business_model_analysis 담당 | `BIZMODEL_SYSTEM` — | research_analysis | business_model_analysis | complete | 채택 |  |\n| `risk` | risk_analysis 담당 | `RISK_SYSTEM` — | research_analysis, pestel_analysis | risk_analysis | complete | 채택 |  |\n| `kosena_industry` | 산업 분석 전략가 | `KOSENA_INDUSTRY_SYSTEM` ✅ | pestel_analysis, research_analysis, competitor_analysis, swot_analysis | `kosena`: critical_uncertainties, porter, value_chain, ksf, implications | complete | 채택 |  |\n| `kosena_model` | 린 스타트업 코치 | `KOSENA_MODEL_SYSTEM` ✅ | research_analysis, customer_analysis, business_model_analysis, kosena.ksf, kosena.implications | `kosena`: hmw, ideas, shortlisted_concepts, selected_concept, lean_canvas, key_hypotheses | complete | 채택 |  |\n| `kosena_research` | 데이터 기반 서비스 기획자 | `KOSENA_RESEARCH_SYSTEM` ✅ | research_analysis, customer_analysis, competitor_analysis | `kosena`: personas, cjm, market_sizing, competitor_groups, comparison_criteria, competitor_comparison, positioning_map | complete | 채택 |  |\n| `kosena_roadmap` | 프로덕트 오너 | `KOSENA_ROADMAP_SYSTEM` ✅ | customer_analysis, business_model_analysis, risk_analysis, kosena.lean_canvas, kosena.personas | `kosena`: vpc, core_features, use_cases, moscow, kano, mvp_scope, epics, milestones, kpis, wireframes | complete | 채택 |  |\n| `research_gap` | 근거 공백 보강 조사자 | `RESEARCH_GAP_SYSTEM` — | evidence_gaps | `evidence_registry`: evidence_registry, dynamic_research | complete | 채택 |  |\n| `draft` | 기획서 작성자 | `DRAFT_WRITER_SYSTEM` — | research_analysis, competitor_analysis, customer_analysis, swot_analysis, business_model_analysis, risk_analysis, pestel_analysis | `draft`: draft | complete | 채택 |  |\n| `reviewer` | 기획서 심사자 | `REVIEWER_SYSTEM` — | draft | `review_result`: review_result, initial_review_result | complete | 채택 |  |\n| `polish` | 일관성 편집자 | `EDITOR_SYSTEM` — | final_draft | `final_draft`: final_draft | complete | **미채택** | 편집 생략: 내용 이슈만·구조 정상(revision=section) |\n| `final_reviewer` | 최종본 심사자 | `REVIEWER_SYSTEM` — | final_draft | `final_review_result`: final_review_result, best_version | complete | 채택 |  |\n| `verify` | 근거 일치성 검증자 | `VERIFY_SYSTEM` — | final_draft, evidence_registry | `verification_result`: verification_result | complete | 채택 |  |\n| `section_revise` | 기획서 재작성 | `SECTION_REVISER_SYSTEM` — | review_result.issues, final_draft | `final_draft`: final_draft | complete | **미채택** | 재작성본이 초안보다 낮게 평가되어 초안을 채택(select_best) |\n\n## 검증 절차\n\n- 모든 Agent 출력은 `_validate()` 로 **스키마를 강제**한다(누락 키는 중립값, 더미 문구 차단).\n- LLM 실패는 예외로 터뜨리지 않고 fallback 으로 흡수하되 `status` 에 **정직하게 표기**한다.\n- Reviewer 가 구조화 issue(`target_section_id`·`severity`)로 지목하면 해당 섹션만 재작성한다.\n- 재작성본이 초안보다 낮게 평가되면 **초안을 되돌려 채택**한다(`select_best`) — AI 응답을 그대로 쓰지 않는다는 가장 분명한 증거다.\n- 최종 문서의 주장은 수집한 근거와 대조 검증한다(`verify`, 주장별 `evidence_ids`).\n\n\n## 부록 — 근거 출처\n\n> **검색 기준일: 2026-07-28** · 아래 근거는 그 시점의 웹 검색 결과이며, 이후 변경된 내용은 반영되지 않는다.\n> 도메인 규칙으로 분류한 출처 유형에 따라 **정부·공공 → 학술 → 언론 → 커뮤니티 순으로 정렬**했다(우선 수집이 아니라 우선 정렬이다 — 검색은 공식기관 도메인을 따로 겨냥하지 않는다). 출처 유형은 **권위성 힌트일 뿐 신뢰도 판정이 아니며**, 기업 공식 사이트는 판단을 보류해 '기타'로 남는다.\n> ⚠️ 이 목록은 **실행 전체에서 수집한 출처**다 — KOSENA 항목별 근거 연결은 미구현이다.\n\n| ID | 유형 | 제목 | 발행일 | 조회일 | 인용된 주장 수 |\n|---|---|---|---|---|---|\n| ev4 | 정부·공공 | 대학생을 위한 AI 융합 진로교육 프로그램 개발 및 적용 | 미상 | 2026-07-28 | 0 |\n| ev7 | 정부·공공 | 대학생 진로설계 및 취업 지원을 위한 미래진로 빅데이터 정보 시스템 설계 | 미상 | 2026-07-28 | 0 |\n| ev18 | 정부·공공 | 서울런에서 AI 진로설계 받고 전문 상담까지…멘토링 3종 신설 | Fri, 03 Apr 2026 00:00:00 GMT | 2026-07-28 | 2 |\n| ev3 | 학술·연구 | AI기반 맞춤형 전공·진로 탐색 서비스 「Young熊+」 새롭게 선보여 < DKU ISSUE < CAMPUS NEWS < 기사본문 - DKU WEBZINE | 미상 | 2026-07-28 | 0 |\n| ev5 | 학술·연구 | 머 리 말 | 미상 | 2026-07-28 | 0 |\n| ev10 | 학술·연구 | 대학생의 진로준비도가 초기 노동시장 성과에 미치는 영향 분석 | 미상 | 2026-07-28 | 0 |\n| ev16 | 학술·연구 | 보고서·자료 | 연구 | 한국직업능력연구원 | 미상 | 2026-07-28 | 0 |\n| ev1 | 기타 | Career Compass - AI 기반 진로 나침반 | 맞춤형 진로 상담 | 미상 | 2026-07-28 | 0 |\n| ev2 | 기타 | 인공지능 기반 진로/진학 서비스 프로토타입 개발 연구 | 미상 | 2026-07-28 | 0 |\n| ev6 | 기타 | 진로지도 플랫폼 시장 규모, 점유율 | 연구 [2035] | 미상 | 2026-07-28 | 3 |\n| ev8 | 기타 | 대학생의 진로역량 개발을 위한 교육 요구도 분석 | 미상 | 2026-07-28 | 0 |\n| ev9 | 기타 | 미래사회와 진로설계 | 미상 | 2026-07-28 | 0 |\n| ev11 | 기타 | AI 진로 검사 서비스 | 미상 | 2026-07-28 | 0 |\n| ev12 | 기타 | AI 에이전트 기반 보건의료정보 전공 도메인 특화 맞춤형 진로 취업 지원 ... | 미상 | 2026-07-28 | 0 |\n| ev13 | 기타 | [돈 버는 설문] “10명 중 7명은 사용 중” AI 서비스 일상 필수 파트너 됐다 | 미상 | 2026-07-28 | 0 |\n| ev14 | 기타 | [AI가 바꾸는 진로 설계]① AI로 발견하는 숨겨진 잠재력, 학생 ... | 미상 | 2026-07-28 | 0 |\n| ev15 | 기타 | 일상 속에 자리잡은 AI, 소비자들의 만족도와 신뢰도는 부정적 - 픽플리 블로그: 소비자 데이터 트렌드 리포트 & 데이터 활용 팁 | 미상 | 2026-07-28 | 0 |\n| ev17 | 기타 | 생성형 AI, 교육혁신에서 취업지원·사회문제 해결까지… 대학의 미래를 다시 설계하다 < 리포트 < 이슈·기획 < 기사본문 - 한국대학신문 - 411개 대학을 연결하는 '힘' | Wed, 06 May 2026 12:55:06 GMT | 2026-07-28 | 0 |\n| ev19 | 기타 | [Tech] 글로벌은 AI로 재편, 국내 인슈어테크의 미래는 < 기획일반 < 기획/연재 < 기사본문 - 한국보험신문 | Sun, 29 Mar 2026 15:00:00 GMT | 2026-07-28 | 0 |\n\n## 부록 — 사실 검증 요약 (검색 스니펫 기준)\n\n> **검증 범위**: 문서의 사실 주장을 수집한 **검색 요약 근거**와 대조해 판정한다. 출처 URL 의 **원문 사실성은 재검증하지 않는다**. 따라서 '근거 미확인'은 거짓이라는 뜻이 아니라, 현재 수집된 근거에서 확인하지 못했다는 뜻이다 — 수치·통계는 원문에서 직접 확인해야 한다.\n\n사실 주장 5건 중 근거 확인 5건 · 주장별 근거 연결 5/5건\n\n| 판정 | 건수 | 뜻 |\n|---|---|---|\n| 근거 확인 | 5 | 수집한 검색 요약 근거와 일치 |\n| 근거 미확인 | 0 | **거짓이라는 뜻이 아니다** — 현재 근거에서 확인하지 못함 |\n| 반대 근거 | 0 | 근거가 주장과 반대 방향 |\n| 판단 불가 | 0 | 근거가 모호해 판정 보류 |\n| 검증 대상 아님 | 0 | 추론·제안 주장(사실 주장만 검증한다) |\n\n### 주장별 판정\n\n| 주장 | 유형 | 판정 | 근거 ID |\n|---|---|---|---|\n| AI 기반 진로 설계 서비스 시장은 빠르게 성장하고 있다. | 사실 | 근거 확인 | ev6 |\n| 대학생들은 진로에 대한 불확실성을 느끼고 있다. | 사실 | 근거 확인 | ev18 |\n| AI 기술을 활용한 맞춤형 진로 상담 서비스의 수요가 증가하고 있다. | 사실 | 근거 확인 | ev6 |\n| 2026년부터 2035년까지 연평균 성장률 8.2%가 예상된다. | 사실 | 근거 확인 | ev6 |\n| 대학생들은 진로 정보가 흩어져 있어 어떤 경로를 선택해야 할지 판단하기 어렵다. | 사실 | 근거 확인 | ev18 |\n\n## KOSENA 준수 현황 (구조 자체점검)\n\n> 이 표는 KOSENA 가 요구하는 **필수 구조와 산출물의 존재 여부**를 코드로 결정적 점검한 결과다(LLM 판정 아님). 분석 내용의 타당성과 프레임워크 간 일관성은 포함하지 않으며, Reviewer 와 사람 검토가 추가로 필요하다.\n\nKOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n\n| 모듈 | 항목 | 상태 | 근거(쪽) | 비고 |\n|---|---|---|---|---|\n| M1 | PESTEL 6영역 | 충족 | p7 | 6개 영역 |\n| M1 | Critical Uncertainties Top 3 | 충족 | p7 | Top 3 선별됨 |\n| M1 | Porter/SWOT/Value Chain 중 2개 이상 | 충족 | p8 | SWOT + Porter + Value Chain |\n| M1 | KSF 5개 | 충족 | p8 | 5개 |\n| M1 | 설계 시사점 3가지 | 충족 | p8 | 3개 |\n| M1 | HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개 | 충족 | p9 | HMW 5개 · 아이디어 26개 → 압축 3개 → 컨셉 1개 |\n| M1 | Lean Canvas 9블록 | 충족 | p10 | 9블록 |\n| M1 | 핵심 가설 3개 | 충족 | p10 | 3개 |\n| M2 | 페르소나 2종 × 필수 5항목 | 충족 | p12 | 2종 · 필수 5항목 충족 |\n| M2 | CJM 5단계 × 4항목 + Opportunity | 충족 | p12 | 5단계 × 4항목 |\n| M2 | TAM·SAM·SOM | 충족 | p13 | TAM·SAM·SOM |\n| M2 | Top-down · Bottom-up 교차검증 | 충족 | p13 | Top-down + Bottom-up |\n| M2 | 경쟁사 직접3·간접2·잠재1 | 충족 | p14 | 직접3 · 간접2 · 잠재1 |\n| M2 | 비교 항목 10개 이상 + 경쟁사 비교표 | 충족 | p14 | 기준 10개 · 비교표 6행 |\n| M2 | 2축 포지셔닝 맵 | 충족 | p14 | 기능성 × 가격 |\n| M2 | VPC 6영역 + Fit | 충족 | p15 | 고객 프로필 3 + 가치 지도 3 |\n| M2 | 핵심 기능 5~7개 | 충족 | p15 | 5개 |\n| M2 | Use Case 3종 | 충족 | p15 | 3종 |\n| M3 | MOSCOW 4구분(Won't 명시) | 충족 | p17 | Must/Should/Could/Won't |\n| M3 | Kano 3분류 | 충족 | p17 | 3분류 |\n| M3 | MVP 범위 | 충족 | p17 | 범위 정의됨 |\n| M3 | Epic-Story-AC (Given-When-Then) | 충족 | p18 | Epic 2 · Story 2 · AC 전부 Given-When-Then |\n| M3 | 마일스톤 · KPI | 충족 | p3 | 마일스톤 + KPI |\n| M3 | 와이어프레임 2~3개 화면 | 충족 | p5 | 3개 화면 |\n| 공통 | 출처 명시 (실행 전체 · 항목별 연결 아님) | 충족 | p4 | 출처 19건(주장 연결 2건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현 |\n| 공통 | AI 활용 로그(프롬프트·응답·채택 여부) | 충족 | p4 | 18건 · 전부 프롬프트·입력·산출·검증·채택 기록 |\n| 공통 | 정량 주장의 가설·추정 표기 | 충족 | p4 | 가설·추정 표기 있음 |\n| 공통 | 본문 A4 30~50쪽 | 부분 | p4 | 약 13.0쪽(추정) — 30~50쪽 필요 |\n",
+  "kosena_deck": "# AI 기반 대학생 진로 설계 서비스\n\n## 문제 정의 · 목표 사용자\n\n**문제**\n\n진로 정보가 흩어져 있고, 자신에게 맞는 경로와 준비 순서를 판단하기 어렵다\n\n**목표 사용자**\n\n진로를 구체화하지 못한 대학교 2~3학년\n\n## 거시환경 — Critical Uncertainties\n\n- Political\n- Economic\n- Technological\n\n## 산업 구조 — Porter's Five Forces\n\n| Force | 강도 |\n|---|---|\n| rivalry | 높음 |\n| new_entrants | 중간 |\n| substitutes | 중간 |\n| buyer_power | 높음 |\n| supplier_power | 낮음 |\n\n## 핵심 성공요인 (KSF)\n\n- AI 기술의 신뢰성 및 정확성 확보\n- 사용자 맞춤형 서비스 제공\n- 정부 및 대학과의 협력 강화\n- 효율적인 마케팅 전략 수립\n- 지속적인 기술 개발 및 혁신\n\n## 설계 시사점\n\n- 정책 변화에 민감하게 반응하여 서비스 운영 전략을 조정해야 합니다.\n- AI 기술의 신뢰성을 높이기 위한 지속적인 기술 개발과 사용자 교육이 필요합니다.\n- 다양한 가격대의 서비스를 제공하여 경제 상황에 따른 소비자 접근성을 높여야 합니다.\n\n## 서비스 컨셉\n\nAI 기반 진로 상담 챗봇 개발은 실시간으로 대학생들에게 맞춤형 진로 상담을 제공하여, 경쟁 서비스와의 차별성을 확보하고 사용자 만족도를 높일 수 있는 가능성이 크기 때문에 최종 서비스 컨셉으로 선택되었습니다.\n\n## Lean Canvas 핵심\n\n| 항목 | 내용 |\n|---|---|\n| Problem | 진로 정보가 흩어져 있어 경로 선택이 어려움, 맞춤형 학습 및 경험 설계 도구 부족, AI 기반 진로 상담의 부재. |\n| Customer | 진로를 구체화하지 못한 대학교 2~3학년 학생들. |\n| UVP | AI를 통해 개인 맞춤형 진로 상담과 경로 설계를 제공하여 대학생의 진로 선택을 지원합니다. |\n| Solution | AI 기반 진로 상담 챗봇, 사용자 맞춤형 진로 경로 추천 알고리즘, AI 진로 검사 서비스. |\n| Revenue | 구독 모델, 프리미엄 서비스, 제휴 프로그램, 광고 수익. |\n\n## 페르소나\n\n- 진로 불확실성 학생\n- 경로 탐색 학생\n\n## 고객 여정 (CJM)\n\n| 단계 | Pain Point |\n|---|---|\n| 인지 | 정보의 신뢰성 부족 |\n| 고려 | 기능에 대한 이해 부족 |\n| 구매 | 결제 과정의 복잡함 |\n| 사용 | AI의 신뢰성에 대한 의구심 |\n| 재사용/이탈 | 개인 맞춤형 서비스 부족 |\n\n## 시장 규모 (추정)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 39억 6천만 달러 (2035년 예상 시장 규모) |\n| SAM | 19억 4천만 달러 (2026년 예상 시장 규모) |\n| SOM | 1억 달러 (1% 점유율 가정) |\n| Top-down | 39억 6천만 달러 × 1% = 3960만 달러 |\n| Bottom-up | 100만 대학생 × 100달러 (서비스 단가) × 1회 = 1억 달러 |\n\n## 경쟁사 비교\n\n| 대상 | 가격 | 강점 | 약점 |\n|---|---|---|---|\n| Career Compass (직접) | 미확인 | AI 기술을 활용한 데이터 분석 | AI의 신뢰성 문제 |\n| Young熊+ (직접) | 미확인 | 졸업생의 학습 이력 분석 | 특정 대학에 국한된 서비스 |\n| 커리어넷 (직접) | 미확인 | 개인 맞춤형 정보 제공 | 데이터 신뢰성 문제 |\n| AI 진로 검사 서비스 (간접) | 12,000원 | 높은 사용자 만족도 | 제한된 기능 |\n| 진로 설계 프로그램 (간접) | 미확인 | 미확인 | 미확인 |\n| 자사 (자사) | 미확인 | 초개인화된 진로 설계 기능 | 미확인 |\n\n## 경쟁 포지셔닝\n\n| 대상 | X | Y |\n|---|---|---|\n| Career Compass | 8.0 | 7.0 |\n| Young熊+ | 7.0 | 6.0 |\n| 커리어넷 | 6.0 | 5.0 |\n| AI 진로 검사 서비스 | 5.0 | 4.0 |\n| 진로 설계 프로그램 | 4.0 | 3.0 |\n| 자사 | 9.0 | 5.0 |\n\n## 가치 제안 (VPC Fit)\n\n고객의 진로 설계에 대한 요구와 AI 기반 서비스의 제공이 잘 맞아떨어짐.\n\n## 핵심 기능\n\n- AI 진로 상담 챗봇\n- 맞춤형 경로 추천 알고리즘\n- AI 진로 검사 서비스\n- 사용자 피드백 시스템\n- 모바일 최적화 인터페이스\n\n## MVP 범위\n\nMVP는 AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘을 포함하며, 사용자 피드백 시스템을 통해 초기 사용자 경험을 개선하는 데 중점을 둡니다.\n\n## 우선순위 (MOSCOW)\n\n| 구분 | 기능 |\n|---|---|\n| Must | AI 진로 상담 챗봇, 맞춤형 경로 추천 알고리즘, AI 진로 검사 서비스 |\n| Won't | 오프라인 서비스 제공 |\n\n## 개발 로드맵\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 서비스 프로토타입 개발 | 3개월 | AI 진로 상담 챗봇과 맞춤형 경로 추천 알고리즘의 초기 버전 출시 |\n| 베타 테스트 진행 | 2개월 | 사용자 피드백을 통해 서비스 개선 |\n| 정식 서비스 런칭 | 1개월 | 정식 서비스 출시 및 마케팅 시작 |\n\n## KPI\n\n| 지표 | 목표 |\n|---|---|\n| 사용자 수 | 1,000명 (가정) |\n| 구독 전환율 | 10% (가정) |\n| 사용자 만족도 | 80% 이상 (가정) |\n\n## 한계와 다음 단계\n\n- 정량 주장은 웹 리서치 기반 **가설·추정**이며 인터뷰·설문으로 검증되지 않았습니다.\n- KOSENA 자체 판정: KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n- 다음 단계: 페르소나 인터뷰, 시장 규모 1차 자료 확인, MVP 사용성 테스트\n",
+  "ai_usage_log": [
+    {
+      "agent": "research",
+      "role": "research_analysis 담당",
+      "prompt": {
+        "template": "RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1639
+      },
+      "inputs": [
+        "structured_input",
+        "web_search"
+      ],
+      "output": {
+        "artifact": "research_analysis",
+        "target_sections": [
+          "market_analysis"
+        ],
+        "evidence_ids": [
+          "ev1",
+          "ev2",
+          "ev3",
+          "ev4",
+          "ev5",
+          "ev6",
+          "ev7",
+          "ev8",
+          "ev9",
+          "ev10",
+          "ev11",
+          "ev12",
+          "ev13",
+          "ev14",
+          "ev15"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "competitor",
+      "role": "competitor_analysis 담당",
+      "prompt": {
+        "template": "COMPETITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 717
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "competitor_analysis",
+        "target_sections": [
+          "differentiation"
+        ],
+        "evidence_ids": [
+          "ev16",
+          "ev17",
+          "ev18",
+          "ev19"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "customer",
+      "role": "customer_analysis 담당",
+      "prompt": {
+        "template": "CUSTOMER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 399
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "customer_analysis",
+        "target_sections": [
+          "target_user"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "pestel",
+      "role": "pestel_analysis 담당",
+      "prompt": {
+        "template": "PESTEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1265
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "pestel_analysis",
+        "target_sections": [
+          "pestel"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "swot",
+      "role": "swot_analysis 담당",
+      "prompt": {
+        "template": "SWOT_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 252
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": "swot_analysis",
+        "target_sections": [
+          "swot"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "business_model",
+      "role": "business_model_analysis 담당",
+      "prompt": {
+        "template": "BIZMODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 347
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "business_model_analysis",
+        "target_sections": [
+          "revenue_model"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "risk",
+      "role": "risk_analysis 담당",
+      "prompt": {
+        "template": "RISK_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 343
+      },
+      "inputs": [
+        "research_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": "risk_analysis",
+        "target_sections": [
+          "risk"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_industry",
+      "role": "산업 분석 전략가",
+      "prompt": {
+        "template": "KOSENA_INDUSTRY_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1465
+      },
+      "inputs": [
+        "pestel_analysis",
+        "research_analysis",
+        "competitor_analysis",
+        "swot_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "critical_uncertainties",
+          "porter",
+          "value_chain",
+          "ksf",
+          "implications"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_model",
+      "role": "린 스타트업 코치",
+      "prompt": {
+        "template": "KOSENA_MODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1852
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "business_model_analysis",
+        "kosena.ksf",
+        "kosena.implications"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "hmw",
+          "ideas",
+          "shortlisted_concepts",
+          "selected_concept",
+          "lean_canvas",
+          "key_hypotheses"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_research",
+      "role": "데이터 기반 서비스 기획자",
+      "prompt": {
+        "template": "KOSENA_RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 2474
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "personas",
+          "cjm",
+          "market_sizing",
+          "competitor_groups",
+          "comparison_criteria",
+          "competitor_comparison",
+          "positioning_map"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_roadmap",
+      "role": "프로덕트 오너",
+      "prompt": {
+        "template": "KOSENA_ROADMAP_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1940
+      },
+      "inputs": [
+        "customer_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "kosena.lean_canvas",
+        "kosena.personas"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "vpc",
+          "core_features",
+          "use_cases",
+          "moscow",
+          "kano",
+          "mvp_scope",
+          "epics",
+          "milestones",
+          "kpis",
+          "wireframes"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "research_gap",
+      "role": "근거 공백 보강 조사자",
+      "prompt": {
+        "template": "RESEARCH_GAP_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1066
+      },
+      "inputs": [
+        "evidence_gaps"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "evidence_registry",
+        "produced_fields": [
+          "evidence_registry",
+          "dynamic_research"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "draft",
+      "role": "기획서 작성자",
+      "prompt": {
+        "template": "DRAFT_WRITER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1668
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis",
+        "customer_analysis",
+        "swot_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "draft",
+        "produced_fields": [
+          "draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "reviewer",
+      "role": "기획서 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "review_result",
+        "produced_fields": [
+          "review_result",
+          "initial_review_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "polish",
+      "role": "일관성 편집자",
+      "prompt": {
+        "template": "EDITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 373
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": false,
+      "note": "편집 생략: 내용 이슈만·구조 정상(revision=section)"
+    },
+    {
+      "agent": "final_reviewer",
+      "role": "최종본 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_review_result",
+        "produced_fields": [
+          "final_review_result",
+          "best_version"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "verify",
+      "role": "근거 일치성 검증자",
+      "prompt": {
+        "template": "VERIFY_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 2317
+      },
+      "inputs": [
+        "final_draft",
+        "evidence_registry"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "verification_result",
+        "produced_fields": [
+          "verification_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "section_revise",
+      "role": "기획서 재작성",
+      "prompt": {
+        "template": "SECTION_REVISER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 909
+      },
+      "inputs": [
+        "review_result.issues",
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ],
+        "revised_sections": [
+          "market_analysis",
+          "revenue_model"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete",
+        "reviewer_rescored": true
+      },
+      "adopted": false,
+      "note": "재작성본이 초안보다 낮게 평가되어 초안을 채택(select_best)"
+    }
+  ]
+}
