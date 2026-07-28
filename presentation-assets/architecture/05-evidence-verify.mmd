@@ -1,0 +1,16 @@
+%% Fig.5 근거 흐름 — 근거: app/services/evidence.py, app/agents/verifier.py:26,78-106
+flowchart TD
+    Q[검색 질의] --> TAV[Tavily 검색]
+    TAV -- 실패·쿼터소진 --> SKIP["검색 생략<br/>LLM 지식 기반으로 계속"]
+    TAV --> SRC["결과: url · title · snippet<br/>retrieved_at 필수<br/>published_date 있으면"]
+    SRC --> REG["evidence_registry<br/>URL 중복 제거 → evidence_id 부여<br/>출처 유형 분류"]
+    REG --> SORT["프롬프트 적재 순서<br/>정부·공공 → 학술 → 언론 → 커뮤니티"]
+    SORT --> AGENT[분석 Agent]
+    AGENT --> DOC[최종 문서 주장]
+    DOC --> VF[verifier]
+    REG --> VF
+    VF --> V1[supported]
+    VF --> V2[unsupported<br/>= 거짓이 아니라 확인 못함]
+    VF --> V3[contradicted]
+    VF --> V4[uncertain]
+    V1 --> GATE[quality_gate<br/>근거 충족률]

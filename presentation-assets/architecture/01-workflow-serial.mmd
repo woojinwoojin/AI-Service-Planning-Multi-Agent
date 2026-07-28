@@ -1,0 +1,17 @@
+%% Fig.1 직렬 그래프 — 근거: app/graph/workflow.py:222-237 (build_serial_graph)
+flowchart TD
+    START([START]) --> PRE[preprocess<br/>입력 구조화]
+    PRE --> RES[research<br/>웹검색 grounding]
+    RES --> GAP[research_gap<br/>근거 공백만 추가조사]
+    GAP --> COMP[competitor]
+    COMP --> CUST[customer]
+    CUST --> PES[pestel]
+    PES --> SWOT[swot]
+    SWOT --> BM[business_model]
+    BM --> RISK[risk]
+    RISK --> KI[kosena_industry<br/>M1]
+    KI --> KM[kosena_model<br/>M1]
+    KM --> KR[kosena_research<br/>M2]
+    KR --> KRD[kosena_roadmap<br/>M3]
+    KRD --> DRAFT[draft<br/>14섹션 기획서]
+    DRAFT --> FIN[[마무리 구간 · Fig.3]]

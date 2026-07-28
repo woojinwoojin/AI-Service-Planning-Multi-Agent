@@ -74,15 +74,18 @@ START → preprocess → research → research_gap → competitor → customer �
       → draft → [마무리]
 ```
 
-**분석 구간(병렬, `build_parallel_graph`):** Research 이후 독립 4분기를 동시 실행 → Draft 에서 fan-in join.
+**분석 구간(병렬, `build_parallel_graph`):** Research 이후 독립 4분기를 동시 실행 →
+**`kosena_industry` 에서 fan-in join**(draft 가 아니다 — KOSENA M1 이 분석 4분기 결과를 모두 받아야 한다).
 ```text
 research → research_gap ┬→ competitor → swot ┐
-                        ├→ customer          ├→ (모두 완료 후 1회) draft → [마무리]
-                        ├→ pestel → risk     │
-                        └→ business_model ────┘
+                        ├→ customer          ├→ (모두 완료 후 1회) kosena_industry
+                        ├→ pestel → risk     │      → kosena_model → kosena_research
+                        └→ business_model ────┘      → kosena_roadmap → draft → [마무리]
 ```
 - Agent 입력·프롬프트·결과 구조는 직렬과 **동일**, 실행 순서만 다르다(비열등성 전제). 지연 차이만 병렬화 효과.
-- fan-in: `add_edge(["swot","customer","risk","business_model"], "draft")` — 깊이 다른 분기의 조기/중복 실행 방지.
+- fan-in: `add_edge(["swot","customer","risk","business_model"], "kosena_industry")` — 깊이 다른
+  분기의 조기/중복 실행 방지. ⚠️ 이 문서가 한동안 fan-in 대상을 `draft` 로 잘못 적고 있었다
+  (2026-07-28 구조도 작업 중 코드와 대조해 발견·정정). 실제 코드는 `workflow.py:266`.
 - **KOSENA 4노드는 fan-in 뒤 순차**다(`industry → model → research → roadmap`). 뒤 노드가 앞 결과를 이어받아야 평가표의 'Lean Canvas 블록 간 일관성'·'VPC Fit'이 성립하기 때문에 정확성을 우선해 병렬화하지 않았다(대가: LLM 호출 +4, 지연 +20~30초).
 
 **마무리 구간(공통, `_add_finish_edges`):**

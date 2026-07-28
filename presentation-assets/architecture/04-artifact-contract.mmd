@@ -1,0 +1,16 @@
+%% Fig.4 Artifact Contract — 근거: app/schemas/artifact.py:49-59, ARTIFACT_READ_MODE
+flowchart LR
+    subgraph W["생산: Dual Write"]
+        AG[Agent] --> FLAT[평면 State 키<br/>research_result 등]
+        AG --> ART["Artifact 봉투<br/>owner · depends_on<br/>target_sections<br/>evidence_ids · status"]
+    end
+    subgraph R["소비: selector artifact.read"]
+        MODE{"ARTIFACT_READ_MODE"}
+        MODE -- legacy<br/>기본·배포값 --> L[평면 키만 읽음<br/>Artifact 안 봄]
+        MODE -- prefer_artifact --> P[Artifact 우선<br/>없으면 평면 키]
+        MODE -- artifact_only --> O["Artifact 만<br/>폴백 없음 · 검증 전용"]
+    end
+    FLAT --> MODE
+    ART --> MODE
+    ART --> PAR[artifact_parity<br/>정합성 검사]
+    FLAT --> PAR

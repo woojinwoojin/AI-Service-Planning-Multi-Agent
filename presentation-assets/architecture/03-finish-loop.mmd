@@ -1,0 +1,19 @@
+%% Fig.3 마무리 구간 — 근거: app/graph/workflow.py:204-215, _route_revision:83-95
+flowchart TD
+    DRAFT[draft] --> REV[reviewer<br/>5항목 100점 + 구조화 이슈]
+    REV --> Q{"수정 필요?<br/>총점 &lt; 90 AND 재작성 0회"}
+    Q -- 아니오 --> FZ[finalize<br/>초안 확정]
+    Q -- 예 --> Q2{"섹션 단위 수정 가능?<br/>plan_section_revision"}
+    Q2 -- 예 --> SR[section_revise<br/>문제 섹션만]
+    Q2 -- 아니오 --> FR[revise<br/>전체 재작성]
+    SR -. 런타임 실패 .-> FR
+    FZ --> POL
+    SR --> POL
+    FR --> POL[polish<br/>조건부 일관성 편집]
+    POL --> FRV[final_reviewer<br/>최종본 재채점]
+    FRV --> SB{"select_best<br/>재작성본 vs 초안"}
+    SB -- 재작성본이 낮다 --> BACK[초안 채택<br/>reverted_from_revision]
+    SB -- 재작성본이 높다 --> KEEP[재작성본 채택]
+    BACK --> VER
+    KEEP --> VER[verify<br/>주장 ↔ 근거 대조]
+    VER --> END([END])
