@@ -327,6 +327,35 @@ def _assess_quality(state: ProjectState) -> dict:
             "fallback_nodes": fallback, "fallback_reasons": reasons}
 
 
+# run_status 의 심각도 — 재판정이 원 실행보다 **좋게** 끝나도 등급을 올리지 않기 위한 순서.
+_STATUS_RANK = {"success": 0, "degraded": 1, "failed": 2}
+
+
+def _merge_quality(prev: ProjectState, fresh: dict) -> dict:
+    """원 실행의 실패 사실을 **지우지 않고** 재작성 구간의 판정과 합친다.
+
+    `/revise` 는 재작성 구간만 계측하려고 `logs` 를 비운 상태로 들어온다. 그런데
+    `_assess_quality` 는 로그에서 실패를 읽으므로, 그대로 덮어쓰면 **원 실행이 무엇에
+    실패했든 `run_status` 가 `success` 로 올라가고 `fallback_nodes` 가 비워진다.**
+
+    실제로 그렇게 됐다(2026-07-28): KOSENA Agent 3개가 빈 결과를 낸 실행에 `/revise` 를
+    한 번 누른 뒤 기록이 `run_status: success` · `fallback_nodes: []` 로 남아, **왜 실패했는지
+    복구할 수 없었다.** 노드 로그는 stdout 이 아니라 state 에만 있어 서버 로그로도 못 찾는다.
+
+    이 프로젝트의 원칙은 '폴백이 실패를 숨기지 않는다'(item 9)이므로, 수정 한 번으로 실패가
+    성공으로 바뀌면 안 된다. 그래서 **합집합 + 나쁜 등급 우선**으로 합친다.
+    """
+    merged_failed = sorted(set(prev.get("failed_nodes") or []) | set(fresh["failed_nodes"]))
+    merged_fallback = sorted(set(prev.get("fallback_nodes") or []) | set(fresh["fallback_nodes"]))
+    # 원인은 원 실행 것을 우선 보존한다(같은 노드가 다시 폴백하면 새 원인으로 덮어쓴다).
+    merged_reasons = {**(prev.get("fallback_reasons") or {}), **fresh["fallback_reasons"]}
+    prev_status = prev.get("run_status") or "success"
+    status = max(prev_status, fresh["run_status"],
+                 key=lambda s: _STATUS_RANK.get(s, 0))
+    return {"run_status": status, "failed_nodes": merged_failed,
+            "fallback_nodes": merged_fallback, "fallback_reasons": merged_reasons}
+
+
 def apply_node_update(state: ProjectState, update: dict) -> ProjectState:
     """그래프 '밖'에서 노드 결과를 state 에 병합한다(logs 는 reducer 처럼 이어붙임).
 
@@ -360,7 +389,9 @@ def rerun_finalizers(state: ProjectState) -> ProjectState:
                      ("verify", verifier.verify)):
         apply_node_update(state, _safe(node, fn)(state))
     _finalize_evidence(state)   # 재작성 후에도 주장-근거 연결(used_by_claims) 재계산
-    state.update(_assess_quality(state))
+    # ⚠️ 덮어쓰지 않고 **합친다.** `/revise` 는 logs 를 비운 채 들어오므로 그대로 덮으면 원 실행의
+    # 실패가 사라지고 run_status 가 success 로 올라간다(`_merge_quality` 주석 참고).
+    state.update(_merge_quality(state, _assess_quality(state)))
     state["quality_gate"] = quality_gate.evaluate(state)  # 수정본에 대해 품질 게이트 재판정
     _finalize_artifacts(state)    # 수정 후에도 Artifact 를 최신 결과로 재생성(로드맵 2-2)
     # KOSENA 산출물도 재조립한다 — 하지 않으면 14섹션 기획서만 수정되고 KOSENA 문서·준수 판정·
