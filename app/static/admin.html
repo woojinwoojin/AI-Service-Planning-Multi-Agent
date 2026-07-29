@@ -85,12 +85,22 @@
   </div>
 </main>
 <script>
+// 노드 이름은 workflow.py 의 add_node 이름과 정확히 같아야 한다(_safe 가 이 이름으로 주입
+// 여부를 판단한다). KOSENA 4종은 이 페이지를 만든 뒤에 추가돼 목록에서 빠져 있었다 —
+// 시연에서 '한 KOSENA Agent 만 실패시키고 나머지 3개는 완주'를 보여주려면 필요하다.
 const NODES = [
   ["research","시장조사"],["competitor","경쟁사 분석"],["customer","고객 문제 분석"],
   ["pestel","PESTEL 분석"],["swot","SWOT 분석"],["business_model","수익모델 설계"],
-  ["risk","리스크 분석"],["draft","초안 작성"],["reviewer","초안 평가"],["verify","근거 검증"],
+  ["risk","리스크 분석"],
+  ["kosena_industry","KOSENA 산업 분석"],["kosena_model","KOSENA 비즈니스 모델"],
+  ["kosena_research","KOSENA 고객·시장 리서치"],["kosena_roadmap","KOSENA 로드맵"],
+  ["draft","초안 작성"],["reviewer","초안 평가"],["verify","근거 검증"],
 ];
-function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+// String() 으로 감싸는 이유: 객체·숫자가 들어오면 (s||"") 는 그대로 통과하고 .replace 가 없어
+// TypeError 가 난다. 그 예외가 호출부 catch 에 삼켜지면 화면이 조용히 비는데, 실제로 모델
+// 목록에서 그렇게 됐다(/models 가 문자열 배열에서 객체 배열로 바뀐 뒤). 메인 UI 의 esc 는
+// 같은 이유로 displayText() 를 통과시킨다.
+function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 document.getElementById("nodes").innerHTML = NODES.map(([v,t]) =>
   `<label><input type="checkbox" class="node" value="${v}"> ${esc(t)}</label>`).join("");
@@ -99,7 +109,9 @@ async function loadModels() {
   try {
     const d = await (await fetch("/models")).json();
     const sel = document.getElementById("model");
-    sel.innerHTML = (d.models || []).map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+    // /models 는 {id,label,cost} 객체 배열을 준다. 문자열로 다루면 위 esc 에서 죽는다.
+    sel.innerHTML = (d.models || []).map(m =>
+      `<option value="${esc(m.id)}">${esc(m.label || m.id)}</option>`).join("");
     if (d.default_model) sel.value = d.default_model;
   } catch (e) { /* 모델 목록 없으면 서버 기본값 사용 */ }
 }
