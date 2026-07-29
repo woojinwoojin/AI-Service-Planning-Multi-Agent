@@ -9,8 +9,8 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 
 > 이 문서는 **실제 구현된 현재 상태**를 설명합니다. 초기 12-Agent 풀버전 구상과 13일 압축 계획, 잘라낸 범위는 [`ROADMAP.md`](ROADMAP.md)를, 상세 명세는 [`docs/PRD.md`](docs/PRD.md)를 참고하세요.
 
-> 🔒 **제출·발표 기준 코드 동결: `v1.0.1-submission`** (2026-07-28) · 테스트 675개 · 커버리지 96.93%
-> (2026-07-29 재측정 · CI 하한 90%) · 실 LLM 표본 **N=7** 에서 KOSENA 준수 **26~27/28**(평균 26.4).
+> 🔒 **제출·발표 기준 코드 동결: `v1.0.1-submission`** (2026-07-28) · 테스트 675개 · 커버리지 96.65%
+> (2026-07-29 CI 실측 · 하한 90%) · 실 LLM 표본 **N=7** 에서 KOSENA 준수 **26~27/28**(평균 26.4).
 > 동결 지점·측정 메타데이터·알려진 한계·**수치를 말할 때 지킬 것**은
 > [`docs/동결_기록.md`](docs/동결_기록.md) 에, 표본 분포는
 > [`docs/실측_표본_통계.md`](docs/실측_표본_통계.md) 에 모아 두었습니다.
@@ -129,7 +129,7 @@ FastAPI + LangGraph 기반의 Multi-Agent 워크플로로, 핵심 차별점은 �
 - **AI 활용 로그** — Agent별 프롬프트·입력·산출·검증·**채택 여부**를 별도 파일로 첨부. 재작성본이 초안보다
   낮아 되돌린 기록(`best_version`)이 "AI 응답을 그대로 쓰지 않았다"는 증거가 된다
 - **비교 harness** — 단일 vs 멀티(`run_compare.py`), 다중 모델(`run_multimodel.py`), 직렬 vs 병렬(`run_parallel_bench.py`) 재현 가능한 실험
-- **회귀 테스트** — `pytest` **675개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 **96.93%**(하한 90%)
+- **회귀 테스트** — `pytest` **675개** (LLM 호출 없이 검증 로직·라우트 커버) · `ruff` 정적 검사 통과 · CI 4게이트(ruff+pytest·gitleaks·pip-audit·docker build) · 커버리지 **96.65%**(CI 실측 · 하한 90%)
 
 ---
 
