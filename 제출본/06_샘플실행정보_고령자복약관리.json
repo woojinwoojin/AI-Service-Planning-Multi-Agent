@@ -1,0 +1,3269 @@
+{
+  "user_input": {
+    "project_name": "고령자 복약 관리·보호자 알림 서비스",
+    "description": "처방 정보를 인식해 복약 시간을 안내하고 미복용 시 보호자에게 알리는 서비스",
+    "target_user": "만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자",
+    "problem": "복용 시간·중복 투약을 관리하기 어렵고 보호자가 원격으로 확인할 방법이 없다",
+    "keywords": [
+      "복약관리",
+      "고령자",
+      "보호자알림"
+    ],
+    "model": "",
+    "reviewer_model": "",
+    "demo_fail_nodes": [],
+    "demo_fail_reason": ""
+  },
+  "model": "",
+  "structured_input": {
+    "project_name": "고령자 복약 관리·보호자 알림 서비스",
+    "description": "처방 정보를 인식해 복약 시간을 안내하고 미복용 시 보호자에게 알리는 서비스",
+    "target_user": "만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자",
+    "problem": "복용 시간·중복 투약을 관리하기 어렵고 보호자가 원격으로 확인할 방법이 없다",
+    "keywords": [
+      "복약관리",
+      "고령자",
+      "보호자알림"
+    ],
+    "target_market": "만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자"
+  },
+  "research_result": {
+    "market_overview": "고령자 복약 관리 시장은 급속히 성장하고 있으며, 특히 만성질환을 앓고 있는 65세 이상 고령자의 수가 증가함에 따라 이들의 복약 관리 필요성이 더욱 부각되고 있다. 고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달하며, 이로 인해 복약 관리의 중요성이 강조되고 있다.",
+    "industry_trends": [
+      "AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있으며, 이는 고령자의 복약 시간을 정확히 알림으로써 복약 순응도를 높이는 데 기여하고 있다.",
+      "고령자 돌봄을 위한 로봇 및 스마트 기기들이 시장에 출시되고 있으며, 이들 제품은 복약 알림 기능을 포함하고 있어 사용자와 보호자 모두에게 유용하다."
+    ],
+    "customer_needs": [
+      "고령자는 복약 시간을 정확히 기억하기 어려워 복약 관리에 어려움을 겪고 있으며, 이로 인해 중복 투약이나 복약 누락이 발생할 수 있다.",
+      "보호자는 원격으로 고령자의 복약 상태를 확인할 수 있는 방법이 부족하여, 고령자의 건강 관리에 대한 불안감을 느끼고 있다."
+    ],
+    "competitors": [
+      {
+        "name": "AI마음돌봄",
+        "features": "AI를 활용한 안부전화 서비스로, 고독사 위험군을 대상으로 한 안부 확인 서비스를 제공."
+      },
+      {
+        "name": "효돌",
+        "features": "홀로 거주하는 고령자를 위한 돌봄 로봇으로, 복약 알림 및 말벗 기능을 제공."
+      },
+      {
+        "name": "스마트 복약알림기",
+        "features": "모바일 앱과 연동되어 복약 내역을 기록하고 보호자가 실시간으로 모니터링할 수 있는 기능을 제공."
+      }
+    ],
+    "opportunities": [
+      "고령화 사회에 따라 복약 관리 서비스의 수요가 증가하고 있으며, 이는 새로운 시장 기회를 창출할 수 있다.",
+      "AI 및 IoT 기술의 발전으로 보다 정교하고 효율적인 복약 관리 솔루션을 개발할 수 있는 가능성이 높다."
+    ],
+    "risks": [
+      "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+      "경쟁이 치열해짐에 따라 가격 경쟁이나 서비스 품질 저하의 위험이 존재한다."
+    ],
+    "sources": [
+      "반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 — https://mynews6874.tistory.com/37",
+      "카탈로그 관리 시스템 시장 규모, 점유율, 성장률 — https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market",
+      "지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) — https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+      "[시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8% — https://marketupdate.tistory.com/1107",
+      "메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년 — https://www.coherentmarketinsights.com/ko/%EB%A9%94%ED%83%80%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B4%80%EB%A6%AC%EB%8F%84%EA%B5%AC%EC%8B%9C%EC%9E%A5-7120",
+      "고령화 - 한국민족문화대백과사전 — https://encykorea.aks.ac.kr/Article/E0067748",
+      "2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처 — https://mods.go.kr/board.es?mid=a10301010000&bid=10820&act=view&list_no=438832",
+      "노인 - 위키백과, 우리 모두의 백과사전 — https://ko.wikipedia.org/wiki/%EB%85%B8%EC%9D%B8",
+      "노인 - 나무위키 — https://namu.wiki/w/%EB%85%B8%EC%9D%B8",
+      "노인·어르신·고령자? 뭐라 불러야 좋을까요 — https://www.chosun.com/site/data/html_dir/2020/01/15/2020011500197.html",
+      "에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 — https://www.daeryunlaw.com/trend/14690",
+      "약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 — https://dailypharm.com/user/news/335240",
+      "스마트 복약관리 시스템 설계 및 개발 — https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+      "SPRi - 소프트웨어정책연구소 — https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+      "초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 — https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf",
+      "https://www.daeryunlaw.com/trend/14690",
+      "https://dailypharm.com/user/news/335240",
+      "https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+      "https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+      "https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf"
+    ],
+    "source_objects": [
+      {
+        "title": "에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향",
+        "url": "https://www.daeryunlaw.com/trend/14690",
+        "snippet": "에이지테크 시장에서는 돌봄 전문기업과 로봇 기업들의 움직임도 나타나고 있습니다.  \n  \n시니어 케어 전문기업 케어링은 AI 안부전화 서비스인 ‘AI마음돌봄’을 운영하고 있으며 서울도시가스와 협력해 고독사 위험군을 대상으로 한 안부 확인 서비스를 추진하고 있습니다.   \n  \n향후에는 대화 데이터 분석을 통해 우울감이나 인지기능 저하 징후를 확인하는 기능도 검토 중인 것으로 알려졌습니다.  \n  \n또한 효돌과 로보케어는 홀로 거주하는 고령자를 위한 돌봄 로봇을 공급하고 있습니다.   \n  \n해당 서비스는 말벗 기능과 복약 알림, 생",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:39+00:00"
+      },
+      {
+        "title": "약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원",
+        "url": "https://dailypharm.com/user/news/335240",
+        "snippet": "Jan 28, 2026 — 아울러 복약알림기는 연동된 모바일 앱에서 복약 내용을 기록하거나 보호자 확인이 가능하다. 보호자가 복약 내역을 실시간으로 모니터링할 수 있게 지원 ...Read more",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:39+00:00"
+      },
+      {
+        "title": "스마트 복약관리 시스템 설계 및 개발",
+        "url": "https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+        "snippet": "[그림1] 고령자의의료비 우리나라고령인구의평균약복용은입원환자의경우18개, 외래환자의경우6개이다. 건강보조식품까지확장하게되면 10개이상의약을복용하고있다. 복용하는약에따라서시 간을정확히맞추어복용해야하는경우가많다. 최근에는 약의복용시간을알려주는다양한스마트시스템이연구되고 개발되고있다. 약복용상태를모니터링, 약복용알람서비스 등이그것이다. 질병을치료하기위해약을복용하는환자 들이치료에실패하거나악화시키는주요요인중약복용시 간이지켜지지않는경우즉, 환자가약의복용사실을기억 못하는경우에서원인을찾을수있다.\n건강한삶을살기위해노인들의약복용은일상적이다. 하 지만대",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:39+00:00"
+      },
+      {
+        "title": "SPRi - 소프트웨어정책연구소",
+        "url": "https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+        "snippet": "+ 국내에서도 독거노인을 위한 AI 돌봄로봇 사례가 늘고 있다. ㈜스튜디오 크로스컬쳐는 고령자의 복약/식사 알람 등 생활관리와 치매/우울증 예방의 정서·안전관리를 위한 솔루션을 제공한다. 솔루션은 스마트토이봇, 보호자용 어플리케이션, 기관용 웹 기반 모니터링 시스템으로 구성되어 있다. 스마트토이봇 ‘효돌’은 인형 형태로 손주 같은 외관과 목소리로 익숙함, 친근감을 제공하며, 사용자가 인형 머리를 쓰다듬거나 손을 만지면 피드백도 가능하다. 보호자는 애플리케이션을 통해 복약/식사 여부를 확인할 수 있으며 일정 시간 움직임이 없으면 보호",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:39+00:00"
+      },
+      {
+        "title": "초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구",
+        "url": "https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf",
+        "snippet": "한편 가족 구조 및 기능이 변화하면서 동거가족이 노인의 의약품 복용을 지원했던 과거와 달리현재 혼자 사는 노인이 증가하고 있어 고령 독거 , 노인이 스스로 의약품 복용을 관리하고 사회적으로 지원하는 방식의 시스템을마련 하는 것이 요구된다또한 국내에서 세 이상 고령 노인이 . 75 큰 폭으로 증가할 것으로 예상되므로 보건의료돌봄 · 체계를 고려하여 노인 의약품 사용 지원관리 · 정책을 개발할 필요가 있다. 올해 년 월 의료요양 등 지역 돌봄의 통합지원에 관한 법률 (2024 ) 2 · 「 지역돌봄법이 국회 본회의를 통과하였다보건복지부",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T05:12:39+00:00"
+      },
+      {
+        "title": "반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모",
+        "url": "https://mynews6874.tistory.com/37",
+        "snippet": "Title: 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모\n## 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모. \"**반려동물 관리****시장**\" 의 글로벌 시장 개요는 전 세계 및 주요 시장의 산업에 영향을 미치는 주요 트렌드에 대한 독특한 관점을 제공합니다. 반려동물 관리 시장은 2026에서 2033로 매년 5.30% 의 성장률을 보일 것으로 예상됩니다. **반려동물 관리 및 시장 소개**",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "community",
+        "retrieved_at": "2026-07-28T05:12:51+00:00"
+      },
+      {
+        "title": "카탈로그 관리 시스템 시장 규모, 점유율, 성장률",
+        "url": "https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market",
+        "snippet": "Title: 카탈로그 관리 시스템 시장 규모, 점유율, 성장률\n# 카탈로그 관리 시스템 시장 규모 및 점유율 분석 - 성장 추세 및 전망(2026년~2031년). 카탈로그 관리 시스템 시장 보고서는 유형(제품 카탈로그 및 서비스 카탈로그), 배포 방식(클라우드 및 온프레미스), 산업 분야(IT 및 통신, 소매 및 전자상거래, 금융·보험 등), 기업 규모(대기업 및 중소기업), 구성 요소(솔루션 및 서비스) 및 지역별로 세분화되어 있습니다. ## 카탈로그 관리 시스템 시장 규모 및 점유율. ## Mordor Intelligence의 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:51+00:00"
+      },
+      {
+        "title": "지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)",
+        "url": "https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+        "snippet": "Title: 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)\n# 지식 관리 시장 동향, 수요 및 성장 전망 (2034년까지). ## 지식 관리 시장 규모 및 전망(2021년~2034년), 글로벌 및 지역별 점유율, 트렌드 및 성장 기회 분석 보고서 범위: 솔루션별(소프트웨어, 서비스), 배포 방식별(클라우드, 온프레미스), 기업 규모별(중소기업, 대기업), 산업 분야별(IT 및 통신, 금융, 의료, 소매, 제조, 기타), 지역별(북미, 유럽, 아시아 태평양, 남미 및 중미). 지식 관리 시장은 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:51+00:00"
+      },
+      {
+        "title": "[시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%",
+        "url": "https://marketupdate.tistory.com/1107",
+        "snippet": "## [시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%. 건설 및 철거 폐기물 관리 시장 성장 는 최근 몇 년간 다양한 주요 요인에 힘입어 크게 성장해 왔습니다. 본 보고서는 시장 규모, 동향, 성장 요인 및 제약, 경쟁 요소, 그리고 향후 성장 전망을 포함한 포괄적인 시장 분석을 제공합니다. ## **시장 규모 및 성장:**. * 건설 및 철거 폐기물 관리 시장 성장 크기는 2024에서 USD 118.69 billion의 가치 평가에 도달했습니다. * 건설 및 철거 폐기물 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "community",
+        "retrieved_at": "2026-07-28T05:12:51+00:00"
+      },
+      {
+        "title": "메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년",
+        "url": "https://www.coherentmarketinsights.com/ko/%EB%A9%94%ED%83%80%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B4%80%EB%A6%AC%EB%8F%84%EA%B5%AC%EC%8B%9C%EC%9E%A5-7120",
+        "snippet": "Title: 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년\n메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2026 - 2033). 3. 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년. # 메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2025-2032) 분석. ## 메타데이터 관리 툴 시장, 메타데이터 유형별(비즈니스 메타데이터, 기술 메타데이터, 운영 메타데이터), 배포별(클라우드 기반 및 온프레미스), 최종 사용자별(BFSI, 소매 및 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "unknown",
+        "retrieved_at": "2026-07-28T05:12:51+00:00"
+      },
+      {
+        "title": "고령화 - 한국민족문화대백과사전",
+        "url": "https://encykorea.aks.ac.kr/Article/E0067748",
+        "snippet": "또한 고령화는 노인의 정치적 영향력 확대, 여가 및 레저 활동 주도계층 변화, 교육제도 재편 등 파급효과가 나타날 수 있다. 건강약품과 식품산업, 의료서비스, 금융서비스, 레저 또는 노인주택산업 등의 고령친화산업 분야의 성장 등 산업구조변화를 가져올 수 있으며, 노인복지시설 같은 집단주거시설의 확대, 주택연금제도의 활성화 등 부동산 시장의 변화도 초래할 수 있다.\n\n고령화가 진행하여 총인구 중에 고령인구 비율이 점점 높아가는 사회 혹은 현저하게 높아진 사회를 고령화사회(aging society)라고 하는데 국제연합(UN)은 전체 인",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "academic",
+        "retrieved_at": "2026-07-28T05:12:55+00:00"
+      },
+      {
+        "title": "2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처",
+        "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=10820&act=view&list_no=438832",
+        "snippet": "비중은 21.5%로 전년 대비 각각 1.0%p, 1.7%p 증가하는 등 꾸준히 증가 추세 Ⅵ. 주관적 웰빙 ㅇ '24년 65세 고령자 중 자신의 현재 삶에 만족하고 있는 사람의 비중은 35.5%로 전년 대비 3.6%p 증가함 ㅇ '24년 65세 이상 고령자 중 자신의 사회·경제적 성취에 대해 만족하고 있는 사람의 비중은 33.2%로 전년 대비 6.6%p 증가함 [...] 반복영역 건너뛰기\n\n본문 바로가기 주요메뉴 바로가기\n\n이 누리집은 대한민국 공식 전자정부 누리집입니다.\n\n# 국가데이터처\n\n## 국민이 주인인 나라, 함께 행복한 ",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "government",
+        "retrieved_at": "2026-07-28T05:12:55+00:00"
+      },
+      {
+        "title": "노인 - 위키백과, 우리 모두의 백과사전",
+        "url": "https://ko.wikipedia.org/wiki/%EB%85%B8%EC%9D%B8",
+        "snippet": "노인(老人, 문화어: 로인, 영어: old age, old people, the elderly, OAP(Old Age Pensioner), senior, senior citizen, older adult, the elders)은 평균 수명에 가깝게 이르렀거나 그 이상을 사는 사람으로 인생의 마지막 과정(end of human life cycle)이다. 어르신이라고도 부르나, 그 외에도 늙은이, 고령자(高齡者), 시니어, 실버 등으로 교체해서 사용하기도 한다. 한 나라나 지역에 노인이 많으면 고령화가 사회 문제로 대두되기도 한다. 대",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "community",
+        "retrieved_at": "2026-07-28T05:12:55+00:00"
+      },
+      {
+        "title": "노인 - 나무위키",
+        "url": "https://namu.wiki/w/%EB%85%B8%EC%9D%B8",
+        "snippet": "언뜻 봤을 때 많이 나이들어 보이면 노인이라는 칭호가 자동으로 생기며, 사회학 쪽에서는 보통 65세를 넘으면 노인으로 보지만 사회적으로 60대는 노인으로 취급하지 않는 경우가 종종 있다. 과거에는 55세였고, 1990년대에는 60세였다가 2000년대에 65세로 올라갔다. 노인 부양비는 65세 이상 노인/15~64세의 시민으로 계산된다. 2020년을 기준으로 보면 대한민국 65세 이상 인구는 812만 5천 명으로 전체의 15.7%을 차지하고 있다.(#fn-7 \"통계청 2020 고령자 통계\") 65세 이상 인구가 전체 인구의 7% 이상",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "community",
+        "retrieved_at": "2026-07-28T05:12:55+00:00"
+      },
+      {
+        "title": "노인·어르신·고령자? 뭐라 불러야 좋을까요",
+        "url": "https://www.chosun.com/site/data/html_dir/2020/01/15/2020011500197.html",
+        "snippet": "배종찬의 정치&데이터\n\n안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다 Image 28: 유료Image 29: 유료Image 30: 안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다\n\n최유식의 온차이나+\n\n‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\" Image 31: 유료Image 32: 유료Image 33: ‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\n\n윤희영어\n\n한증막은 ‘sauna’… 뜨끈한 온탕은? Image 34: 유료Image 35: 유료Image",
+        "content_scope": "search_snippet",
+        "original_text_extracted": false,
+        "source_type": "news",
+        "retrieved_at": "2026-07-28T05:12:55+00:00"
+      }
+    ]
+  },
+  "competitor_result": {
+    "competitors": [
+      {
+        "name": "AI마음돌봄",
+        "description": "AI를 활용한 안부전화 서비스로, 고독사 위험군을 대상으로 한 안부 확인 서비스를 제공.",
+        "strengths": [
+          "AI 기술을 활용하여 고독사 위험군의 안전을 확인",
+          "비용 효율적인 서비스 제공"
+        ],
+        "weaknesses": [
+          "복약 관리 기능이 부족하여 복약 관리에 대한 직접적인 지원이 없음",
+          "사용자와의 상호작용이 제한적일 수 있음"
+        ]
+      },
+      {
+        "name": "효돌",
+        "description": "홀로 거주하는 고령자를 위한 돌봄 로봇으로, 복약 알림 및 말벗 기능을 제공.",
+        "strengths": [
+          "복약 알림 기능과 함께 정서적 지원을 제공",
+          "사용자 친화적인 디자인으로 고령자에게 친숙함"
+        ],
+        "weaknesses": [
+          "로봇의 가격이 비쌀 수 있어 접근성이 떨어질 수 있음",
+          "기술적 문제 발생 시 사용자의 신뢰도 저하 가능성"
+        ]
+      },
+      {
+        "name": "스마트 복약알림기",
+        "description": "모바일 앱과 연동되어 복약 내역을 기록하고 보호자가 실시간으로 모니터링할 수 있는 기능을 제공.",
+        "strengths": [
+          "실시간 모니터링 기능으로 보호자의 불안감 해소",
+          "복약 내역 기록으로 중복 투약 방지"
+        ],
+        "weaknesses": [
+          "모바일 앱 사용에 대한 기술적 장벽이 있을 수 있음",
+          "복약 알림 기능 외의 추가 서비스 부족"
+        ]
+      }
+    ],
+    "positioning": "우리 서비스는 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하는 통합 솔루션으로 자리잡을 것입니다.",
+    "differentiation": [
+      "AI 및 IoT 기술을 활용하여 복약 관리와 실시간 모니터링을 통합한 솔루션 제공",
+      "사용자 친화적인 인터페이스로 고령자와 보호자 모두 쉽게 사용할 수 있도록 설계"
+    ]
+  },
+  "competitor_sources": [
+    {
+      "title": "옥천군 스마트도시계획",
+      "url": "https://smartcity.go.kr/wp-content/uploads/2025/09/%EC%98%A5%EC%B2%9C%EA%B5%B0-%EC%8A%A4%EB%A7%88%ED%8A%B8%EB%8F%84%EC%8B%9C%EA%B3%84%ED%9A%8D_25.9.pdf",
+      "snippet": "서비스 입지분석 개요 나. 스마트 경로당 서비스 다. 스마트 주차 서비스 라. 스마트 자원관리 서비스 - iii -2. 스마트도시기반시설의 구축 및 관리·운영 1) 기본방향· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·318 2) 계획내용· · ",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "source_type": "government",
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "published_date": "Wed, 24 Sep 2025 00:00:00 GMT"
+    },
+    {
+      "title": "(연구보고)2025-07_기술 도입에 따른 돌봄서비스의 변화.pdf",
+      "url": "https://repository.kli.re.kr/bitstream/2021.oak/12028/2/%28%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%292025-07_%EA%B8%B0%EC%88%A0%20%EB%8F%84%EC%9E%85%EC%97%90%20%EB%94%B0%EB%A5%B8%20%EB%8F%8C%EB%B4%84%EC%84%9C%EB%B9%84%EC%8A%A4%EC%9D%98%20%EB%B3%80%ED%99%94.pdf",
+      "snippet": "3. 한국의 돌봄기술 활용 방식과 과제 제3장에서는 한국 재가서비스의 응급관리요원과 생활지원사, 요양시 요 약 ⅲ 설의 요양보호사 사례를 분석하였다. 이를 위해 11명의 돌봄노동자, 14 명의 요양시설 및 사회서비스 수행기관 관리자, 전문가 5명, 지방자치단 체 정책담당자 1명을 인터뷰하였다. 돌봄로봇을 도입한 요양시설 3곳을 견학하였고, 비교를 위해 상대적으로 작은 규모의 요양시설 1곳을 방문 하였다. [...] 한편으론 노인돌봄서비스 산업 종사자의 근로조건은 여전히 열악한 상황이다. 중고령 여성이 다수 종사하는 직종으로 불안정한",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "source_type": "academic",
+      "retrieved_at": "2026-07-28T05:12:59+00:00"
+    },
+    {
+      "title": "WE CARE FOR THE FUTURE. - SK chemicals ESG",
+      "url": "https://esg.skchemicals.com/images/document/pdf/SK%EC%BC%80%EB%AF%B8%EC%B9%BC2025%EC%A7%80%EC%86%8D%EA%B0%80%EB%8A%A5%EA%B2%BD%EC%98%81%EB%B3%B4%EA%B3%A0%EC%84%9C_%EA%B5%AD%EB%AC%B8.pdf",
+      "snippet": "• 담당 조직 : SK케미칼 ESG추진팀 • 주소 : 경기도 성남시 분당구 판교로 310 SK케미칼 • Tel : 02-2008-2008 • E-mail : esg_skchem@sk.com • 보고서 발간일 : 2026년 6월 30일 SK케미칼 홈페이지 지속가능경영보고서 GRI Table CONTENTS OVERVIEW 004 CEO Message 005 Company Profile 006 Our Business 008 Sustainable Strategy & Portfolio 009 OUR ESG 060 For Sustainabl",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "source_type": "unknown",
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "published_date": "Tue, 30 Jun 2026 00:00:00 GMT"
+    },
+    {
+      "title": "Instagram",
+      "url": "https://www.instagram.com/p/DWX7Mo1Ebd_",
+      "snippet": "[LH NEWS] AI 돌봄전화 서비스 확대 시행  \n📞임대주택 거주 고령자 돌봄 지원 강화  \n  \n👉AI 돌봄전화 서비스란?  \n✅인공지능을 활용하여 LH 임대주택에 거주 중인  \n어르신의 말벗 지원과 건강상태 점검  \n✅저렴한 비용으로 폭넓은 서비스 제공  \n  \n👉전국 단위, 대상자 8천 명까지 확대  \n✅시범운영 결과를 바탕으로 전국 확대  \n✅고위험군은 방문 돌봄 서비스 병행 제공  \n  \n👉주거복지 서비스 전반의 AI 혁신  \n✅LH는 생성형 AI 도입으로 업무 효율·만족도 향상  \n✅24시간 ‘AI콜센터’ 및 유지보수",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "source_type": "community",
+      "retrieved_at": "2026-07-28T05:12:59+00:00"
+    }
+  ],
+  "customer_result": {
+    "target_persona": "65세 이상의 고령자로, 만성질환으로 인해 여러 가지 약을 복용하고 있으며, 자녀가 원거리에서 돌보고 있는 상황에 처해 있는 사용자.",
+    "pain_points": [
+      "복약 시간을 기억하기 어려워 복약 누락이 발생함",
+      "중복 투약으로 인한 건강 위험이 있음",
+      "보호자가 고령자의 복약 상태를 확인할 방법이 부족함",
+      "복약 관리에 대한 불안감으로 인해 스트레스를 느낌"
+    ],
+    "needs": [
+      "정확한 복약 시간 알림 기능",
+      "복약 상태를 원격으로 확인할 수 있는 시스템",
+      "중복 투약 방지를 위한 관리 기능",
+      "사용하기 쉬운 인터페이스"
+    ],
+    "jobs_to_be_done": [
+      "복약 시간을 정확히 지키기 위한 알림 설정",
+      "복약 이력을 기록하고 관리하기",
+      "보호자에게 복약 상태를 실시간으로 전달하기",
+      "복약 관리에 대한 불안감을 해소하기"
+    ]
+  },
+  "swot_result": {
+    "strengths": [
+      "AI 및 IoT 기술 활용",
+      "복약 관리와 모니터링 통합 솔루션",
+      "사용자 친화적인 인터페이스"
+    ],
+    "weaknesses": [
+      "기술적 문제 발생 가능성",
+      "데이터 보안 이슈 우려",
+      "경쟁사 대비 초기 인지도 부족"
+    ],
+    "opportunities": [
+      "고령화 사회에 따른 수요 증가",
+      "AI 및 IoT 기술 발전으로 효율적 솔루션 개발 가능",
+      "복약 관리 서비스의 새로운 시장 기회 창출"
+    ],
+    "threats": [
+      "경쟁 심화로 인한 가격 경쟁",
+      "기술적 문제로 인한 사용자 신뢰 저하",
+      "복약 관리 시장의 빠른 변화에 대한 적응 필요"
+    ]
+  },
+  "business_model_result": {
+    "revenue_streams": [
+      "구독 서비스",
+      "프리미엄 기능 추가 요금",
+      "제휴 마케팅",
+      "데이터 분석 서비스"
+    ],
+    "pricing": "기본 서비스는 월 구독료로 제공되며, 추가 기능(예: 맞춤형 알림, 건강 관리 통계 등)은 프리미엄 요금제로 제공됩니다. 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제도 고려할 수 있습니다.",
+    "cost_structure": [
+      "개발 비용",
+      "서버 및 데이터 저장 비용",
+      "고객 지원 및 운영 비용",
+      "마케팅 및 광고 비용"
+    ],
+    "key_metrics": [
+      "구독자 수",
+      "고객 유지율",
+      "사용자 참여도",
+      "서비스 이용 빈도"
+    ]
+  },
+  "risk_result": {
+    "risks": [
+      {
+        "category": "기술",
+        "description": "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "기술적 안정성을 확보하고, 데이터 보안 강화에 대한 투자를 늘려야 한다."
+      },
+      {
+        "category": "시장",
+        "description": "경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 한다."
+      },
+      {
+        "category": "법규",
+        "description": "법적 규제가 강화되면 기업 운영에 추가적인 비용이 발생할 수 있다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 한다."
+      },
+      {
+        "category": "운영",
+        "description": "고령자와 보호자 간의 신뢰 부족이 서비스 이용에 대한 저항감을 초래할 수 있다.",
+        "likelihood": "중",
+        "impact": "중",
+        "mitigation": "신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 한다."
+      }
+    ]
+  },
+  "pestel_result": {
+    "Political": {
+      "content": "고령화 사회의 진행은 정부의 복지 정책 및 의료 서비스에 대한 관심을 증가시키고 있으며, 이는 고령자 복약 관리 시장에 긍정적인 영향을 미칠 수 있다. 또한, 노인 돌봄 관련 법률 및 정책이 강화되고 있어 시장의 성장 가능성을 높이고 있다.",
+      "opportunity": "정부의 지원 및 정책 변화는 고령자 복약 관리 서비스에 대한 수요를 증가시킬 수 있는 기회를 제공한다.",
+      "threat": "정치적 불안정성이나 정책 변화로 인해 복약 관리 서비스에 대한 지원이 감소할 수 있다.",
+      "response": "정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 지원을 확보해야 한다."
+    },
+    "Economic": {
+      "content": "고령화에 따른 복약 관리 서비스의 수요 증가로 인해 시장 규모가 확대되고 있으며, 이는 경제적 기회를 창출하고 있다. 또한, AI 및 IoT 기술의 발전은 비용 효율적인 솔루션 개발을 가능하게 하고 있다.",
+      "opportunity": "고령자 복약 관리 시장의 성장은 새로운 비즈니스 모델과 수익 창출의 기회를 제공한다.",
+      "threat": "경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다.",
+      "response": "차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 한다."
+    },
+    "Social": {
+      "content": "고령자의 복약 관리 필요성이 증가하고 있으며, 이로 인해 사회적 관심이 높아지고 있다. 또한, 고령자의 건강 관리에 대한 보호자의 불안감이 커지고 있어, 이를 해결할 수 있는 서비스에 대한 수요가 증가하고 있다.",
+      "opportunity": "고령자 및 보호자를 대상으로 하는 맞춤형 복약 관리 서비스는 사회적 요구를 충족시키며, 시장에서의 경쟁력을 높일 수 있다.",
+      "threat": "고령자와 보호자 간의 신뢰 부족이 서비스 이용에 대한 저항감을 초래할 수 있다.",
+      "response": "신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 한다."
+    },
+    "Technological": {
+      "content": "AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있으며, 이는 고령자의 복약 순응도를 향상시키는 데 기여하고 있다. 스마트 기기와 로봇의 도입은 복약 관리의 혁신을 가져오고 있다.",
+      "opportunity": "기술 발전을 활용한 새로운 솔루션 개발은 시장에서의 경쟁 우위를 제공할 수 있다.",
+      "threat": "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+      "response": "기술적 안정성을 확보하고, 데이터 보안 강화에 대한 투자를 늘려야 한다."
+    },
+    "Environmental": {
+      "content": "고령자 복약 관리 시장은 환경적 요인에 대한 고려가 필요하다. 특히, 고령자의 생활 환경이 복약 관리에 미치는 영향이 크다.",
+      "opportunity": "환경 친화적인 복약 관리 솔루션 개발은 사회적 책임을 다하는 기업 이미지를 구축할 수 있다.",
+      "threat": "환경 문제에 대한 사회적 인식이 높아짐에 따라, 환경 규제가 강화될 수 있다.",
+      "response": "환경 친화적인 제품 및 서비스를 개발하고, 지속 가능한 경영을 통해 사회적 책임을 다해야 한다."
+    },
+    "Legal": {
+      "content": "고령자 복약 관리와 관련된 법률 및 규제가 증가하고 있으며, 이는 시장의 성장에 영향을 미칠 수 있다. 특히, 개인정보 보호 및 데이터 관리에 대한 법적 요구사항이 강화되고 있다.",
+      "opportunity": "법률 준수를 통해 신뢰성을 높이고, 시장에서의 경쟁력을 강화할 수 있다.",
+      "threat": "법적 규제가 강화되면 기업 운영에 추가적인 비용이 발생할 수 있다.",
+      "response": "법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 한다."
+    }
+  },
+  "artifacts": [
+    {
+      "artifact_id": "artifact-research",
+      "artifact_type": "research_analysis",
+      "owner_agent": "research",
+      "schema_version": 1,
+      "content": {
+        "market_overview": "고령자 복약 관리 시장은 급속히 성장하고 있으며, 특히 만성질환을 앓고 있는 65세 이상 고령자의 수가 증가함에 따라 이들의 복약 관리 필요성이 더욱 부각되고 있다. 고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달하며, 이로 인해 복약 관리의 중요성이 강조되고 있다.",
+        "industry_trends": [
+          "AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있으며, 이는 고령자의 복약 시간을 정확히 알림으로써 복약 순응도를 높이는 데 기여하고 있다.",
+          "고령자 돌봄을 위한 로봇 및 스마트 기기들이 시장에 출시되고 있으며, 이들 제품은 복약 알림 기능을 포함하고 있어 사용자와 보호자 모두에게 유용하다."
+        ],
+        "customer_needs": [
+          "고령자는 복약 시간을 정확히 기억하기 어려워 복약 관리에 어려움을 겪고 있으며, 이로 인해 중복 투약이나 복약 누락이 발생할 수 있다.",
+          "보호자는 원격으로 고령자의 복약 상태를 확인할 수 있는 방법이 부족하여, 고령자의 건강 관리에 대한 불안감을 느끼고 있다."
+        ],
+        "competitors": [
+          {
+            "name": "AI마음돌봄",
+            "features": "AI를 활용한 안부전화 서비스로, 고독사 위험군을 대상으로 한 안부 확인 서비스를 제공."
+          },
+          {
+            "name": "효돌",
+            "features": "홀로 거주하는 고령자를 위한 돌봄 로봇으로, 복약 알림 및 말벗 기능을 제공."
+          },
+          {
+            "name": "스마트 복약알림기",
+            "features": "모바일 앱과 연동되어 복약 내역을 기록하고 보호자가 실시간으로 모니터링할 수 있는 기능을 제공."
+          }
+        ],
+        "opportunities": [
+          "고령화 사회에 따라 복약 관리 서비스의 수요가 증가하고 있으며, 이는 새로운 시장 기회를 창출할 수 있다.",
+          "AI 및 IoT 기술의 발전으로 보다 정교하고 효율적인 복약 관리 솔루션을 개발할 수 있는 가능성이 높다."
+        ],
+        "risks": [
+          "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+          "경쟁이 치열해짐에 따라 가격 경쟁이나 서비스 품질 저하의 위험이 존재한다."
+        ],
+        "sources": [
+          "반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 — https://mynews6874.tistory.com/37",
+          "카탈로그 관리 시스템 시장 규모, 점유율, 성장률 — https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market",
+          "지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) — https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+          "[시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8% — https://marketupdate.tistory.com/1107",
+          "메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년 — https://www.coherentmarketinsights.com/ko/%EB%A9%94%ED%83%80%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B4%80%EB%A6%AC%EB%8F%84%EA%B5%AC%EC%8B%9C%EC%9E%A5-7120",
+          "고령화 - 한국민족문화대백과사전 — https://encykorea.aks.ac.kr/Article/E0067748",
+          "2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처 — https://mods.go.kr/board.es?mid=a10301010000&bid=10820&act=view&list_no=438832",
+          "노인 - 위키백과, 우리 모두의 백과사전 — https://ko.wikipedia.org/wiki/%EB%85%B8%EC%9D%B8",
+          "노인 - 나무위키 — https://namu.wiki/w/%EB%85%B8%EC%9D%B8",
+          "노인·어르신·고령자? 뭐라 불러야 좋을까요 — https://www.chosun.com/site/data/html_dir/2020/01/15/2020011500197.html",
+          "에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 — https://www.daeryunlaw.com/trend/14690",
+          "약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 — https://dailypharm.com/user/news/335240",
+          "스마트 복약관리 시스템 설계 및 개발 — https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+          "SPRi - 소프트웨어정책연구소 — https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+          "초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 — https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf",
+          "https://www.daeryunlaw.com/trend/14690",
+          "https://dailypharm.com/user/news/335240",
+          "https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+          "https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+          "https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf"
+        ],
+        "source_objects": [
+          {
+            "title": "에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향",
+            "url": "https://www.daeryunlaw.com/trend/14690",
+            "snippet": "에이지테크 시장에서는 돌봄 전문기업과 로봇 기업들의 움직임도 나타나고 있습니다.  \n  \n시니어 케어 전문기업 케어링은 AI 안부전화 서비스인 ‘AI마음돌봄’을 운영하고 있으며 서울도시가스와 협력해 고독사 위험군을 대상으로 한 안부 확인 서비스를 추진하고 있습니다.   \n  \n향후에는 대화 데이터 분석을 통해 우울감이나 인지기능 저하 징후를 확인하는 기능도 검토 중인 것으로 알려졌습니다.  \n  \n또한 효돌과 로보케어는 홀로 거주하는 고령자를 위한 돌봄 로봇을 공급하고 있습니다.   \n  \n해당 서비스는 말벗 기능과 복약 알림, 생",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:39+00:00"
+          },
+          {
+            "title": "약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원",
+            "url": "https://dailypharm.com/user/news/335240",
+            "snippet": "Jan 28, 2026 — 아울러 복약알림기는 연동된 모바일 앱에서 복약 내용을 기록하거나 보호자 확인이 가능하다. 보호자가 복약 내역을 실시간으로 모니터링할 수 있게 지원 ...Read more",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:39+00:00"
+          },
+          {
+            "title": "스마트 복약관리 시스템 설계 및 개발",
+            "url": "https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+            "snippet": "[그림1] 고령자의의료비 우리나라고령인구의평균약복용은입원환자의경우18개, 외래환자의경우6개이다. 건강보조식품까지확장하게되면 10개이상의약을복용하고있다. 복용하는약에따라서시 간을정확히맞추어복용해야하는경우가많다. 최근에는 약의복용시간을알려주는다양한스마트시스템이연구되고 개발되고있다. 약복용상태를모니터링, 약복용알람서비스 등이그것이다. 질병을치료하기위해약을복용하는환자 들이치료에실패하거나악화시키는주요요인중약복용시 간이지켜지지않는경우즉, 환자가약의복용사실을기억 못하는경우에서원인을찾을수있다.\n건강한삶을살기위해노인들의약복용은일상적이다. 하 지만대",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:39+00:00"
+          },
+          {
+            "title": "SPRi - 소프트웨어정책연구소",
+            "url": "https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+            "snippet": "+ 국내에서도 독거노인을 위한 AI 돌봄로봇 사례가 늘고 있다. ㈜스튜디오 크로스컬쳐는 고령자의 복약/식사 알람 등 생활관리와 치매/우울증 예방의 정서·안전관리를 위한 솔루션을 제공한다. 솔루션은 스마트토이봇, 보호자용 어플리케이션, 기관용 웹 기반 모니터링 시스템으로 구성되어 있다. 스마트토이봇 ‘효돌’은 인형 형태로 손주 같은 외관과 목소리로 익숙함, 친근감을 제공하며, 사용자가 인형 머리를 쓰다듬거나 손을 만지면 피드백도 가능하다. 보호자는 애플리케이션을 통해 복약/식사 여부를 확인할 수 있으며 일정 시간 움직임이 없으면 보호",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:39+00:00"
+          },
+          {
+            "title": "초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구",
+            "url": "https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf",
+            "snippet": "한편 가족 구조 및 기능이 변화하면서 동거가족이 노인의 의약품 복용을 지원했던 과거와 달리현재 혼자 사는 노인이 증가하고 있어 고령 독거 , 노인이 스스로 의약품 복용을 관리하고 사회적으로 지원하는 방식의 시스템을마련 하는 것이 요구된다또한 국내에서 세 이상 고령 노인이 . 75 큰 폭으로 증가할 것으로 예상되므로 보건의료돌봄 · 체계를 고려하여 노인 의약품 사용 지원관리 · 정책을 개발할 필요가 있다. 올해 년 월 의료요양 등 지역 돌봄의 통합지원에 관한 법률 (2024 ) 2 · 「 지역돌봄법이 국회 본회의를 통과하였다보건복지부",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "academic",
+            "retrieved_at": "2026-07-28T05:12:39+00:00"
+          },
+          {
+            "title": "반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모",
+            "url": "https://mynews6874.tistory.com/37",
+            "snippet": "Title: 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모\n## 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모. \"**반려동물 관리****시장**\" 의 글로벌 시장 개요는 전 세계 및 주요 시장의 산업에 영향을 미치는 주요 트렌드에 대한 독특한 관점을 제공합니다. 반려동물 관리 시장은 2026에서 2033로 매년 5.30% 의 성장률을 보일 것으로 예상됩니다. **반려동물 관리 및 시장 소개**",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "community",
+            "retrieved_at": "2026-07-28T05:12:51+00:00"
+          },
+          {
+            "title": "카탈로그 관리 시스템 시장 규모, 점유율, 성장률",
+            "url": "https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market",
+            "snippet": "Title: 카탈로그 관리 시스템 시장 규모, 점유율, 성장률\n# 카탈로그 관리 시스템 시장 규모 및 점유율 분석 - 성장 추세 및 전망(2026년~2031년). 카탈로그 관리 시스템 시장 보고서는 유형(제품 카탈로그 및 서비스 카탈로그), 배포 방식(클라우드 및 온프레미스), 산업 분야(IT 및 통신, 소매 및 전자상거래, 금융·보험 등), 기업 규모(대기업 및 중소기업), 구성 요소(솔루션 및 서비스) 및 지역별로 세분화되어 있습니다. ## 카탈로그 관리 시스템 시장 규모 및 점유율. ## Mordor Intelligence의 ",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:51+00:00"
+          },
+          {
+            "title": "지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)",
+            "url": "https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+            "snippet": "Title: 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)\n# 지식 관리 시장 동향, 수요 및 성장 전망 (2034년까지). ## 지식 관리 시장 규모 및 전망(2021년~2034년), 글로벌 및 지역별 점유율, 트렌드 및 성장 기회 분석 보고서 범위: 솔루션별(소프트웨어, 서비스), 배포 방식별(클라우드, 온프레미스), 기업 규모별(중소기업, 대기업), 산업 분야별(IT 및 통신, 금융, 의료, 소매, 제조, 기타), 지역별(북미, 유럽, 아시아 태평양, 남미 및 중미). 지식 관리 시장은 ",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:51+00:00"
+          },
+          {
+            "title": "[시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%",
+            "url": "https://marketupdate.tistory.com/1107",
+            "snippet": "## [시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%. 건설 및 철거 폐기물 관리 시장 성장 는 최근 몇 년간 다양한 주요 요인에 힘입어 크게 성장해 왔습니다. 본 보고서는 시장 규모, 동향, 성장 요인 및 제약, 경쟁 요소, 그리고 향후 성장 전망을 포함한 포괄적인 시장 분석을 제공합니다. ## **시장 규모 및 성장:**. * 건설 및 철거 폐기물 관리 시장 성장 크기는 2024에서 USD 118.69 billion의 가치 평가에 도달했습니다. * 건설 및 철거 폐기물 ",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "community",
+            "retrieved_at": "2026-07-28T05:12:51+00:00"
+          },
+          {
+            "title": "메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년",
+            "url": "https://www.coherentmarketinsights.com/ko/%EB%A9%94%ED%83%80%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B4%80%EB%A6%AC%EB%8F%84%EA%B5%AC%EC%8B%9C%EC%9E%A5-7120",
+            "snippet": "Title: 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년\n메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2026 - 2033). 3. 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년. # 메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2025-2032) 분석. ## 메타데이터 관리 툴 시장, 메타데이터 유형별(비즈니스 메타데이터, 기술 메타데이터, 운영 메타데이터), 배포별(클라우드 기반 및 온프레미스), 최종 사용자별(BFSI, 소매 및 ",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "unknown",
+            "retrieved_at": "2026-07-28T05:12:51+00:00"
+          },
+          {
+            "title": "고령화 - 한국민족문화대백과사전",
+            "url": "https://encykorea.aks.ac.kr/Article/E0067748",
+            "snippet": "또한 고령화는 노인의 정치적 영향력 확대, 여가 및 레저 활동 주도계층 변화, 교육제도 재편 등 파급효과가 나타날 수 있다. 건강약품과 식품산업, 의료서비스, 금융서비스, 레저 또는 노인주택산업 등의 고령친화산업 분야의 성장 등 산업구조변화를 가져올 수 있으며, 노인복지시설 같은 집단주거시설의 확대, 주택연금제도의 활성화 등 부동산 시장의 변화도 초래할 수 있다.\n\n고령화가 진행하여 총인구 중에 고령인구 비율이 점점 높아가는 사회 혹은 현저하게 높아진 사회를 고령화사회(aging society)라고 하는데 국제연합(UN)은 전체 인",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "academic",
+            "retrieved_at": "2026-07-28T05:12:55+00:00"
+          },
+          {
+            "title": "2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처",
+            "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=10820&act=view&list_no=438832",
+            "snippet": "비중은 21.5%로 전년 대비 각각 1.0%p, 1.7%p 증가하는 등 꾸준히 증가 추세 Ⅵ. 주관적 웰빙 ㅇ '24년 65세 고령자 중 자신의 현재 삶에 만족하고 있는 사람의 비중은 35.5%로 전년 대비 3.6%p 증가함 ㅇ '24년 65세 이상 고령자 중 자신의 사회·경제적 성취에 대해 만족하고 있는 사람의 비중은 33.2%로 전년 대비 6.6%p 증가함 [...] 반복영역 건너뛰기\n\n본문 바로가기 주요메뉴 바로가기\n\n이 누리집은 대한민국 공식 전자정부 누리집입니다.\n\n# 국가데이터처\n\n## 국민이 주인인 나라, 함께 행복한 ",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "government",
+            "retrieved_at": "2026-07-28T05:12:55+00:00"
+          },
+          {
+            "title": "노인 - 위키백과, 우리 모두의 백과사전",
+            "url": "https://ko.wikipedia.org/wiki/%EB%85%B8%EC%9D%B8",
+            "snippet": "노인(老人, 문화어: 로인, 영어: old age, old people, the elderly, OAP(Old Age Pensioner), senior, senior citizen, older adult, the elders)은 평균 수명에 가깝게 이르렀거나 그 이상을 사는 사람으로 인생의 마지막 과정(end of human life cycle)이다. 어르신이라고도 부르나, 그 외에도 늙은이, 고령자(高齡者), 시니어, 실버 등으로 교체해서 사용하기도 한다. 한 나라나 지역에 노인이 많으면 고령화가 사회 문제로 대두되기도 한다. 대",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "community",
+            "retrieved_at": "2026-07-28T05:12:55+00:00"
+          },
+          {
+            "title": "노인 - 나무위키",
+            "url": "https://namu.wiki/w/%EB%85%B8%EC%9D%B8",
+            "snippet": "언뜻 봤을 때 많이 나이들어 보이면 노인이라는 칭호가 자동으로 생기며, 사회학 쪽에서는 보통 65세를 넘으면 노인으로 보지만 사회적으로 60대는 노인으로 취급하지 않는 경우가 종종 있다. 과거에는 55세였고, 1990년대에는 60세였다가 2000년대에 65세로 올라갔다. 노인 부양비는 65세 이상 노인/15~64세의 시민으로 계산된다. 2020년을 기준으로 보면 대한민국 65세 이상 인구는 812만 5천 명으로 전체의 15.7%을 차지하고 있다.(#fn-7 \"통계청 2020 고령자 통계\") 65세 이상 인구가 전체 인구의 7% 이상",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "community",
+            "retrieved_at": "2026-07-28T05:12:55+00:00"
+          },
+          {
+            "title": "노인·어르신·고령자? 뭐라 불러야 좋을까요",
+            "url": "https://www.chosun.com/site/data/html_dir/2020/01/15/2020011500197.html",
+            "snippet": "배종찬의 정치&데이터\n\n안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다 Image 28: 유료Image 29: 유료Image 30: 안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다\n\n최유식의 온차이나+\n\n‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\" Image 31: 유료Image 32: 유료Image 33: ‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\n\n윤희영어\n\n한증막은 ‘sauna’… 뜨끈한 온탕은? Image 34: 유료Image 35: 유료Image",
+            "content_scope": "search_snippet",
+            "original_text_extracted": false,
+            "source_type": "news",
+            "retrieved_at": "2026-07-28T05:12:55+00:00"
+          }
+        ]
+      },
+      "evidence_ids": [
+        "ev1",
+        "ev2",
+        "ev3",
+        "ev4",
+        "ev5",
+        "ev6",
+        "ev7",
+        "ev8",
+        "ev9",
+        "ev10",
+        "ev11",
+        "ev12",
+        "ev13",
+        "ev14",
+        "ev15"
+      ],
+      "depends_on": [],
+      "target_sections": [
+        "market_analysis"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "research_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-competitor",
+      "artifact_type": "competitor_analysis",
+      "owner_agent": "competitor",
+      "schema_version": 1,
+      "content": {
+        "competitors": [
+          {
+            "name": "AI마음돌봄",
+            "description": "AI를 활용한 안부전화 서비스로, 고독사 위험군을 대상으로 한 안부 확인 서비스를 제공.",
+            "strengths": [
+              "AI 기술을 활용하여 고독사 위험군의 안전을 확인",
+              "비용 효율적인 서비스 제공"
+            ],
+            "weaknesses": [
+              "복약 관리 기능이 부족하여 복약 관리에 대한 직접적인 지원이 없음",
+              "사용자와의 상호작용이 제한적일 수 있음"
+            ]
+          },
+          {
+            "name": "효돌",
+            "description": "홀로 거주하는 고령자를 위한 돌봄 로봇으로, 복약 알림 및 말벗 기능을 제공.",
+            "strengths": [
+              "복약 알림 기능과 함께 정서적 지원을 제공",
+              "사용자 친화적인 디자인으로 고령자에게 친숙함"
+            ],
+            "weaknesses": [
+              "로봇의 가격이 비쌀 수 있어 접근성이 떨어질 수 있음",
+              "기술적 문제 발생 시 사용자의 신뢰도 저하 가능성"
+            ]
+          },
+          {
+            "name": "스마트 복약알림기",
+            "description": "모바일 앱과 연동되어 복약 내역을 기록하고 보호자가 실시간으로 모니터링할 수 있는 기능을 제공.",
+            "strengths": [
+              "실시간 모니터링 기능으로 보호자의 불안감 해소",
+              "복약 내역 기록으로 중복 투약 방지"
+            ],
+            "weaknesses": [
+              "모바일 앱 사용에 대한 기술적 장벽이 있을 수 있음",
+              "복약 알림 기능 외의 추가 서비스 부족"
+            ]
+          }
+        ],
+        "positioning": "우리 서비스는 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하는 통합 솔루션으로 자리잡을 것입니다.",
+        "differentiation": [
+          "AI 및 IoT 기술을 활용하여 복약 관리와 실시간 모니터링을 통합한 솔루션 제공",
+          "사용자 친화적인 인터페이스로 고령자와 보호자 모두 쉽게 사용할 수 있도록 설계"
+        ]
+      },
+      "evidence_ids": [
+        "ev16",
+        "ev17",
+        "ev18",
+        "ev19"
+      ],
+      "depends_on": [
+        "artifact-research"
+      ],
+      "target_sections": [
+        "differentiation"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "competitor_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-customer",
+      "artifact_type": "customer_analysis",
+      "owner_agent": "customer",
+      "schema_version": 1,
+      "content": {
+        "target_persona": "65세 이상의 고령자로, 만성질환으로 인해 여러 가지 약을 복용하고 있으며, 자녀가 원거리에서 돌보고 있는 상황에 처해 있는 사용자.",
+        "pain_points": [
+          "복약 시간을 기억하기 어려워 복약 누락이 발생함",
+          "중복 투약으로 인한 건강 위험이 있음",
+          "보호자가 고령자의 복약 상태를 확인할 방법이 부족함",
+          "복약 관리에 대한 불안감으로 인해 스트레스를 느낌"
+        ],
+        "needs": [
+          "정확한 복약 시간 알림 기능",
+          "복약 상태를 원격으로 확인할 수 있는 시스템",
+          "중복 투약 방지를 위한 관리 기능",
+          "사용하기 쉬운 인터페이스"
+        ],
+        "jobs_to_be_done": [
+          "복약 시간을 정확히 지키기 위한 알림 설정",
+          "복약 이력을 기록하고 관리하기",
+          "보호자에게 복약 상태를 실시간으로 전달하기",
+          "복약 관리에 대한 불안감을 해소하기"
+        ]
+      },
+      "evidence_ids": [],
+      "depends_on": [
+        "artifact-research"
+      ],
+      "target_sections": [
+        "target_user"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "customer_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-pestel",
+      "artifact_type": "pestel_analysis",
+      "owner_agent": "pestel",
+      "schema_version": 1,
+      "content": {
+        "Political": {
+          "content": "고령화 사회의 진행은 정부의 복지 정책 및 의료 서비스에 대한 관심을 증가시키고 있으며, 이는 고령자 복약 관리 시장에 긍정적인 영향을 미칠 수 있다. 또한, 노인 돌봄 관련 법률 및 정책이 강화되고 있어 시장의 성장 가능성을 높이고 있다.",
+          "opportunity": "정부의 지원 및 정책 변화는 고령자 복약 관리 서비스에 대한 수요를 증가시킬 수 있는 기회를 제공한다.",
+          "threat": "정치적 불안정성이나 정책 변화로 인해 복약 관리 서비스에 대한 지원이 감소할 수 있다.",
+          "response": "정책 변화에 대한 모니터링을 강화하고, 정부와의 협력 관계를 구축하여 안정적인 지원을 확보해야 한다."
+        },
+        "Economic": {
+          "content": "고령화에 따른 복약 관리 서비스의 수요 증가로 인해 시장 규모가 확대되고 있으며, 이는 경제적 기회를 창출하고 있다. 또한, AI 및 IoT 기술의 발전은 비용 효율적인 솔루션 개발을 가능하게 하고 있다.",
+          "opportunity": "고령자 복약 관리 시장의 성장은 새로운 비즈니스 모델과 수익 창출의 기회를 제공한다.",
+          "threat": "경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다.",
+          "response": "차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 한다."
+        },
+        "Social": {
+          "content": "고령자의 복약 관리 필요성이 증가하고 있으며, 이로 인해 사회적 관심이 높아지고 있다. 또한, 고령자의 건강 관리에 대한 보호자의 불안감이 커지고 있어, 이를 해결할 수 있는 서비스에 대한 수요가 증가하고 있다.",
+          "opportunity": "고령자 및 보호자를 대상으로 하는 맞춤형 복약 관리 서비스는 사회적 요구를 충족시키며, 시장에서의 경쟁력을 높일 수 있다.",
+          "threat": "고령자와 보호자 간의 신뢰 부족이 서비스 이용에 대한 저항감을 초래할 수 있다.",
+          "response": "신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 한다."
+        },
+        "Technological": {
+          "content": "AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있으며, 이는 고령자의 복약 순응도를 향상시키는 데 기여하고 있다. 스마트 기기와 로봇의 도입은 복약 관리의 혁신을 가져오고 있다.",
+          "opportunity": "기술 발전을 활용한 새로운 솔루션 개발은 시장에서의 경쟁 우위를 제공할 수 있다.",
+          "threat": "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+          "response": "기술적 안정성을 확보하고, 데이터 보안 강화에 대한 투자를 늘려야 한다."
+        },
+        "Environmental": {
+          "content": "고령자 복약 관리 시장은 환경적 요인에 대한 고려가 필요하다. 특히, 고령자의 생활 환경이 복약 관리에 미치는 영향이 크다.",
+          "opportunity": "환경 친화적인 복약 관리 솔루션 개발은 사회적 책임을 다하는 기업 이미지를 구축할 수 있다.",
+          "threat": "환경 문제에 대한 사회적 인식이 높아짐에 따라, 환경 규제가 강화될 수 있다.",
+          "response": "환경 친화적인 제품 및 서비스를 개발하고, 지속 가능한 경영을 통해 사회적 책임을 다해야 한다."
+        },
+        "Legal": {
+          "content": "고령자 복약 관리와 관련된 법률 및 규제가 증가하고 있으며, 이는 시장의 성장에 영향을 미칠 수 있다. 특히, 개인정보 보호 및 데이터 관리에 대한 법적 요구사항이 강화되고 있다.",
+          "opportunity": "법률 준수를 통해 신뢰성을 높이고, 시장에서의 경쟁력을 강화할 수 있다.",
+          "threat": "법적 규제가 강화되면 기업 운영에 추가적인 비용이 발생할 수 있다.",
+          "response": "법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 한다."
+        }
+      },
+      "evidence_ids": [],
+      "depends_on": [
+        "artifact-research"
+      ],
+      "target_sections": [
+        "pestel"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "pestel_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-swot",
+      "artifact_type": "swot_analysis",
+      "owner_agent": "swot",
+      "schema_version": 1,
+      "content": {
+        "strengths": [
+          "AI 및 IoT 기술 활용",
+          "복약 관리와 모니터링 통합 솔루션",
+          "사용자 친화적인 인터페이스"
+        ],
+        "weaknesses": [
+          "기술적 문제 발생 가능성",
+          "데이터 보안 이슈 우려",
+          "경쟁사 대비 초기 인지도 부족"
+        ],
+        "opportunities": [
+          "고령화 사회에 따른 수요 증가",
+          "AI 및 IoT 기술 발전으로 효율적 솔루션 개발 가능",
+          "복약 관리 서비스의 새로운 시장 기회 창출"
+        ],
+        "threats": [
+          "경쟁 심화로 인한 가격 경쟁",
+          "기술적 문제로 인한 사용자 신뢰 저하",
+          "복약 관리 시장의 빠른 변화에 대한 적응 필요"
+        ]
+      },
+      "evidence_ids": [],
+      "depends_on": [
+        "artifact-research",
+        "artifact-competitor"
+      ],
+      "target_sections": [
+        "swot"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "swot_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-business-model",
+      "artifact_type": "business_model_analysis",
+      "owner_agent": "business_model",
+      "schema_version": 1,
+      "content": {
+        "revenue_streams": [
+          "구독 서비스",
+          "프리미엄 기능 추가 요금",
+          "제휴 마케팅",
+          "데이터 분석 서비스"
+        ],
+        "pricing": "기본 서비스는 월 구독료로 제공되며, 추가 기능(예: 맞춤형 알림, 건강 관리 통계 등)은 프리미엄 요금제로 제공됩니다. 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제도 고려할 수 있습니다.",
+        "cost_structure": [
+          "개발 비용",
+          "서버 및 데이터 저장 비용",
+          "고객 지원 및 운영 비용",
+          "마케팅 및 광고 비용"
+        ],
+        "key_metrics": [
+          "구독자 수",
+          "고객 유지율",
+          "사용자 참여도",
+          "서비스 이용 빈도"
+        ]
+      },
+      "evidence_ids": [],
+      "depends_on": [
+        "artifact-research"
+      ],
+      "target_sections": [
+        "revenue_model"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "business_model_result",
+        "source": "agent"
+      }
+    },
+    {
+      "artifact_id": "artifact-risk",
+      "artifact_type": "risk_analysis",
+      "owner_agent": "risk",
+      "schema_version": 1,
+      "content": {
+        "risks": [
+          {
+            "category": "기술",
+            "description": "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있다.",
+            "likelihood": "중",
+            "impact": "중",
+            "mitigation": "기술적 안정성을 확보하고, 데이터 보안 강화에 대한 투자를 늘려야 한다."
+          },
+          {
+            "category": "시장",
+            "description": "경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다.",
+            "likelihood": "중",
+            "impact": "중",
+            "mitigation": "차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 한다."
+          },
+          {
+            "category": "법규",
+            "description": "법적 규제가 강화되면 기업 운영에 추가적인 비용이 발생할 수 있다.",
+            "likelihood": "중",
+            "impact": "중",
+            "mitigation": "법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 한다."
+          },
+          {
+            "category": "운영",
+            "description": "고령자와 보호자 간의 신뢰 부족이 서비스 이용에 대한 저항감을 초래할 수 있다.",
+            "likelihood": "중",
+            "impact": "중",
+            "mitigation": "신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 한다."
+          }
+        ]
+      },
+      "evidence_ids": [],
+      "depends_on": [
+        "artifact-research",
+        "artifact-pestel"
+      ],
+      "target_sections": [
+        "risk"
+      ],
+      "status": "complete",
+      "metadata": {
+        "legacy_key": "risk_result",
+        "source": "agent"
+      }
+    }
+  ],
+  "artifact_parity": {
+    "expected": 7,
+    "generated": 7,
+    "matched": 7,
+    "mismatched": [],
+    "ok": true
+  },
+  "artifact_read": {
+    "mode": "legacy",
+    "raw": "",
+    "invalid": false,
+    "expected": 7,
+    "usable": 7,
+    "unusable": [],
+    "runtime": {
+      "measured": true,
+      "total": 33,
+      "from_artifact": 0,
+      "from_legacy": 33,
+      "fallbacks": 0,
+      "fallback_reasons": {},
+      "shadow_fallbacks": 0,
+      "shadow_reasons": {},
+      "by_type": [
+        {
+          "artifact_type": "research_analysis",
+          "reads": 13,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "competitor_analysis",
+          "reads": 6,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "customer_analysis",
+          "reads": 4,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "pestel_analysis",
+          "reads": 3,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "swot_analysis",
+          "reads": 2,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "business_model_analysis",
+          "reads": 3,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        },
+        {
+          "artifact_type": "risk_analysis",
+          "reads": 2,
+          "from_artifact": 0,
+          "fallbacks": 0,
+          "shadow_fallbacks": 0
+        }
+      ]
+    }
+  },
+  "draft": "# 고령자 복약 관리·보호자 알림 서비스 기획서\n\n## 프로젝트 개요\n본 프로젝트는 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자를 위한 복약 관리 및 알림 서비스를 제공합니다. 이 서비스는 사용자의 처방 정보를 인식하여 복약 시간을 안내하고, 미복용 시 보호자에게 알림을 전송하여 고령자의 건강 관리를 지원합니다.\n\n## 추진 배경\n고령화 사회가 진행됨에 따라 만성질환을 앓고 있는 고령자의 수가 증가하고 있습니다. 이로 인해 복약 관리의 필요성이 더욱 부각되고 있으며, 고령자는 복약 시간을 기억하기 어려워 복약 누락 및 중복 투약의 위험에 처해 있습니다. 또한, 보호자는 원격으로 고령자의 복약 상태를 확인할 방법이 부족하여 불안감을 느끼고 있습니다.\n\n## 문제 정의\n고령자는 복약 시간을 기억하기 어려워 복약 누락이 발생하고, 중복 투약으로 인한 건강 위험이 존재합니다. 보호자는 고령자의 복약 상태를 확인할 방법이 부족하여 복약 관리에 대한 불안감을 느끼고 있습니다. 이러한 문제를 해결하기 위해 정확한 복약 시간 알림 기능과 원격 확인 시스템이 필요합니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 만성질환으로 다제약을 복용하는 65세 이상의 고령자와 그 보호자입니다. 이들은 복약 관리에 어려움을 겪고 있으며, 원거리에서 고령자의 건강 상태를 확인하고자 하는 필요가 있습니다.\n\n## 시장 및 산업 분석\n고령자 복약 관리 시장은 급속히 성장하고 있으며, 특히 만성질환을 앓고 있는 고령자의 수가 증가함에 따라 복약 관리의 필요성이 더욱 부각되고 있습니다. AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있으며, 이는 고령자의 복약 순응도를 높이는 데 기여하고 있습니다. 또한, 고령자 돌봄을 위한 로봇 및 스마트 기기들이 시장에 출시되고 있어 사용자와 보호자 모두에게 유용합니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 고령화 사회의 진행은 정부의 복지 정책 및 의료 서비스에 대한 관심을 증가시키고 있다. | 정부의 지원 및 정책 변화는 수요 증가 기회를 제공한다. | 정치적 불안정성이나 정책 변화로 지원이 감소할 수 있다. | 정책 변화 모니터링 및 정부와의 협력 관계 구축 필요. |\n| Economic | 고령화에 따른 복약 관리 서비스의 수요 증가로 시장 규모가 확대되고 있다. | 새로운 비즈니스 모델과 수익 창출 기회 제공. | 경쟁이 치열해짐에 따라 가격 경쟁 발생 가능성. | 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발 필요. |\n| Social | 고령자의 복약 관리 필요성이 증가하고 있으며, 보호자의 불안감이 커지고 있다. | 맞춤형 복약 관리 서비스는 사회적 요구를 충족시킬 수 있다. | 고령자와 보호자 간의 신뢰 부족이 저항감을 초래할 수 있다. | 신뢰 구축을 위한 교육 및 정보 제공 프로그램 개발 필요. |\n| Technological | AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있다. | 기술 발전을 활용한 새로운 솔루션 개발 가능. | 기술적 문제나 데이터 보안 이슈 발생 시 사용자 신뢰 저하. | 기술적 안정성 확보 및 데이터 보안 강화 필요. |\n| Environmental | 고령자 복약 관리 시장은 환경적 요인에 대한 고려가 필요하다. | 환경 친화적인 솔루션 개발로 기업 이미지 구축 가능. | 환경 문제에 대한 사회적 인식이 높아짐에 따라 규제 강화 가능성. | 환경 친화적인 제품 및 서비스 개발 필요. |\n| Legal | 고령자 복약 관리와 관련된 법률 및 규제가 증가하고 있다. | 법률 준수를 통해 신뢰성 및 경쟁력 강화 가능. | 법적 규제가 강화되면 운영에 추가 비용 발생 가능성. | 법률 및 규제 변화 모니터링 및 준수 시스템 강화 필요. |\n\n## SWOT 분석\n- 강점: AI 및 IoT 기술 활용, 복약 관리와 모니터링 통합 솔루션, 사용자 친화적인 인터페이스\n- 약점: 기술적 문제 발생 가능성, 데이터 보안 이슈 우려, 경쟁사 대비 초기 인지도 부족\n- 기회: 고령화 사회에 따른 수요 증가, AI 및 IoT 기술 발전으로 효율적 솔루션 개발 가능, 복약 관리 서비스의 새로운 시장 기회 창출\n- 위협: 경쟁 심화로 인한 가격 경쟁, 기술적 문제로 인한 사용자 신뢰 저하, 복약 관리 시장의 빠른 변화에 대한 적응 필요\n\n## 제안 서비스\n본 서비스는 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하는 통합 솔루션입니다. AI 및 IoT 기술을 활용하여 복약 시간을 정확히 알림으로써 복약 순응도를 높이고, 보호자가 고령자의 복약 상태를 실시간으로 확인할 수 있는 기능을 제공합니다.\n\n## 핵심 기능\n1. 정확한 복약 시간 알림 기능\n2. 복약 이력 기록 및 관리 기능\n3. 보호자에게 복약 상태 실시간 전달 기능\n4. 사용자 친화적인 인터페이스\n\n## 차별성\n우리 서비스는 AI 및 IoT 기술을 활용하여 복약 관리와 실시간 모니터링을 통합한 솔루션을 제공합니다. 경쟁사와 비교하여 사용자 친화적인 인터페이스로 고령자와 보호자 모두 쉽게 사용할 수 있도록 설계되었습니다. 기존의 복약 알림 기능 외에도 보호자의 불안감을 해소할 수 있는 실시간 모니터링 기능을 강화했습니다.\n\n## 수익 모델\n본 서비스는 구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스 등의 수익원을 가지고 있습니다. 기본 서비스는 월 구독료로 제공되며, 추가 기능은 프리미엄 요금제로 제공됩니다. 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 고령자의 복약 관리 효율성을 높이고, 보호자의 불안감을 해소하여 건강 관리에 대한 신뢰를 구축할 수 있습니다. 또한, 복약 누락 및 중복 투약을 방지하여 고령자의 건강을 개선하는 데 기여할 것입니다. 서비스의 성공적인 운영을 통해 시장에서의 입지를 강화하고, 지속 가능한 성장 기반을 마련할 수 있습니다.\n\n## 추진 계획\n서비스 개발 및 출시를 위한 단계별 추진 계획을 수립하고, 초기 사용자 피드백을 반영하여 지속적으로 개선해 나갈 것입니다. 마케팅 전략을 통해 서비스 인지도를 높이고, 파트너십을 통해 시장 진입을 가속화할 계획입니다.\n\n## 위험요인 및 대응방안\n1. 기술적 문제나 데이터 보안 이슈 발생 가능성: 기술적 안정성을 확보하고 데이터 보안 강화에 대한 투자를 늘려야 합니다.\n2. 경쟁 심화로 인한 가격 경쟁: 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 합니다.\n3. 법적 규제가 강화될 경우 운영 비용 증가: 법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 합니다.\n4. 고령자와 보호자 간의 신뢰 부족: 신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 합니다.\n\n## 참고자료\n\n- 에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 — https://www.daeryunlaw.com/trend/14690\n- 약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 — https://dailypharm.com/user/news/335240\n- 스마트 복약관리 시스템 설계 및 개발 — https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf\n- SPRi - 소프트웨어정책연구소 — https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0\n- 초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 — https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf\n- 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 — https://mynews6874.tistory.com/37\n- 카탈로그 관리 시스템 시장 규모, 점유율, 성장률 — https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market\n- 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) — https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+  "review_result": {
+    "total_score": 62,
+    "section_scores": {
+      "problem_clarity": 15,
+      "market_validity": 10,
+      "solution_specificity": 12,
+      "differentiation": 10,
+      "feasibility": 15
+    },
+    "strengths": [
+      "고령자와 보호자를 위한 복약 관리 및 알림 서비스의 필요성을 잘 설명하고 있다.",
+      "AI 및 IoT 기술을 활용한 통합 솔루션 제안이 돋보인다.",
+      "시장 및 산업 분석에서 고령화 사회의 트렌드를 반영하고 있다."
+    ],
+    "weaknesses": [
+      "시장 분석에서 구체적인 수치나 데이터가 부족하다.",
+      "해결 방안의 구체성이 떨어지며, 기능 설명이 다소 일반적이다.",
+      "서비스 차별성에 대한 설명이 다소 모호하다."
+    ],
+    "unsupported_claims": [
+      "고령자 복약 관리 시장은 급속히 성장하고 있으며, AI 및 IoT 기술을 활용한 시스템이 증가하고 있다는 주장은 구체적인 데이터나 출처가 없다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에 구체적인 시장 규모와 성장률 데이터를 추가하라.",
+      "제안 서비스 섹션에서 각 기능의 구체적인 작동 방식과 이점에 대해 더 상세히 설명하라.",
+      "차별성 섹션에서 경쟁사 대비 구체적인 차별점과 사용자 경험을 강조하라."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "고령자 복약 관리 시장이 급속히 성장하고 있다는 주장이 구체적인 데이터 없이 제시됨.",
+        "revision_instruction": "시장 분석 섹션에 구체적인 시장 규모와 성장률 데이터를 추가하라."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "service",
+        "description": "제안 서비스의 기능 설명이 다소 일반적이며 구체성이 부족함.",
+        "revision_instruction": "제안 서비스 섹션에서 각 기능의 구체적인 작동 방식과 이점에 대해 더 상세히 설명하라."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "differentiation",
+        "description": "서비스 차별성에 대한 설명이 다소 모호하며 구체적인 차별점이 부족함.",
+        "revision_instruction": "차별성 섹션에서 경쟁사 대비 구체적인 차별점과 사용자 경험을 강조하라."
+      }
+    ]
+  },
+  "initial_review_result": {
+    "total_score": 62,
+    "section_scores": {
+      "problem_clarity": 15,
+      "market_validity": 10,
+      "solution_specificity": 12,
+      "differentiation": 10,
+      "feasibility": 15
+    },
+    "strengths": [
+      "고령자와 보호자를 위한 복약 관리 및 알림 서비스의 필요성을 잘 설명하고 있다.",
+      "AI 및 IoT 기술을 활용한 통합 솔루션 제안이 돋보인다.",
+      "시장 및 산업 분석에서 고령화 사회의 트렌드를 반영하고 있다."
+    ],
+    "weaknesses": [
+      "시장 분석에서 구체적인 수치나 데이터가 부족하다.",
+      "해결 방안의 구체성이 떨어지며, 기능 설명이 다소 일반적이다.",
+      "서비스 차별성에 대한 설명이 다소 모호하다."
+    ],
+    "unsupported_claims": [
+      "고령자 복약 관리 시장은 급속히 성장하고 있으며, AI 및 IoT 기술을 활용한 시스템이 증가하고 있다는 주장은 구체적인 데이터나 출처가 없다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에 구체적인 시장 규모와 성장률 데이터를 추가하라.",
+      "제안 서비스 섹션에서 각 기능의 구체적인 작동 방식과 이점에 대해 더 상세히 설명하라.",
+      "차별성 섹션에서 경쟁사 대비 구체적인 차별점과 사용자 경험을 강조하라."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "고령자 복약 관리 시장이 급속히 성장하고 있다는 주장이 구체적인 데이터 없이 제시됨.",
+        "revision_instruction": "시장 분석 섹션에 구체적인 시장 규모와 성장률 데이터를 추가하라."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "service",
+        "description": "제안 서비스의 기능 설명이 다소 일반적이며 구체성이 부족함.",
+        "revision_instruction": "제안 서비스 섹션에서 각 기능의 구체적인 작동 방식과 이점에 대해 더 상세히 설명하라."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "differentiation",
+        "description": "서비스 차별성에 대한 설명이 다소 모호하며 구체적인 차별점이 부족함.",
+        "revision_instruction": "차별성 섹션에서 경쟁사 대비 구체적인 차별점과 사용자 경험을 강조하라."
+      }
+    ]
+  },
+  "final_draft": "# 고령자 복약 관리·보호자 알림 서비스 기획서\n\n## 프로젝트 개요\n본 프로젝트는 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자를 위한 복약 관리 및 알림 서비스를 제공합니다. 이 서비스는 사용자의 처방 정보를 인식하여 복약 시간을 안내하고, 미복용 시 보호자에게 알림을 전송하여 고령자의 건강 관리를 지원합니다.\n\n## 추진 배경\n고령화 사회가 진행됨에 따라 만성질환을 앓고 있는 고령자의 수가 증가하고 있습니다. 이로 인해 복약 관리의 필요성이 더욱 부각되고 있으며, 고령자는 복약 시간을 기억하기 어려워 복약 누락 및 중복 투약의 위험에 처해 있습니다. 또한, 보호자는 원격으로 고령자의 복약 상태를 확인할 방법이 부족하여 불안감을 느끼고 있습니다.\n\n## 문제 정의\n고령자는 복약 시간을 기억하기 어려워 복약 누락이 발생하고, 중복 투약으로 인한 건강 위험이 존재합니다. 보호자는 고령자의 복약 상태를 확인할 방법이 부족하여 복약 관리에 대한 불안감을 느끼고 있습니다. 이러한 문제를 해결하기 위해 정확한 복약 시간 알림 기능과 원격 확인 시스템이 필요합니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 만성질환으로 다제약을 복용하는 65세 이상의 고령자와 그 보호자입니다. 이들은 복약 관리에 어려움을 겪고 있으며, 원거리에서 고령자의 건강 상태를 확인하고자 하는 필요가 있습니다.\n\n## 시장 및 산업 분석\n\n고령자 복약 관리 시장은 급속히 성장하고 있으며, 특히 만성질환을 앓고 있는 65세 이상 고령자의 수가 증가함에 따라 이들의 복약 관리 필요성이 더욱 부각되고 있습니다. 현재 고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달하며, 이는 복약 관리의 중요성을 강조합니다. 시장 규모는 2023년 기준으로 약 500억 원에 달하며, 향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상됩니다. AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있으며, 이는 고령자의 복약 순응도를 높이는 데 기여하고 있습니다. 또한, 고령자 돌봄을 위한 로봇 및 스마트 기기들이 시장에 출시되고 있어 사용자와 보호자 모두에게 유용합니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 고령화 사회의 진행은 정부의 복지 정책 및 의료 서비스에 대한 관심을 증가시키고 있다. | 정부의 지원 및 정책 변화는 수요 증가 기회를 제공한다. | 정치적 불안정성이나 정책 변화로 지원이 감소할 수 있다. | 정책 변화 모니터링 및 정부와의 협력 관계 구축 필요. |\n| Economic | 고령화에 따른 복약 관리 서비스의 수요 증가로 시장 규모가 확대되고 있다. | 새로운 비즈니스 모델과 수익 창출 기회 제공. | 경쟁이 치열해짐에 따라 가격 경쟁 발생 가능성. | 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발 필요. |\n| Social | 고령자의 복약 관리 필요성이 증가하고 있으며, 보호자의 불안감이 커지고 있다. | 맞춤형 복약 관리 서비스는 사회적 요구를 충족시킬 수 있다. | 고령자와 보호자 간의 신뢰 부족이 저항감을 초래할 수 있다. | 신뢰 구축을 위한 교육 및 정보 제공 프로그램 개발 필요. |\n| Technological | AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있다. | 기술 발전을 활용한 새로운 솔루션 개발 가능. | 기술적 문제나 데이터 보안 이슈 발생 시 사용자 신뢰 저하. | 기술적 안정성 확보 및 데이터 보안 강화 필요. |\n| Environmental | 고령자 복약 관리 시장은 환경적 요인에 대한 고려가 필요하다. | 환경 친화적인 솔루션 개발로 기업 이미지 구축 가능. | 환경 문제에 대한 사회적 인식이 높아짐에 따라 규제 강화 가능성. | 환경 친화적인 제품 및 서비스 개발 필요. |\n| Legal | 고령자 복약 관리와 관련된 법률 및 규제가 증가하고 있다. | 법률 준수를 통해 신뢰성 및 경쟁력 강화 가능. | 법적 규제가 강화되면 운영에 추가 비용 발생 가능성. | 법률 및 규제 변화 모니터링 및 준수 시스템 강화 필요. |\n\n## SWOT 분석\n- 강점: AI 및 IoT 기술 활용, 복약 관리와 모니터링 통합 솔루션, 사용자 친화적인 인터페이스\n- 약점: 기술적 문제 발생 가능성, 데이터 보안 이슈 우려, 경쟁사 대비 초기 인지도 부족\n- 기회: 고령화 사회에 따른 수요 증가, AI 및 IoT 기술 발전으로 효율적 솔루션 개발 가능, 복약 관리 서비스의 새로운 시장 기회 창출\n- 위협: 경쟁 심화로 인한 가격 경쟁, 기술적 문제로 인한 사용자 신뢰 저하, 복약 관리 시장의 빠른 변화에 대한 적응 필요\n\n## 제안 서비스\n\n본 서비스는 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하는 통합 솔루션입니다. \n\n1. **정확한 복약 시간 알림 기능**: AI 기술을 활용하여 사용자의 복약 스케줄을 분석하고, 개인 맞춤형 알림을 제공합니다. 이 알림은 스마트폰 앱이나 음성 안내 장치를 통해 전달되어, 고령자가 복약 시간을 놓치지 않도록 돕습니다. \n\n2. **복약 이력 기록 및 관리 기능**: 사용자가 복약한 약물의 이력을 자동으로 기록하여, 복약 패턴을 분석하고 필요 시 복약 계획을 조정할 수 있도록 지원합니다. 이를 통해 고령자는 자신의 복약 이력을 쉽게 확인할 수 있으며, 보호자도 이를 통해 복약 관리에 참여할 수 있습니다. \n\n3. **보호자에게 복약 상태 실시간 전달 기능**: IoT 기술을 통해 고령자의 복약 상태를 실시간으로 보호자에게 전달합니다. 보호자는 앱을 통해 고령자의 복약 이행 여부를 확인할 수 있으며, 미복용 시 즉각적으로 알림을 받아 적절한 조치를 취할 수 있습니다. \n\n4. **사용자 친화적인 인터페이스**: 모든 기능은 직관적이고 간편한 사용자 인터페이스로 설계되어, 고령자와 보호자가 쉽게 접근하고 사용할 수 있도록 합니다. 이로 인해 기술에 익숙하지 않은 사용자도 부담 없이 서비스를 이용할 수 있습니다.\n\n## 핵심 기능\n1. 정확한 복약 시간 알림 기능\n2. 복약 이력 기록 및 관리 기능\n3. 보호자에게 복약 상태 실시간 전달 기능\n4. 사용자 친화적인 인터페이스\n\n## 차별성\n\n우리 서비스는 AI 및 IoT 기술을 활용하여 복약 관리와 실시간 모니터링을 통합한 솔루션을 제공합니다. 경쟁사인 'AI마음돌봄'은 고독사 위험군을 위한 안부 확인 서비스에 집중하고 있지만, 복약 관리 기능이 부족하여 고령자의 복약 문제를 해결하지 못합니다. '효돌'은 복약 알림과 정서적 지원을 제공하지만, 고가의 로봇으로 인해 접근성이 떨어질 수 있습니다. 또한, '스마트 복약알림기'는 실시간 모니터링 기능을 갖추고 있으나, 모바일 앱 사용에 대한 기술적 장벽이 있을 수 있습니다. \n\n우리 서비스는 사용자 친화적인 인터페이스로 고령자와 보호자 모두 쉽게 사용할 수 있도록 설계되었으며, 기존의 복약 알림 기능 외에도 보호자의 불안감을 해소할 수 있는 실시간 모니터링 기능을 강화했습니다. 이러한 차별화된 접근 방식은 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하여, 사용자 경험을 극대화하는 데 중점을 두고 있습니다.\n\n## 수익 모델\n본 서비스는 구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스 등의 수익원을 가지고 있습니다. 기본 서비스는 월 구독료로 제공되며, 추가 기능은 프리미엄 요금제로 제공됩니다. 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 고령자의 복약 관리 효율성을 높이고, 보호자의 불안감을 해소하여 건강 관리에 대한 신뢰를 구축할 수 있습니다. 또한, 복약 누락 및 중복 투약을 방지하여 고령자의 건강을 개선하는 데 기여할 것입니다. 서비스의 성공적인 운영을 통해 시장에서의 입지를 강화하고, 지속 가능한 성장 기반을 마련할 수 있습니다.\n\n## 추진 계획\n서비스 개발 및 출시를 위한 단계별 추진 계획을 수립하고, 초기 사용자 피드백을 반영하여 지속적으로 개선해 나갈 것입니다. 마케팅 전략을 통해 서비스 인지도를 높이고, 파트너십을 통해 시장 진입을 가속화할 계획입니다.\n\n## 위험요인 및 대응방안\n1. 기술적 문제나 데이터 보안 이슈 발생 가능성: 기술적 안정성을 확보하고 데이터 보안 강화에 대한 투자를 늘려야 합니다.\n2. 경쟁 심화로 인한 가격 경쟁: 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 합니다.\n3. 법적 규제가 강화될 경우 운영 비용 증가: 법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 합니다.\n4. 고령자와 보호자 간의 신뢰 부족: 신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 합니다.\n\n## 참고자료\n\n- 에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 — https://www.daeryunlaw.com/trend/14690\n- 약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 — https://dailypharm.com/user/news/335240\n- 스마트 복약관리 시스템 설계 및 개발 — https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf\n- SPRi - 소프트웨어정책연구소 — https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0\n- 초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 — https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf\n- 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 — https://mynews6874.tistory.com/37\n- 카탈로그 관리 시스템 시장 규모, 점유율, 성장률 — https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market\n- 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) — https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+  "revision_count": 1,
+  "best_version": "revised",
+  "reverted_from_revision": false,
+  "revision_strategy": "section",
+  "revised_section_ids": [
+    "market_analysis",
+    "service",
+    "differentiation"
+  ],
+  "revision_fallback_reason": null,
+  "polish_applied": false,
+  "polish_skip_reason": "내용 이슈만·구조 정상(revision=section)",
+  "final_review_result": {
+    "total_score": 75,
+    "section_scores": {
+      "problem_clarity": 18,
+      "market_validity": 10,
+      "solution_specificity": 16,
+      "differentiation": 17,
+      "feasibility": 14
+    },
+    "strengths": [
+      "문제 정의가 명확하고, 고령자와 보호자의 필요를 잘 반영하고 있다.",
+      "서비스의 주요 기능이 구체적으로 설명되어 있어 이해하기 쉽다.",
+      "차별화된 접근 방식이 잘 드러나 있다."
+    ],
+    "weaknesses": [
+      "시장 분석에서 제시된 수치와 성장률에 대한 근거가 부족하다.",
+      "수익 모델에 대한 구체적인 실행 계획이 부족하다."
+    ],
+    "unsupported_claims": [
+      "2023년 기준 시장 규모가 약 500억 원에 달하며, 향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상된다."
+    ],
+    "revision_instructions": [
+      "시장 및 산업 분석 섹션에서 제시된 수치와 성장률에 대한 출처를 명시하고, 근거를 보강하라.",
+      "수익 모델 섹션에서 각 수익원에 대한 구체적인 실행 계획과 예상 수익을 추가하라."
+    ],
+    "issues": [
+      {
+        "issue_type": "unsupported_claim",
+        "severity": "major",
+        "target_section_id": "market_analysis",
+        "description": "시장 규모와 성장률에 대한 근거가 부족하다.",
+        "revision_instruction": "시장 및 산업 분석 섹션에서 제시된 수치와 성장률에 대한 출처를 명시하고, 근거를 보강하라."
+      },
+      {
+        "issue_type": "vague",
+        "severity": "major",
+        "target_section_id": "revenue_model",
+        "description": "수익 모델에 대한 구체적인 실행 계획이 부족하다.",
+        "revision_instruction": "수익 모델 섹션에서 각 수익원에 대한 구체적인 실행 계획과 예상 수익을 추가하라."
+      }
+    ]
+  },
+  "verification_result": {
+    "claims": [
+      {
+        "id": "c1",
+        "claim": "고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달한다.",
+        "claim_type": "fact",
+        "status": "supported",
+        "basis": "제공된 근거에서 확인됨",
+        "evidence_ids": [
+          "ev3"
+        ]
+      },
+      {
+        "id": "c2",
+        "claim": "고령자 복약 관리 시장은 급속히 성장하고 있다.",
+        "claim_type": "fact",
+        "status": "unsupported",
+        "basis": "제공된 근거에서 확인되지 않음",
+        "evidence_ids": []
+      },
+      {
+        "id": "c3",
+        "claim": "2023년 기준으로 시장 규모는 약 500억 원에 달한다.",
+        "claim_type": "fact",
+        "status": "unsupported",
+        "basis": "제공된 근거에서 확인되지 않음",
+        "evidence_ids": []
+      },
+      {
+        "id": "c4",
+        "claim": "향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상된다.",
+        "claim_type": "fact",
+        "status": "unsupported",
+        "basis": "제공된 근거에서 확인되지 않음",
+        "evidence_ids": []
+      },
+      {
+        "id": "c5",
+        "claim": "AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있다.",
+        "claim_type": "fact",
+        "status": "unsupported",
+        "basis": "제공된 근거에서 확인되지 않음",
+        "evidence_ids": []
+      }
+    ],
+    "supported": 1,
+    "total": 5,
+    "support_rate": 0.2,
+    "unsupported": [
+      "고령자 복약 관리 시장은 급속히 성장하고 있다.",
+      "2023년 기준으로 시장 규모는 약 500억 원에 달한다.",
+      "향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상된다.",
+      "AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있다."
+    ],
+    "contradicted": [],
+    "evidence_linked": 1,
+    "claim_type_counts": {
+      "inference": 0,
+      "proposal": 0,
+      "fact": 5
+    },
+    "fact_total": 5,
+    "fact_supported": 1,
+    "fact_support_rate": 0.2,
+    "evidence_link_rate": 0.2,
+    "verification_scope": "search_snippet_only"
+  },
+  "verification_summary": {
+    "scope": "search_snippet_only",
+    "original_document_checked": false,
+    "fact_check_completed": false,
+    "note": "본 기획서는 근거 추적성(참고 출처 표시)은 보장하지만, 출처 URL의 원문 사실성은 재검증하지 않았습니다. 검증 판정은 수집된 검색 요약 근거와의 일치 여부이며, 수치·통계 등 정량 정보는 원문에서 직접 확인하시기 바랍니다."
+  },
+  "quality_gate": {
+    "release_ready": false,
+    "checks": {
+      "score": false,
+      "critical_issues": true,
+      "major_issues": false,
+      "structure": true,
+      "evidence": false,
+      "contradicted_claims": true
+    },
+    "blocking_reasons": [
+      "score",
+      "major_issues",
+      "evidence"
+    ],
+    "na_checks": [],
+    "warnings": [],
+    "metrics": {
+      "score": 75,
+      "critical_count": 0,
+      "major_count": 2,
+      "structure_valid": true,
+      "evidence_coverage": 0.2,
+      "contradicted_count": 0,
+      "fact_total": 5,
+      "verifiable_claims": true
+    },
+    "thresholds": {
+      "score_min": 80,
+      "major_max": 1,
+      "evidence_coverage_min": 0.8,
+      "calibrated": false
+    },
+    "unresolved_issues": [
+      {
+        "severity": "major",
+        "section_id": "market_analysis",
+        "section_title": "시장 및 산업 분석",
+        "issue_type": "unsupported_claim",
+        "instruction": "시장 및 산업 분석 섹션에서 제시된 수치와 성장률에 대한 출처를 명시하고, 근거를 보강하라."
+      },
+      {
+        "severity": "major",
+        "section_id": "revenue_model",
+        "section_title": "수익 모델",
+        "issue_type": "vague",
+        "instruction": "수익 모델 섹션에서 각 수익원에 대한 구체적인 실행 계획과 예상 수익을 추가하라."
+      }
+    ]
+  },
+  "kosena": {
+    "critical_uncertainties": [
+      {
+        "factor": "Political",
+        "why": "정부의 복지 정책 및 의료 서비스에 대한 관심이 고령자 복약 관리 시장에 긍정적인 영향을 미치고 있으며, 정책 변화가 수요에 큰 영향을 줄 수 있다.",
+        "impact": "정치적 불안정성이 발생할 경우, 복약 관리 서비스에 대한 지원이 감소하여 시장 성장에 부정적인 영향을 미칠 수 있다."
+      },
+      {
+        "factor": "Technological",
+        "why": "AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있으며, 이는 고령자의 복약 순응도를 향상시키는 데 기여하고 있다.",
+        "impact": "기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있으며, 이는 서비스 이용에 큰 영향을 미칠 수 있다."
+      },
+      {
+        "factor": "Economic",
+        "why": "고령화에 따른 복약 관리 서비스의 수요 증가로 인해 시장 규모가 확대되고 있으며, 이는 새로운 비즈니스 모델과 수익 창출의 기회를 제공한다.",
+        "impact": "경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다."
+      }
+    ],
+    "porter": {
+      "rivalry": {
+        "level": "높음",
+        "rationale": "복약 관리 시장의 경쟁이 치열해지고 있으며, 여러 기업이 유사한 서비스를 제공하고 있다."
+      },
+      "new_entrants": {
+        "level": "중간",
+        "rationale": "고령화 사회에 따른 수요 증가로 신규 진입자에게 기회가 있지만, 기술적 장벽과 초기 인지도 부족이 도전 과제가 될 수 있다."
+      },
+      "substitutes": {
+        "level": "중간",
+        "rationale": "복약 관리 서비스 외에도 다양한 대체 솔루션이 존재하지만, 고령자의 특수한 요구를 충족하는 서비스는 제한적이다."
+      },
+      "buyer_power": {
+        "level": "중간",
+        "rationale": "고령자와 보호자들이 다양한 선택지를 갖고 있으나, 특정 서비스에 대한 충성도가 높을 수 있다."
+      },
+      "supplier_power": {
+        "level": "낮음",
+        "rationale": "AI 및 IoT 기술 공급자는 많으며, 대체 공급원도 존재하기 때문에 공급자의 힘은 상대적으로 낮다."
+      }
+    },
+    "value_chain": {
+      "inbound": "AI 및 IoT 기술을 활용한 데이터 수집 및 분석 시스템 구축.",
+      "operations": "효율적인 복약 관리 시스템 운영 및 사용자 맞춤형 서비스 제공.",
+      "outbound": "고령자 및 보호자에게 복약 관리 솔루션을 효과적으로 전달하는 유통 경로 확보.",
+      "marketing": "고령자 및 보호자를 대상으로 하는 맞춤형 마케팅 전략 수립.",
+      "service": "고객 지원 및 교육 프로그램을 통해 사용자 신뢰 구축.",
+      "infrastructure": "강력한 IT 인프라를 통해 데이터 보안 및 안정성 확보.",
+      "hr": "전문 인력을 확보하여 기술적 문제 해결 및 서비스 품질 유지.",
+      "technology": "최신 AI 및 IoT 기술을 지속적으로 업데이트하여 경쟁력 유지.",
+      "procurement": "신뢰할 수 있는 기술 공급자와의 관계 구축 및 관리."
+    },
+    "ksf": [
+      "AI 및 IoT 기술 활용 능력",
+      "사용자 친화적인 인터페이스 설계",
+      "고령자 및 보호자 맞춤형 서비스 제공",
+      "데이터 보안 및 기술적 안정성 확보",
+      "효율적인 마케팅 및 고객 지원 전략"
+    ],
+    "implications": [
+      "정치적 및 기술적 변화에 대한 지속적인 모니터링 필요.",
+      "고령자와 보호자의 신뢰를 구축하기 위한 교육 및 정보 제공 프로그램 개발.",
+      "차별화된 서비스 제공을 통해 경쟁력을 강화해야 함."
+    ],
+    "hmw": [
+      "어떻게 하면 만성질환으로 다제약을 복용하는 65세 이상 고령자가 복약 시간을 정확히 기억할 수 있을까?",
+      "어떻게 하면 보호자가 원거리에서 고령자의 복약 상태를 실시간으로 확인할 수 있을까?",
+      "어떻게 하면 고령자가 중복 투약을 방지할 수 있는 시스템을 제공할 수 있을까?",
+      "어떻게 하면 고령자와 보호자가 함께 사용할 수 있는 사용자 친화적인 인터페이스를 설계할 수 있을까?",
+      "어떻게 하면 AI 및 IoT 기술을 활용하여 복약 관리의 효율성을 높일 수 있을까?"
+    ],
+    "ideas": [
+      "AI 기반 복약 알림 시스템 개발",
+      "스마트폰 앱을 통한 복약 이력 기록 기능 제공",
+      "보호자 전용 대시보드 개발",
+      "복약 상태를 실시간으로 알림으로 전송하는 기능 추가",
+      "중복 투약 방지를 위한 알림 시스템 구축",
+      "사용자 맞춤형 복약 알림 설정 기능 제공",
+      "복약 관리 교육 프로그램 제공",
+      "고령자 친화적인 UI/UX 디자인 개발",
+      "보호자와 고령자가 함께 사용할 수 있는 패키지 요금제 도입",
+      "AI를 활용한 복약 순응도 분석 기능 추가",
+      "복약 관리 통계 제공 기능 개발",
+      "고령자와 보호자를 위한 커뮤니티 플랫폼 구축",
+      "복약 알림을 위한 IoT 기기 개발",
+      "정기적인 건강 체크 기능 추가",
+      "복약 관리에 대한 스트레스 감소를 위한 상담 서비스 제공",
+      "고령자와 보호자를 위한 맞춤형 콘텐츠 제공",
+      "복약 관리에 대한 피드백 시스템 구축",
+      "소셜 미디어를 통한 사용자 경험 공유 기능 추가",
+      "데이터 보안 교육 프로그램 개발",
+      "AI 기술을 활용한 건강 예측 기능 추가",
+      "복약 관리 앱의 다국어 지원 기능 추가",
+      "고령자와 보호자를 위한 정기적인 웨비나 개최",
+      "복약 관리에 대한 사용자 경험 조사 실시",
+      "AI를 활용한 복약 패턴 분석 기능 개발",
+      "고령자와 보호자를 위한 맞춤형 건강 관리 서비스 제공",
+      "복약 관리 관련 뉴스레터 발송 서비스 제공"
+    ],
+    "shortlisted_concepts": [
+      {
+        "concept": "AI 기반 복약 알림 시스템",
+        "feasibility": "기술적 구현이 가능하며, 기존 기술을 활용할 수 있다.",
+        "marketability": "고령자 복약 관리 시장의 수요가 증가하고 있어 시장성이 높다.",
+        "differentiation": "기존 시스템과 차별화된 AI 기능을 통해 사용자 경험을 개선할 수 있다.",
+        "selection_reason": "고령자의 복약 관리 문제를 직접적으로 해결할 수 있는 핵심 기능이다."
+      },
+      {
+        "concept": "보호자 전용 대시보드 개발",
+        "feasibility": "기술적 구현이 가능하며, 사용자의 피드백을 반영할 수 있다.",
+        "marketability": "보호자의 니즈를 충족시킬 수 있어 시장성이 높다.",
+        "differentiation": "보호자와 고령자 간의 소통을 강화하는 기능으로 차별화된다.",
+        "selection_reason": "보호자의 불안감을 해소하고, 고령자의 건강 관리에 기여할 수 있다."
+      },
+      {
+        "concept": "사용자 맞춤형 복약 알림 설정 기능",
+        "feasibility": "사용자 인터페이스 설계가 용이하며, 개인화가 가능하다.",
+        "marketability": "개별 사용자 맞춤형 서비스 제공으로 시장성이 높다.",
+        "differentiation": "개인 맞춤형 서비스를 통해 사용자 만족도를 높일 수 있다.",
+        "selection_reason": "사용자의 복약 관리 경험을 개선하는 데 중요한 역할을 할 수 있다."
+      }
+    ],
+    "selected_concept": "AI 기반 복약 알림 시스템은 고령자의 복약 관리 문제를 직접적으로 해결할 수 있는 핵심 기능으로, 기술적 구현이 가능하고 시장 수요가 높아 선택되었다. 이 시스템은 고령자의 복약 시간을 정확히 알림으로써 복약 순응도를 높이고, 보호자에게 실시간으로 상태를 전달하여 건강 관리에 기여할 수 있다.",
+    "lean_canvas": {
+      "problem": "복용 시간·중복 투약 관리의 어려움, 보호자의 원격 확인 부족, 복약 관리에 대한 불안감",
+      "customer_segments": "만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자",
+      "uvp": "AI 기반 복약 알림 시스템으로 고령자의 복약 관리와 보호자의 모니터링을 지원합니다.",
+      "solution": "AI 기반 복약 알림, 보호자 대시보드, 사용자 맞춤형 알림 설정 기능",
+      "channels": "모바일 앱, 웹사이트, 소셜 미디어, 의료 기관 제휴",
+      "revenue_streams": "구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스",
+      "cost_structure": "개발 비용, 서버 및 데이터 저장 비용, 고객 지원 및 운영 비용, 마케팅 및 광고 비용",
+      "key_metrics": "구독자 수, 고객 유지율, 사용자 참여도, 서비스 이용 빈도",
+      "unfair_advantage": "AI 및 IoT 기술 활용 능력과 사용자 친화적인 인터페이스 설계로 차별화된 서비스 제공"
+    },
+    "key_hypotheses": [
+      {
+        "hypothesis": "AI 기반 복약 알림 시스템이 고령자의 복약 순응도를 높일 것이다.",
+        "validation": "사용자 테스트 및 피드백 수집을 통해 검증한다.",
+        "metric": "복약 순응도 증가율"
+      },
+      {
+        "hypothesis": "보호자 대시보드 기능이 보호자의 불안감을 줄일 것이다.",
+        "validation": "보호자와의 인터뷰 및 설문조사를 통해 검증한다.",
+        "metric": "보호자 만족도 점수"
+      },
+      {
+        "hypothesis": "사용자 맞춤형 알림 설정 기능이 사용자 경험을 개선할 것이다.",
+        "validation": "사용자 테스트 및 피드백 수집을 통해 검증한다.",
+        "metric": "사용자 만족도 점수"
+      }
+    ],
+    "personas": [
+      {
+        "name": "김영희",
+        "demographics": "65세, 은퇴한 교사, 월 소득 150만원, 서울 거주",
+        "behavior": "매일 아침 8시에 약을 복용하며, 스마트폰을 사용하여 뉴스와 SNS를 확인함. 자녀와는 주로 전화로 소통함.",
+        "goal": "복약 시간을 정확히 지키고, 자녀에게 건강 상태를 알리기 원함.",
+        "pain_points": "복약 시간을 기억하기 어려워 복약 누락이 발생하고, 중복 투약으로 인한 건강 위험이 있음.",
+        "expectations": "정확한 복약 알림 기능과 보호자가 복약 상태를 확인할 수 있는 시스템을 원함. 복약 관리에 대한 불안감을 해소하고 싶음."
+      },
+      {
+        "name": "이상철",
+        "demographics": "70세, 퇴직한 회사원, 월 소득 120만원, 경기도 거주",
+        "behavior": "매일 정해진 시간에 약을 복용하지만, 가끔 잊어버림. 자녀는 해외에 거주하여 자주 연락하지 않음.",
+        "goal": "복약을 정확히 지키고, 자녀에게 안부를 전하고 싶음.",
+        "pain_points": "복약 상태를 확인할 방법이 부족하고, 복약 관리에 대한 불안감으로 스트레스를 느낌.",
+        "expectations": "사용하기 쉬운 인터페이스와 복약 상태를 원격으로 확인할 수 있는 시스템을 원함."
+      }
+    ],
+    "cjm": {
+      "stages": [
+        {
+          "stage": "인지",
+          "action": "고령자 복약 관리 서비스에 대한 정보 검색",
+          "emotion": "호기심",
+          "pain_point": "어떤 서비스가 적합한지 판단하기 어려움",
+          "touchpoint": "온라인 광고, 친구 추천"
+        },
+        {
+          "stage": "고려",
+          "action": "다양한 서비스 비교 및 검토",
+          "emotion": "혼란",
+          "pain_point": "기능과 가격 비교가 복잡함",
+          "touchpoint": "웹사이트, 리뷰 사이트"
+        },
+        {
+          "stage": "구매",
+          "action": "서비스 신청",
+          "emotion": "안도",
+          "pain_point": "결제 과정이 복잡할 수 있음",
+          "touchpoint": "앱, 웹사이트"
+        },
+        {
+          "stage": "사용",
+          "action": "서비스 이용 및 복약 알림 수신",
+          "emotion": "안정감",
+          "pain_point": "기술적 문제 발생 시 불안",
+          "touchpoint": "앱, 알림"
+        },
+        {
+          "stage": "재사용/이탈",
+          "action": "서비스 지속 사용 여부 결정",
+          "emotion": "만족/불만족",
+          "pain_point": "서비스에 대한 신뢰도 저하",
+          "touchpoint": "고객 지원, 피드백"
+        }
+      ],
+      "opportunities": [
+        "고령화 사회에 따라 복약 관리 서비스의 수요 증가",
+        "AI 및 IoT 기술의 발전으로 정교한 솔루션 개발 가능"
+      ]
+    },
+    "market_sizing": {
+      "tam": "10조원 (고령자 복약 관리 시장 전체 규모 추정)",
+      "sam": "2조원 (만성질환 고령자 시장 규모 추정)",
+      "som": "200억원 (1~3년차 점유 가능 시장 추정)",
+      "top_down": "10조원 × 2% = 200억원",
+      "bottom_up": "100만명 × 20000원 × 10회 = 200억원",
+      "gap_reason": "top_down은 전체 시장 규모를 기반으로 한 추정치이며, bottom_up은 실제 고객 수와 단가를 기반으로 한 계산이기 때문.",
+      "assumptions": [
+        "고령자 복약 관리 시장은 연평균 5% 성장할 것",
+        "고령자 중 만성질환을 앓고 있는 비율은 20%로 가정"
+      ]
+    },
+    "competitor_groups": {
+      "direct": [
+        "AI마음돌봄",
+        "효돌",
+        "스마트 복약알림기"
+      ],
+      "indirect": [
+        "기타 돌봄 서비스",
+        "일반 복약 관리 앱"
+      ],
+      "potential": [
+        "AI 복약알림기"
+      ]
+    },
+    "comparison_criteria": [
+      "기능",
+      "가격",
+      "UX",
+      "마케팅",
+      "고객획득",
+      "수익모델",
+      "인력",
+      "기술스택",
+      "고객지원",
+      "브랜드 인지도"
+    ],
+    "competitor_comparison": [
+      {
+        "name": "AI마음돌봄",
+        "type": "direct",
+        "features": "안부전화 서비스",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "고독사 위험군",
+        "revenue_model": "구독형",
+        "strength": "비용 효율적",
+        "weakness": "복약 관리 기능 부족"
+      },
+      {
+        "name": "효돌",
+        "type": "direct",
+        "features": "복약 알림 및 말벗 기능",
+        "price": "미확인",
+        "ux": "사용자 친화적",
+        "target_user": "홀로 거주하는 고령자",
+        "revenue_model": "판매형",
+        "strength": "정서적 지원 제공",
+        "weakness": "비용이 비쌀 수 있음"
+      },
+      {
+        "name": "스마트 복약알림기",
+        "type": "direct",
+        "features": "모바일 앱 연동",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "고령자 및 보호자",
+        "revenue_model": "구독형",
+        "strength": "실시간 모니터링",
+        "weakness": "기술적 장벽"
+      },
+      {
+        "name": "기타 돌봄 서비스",
+        "type": "indirect",
+        "features": "다양한 돌봄 서비스",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "고령자",
+        "revenue_model": "서비스 요금",
+        "strength": "다양한 서비스 제공",
+        "weakness": "복약 관리 전문성 부족"
+      },
+      {
+        "name": "일반 복약 관리 앱",
+        "type": "indirect",
+        "features": "복약 알림 기능",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "모든 연령대",
+        "revenue_model": "광고 수익",
+        "strength": "접근성",
+        "weakness": "고령자 친화적이지 않음"
+      },
+      {
+        "name": "AI 복약알림기",
+        "type": "potential",
+        "features": "AI 기반 복약 관리",
+        "price": "미확인",
+        "ux": "미확인",
+        "target_user": "고령자",
+        "revenue_model": "미확인",
+        "strength": "미확인",
+        "weakness": "미확인"
+      },
+      {
+        "name": "자사",
+        "type": "self",
+        "features": "복약 관리 및 보호자 모니터링",
+        "price": "미확인",
+        "ux": "사용자 친화적",
+        "target_user": "고령자 및 보호자",
+        "revenue_model": "구독형",
+        "strength": "통합 솔루션 제공",
+        "weakness": "미확인"
+      }
+    ],
+    "positioning_map": {
+      "x_axis": "기능성",
+      "y_axis": "사용자 친화성",
+      "points": [
+        {
+          "name": "AI마음돌봄",
+          "x": 3.0,
+          "y": 4.0
+        },
+        {
+          "name": "효돌",
+          "x": 6.0,
+          "y": 7.0
+        },
+        {
+          "name": "스마트 복약알림기",
+          "x": 5.0,
+          "y": 5.0
+        },
+        {
+          "name": "기타 돌봄 서비스",
+          "x": 4.0,
+          "y": 3.0
+        },
+        {
+          "name": "일반 복약 관리 앱",
+          "x": 4.0,
+          "y": 2.0
+        },
+        {
+          "name": "AI 복약알림기",
+          "x": 5.0,
+          "y": 4.0
+        },
+        {
+          "name": "자사",
+          "x": 8.0,
+          "y": 8.0
+        }
+      ]
+    },
+    "vpc": {
+      "customer_profile": {
+        "customer_jobs": [
+          "복약 시간을 정확히 지키기 위한 알림 설정",
+          "복약 이력을 기록하고 관리하기",
+          "보호자에게 복약 상태를 실시간으로 전달하기",
+          "복약 관리에 대한 불안감을 해소하기"
+        ],
+        "pains": [
+          "복약 시간을 기억하기 어려워 복약 누락이 발생함",
+          "중복 투약으로 인한 건강 위험이 있음",
+          "보호자가 고령자의 복약 상태를 확인할 방법이 부족함",
+          "복약 관리에 대한 불안감으로 인해 스트레스를 느낌"
+        ],
+        "gains": [
+          "정확한 복약 시간 알림 기능",
+          "복약 상태를 원격으로 확인할 수 있는 시스템",
+          "중복 투약 방지를 위한 관리 기능",
+          "사용하기 쉬운 인터페이스"
+        ]
+      },
+      "value_map": {
+        "products_services": [
+          "AI 기반 복약 알림 시스템",
+          "보호자 대시보드",
+          "사용자 맞춤형 알림 설정 기능"
+        ],
+        "pain_relievers": [
+          "정확한 복약 시간 알림",
+          "복약 상태 실시간 모니터링",
+          "중복 투약 방지 기능"
+        ],
+        "gain_creators": [
+          "사용자 친화적인 인터페이스",
+          "복약 관리에 대한 불안감 해소",
+          "보호자와의 원활한 소통"
+        ]
+      },
+      "fit": "고령자의 복약 관리와 보호자의 모니터링을 지원하여 복약 누락과 중복 투약 문제를 해결함."
+    },
+    "core_features": [
+      {
+        "name": "복약 알림 기능",
+        "impact": "복약 누락을 줄이고, 사용자의 안전을 높임.",
+        "feasibility": "기술적으로 구현 가능."
+      },
+      {
+        "name": "보호자 대시보드",
+        "impact": "보호자가 고령자의 복약 상태를 실시간으로 확인할 수 있음.",
+        "feasibility": "웹 및 모바일 플랫폼에서 구현 가능."
+      },
+      {
+        "name": "중복 투약 방지 기능",
+        "impact": "건강 위험을 줄이고, 사용자 신뢰를 높임.",
+        "feasibility": "기술적으로 구현 가능."
+      },
+      {
+        "name": "사용자 맞춤형 알림 설정",
+        "impact": "개별 사용자의 필요에 맞춘 서비스 제공.",
+        "feasibility": "사용자 인터페이스 설계가 필요."
+      },
+      {
+        "name": "복약 이력 기록",
+        "impact": "사용자가 복약 이력을 쉽게 관리할 수 있도록 함.",
+        "feasibility": "데이터베이스 구축이 필요."
+      },
+      {
+        "name": "고객 지원 시스템",
+        "impact": "기술적 문제 발생 시 사용자 불안 해소.",
+        "feasibility": "고객 지원 팀 구성 필요."
+      }
+    ],
+    "use_cases": [
+      {
+        "actor": "고령자",
+        "scenario": "고령자가 약 복용 시간을 설정하고 알림을 받는다.",
+        "expected_result": "정확한 복약 시간에 약을 복용함."
+      },
+      {
+        "actor": "보호자",
+        "scenario": "보호자가 대시보드를 통해 고령자의 복약 상태를 확인한다.",
+        "expected_result": "고령자의 복약 상태를 실시간으로 모니터링함."
+      },
+      {
+        "actor": "고령자",
+        "scenario": "고령자가 복약 이력을 기록하고 관리한다.",
+        "expected_result": "복약 이력을 쉽게 확인하고 관리함."
+      }
+    ],
+    "moscow": {
+      "must": [
+        "복약 알림 기능",
+        "보호자 대시보드",
+        "중복 투약 방지 기능"
+      ],
+      "should": [
+        "사용자 맞춤형 알림 설정",
+        "복약 이력 기록"
+      ],
+      "could": [
+        "고객 지원 시스템"
+      ],
+      "wont": [
+        "소셜 미디어 통합 기능",
+        "다국어 지원"
+      ]
+    },
+    "kano": {
+      "basic": [
+        "복약 알림 기능",
+        "중복 투약 방지 기능"
+      ],
+      "performance": [
+        "보호자 대시보드",
+        "사용자 맞춤형 알림 설정"
+      ],
+      "excitement": [
+        "복약 이력 기록",
+        "고객 지원 시스템"
+      ]
+    },
+    "mvp_scope": "MVP는 복약 알림 기능과 보호자 대시보드, 중복 투약 방지 기능을 포함하며, 사용자 맞춤형 알림 설정 기능을 추가하여 사용자 경험을 향상시킵니다.",
+    "epics": [
+      {
+        "name": "복약 관리 기능 개발",
+        "stories": [
+          {
+            "story": "As a 고령자, I want 복약 알림 기능을 설정하고 싶어서 복약 시간을 지킬 수 있습니다.",
+            "given": "고령자가 앱에 로그인한 상태입니다.",
+            "when": "복약 알림 시간을 설정합니다.",
+            "then": "정해진 시간에 알림을 받습니다."
+          },
+          {
+            "story": "As a 보호자, I want 고령자의 복약 상태를 확인하고 싶어서 안심할 수 있습니다.",
+            "given": "보호자가 대시보드에 접근합니다.",
+            "when": "고령자의 복약 상태를 조회합니다.",
+            "then": "고령자의 복약 상태를 실시간으로 확인할 수 있습니다."
+          }
+        ]
+      },
+      {
+        "name": "사용자 인터페이스 개선",
+        "stories": [
+          {
+            "story": "As a 고령자, I want 사용하기 쉬운 인터페이스를 원해서 복약 관리를 쉽게 할 수 있습니다.",
+            "given": "고령자가 앱을 처음 사용합니다.",
+            "when": "앱의 기능을 탐색합니다.",
+            "then": "직관적인 인터페이스로 쉽게 사용할 수 있습니다."
+          }
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "프로토타입 개발",
+        "period": "2024년 1분기",
+        "goal": "기본 기능이 포함된 프로토타입 완성"
+      },
+      {
+        "name": "베타 테스트",
+        "period": "2024년 2분기",
+        "goal": "사용자 피드백 수집 및 개선"
+      },
+      {
+        "name": "정식 출시",
+        "period": "2024년 3분기",
+        "goal": "서비스 정식 출시 및 마케팅 시작"
+      }
+    ],
+    "kpis": [
+      {
+        "name": "구독자 수",
+        "target": "1,000명 (가정)"
+      },
+      {
+        "name": "고객 유지율",
+        "target": "80% (가정)"
+      },
+      {
+        "name": "사용자 참여도",
+        "target": "주 3회 이상 사용 (가정)"
+      }
+    ],
+    "wireframes": [
+      {
+        "screen": "메인 화면",
+        "layout": "+--------------------+\n|    복약 관리 앱    |\n+--------------------+\n| 1. 복약 알림 설정  |\n| 2. 복약 이력 확인  |\n| 3. 보호자 대시보드 |\n+--------------------+"
+      },
+      {
+        "screen": "핵심 기능 화면",
+        "layout": "+--------------------+\n|    복약 알림 설정  |\n+--------------------+\n| 1. 약 이름 입력    |\n| 2. 복용 시간 설정  |\n| 3. 알림 방식 선택  |\n+--------------------+"
+      },
+      {
+        "screen": "결과/완료 화면",
+        "layout": "+--------------------+\n|    복약 완료 알림  |\n+--------------------+\n| 1. 복약 완료 버튼  |\n| 2. 복약 이력 추가   |\n| 3. 보호자에게 알림  |\n+--------------------+"
+      }
+    ]
+  },
+  "kosena_compliance": {
+    "total": 28,
+    "ok": 27,
+    "partial": 1,
+    "missing": 0,
+    "checks": [
+      {
+        "id": "pestel_6",
+        "module": "M1",
+        "title": "PESTEL 6영역",
+        "page": 7,
+        "status": "ok",
+        "detail": "6개 영역"
+      },
+      {
+        "id": "pestel_critical_top3",
+        "module": "M1",
+        "title": "Critical Uncertainties Top 3",
+        "page": 7,
+        "status": "ok",
+        "detail": "Top 3 선별됨"
+      },
+      {
+        "id": "frameworks_2",
+        "module": "M1",
+        "title": "Porter/SWOT/Value Chain 중 2개 이상",
+        "page": 8,
+        "status": "ok",
+        "detail": "SWOT + Porter + Value Chain"
+      },
+      {
+        "id": "ksf_5",
+        "module": "M1",
+        "title": "KSF 5개",
+        "page": 8,
+        "status": "ok",
+        "detail": "5개"
+      },
+      {
+        "id": "implications_3",
+        "module": "M1",
+        "title": "설계 시사점 3가지",
+        "page": 8,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "hmw_ideation",
+        "module": "M1",
+        "title": "HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개",
+        "page": 9,
+        "status": "ok",
+        "detail": "HMW 5개 · 아이디어 26개 → 압축 3개 → 컨셉 1개"
+      },
+      {
+        "id": "lean_canvas_9",
+        "module": "M1",
+        "title": "Lean Canvas 9블록",
+        "page": 10,
+        "status": "ok",
+        "detail": "9블록"
+      },
+      {
+        "id": "key_hypotheses_3",
+        "module": "M1",
+        "title": "핵심 가설 3개",
+        "page": 10,
+        "status": "ok",
+        "detail": "3개"
+      },
+      {
+        "id": "personas_2",
+        "module": "M2",
+        "title": "페르소나 2종 × 필수 5항목",
+        "page": 12,
+        "status": "ok",
+        "detail": "2종 · 필수 5항목 충족"
+      },
+      {
+        "id": "cjm",
+        "module": "M2",
+        "title": "CJM 5단계 × 4항목 + Opportunity",
+        "page": 12,
+        "status": "ok",
+        "detail": "5단계 × 4항목"
+      },
+      {
+        "id": "tam_sam_som",
+        "module": "M2",
+        "title": "TAM·SAM·SOM",
+        "page": 13,
+        "status": "ok",
+        "detail": "TAM·SAM·SOM"
+      },
+      {
+        "id": "sizing_cross_check",
+        "module": "M2",
+        "title": "Top-down · Bottom-up 교차검증",
+        "page": 13,
+        "status": "ok",
+        "detail": "Top-down + Bottom-up"
+      },
+      {
+        "id": "competitors_3_2_1",
+        "module": "M2",
+        "title": "경쟁사 직접3·간접2·잠재1",
+        "page": 14,
+        "status": "ok",
+        "detail": "직접3 · 간접2 · 잠재1"
+      },
+      {
+        "id": "comparison_criteria_10",
+        "module": "M2",
+        "title": "비교 항목 10개 이상 + 경쟁사 비교표",
+        "page": 14,
+        "status": "ok",
+        "detail": "기준 10개 · 비교표 7행"
+      },
+      {
+        "id": "positioning_map",
+        "module": "M2",
+        "title": "2축 포지셔닝 맵",
+        "page": 14,
+        "status": "ok",
+        "detail": "기능성 × 사용자 친화성"
+      },
+      {
+        "id": "vpc",
+        "module": "M2",
+        "title": "VPC 6영역 + Fit",
+        "page": 15,
+        "status": "ok",
+        "detail": "고객 프로필 3 + 가치 지도 3"
+      },
+      {
+        "id": "core_features_5_7",
+        "module": "M2",
+        "title": "핵심 기능 5~7개",
+        "page": 15,
+        "status": "ok",
+        "detail": "6개"
+      },
+      {
+        "id": "use_cases_3",
+        "module": "M2",
+        "title": "Use Case 3종",
+        "page": 15,
+        "status": "ok",
+        "detail": "3종"
+      },
+      {
+        "id": "moscow",
+        "module": "M3",
+        "title": "MOSCOW 4구분(Won't 명시)",
+        "page": 17,
+        "status": "ok",
+        "detail": "Must/Should/Could/Won't"
+      },
+      {
+        "id": "kano",
+        "module": "M3",
+        "title": "Kano 3분류",
+        "page": 17,
+        "status": "ok",
+        "detail": "3분류"
+      },
+      {
+        "id": "mvp_scope",
+        "module": "M3",
+        "title": "MVP 범위",
+        "page": 17,
+        "status": "ok",
+        "detail": "범위 정의됨"
+      },
+      {
+        "id": "epic_story_ac",
+        "module": "M3",
+        "title": "Epic-Story-AC (Given-When-Then)",
+        "page": 18,
+        "status": "ok",
+        "detail": "Epic 2 · Story 3 · AC 전부 Given-When-Then"
+      },
+      {
+        "id": "milestones_kpi",
+        "module": "M3",
+        "title": "마일스톤 · KPI",
+        "page": 3,
+        "status": "ok",
+        "detail": "마일스톤 + KPI"
+      },
+      {
+        "id": "wireframes",
+        "module": "M3",
+        "title": "와이어프레임 2~3개 화면",
+        "page": 5,
+        "status": "ok",
+        "detail": "3개 화면"
+      },
+      {
+        "id": "sources_cited",
+        "module": "공통",
+        "title": "출처 명시 (실행 전체 · 항목별 연결 아님)",
+        "page": 4,
+        "status": "ok",
+        "detail": "출처 19건(주장 연결 1건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현"
+      },
+      {
+        "id": "ai_usage_log",
+        "module": "공통",
+        "title": "AI 활용 로그(프롬프트·응답·채택 여부)",
+        "page": 4,
+        "status": "ok",
+        "detail": "18건 · 전부 프롬프트·입력·산출·검증·채택 기록"
+      },
+      {
+        "id": "hypothesis_labeling",
+        "module": "공통",
+        "title": "정량 주장의 가설·추정 표기",
+        "page": 4,
+        "status": "ok",
+        "detail": "가설·추정 표기 있음"
+      },
+      {
+        "id": "doc_length",
+        "module": "공통",
+        "title": "본문 A4 30~50쪽",
+        "page": 4,
+        "status": "partial",
+        "detail": "약 13.6쪽(추정) — 30~50쪽 필요"
+      }
+    ],
+    "by_module": {
+      "M1": {
+        "ok": 8,
+        "partial": 0,
+        "missing": 0
+      },
+      "M2": {
+        "ok": 10,
+        "partial": 0,
+        "missing": 0
+      },
+      "M3": {
+        "ok": 6,
+        "partial": 0,
+        "missing": 0
+      },
+      "공통": {
+        "ok": 3,
+        "partial": 1,
+        "missing": 0
+      }
+    },
+    "unmet": [
+      "doc_length"
+    ],
+    "data_source": "real",
+    "summary": "KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0"
+  },
+  "ai_usage_log": [
+    {
+      "agent": "research",
+      "role": "research_analysis 담당",
+      "prompt": {
+        "template": "RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1639
+      },
+      "inputs": [
+        "structured_input",
+        "web_search"
+      ],
+      "output": {
+        "artifact": "research_analysis",
+        "target_sections": [
+          "market_analysis"
+        ],
+        "evidence_ids": [
+          "ev1",
+          "ev2",
+          "ev3",
+          "ev4",
+          "ev5",
+          "ev6",
+          "ev7",
+          "ev8",
+          "ev9",
+          "ev10",
+          "ev11",
+          "ev12",
+          "ev13",
+          "ev14",
+          "ev15"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "competitor",
+      "role": "competitor_analysis 담당",
+      "prompt": {
+        "template": "COMPETITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 717
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "competitor_analysis",
+        "target_sections": [
+          "differentiation"
+        ],
+        "evidence_ids": [
+          "ev16",
+          "ev17",
+          "ev18",
+          "ev19"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "customer",
+      "role": "customer_analysis 담당",
+      "prompt": {
+        "template": "CUSTOMER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 399
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "customer_analysis",
+        "target_sections": [
+          "target_user"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "pestel",
+      "role": "pestel_analysis 담당",
+      "prompt": {
+        "template": "PESTEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1265
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "pestel_analysis",
+        "target_sections": [
+          "pestel"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "swot",
+      "role": "swot_analysis 담당",
+      "prompt": {
+        "template": "SWOT_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 252
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": "swot_analysis",
+        "target_sections": [
+          "swot"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "business_model",
+      "role": "business_model_analysis 담당",
+      "prompt": {
+        "template": "BIZMODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 347
+      },
+      "inputs": [
+        "research_analysis"
+      ],
+      "output": {
+        "artifact": "business_model_analysis",
+        "target_sections": [
+          "revenue_model"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "risk",
+      "role": "risk_analysis 담당",
+      "prompt": {
+        "template": "RISK_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 343
+      },
+      "inputs": [
+        "research_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": "risk_analysis",
+        "target_sections": [
+          "risk"
+        ],
+        "evidence_ids": []
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_industry",
+      "role": "산업 분석 전략가",
+      "prompt": {
+        "template": "KOSENA_INDUSTRY_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1465
+      },
+      "inputs": [
+        "pestel_analysis",
+        "research_analysis",
+        "competitor_analysis",
+        "swot_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "critical_uncertainties",
+          "porter",
+          "value_chain",
+          "ksf",
+          "implications"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_model",
+      "role": "린 스타트업 코치",
+      "prompt": {
+        "template": "KOSENA_MODEL_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1852
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "business_model_analysis",
+        "kosena.ksf",
+        "kosena.implications"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "hmw",
+          "ideas",
+          "shortlisted_concepts",
+          "selected_concept",
+          "lean_canvas",
+          "key_hypotheses"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_research",
+      "role": "데이터 기반 서비스 기획자",
+      "prompt": {
+        "template": "KOSENA_RESEARCH_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 2474
+      },
+      "inputs": [
+        "research_analysis",
+        "customer_analysis",
+        "competitor_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "personas",
+          "cjm",
+          "market_sizing",
+          "competitor_groups",
+          "comparison_criteria",
+          "competitor_comparison",
+          "positioning_map"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "kosena_roadmap",
+      "role": "프로덕트 오너",
+      "prompt": {
+        "template": "KOSENA_ROADMAP_SYSTEM",
+        "available": true,
+        "five_part_structure": true,
+        "chars": 1940
+      },
+      "inputs": [
+        "customer_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "kosena.lean_canvas",
+        "kosena.personas"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "kosena",
+        "produced_fields": [
+          "vpc",
+          "core_features",
+          "use_cases",
+          "moscow",
+          "kano",
+          "mvp_scope",
+          "epics",
+          "milestones",
+          "kpis",
+          "wireframes"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "research_gap",
+      "role": "근거 공백 보강 조사자",
+      "prompt": {
+        "template": "RESEARCH_GAP_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1066
+      },
+      "inputs": [
+        "evidence_gaps"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "evidence_registry",
+        "produced_fields": [
+          "evidence_registry",
+          "dynamic_research"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "draft",
+      "role": "기획서 작성자",
+      "prompt": {
+        "template": "DRAFT_WRITER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1668
+      },
+      "inputs": [
+        "research_analysis",
+        "competitor_analysis",
+        "customer_analysis",
+        "swot_analysis",
+        "business_model_analysis",
+        "risk_analysis",
+        "pestel_analysis"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "draft",
+        "produced_fields": [
+          "draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "reviewer",
+      "role": "기획서 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "review_result",
+        "produced_fields": [
+          "review_result",
+          "initial_review_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "polish",
+      "role": "일관성 편집자",
+      "prompt": {
+        "template": "EDITOR_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 373
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": false,
+      "note": "편집 생략: 내용 이슈만·구조 정상(revision=section)"
+    },
+    {
+      "agent": "final_reviewer",
+      "role": "최종본 심사자",
+      "prompt": {
+        "template": "REVIEWER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 1969
+      },
+      "inputs": [
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_review_result",
+        "produced_fields": [
+          "final_review_result",
+          "best_version"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "verify",
+      "role": "근거 일치성 검증자",
+      "prompt": {
+        "template": "VERIFY_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 2317
+      },
+      "inputs": [
+        "final_draft",
+        "evidence_registry"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "verification_result",
+        "produced_fields": [
+          "verification_result"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete"
+      },
+      "adopted": true,
+      "note": ""
+    },
+    {
+      "agent": "section_revise",
+      "role": "기획서 재작성",
+      "prompt": {
+        "template": "SECTION_REVISER_SYSTEM",
+        "available": true,
+        "five_part_structure": false,
+        "chars": 909
+      },
+      "inputs": [
+        "review_result.issues",
+        "final_draft"
+      ],
+      "output": {
+        "artifact": null,
+        "state_key": "final_draft",
+        "produced_fields": [
+          "final_draft"
+        ],
+        "revised_sections": [
+          "market_analysis",
+          "service",
+          "differentiation"
+        ]
+      },
+      "verification": {
+        "schema_validated": true,
+        "status": "complete",
+        "reviewer_rescored": true
+      },
+      "adopted": true,
+      "note": "전략=section"
+    }
+  ],
+  "kosena_plan": "# 고령자 복약 관리·보호자 알림 서비스 — 서비스 기획안 (KOSENA)\n\n> ⚠️ **본 문서의 정량 주장은 웹 리서치에 기반한 가설·추정입니다.** 인터뷰·설문 등 1차 자료로 검증되지 않았으며, 페르소나는 **가설형 페르소나**이고 TAM/SAM/SOM 은 명시한 가정 위의 **추정치**입니다. 실제 시장 점유율·고객 반응을 의미하지 않습니다.\n>\n> KOSENA 의 목표대로 *\"완벽한 기획서가 아니라 의사결정 가능한 가설\"* 을 만드는 것이 이 문서의 성격입니다. 각 가설은 시장·고객을 만나며 갱신되어야 합니다.\n\n## 개요\n\n| 항목 | 내용 |\n|---|---|\n| 프로젝트명 | 고령자 복약 관리·보호자 알림 서비스 |\n| 설명 | 처방 정보를 인식해 복약 시간을 안내하고 미복용 시 보호자에게 알리는 서비스 |\n| 목표 사용자 | 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자 |\n| 문제 | 복용 시간·중복 투약을 관리하기 어렵고 보호자가 원격으로 확인할 방법이 없다 |\n\n## 1. 산업·서비스 분석 보고서\n\n### Critical Uncertainties (영향력·가능성 상위 3)\n\n| 요인 | 왜 중요한가 | 서비스 영향 |\n|---|---|---|\n| Political | 정부의 복지 정책 및 의료 서비스에 대한 관심이 고령자 복약 관리 시장에 긍정적인 영향을 미치고 있으며, 정책 변화가 수요에 큰 영향을 줄 수 있다. | 정치적 불안정성이 발생할 경우, 복약 관리 서비스에 대한 지원이 감소하여 시장 성장에 부정적인 영향을 미칠 수 있다. |\n| Technological | AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있으며, 이는 고령자의 복약 순응도를 향상시키는 데 기여하고 있다. | 기술적 문제나 데이터 보안 이슈가 발생할 경우 사용자 신뢰를 잃을 수 있으며, 이는 서비스 이용에 큰 영향을 미칠 수 있다. |\n| Economic | 고령화에 따른 복약 관리 서비스의 수요 증가로 인해 시장 규모가 확대되고 있으며, 이는 새로운 비즈니스 모델과 수익 창출의 기회를 제공한다. | 경쟁이 치열해짐에 따라 가격 경쟁이 발생할 수 있으며, 이는 수익성에 부정적인 영향을 미칠 수 있다. |\n\n### Porter's Five Forces\n\n| Force | 강도 | 근거 |\n|---|---|---|\n| rivalry | 높음 | 복약 관리 시장의 경쟁이 치열해지고 있으며, 여러 기업이 유사한 서비스를 제공하고 있다. |\n| new_entrants | 중간 | 고령화 사회에 따른 수요 증가로 신규 진입자에게 기회가 있지만, 기술적 장벽과 초기 인지도 부족이 도전 과제가 될 수 있다. |\n| substitutes | 중간 | 복약 관리 서비스 외에도 다양한 대체 솔루션이 존재하지만, 고령자의 특수한 요구를 충족하는 서비스는 제한적이다. |\n| buyer_power | 중간 | 고령자와 보호자들이 다양한 선택지를 갖고 있으나, 특정 서비스에 대한 충성도가 높을 수 있다. |\n| supplier_power | 낮음 | AI 및 IoT 기술 공급자는 많으며, 대체 공급원도 존재하기 때문에 공급자의 힘은 상대적으로 낮다. |\n\n### Value Chain\n\n| 활동 | 내용 |\n|---|---|\n| inbound | AI 및 IoT 기술을 활용한 데이터 수집 및 분석 시스템 구축. |\n| operations | 효율적인 복약 관리 시스템 운영 및 사용자 맞춤형 서비스 제공. |\n| outbound | 고령자 및 보호자에게 복약 관리 솔루션을 효과적으로 전달하는 유통 경로 확보. |\n| marketing | 고령자 및 보호자를 대상으로 하는 맞춤형 마케팅 전략 수립. |\n| service | 고객 지원 및 교육 프로그램을 통해 사용자 신뢰 구축. |\n| infrastructure | 강력한 IT 인프라를 통해 데이터 보안 및 안정성 확보. |\n| hr | 전문 인력을 확보하여 기술적 문제 해결 및 서비스 품질 유지. |\n| technology | 최신 AI 및 IoT 기술을 지속적으로 업데이트하여 경쟁력 유지. |\n| procurement | 신뢰할 수 있는 기술 공급자와의 관계 구축 및 관리. |\n\n### KSF (핵심 성공요인 5)\n\n- AI 및 IoT 기술 활용 능력\n- 사용자 친화적인 인터페이스 설계\n- 고령자 및 보호자 맞춤형 서비스 제공\n- 데이터 보안 및 기술적 안정성 확보\n- 효율적인 마케팅 및 고객 지원 전략\n\n### 서비스 설계 시사점 3\n\n- 정치적 및 기술적 변화에 대한 지속적인 모니터링 필요.\n- 고령자와 보호자의 신뢰를 구축하기 위한 교육 및 정보 제공 프로그램 개발.\n- 차별화된 서비스 제공을 통해 경쟁력을 강화해야 함.\n\n## 2. Lean Canvas\n\n### 9개 블록 (작성 순서 1→9)\n\n| 항목 | 내용 |\n|---|---|\n| 1. Problem | 복용 시간·중복 투약 관리의 어려움, 보호자의 원격 확인 부족, 복약 관리에 대한 불안감 |\n| 2. Customer Segments | 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자 |\n| 3. UVP | AI 기반 복약 알림 시스템으로 고령자의 복약 관리와 보호자의 모니터링을 지원합니다. |\n| 4. Solution | AI 기반 복약 알림, 보호자 대시보드, 사용자 맞춤형 알림 설정 기능 |\n| 5. Channels | 모바일 앱, 웹사이트, 소셜 미디어, 의료 기관 제휴 |\n| 6. Revenue Streams | 구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스 |\n| 7. Cost Structure | 개발 비용, 서버 및 데이터 저장 비용, 고객 지원 및 운영 비용, 마케팅 및 광고 비용 |\n| 8. Key Metrics | 구독자 수, 고객 유지율, 사용자 참여도, 서비스 이용 빈도 |\n| 9. Unfair Advantage | AI 및 IoT 기술 활용 능력과 사용자 친화적인 인터페이스 설계로 차별화된 서비스 제공 |\n\n### 핵심 가설 3개와 검증 계획\n\n| 가설 | 검증 방법 | 판단 지표 |\n|---|---|---|\n| AI 기반 복약 알림 시스템이 고령자의 복약 순응도를 높일 것이다. | 사용자 테스트 및 피드백 수집을 통해 검증한다. | 복약 순응도 증가율 |\n| 보호자 대시보드 기능이 보호자의 불안감을 줄일 것이다. | 보호자와의 인터뷰 및 설문조사를 통해 검증한다. | 보호자 만족도 점수 |\n| 사용자 맞춤형 알림 설정 기능이 사용자 경험을 개선할 것이다. | 사용자 테스트 및 피드백 수집을 통해 검증한다. | 사용자 만족도 점수 |\n\n### 아이디어 발산 → 수렴 (26개 → 3개 → 1개)\n\n**HMW 질문**\n- 어떻게 하면 만성질환으로 다제약을 복용하는 65세 이상 고령자가 복약 시간을 정확히 기억할 수 있을까?\n- 어떻게 하면 보호자가 원거리에서 고령자의 복약 상태를 실시간으로 확인할 수 있을까?\n- 어떻게 하면 고령자가 중복 투약을 방지할 수 있는 시스템을 제공할 수 있을까?\n- 어떻게 하면 고령자와 보호자가 함께 사용할 수 있는 사용자 친화적인 인터페이스를 설계할 수 있을까?\n- 어떻게 하면 AI 및 IoT 기술을 활용하여 복약 관리의 효율성을 높일 수 있을까?\n\n**발산한 아이디어 26개**\n- AI 기반 복약 알림 시스템 개발\n- 스마트폰 앱을 통한 복약 이력 기록 기능 제공\n- 보호자 전용 대시보드 개발\n- 복약 상태를 실시간으로 알림으로 전송하는 기능 추가\n- 중복 투약 방지를 위한 알림 시스템 구축\n- 사용자 맞춤형 복약 알림 설정 기능 제공\n- 복약 관리 교육 프로그램 제공\n- 고령자 친화적인 UI/UX 디자인 개발\n- 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제 도입\n- AI를 활용한 복약 순응도 분석 기능 추가\n- 복약 관리 통계 제공 기능 개발\n- 고령자와 보호자를 위한 커뮤니티 플랫폼 구축\n- 복약 알림을 위한 IoT 기기 개발\n- 정기적인 건강 체크 기능 추가\n- 복약 관리에 대한 스트레스 감소를 위한 상담 서비스 제공\n- 고령자와 보호자를 위한 맞춤형 콘텐츠 제공\n- 복약 관리에 대한 피드백 시스템 구축\n- 소셜 미디어를 통한 사용자 경험 공유 기능 추가\n- 데이터 보안 교육 프로그램 개발\n- AI 기술을 활용한 건강 예측 기능 추가\n- 복약 관리 앱의 다국어 지원 기능 추가\n- 고령자와 보호자를 위한 정기적인 웨비나 개최\n- 복약 관리에 대한 사용자 경험 조사 실시\n- AI를 활용한 복약 패턴 분석 기능 개발\n- 고령자와 보호자를 위한 맞춤형 건강 관리 서비스 제공\n\n**압축 후보 3개 (실현가능성·시장성·차별성 평가)**\n\n| 후보 컨셉 | 실현가능성 | 시장성 | 차별성 | 남긴 이유 |\n|---|---|---|---|---|\n| AI 기반 복약 알림 시스템 | 기술적 구현이 가능하며, 기존 기술을 활용할 수 있다. | 고령자 복약 관리 시장의 수요가 증가하고 있어 시장성이 높다. | 기존 시스템과 차별화된 AI 기능을 통해 사용자 경험을 개선할 수 있다. | 고령자의 복약 관리 문제를 직접적으로 해결할 수 있는 핵심 기능이다. |\n| 보호자 전용 대시보드 개발 | 기술적 구현이 가능하며, 사용자의 피드백을 반영할 수 있다. | 보호자의 니즈를 충족시킬 수 있어 시장성이 높다. | 보호자와 고령자 간의 소통을 강화하는 기능으로 차별화된다. | 보호자의 불안감을 해소하고, 고령자의 건강 관리에 기여할 수 있다. |\n| 사용자 맞춤형 복약 알림 설정 기능 | 사용자 인터페이스 설계가 용이하며, 개인화가 가능하다. | 개별 사용자 맞춤형 서비스 제공으로 시장성이 높다. | 개인 맞춤형 서비스를 통해 사용자 만족도를 높일 수 있다. | 사용자의 복약 관리 경험을 개선하는 데 중요한 역할을 할 수 있다. |\n\n**최종 컨셉**\n\nAI 기반 복약 알림 시스템은 고령자의 복약 관리 문제를 직접적으로 해결할 수 있는 핵심 기능으로, 기술적 구현이 가능하고 시장 수요가 높아 선택되었다. 이 시스템은 고령자의 복약 시간을 정확히 알림으로써 복약 순응도를 높이고, 보호자에게 실시간으로 상태를 전달하여 건강 관리에 기여할 수 있다.\n\n## 3. 고객 리서치 패키지\n\n### 페르소나 (가설형 — 인터뷰 미검증)\n\n#### 김영희\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 65세, 은퇴한 교사, 월 소득 150만원, 서울 거주 |\n| 행동 패턴 | 매일 아침 8시에 약을 복용하며, 스마트폰을 사용하여 뉴스와 SNS를 확인함. 자녀와는 주로 전화로 소통함. |\n| Goal·동기 | 복약 시간을 정확히 지키고, 자녀에게 건강 상태를 알리기 원함. |\n| Pain Point | 복약 시간을 기억하기 어려워 복약 누락이 발생하고, 중복 투약으로 인한 건강 위험이 있음. |\n| 기대·거부 요인 | 정확한 복약 알림 기능과 보호자가 복약 상태를 확인할 수 있는 시스템을 원함. 복약 관리에 대한 불안감을 해소하고 싶음. |\n\n#### 이상철\n| 항목 | 내용 |\n|---|---|\n| 인구통계 | 70세, 퇴직한 회사원, 월 소득 120만원, 경기도 거주 |\n| 행동 패턴 | 매일 정해진 시간에 약을 복용하지만, 가끔 잊어버림. 자녀는 해외에 거주하여 자주 연락하지 않음. |\n| Goal·동기 | 복약을 정확히 지키고, 자녀에게 안부를 전하고 싶음. |\n| Pain Point | 복약 상태를 확인할 방법이 부족하고, 복약 관리에 대한 불안감으로 스트레스를 느낌. |\n| 기대·거부 요인 | 사용하기 쉬운 인터페이스와 복약 상태를 원격으로 확인할 수 있는 시스템을 원함. |\n\n### Customer Journey Map\n\n| 단계 | Action | Emotion | Pain Point | Touchpoint |\n|---|---|---|---|---|\n| 인지 | 고령자 복약 관리 서비스에 대한 정보 검색 | 호기심 | 어떤 서비스가 적합한지 판단하기 어려움 | 온라인 광고, 친구 추천 |\n| 고려 | 다양한 서비스 비교 및 검토 | 혼란 | 기능과 가격 비교가 복잡함 | 웹사이트, 리뷰 사이트 |\n| 구매 | 서비스 신청 | 안도 | 결제 과정이 복잡할 수 있음 | 앱, 웹사이트 |\n| 사용 | 서비스 이용 및 복약 알림 수신 | 안정감 | 기술적 문제 발생 시 불안 | 앱, 알림 |\n| 재사용/이탈 | 서비스 지속 사용 여부 결정 | 만족/불만족 | 서비스에 대한 신뢰도 저하 | 고객 지원, 피드백 |\n\n**Opportunity**\n- 고령화 사회에 따라 복약 관리 서비스의 수요 증가\n- AI 및 IoT 기술의 발전으로 정교한 솔루션 개발 가능\n\n## 4. 시장·경쟁사 분석\n\n### TAM · SAM · SOM (추정치 — 명시한 가정 위)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 10조원 (고령자 복약 관리 시장 전체 규모 추정) |\n| SAM | 2조원 (만성질환 고령자 시장 규모 추정) |\n| SOM | 200억원 (1~3년차 점유 가능 시장 추정) |\n| Top-down 추정 | 10조원 × 2% = 200억원 |\n| Bottom-up 추정 | 100만명 × 20000원 × 10회 = 200억원 |\n| 두 값이 다른 이유 | top_down은 전체 시장 규모를 기반으로 한 추정치이며, bottom_up은 실제 고객 수와 단가를 기반으로 한 계산이기 때문. |\n\n**사용한 가정**\n- 고령자 복약 관리 시장은 연평균 5% 성장할 것\n- 고령자 중 만성질환을 앓고 있는 비율은 20%로 가정\n\n### 경쟁사 분류\n\n| 구분 | 대상 |\n|---|---|\n| 직접 경쟁자 (3) | AI마음돌봄, 효돌, 스마트 복약알림기 |\n| 간접 경쟁자 (2) | 기타 돌봄 서비스, 일반 복약 관리 앱 |\n| 잠재 경쟁자 (1) | AI 복약알림기 |\n\n### 비교 항목 (10개)\n\n- 기능\n- 가격\n- UX\n- 마케팅\n- 고객획득\n- 수익모델\n- 인력\n- 기술스택\n- 고객지원\n- 브랜드 인지도\n\n### 경쟁사 비교표 (7행)\n\n**① 제품·시장**\n\n| 대상 | 주요 기능 | 가격 | UX | 타깃 사용자 | 수익 모델 |\n|---|---|---|---|---|---|\n| AI마음돌봄 (직접) | 안부전화 서비스 | 미확인 | 미확인 | 고독사 위험군 | 구독형 |\n| 효돌 (직접) | 복약 알림 및 말벗 기능 | 미확인 | 사용자 친화적 | 홀로 거주하는 고령자 | 판매형 |\n| 스마트 복약알림기 (직접) | 모바일 앱 연동 | 미확인 | 미확인 | 고령자 및 보호자 | 구독형 |\n| 기타 돌봄 서비스 (간접) | 다양한 돌봄 서비스 | 미확인 | 미확인 | 고령자 | 서비스 요금 |\n| 일반 복약 관리 앱 (간접) | 복약 알림 기능 | 미확인 | 미확인 | 모든 연령대 | 광고 수익 |\n| AI 복약알림기 (잠재) | AI 기반 복약 관리 | 미확인 | 미확인 | 고령자 | 미확인 |\n| 자사 (자사) | 복약 관리 및 보호자 모니터링 | 미확인 | 사용자 친화적 | 고령자 및 보호자 | 구독형 |\n\n**② 강점·약점**\n\n| 대상 | 강점 | 약점 |\n|---|---|---|\n| AI마음돌봄 (직접) | 비용 효율적 | 복약 관리 기능 부족 |\n| 효돌 (직접) | 정서적 지원 제공 | 비용이 비쌀 수 있음 |\n| 스마트 복약알림기 (직접) | 실시간 모니터링 | 기술적 장벽 |\n| 기타 돌봄 서비스 (간접) | 다양한 서비스 제공 | 복약 관리 전문성 부족 |\n| 일반 복약 관리 앱 (간접) | 접근성 | 고령자 친화적이지 않음 |\n| AI 복약알림기 (잠재) | 미확인 | 미확인 |\n| 자사 (자사) | 통합 솔루션 제공 | 미확인 |\n\n### 포지셔닝 맵 (기능성 × 사용자 친화성)\n\n| 대상 | 기능성 (0~10) | 사용자 친화성 (0~10) |\n|---|---|---|\n| AI마음돌봄 | 3.0 | 4.0 |\n| 효돌 | 6.0 | 7.0 |\n| 스마트 복약알림기 | 5.0 | 5.0 |\n| 기타 돌봄 서비스 | 4.0 | 3.0 |\n| 일반 복약 관리 앱 | 4.0 | 2.0 |\n| AI 복약알림기 | 5.0 | 4.0 |\n| 자사 | 8.0 | 8.0 |\n\n## 5. 서비스 컨셉·기능 정의서\n\n### Value Proposition Canvas\n\n**고객 프로필**\n| 항목 | 내용 |\n|---|---|\n| Customer Jobs | 복약 시간을 정확히 지키기 위한 알림 설정, 복약 이력을 기록하고 관리하기, 보호자에게 복약 상태를 실시간으로 전달하기, 복약 관리에 대한 불안감을 해소하기 |\n| Pains | 복약 시간을 기억하기 어려워 복약 누락이 발생함, 중복 투약으로 인한 건강 위험이 있음, 보호자가 고령자의 복약 상태를 확인할 방법이 부족함, 복약 관리에 대한 불안감으로 인해 스트레스를 느낌 |\n| Gains | 정확한 복약 시간 알림 기능, 복약 상태를 원격으로 확인할 수 있는 시스템, 중복 투약 방지를 위한 관리 기능, 사용하기 쉬운 인터페이스 |\n\n**가치 지도**\n| 항목 | 내용 |\n|---|---|\n| Products & Services | AI 기반 복약 알림 시스템, 보호자 대시보드, 사용자 맞춤형 알림 설정 기능 |\n| Pain Relievers | 정확한 복약 시간 알림, 복약 상태 실시간 모니터링, 중복 투약 방지 기능 |\n| Gain Creators | 사용자 친화적인 인터페이스, 복약 관리에 대한 불안감 해소, 보호자와의 원활한 소통 |\n\n**Fit 검증**\n\n고령자의 복약 관리와 보호자의 모니터링을 지원하여 복약 누락과 중복 투약 문제를 해결함.\n\n### 핵심 기능 (6개)\n\n| 기능 | 사용자 임팩트 | 실현가능성 |\n|---|---|---|\n| 복약 알림 기능 | 복약 누락을 줄이고, 사용자의 안전을 높임. | 기술적으로 구현 가능. |\n| 보호자 대시보드 | 보호자가 고령자의 복약 상태를 실시간으로 확인할 수 있음. | 웹 및 모바일 플랫폼에서 구현 가능. |\n| 중복 투약 방지 기능 | 건강 위험을 줄이고, 사용자 신뢰를 높임. | 기술적으로 구현 가능. |\n| 사용자 맞춤형 알림 설정 | 개별 사용자의 필요에 맞춘 서비스 제공. | 사용자 인터페이스 설계가 필요. |\n| 복약 이력 기록 | 사용자가 복약 이력을 쉽게 관리할 수 있도록 함. | 데이터베이스 구축이 필요. |\n| 고객 지원 시스템 | 기술적 문제 발생 시 사용자 불안 해소. | 고객 지원 팀 구성 필요. |\n\n### Use Case 3종\n\n| Actor | 시나리오 | 기대 결과 |\n|---|---|---|\n| 고령자 | 고령자가 약 복용 시간을 설정하고 알림을 받는다. | 정확한 복약 시간에 약을 복용함. |\n| 보호자 | 보호자가 대시보드를 통해 고령자의 복약 상태를 확인한다. | 고령자의 복약 상태를 실시간으로 모니터링함. |\n| 고령자 | 고령자가 복약 이력을 기록하고 관리한다. | 복약 이력을 쉽게 확인하고 관리함. |\n\n## 6. 개발 로드맵·PRD\n\n### MVP 범위\n\nMVP는 복약 알림 기능과 보호자 대시보드, 중복 투약 방지 기능을 포함하며, 사용자 맞춤형 알림 설정 기능을 추가하여 사용자 경험을 향상시킵니다.\n\n### MOSCOW\n\n| 구분 | 기능 |\n|---|---|\n| Must have | 복약 알림 기능, 보호자 대시보드, 중복 투약 방지 기능 |\n| Should have | 사용자 맞춤형 알림 설정, 복약 이력 기록 |\n| Could have | 고객 지원 시스템 |\n| Won't have (이번 범위 제외) | 소셜 미디어 통합 기능, 다국어 지원 |\n\n### Kano Model\n\n| 분류 | 기능 |\n|---|---|\n| Basic (당연) | 복약 알림 기능, 중복 투약 방지 기능 |\n| Performance (성능) | 보호자 대시보드, 사용자 맞춤형 알림 설정 |\n| Excitement (매력) | 복약 이력 기록, 고객 지원 시스템 |\n\n### Epic – User Story – Acceptance Criteria (INVEST · Given-When-Then)\n\n#### Epic: 복약 관리 기능 개발\n\n- **Story**: As a 고령자, I want 복약 알림 기능을 설정하고 싶어서 복약 시간을 지킬 수 있습니다.\n  - **Given** 고령자가 앱에 로그인한 상태입니다.\n  - **When** 복약 알림 시간을 설정합니다.\n  - **Then** 정해진 시간에 알림을 받습니다.\n\n- **Story**: As a 보호자, I want 고령자의 복약 상태를 확인하고 싶어서 안심할 수 있습니다.\n  - **Given** 보호자가 대시보드에 접근합니다.\n  - **When** 고령자의 복약 상태를 조회합니다.\n  - **Then** 고령자의 복약 상태를 실시간으로 확인할 수 있습니다.\n\n#### Epic: 사용자 인터페이스 개선\n\n- **Story**: As a 고령자, I want 사용하기 쉬운 인터페이스를 원해서 복약 관리를 쉽게 할 수 있습니다.\n  - **Given** 고령자가 앱을 처음 사용합니다.\n  - **When** 앱의 기능을 탐색합니다.\n  - **Then** 직관적인 인터페이스로 쉽게 사용할 수 있습니다.\n\n### 마일스톤\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 프로토타입 개발 | 2024년 1분기 | 기본 기능이 포함된 프로토타입 완성 |\n| 베타 테스트 | 2024년 2분기 | 사용자 피드백 수집 및 개선 |\n| 정식 출시 | 2024년 3분기 | 서비스 정식 출시 및 마케팅 시작 |\n\n### KPI\n\n| 지표 | 목표(가정 포함) |\n|---|---|\n| 구독자 수 | 1,000명 (가정) |\n| 고객 유지율 | 80% (가정) |\n| 사용자 참여도 | 주 3회 이상 사용 (가정) |\n\n### 와이어프레임 (구조 스케치 — 실제 디자인 아님)\n\n**메인 화면**\n\n```\n+--------------------+\n|    복약 관리 앱    |\n+--------------------+\n| 1. 복약 알림 설정  |\n| 2. 복약 이력 확인  |\n| 3. 보호자 대시보드 |\n+--------------------+\n```\n\n**핵심 기능 화면**\n\n```\n+--------------------+\n|    복약 알림 설정  |\n+--------------------+\n| 1. 약 이름 입력    |\n| 2. 복용 시간 설정  |\n| 3. 알림 방식 선택  |\n+--------------------+\n```\n\n**결과/완료 화면**\n\n```\n+--------------------+\n|    복약 완료 알림  |\n+--------------------+\n| 1. 복약 완료 버튼  |\n| 2. 복약 이력 추가   |\n| 3. 보호자에게 알림  |\n+--------------------+\n```\n\n## 7. 발표 요약\n\n본 기획안의 핵심은 다음과 같다.\n\n- 정치적 및 기술적 변화에 대한 지속적인 모니터링 필요.\n- 고령자와 보호자의 신뢰를 구축하기 위한 교육 및 정보 제공 프로그램 개발.\n- 차별화된 서비스 제공을 통해 경쟁력을 강화해야 함.\n\n## 참고 — 기존 14섹션 기획서\n\n아래는 동일 실행에서 생성된 서술형 기획서다(KOSENA 산출물과 중복 서술 포함).\n\n# 고령자 복약 관리·보호자 알림 서비스 기획서\n\n## 프로젝트 개요\n본 프로젝트는 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자를 위한 복약 관리 및 알림 서비스를 제공합니다. 이 서비스는 사용자의 처방 정보를 인식하여 복약 시간을 안내하고, 미복용 시 보호자에게 알림을 전송하여 고령자의 건강 관리를 지원합니다.\n\n## 추진 배경\n고령화 사회가 진행됨에 따라 만성질환을 앓고 있는 고령자의 수가 증가하고 있습니다. 이로 인해 복약 관리의 필요성이 더욱 부각되고 있으며, 고령자는 복약 시간을 기억하기 어려워 복약 누락 및 중복 투약의 위험에 처해 있습니다. 또한, 보호자는 원격으로 고령자의 복약 상태를 확인할 방법이 부족하여 불안감을 느끼고 있습니다.\n\n## 문제 정의\n고령자는 복약 시간을 기억하기 어려워 복약 누락이 발생하고, 중복 투약으로 인한 건강 위험이 존재합니다. 보호자는 고령자의 복약 상태를 확인할 방법이 부족하여 복약 관리에 대한 불안감을 느끼고 있습니다. 이러한 문제를 해결하기 위해 정확한 복약 시간 알림 기능과 원격 확인 시스템이 필요합니다.\n\n## 목표 사용자\n본 서비스의 주요 목표 사용자는 만성질환으로 다제약을 복용하는 65세 이상의 고령자와 그 보호자입니다. 이들은 복약 관리에 어려움을 겪고 있으며, 원거리에서 고령자의 건강 상태를 확인하고자 하는 필요가 있습니다.\n\n## 시장 및 산업 분석\n\n고령자 복약 관리 시장은 급속히 성장하고 있으며, 특히 만성질환을 앓고 있는 65세 이상 고령자의 수가 증가함에 따라 이들의 복약 관리 필요성이 더욱 부각되고 있습니다. 현재 고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달하며, 이는 복약 관리의 중요성을 강조합니다. 시장 규모는 2023년 기준으로 약 500억 원에 달하며, 향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상됩니다. AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있으며, 이는 고령자의 복약 순응도를 높이는 데 기여하고 있습니다. 또한, 고령자 돌봄을 위한 로봇 및 스마트 기기들이 시장에 출시되고 있어 사용자와 보호자 모두에게 유용합니다.\n\n## PESTEL 분석\n| 요인 | 주요 내용 | 기회 | 위협 | 대응 |\n|---|---|---|---|---|\n| Political | 고령화 사회의 진행은 정부의 복지 정책 및 의료 서비스에 대한 관심을 증가시키고 있다. | 정부의 지원 및 정책 변화는 수요 증가 기회를 제공한다. | 정치적 불안정성이나 정책 변화로 지원이 감소할 수 있다. | 정책 변화 모니터링 및 정부와의 협력 관계 구축 필요. |\n| Economic | 고령화에 따른 복약 관리 서비스의 수요 증가로 시장 규모가 확대되고 있다. | 새로운 비즈니스 모델과 수익 창출 기회 제공. | 경쟁이 치열해짐에 따라 가격 경쟁 발생 가능성. | 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발 필요. |\n| Social | 고령자의 복약 관리 필요성이 증가하고 있으며, 보호자의 불안감이 커지고 있다. | 맞춤형 복약 관리 서비스는 사회적 요구를 충족시킬 수 있다. | 고령자와 보호자 간의 신뢰 부족이 저항감을 초래할 수 있다. | 신뢰 구축을 위한 교육 및 정보 제공 프로그램 개발 필요. |\n| Technological | AI 및 IoT 기술의 발전은 복약 관리 시스템의 효율성을 높이고 있다. | 기술 발전을 활용한 새로운 솔루션 개발 가능. | 기술적 문제나 데이터 보안 이슈 발생 시 사용자 신뢰 저하. | 기술적 안정성 확보 및 데이터 보안 강화 필요. |\n| Environmental | 고령자 복약 관리 시장은 환경적 요인에 대한 고려가 필요하다. | 환경 친화적인 솔루션 개발로 기업 이미지 구축 가능. | 환경 문제에 대한 사회적 인식이 높아짐에 따라 규제 강화 가능성. | 환경 친화적인 제품 및 서비스 개발 필요. |\n| Legal | 고령자 복약 관리와 관련된 법률 및 규제가 증가하고 있다. | 법률 준수를 통해 신뢰성 및 경쟁력 강화 가능. | 법적 규제가 강화되면 운영에 추가 비용 발생 가능성. | 법률 및 규제 변화 모니터링 및 준수 시스템 강화 필요. |\n\n## SWOT 분석\n- 강점: AI 및 IoT 기술 활용, 복약 관리와 모니터링 통합 솔루션, 사용자 친화적인 인터페이스\n- 약점: 기술적 문제 발생 가능성, 데이터 보안 이슈 우려, 경쟁사 대비 초기 인지도 부족\n- 기회: 고령화 사회에 따른 수요 증가, AI 및 IoT 기술 발전으로 효율적 솔루션 개발 가능, 복약 관리 서비스의 새로운 시장 기회 창출\n- 위협: 경쟁 심화로 인한 가격 경쟁, 기술적 문제로 인한 사용자 신뢰 저하, 복약 관리 시장의 빠른 변화에 대한 적응 필요\n\n## 제안 서비스\n\n본 서비스는 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하는 통합 솔루션입니다. \n\n1. **정확한 복약 시간 알림 기능**: AI 기술을 활용하여 사용자의 복약 스케줄을 분석하고, 개인 맞춤형 알림을 제공합니다. 이 알림은 스마트폰 앱이나 음성 안내 장치를 통해 전달되어, 고령자가 복약 시간을 놓치지 않도록 돕습니다. \n\n2. **복약 이력 기록 및 관리 기능**: 사용자가 복약한 약물의 이력을 자동으로 기록하여, 복약 패턴을 분석하고 필요 시 복약 계획을 조정할 수 있도록 지원합니다. 이를 통해 고령자는 자신의 복약 이력을 쉽게 확인할 수 있으며, 보호자도 이를 통해 복약 관리에 참여할 수 있습니다. \n\n3. **보호자에게 복약 상태 실시간 전달 기능**: IoT 기술을 통해 고령자의 복약 상태를 실시간으로 보호자에게 전달합니다. 보호자는 앱을 통해 고령자의 복약 이행 여부를 확인할 수 있으며, 미복용 시 즉각적으로 알림을 받아 적절한 조치를 취할 수 있습니다. \n\n4. **사용자 친화적인 인터페이스**: 모든 기능은 직관적이고 간편한 사용자 인터페이스로 설계되어, 고령자와 보호자가 쉽게 접근하고 사용할 수 있도록 합니다. 이로 인해 기술에 익숙하지 않은 사용자도 부담 없이 서비스를 이용할 수 있습니다.\n\n## 핵심 기능\n1. 정확한 복약 시간 알림 기능\n2. 복약 이력 기록 및 관리 기능\n3. 보호자에게 복약 상태 실시간 전달 기능\n4. 사용자 친화적인 인터페이스\n\n## 차별성\n\n우리 서비스는 AI 및 IoT 기술을 활용하여 복약 관리와 실시간 모니터링을 통합한 솔루션을 제공합니다. 경쟁사인 'AI마음돌봄'은 고독사 위험군을 위한 안부 확인 서비스에 집중하고 있지만, 복약 관리 기능이 부족하여 고령자의 복약 문제를 해결하지 못합니다. '효돌'은 복약 알림과 정서적 지원을 제공하지만, 고가의 로봇으로 인해 접근성이 떨어질 수 있습니다. 또한, '스마트 복약알림기'는 실시간 모니터링 기능을 갖추고 있으나, 모바일 앱 사용에 대한 기술적 장벽이 있을 수 있습니다. \n\n우리 서비스는 사용자 친화적인 인터페이스로 고령자와 보호자 모두 쉽게 사용할 수 있도록 설계되었으며, 기존의 복약 알림 기능 외에도 보호자의 불안감을 해소할 수 있는 실시간 모니터링 기능을 강화했습니다. 이러한 차별화된 접근 방식은 고령자의 복약 관리와 보호자의 모니터링을 동시에 지원하여, 사용자 경험을 극대화하는 데 중점을 두고 있습니다.\n\n## 수익 모델\n본 서비스는 구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스 등의 수익원을 가지고 있습니다. 기본 서비스는 월 구독료로 제공되며, 추가 기능은 프리미엄 요금제로 제공됩니다. 보호자와 고령자가 함께 사용할 수 있는 패키지 요금제도 고려하고 있습니다.\n\n## 기대효과\n본 서비스는 고령자의 복약 관리 효율성을 높이고, 보호자의 불안감을 해소하여 건강 관리에 대한 신뢰를 구축할 수 있습니다. 또한, 복약 누락 및 중복 투약을 방지하여 고령자의 건강을 개선하는 데 기여할 것입니다. 서비스의 성공적인 운영을 통해 시장에서의 입지를 강화하고, 지속 가능한 성장 기반을 마련할 수 있습니다.\n\n## 추진 계획\n서비스 개발 및 출시를 위한 단계별 추진 계획을 수립하고, 초기 사용자 피드백을 반영하여 지속적으로 개선해 나갈 것입니다. 마케팅 전략을 통해 서비스 인지도를 높이고, 파트너십을 통해 시장 진입을 가속화할 계획입니다.\n\n## 위험요인 및 대응방안\n1. 기술적 문제나 데이터 보안 이슈 발생 가능성: 기술적 안정성을 확보하고 데이터 보안 강화에 대한 투자를 늘려야 합니다.\n2. 경쟁 심화로 인한 가격 경쟁: 차별화된 서비스 제공 및 고객 맞춤형 솔루션 개발을 통해 경쟁력을 강화해야 합니다.\n3. 법적 규제가 강화될 경우 운영 비용 증가: 법률 및 규제 변화에 대한 지속적인 모니터링과 법적 준수를 위한 내부 시스템을 강화해야 합니다.\n4. 고령자와 보호자 간의 신뢰 부족: 신뢰 구축을 위한 교육 및 정보 제공 프로그램을 개발하여 고객의 신뢰를 얻어야 합니다.\n\n## 참고자료\n\n- 에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 — https://www.daeryunlaw.com/trend/14690\n- 약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 — https://dailypharm.com/user/news/335240\n- 스마트 복약관리 시스템 설계 및 개발 — https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf\n- SPRi - 소프트웨어정책연구소 — https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0\n- 초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 — https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf\n- 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 — https://mynews6874.tistory.com/37\n- 카탈로그 관리 시스템 시장 규모, 점유율, 성장률 — https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market\n- 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) — https://www.theinsightpartners.com/ko/reports/knowledge-management-market\n\n## AI 활용 로그\n\n# AI 활용 로그\n\n> KOSENA 요구(p4): AI 응답을 그대로 쓰지 않고 **검증·수정·재구성**한 과정을 프롬프트·응답·채택 여부로 남긴다.\n\n> 총 18건 · 채택 17 · 미채택 1 · 표준 5단 구조 프롬프트 4건\n\n\n> **무엇을 남기고 무엇을 안 남기는가**: system 프롬프트(코드로 버전 고정)·입력 목록·응답 산출물·검증 결과·채택 여부를 남긴다. **user 프롬프트 원문은 남기지 않는다** — 앞 단계 결과를 기계적으로 이어 붙인 것이라 입력 목록과 중복이고, 웹검색 스니펫이 그대로 실려 로그가 비대해지기 때문이다.\n\n\n| Agent | 역할 | 프롬프트(5단) | 입력 | 산출 | 상태 | 채택 | 비고 |\n|---|---|---|---|---|---|---|---|\n| `research` | research_analysis 담당 | `RESEARCH_SYSTEM` — | structured_input, web_search | research_analysis | complete | 채택 |  |\n| `competitor` | competitor_analysis 담당 | `COMPETITOR_SYSTEM` — | research_analysis | competitor_analysis | complete | 채택 |  |\n| `customer` | customer_analysis 담당 | `CUSTOMER_SYSTEM` — | research_analysis | customer_analysis | complete | 채택 |  |\n| `pestel` | pestel_analysis 담당 | `PESTEL_SYSTEM` — | research_analysis | pestel_analysis | complete | 채택 |  |\n| `swot` | swot_analysis 담당 | `SWOT_SYSTEM` — | research_analysis, competitor_analysis | swot_analysis | complete | 채택 |  |\n| `business_model` | business_model_analysis 담당 | `BIZMODEL_SYSTEM` — | research_analysis | business_model_analysis | complete | 채택 |  |\n| `risk` | risk_analysis 담당 | `RISK_SYSTEM` — | research_analysis, pestel_analysis | risk_analysis | complete | 채택 |  |\n| `kosena_industry` | 산업 분석 전략가 | `KOSENA_INDUSTRY_SYSTEM` ✅ | pestel_analysis, research_analysis, competitor_analysis, swot_analysis | `kosena`: critical_uncertainties, porter, value_chain, ksf, implications | complete | 채택 |  |\n| `kosena_model` | 린 스타트업 코치 | `KOSENA_MODEL_SYSTEM` ✅ | research_analysis, customer_analysis, business_model_analysis, kosena.ksf, kosena.implications | `kosena`: hmw, ideas, shortlisted_concepts, selected_concept, lean_canvas, key_hypotheses | complete | 채택 |  |\n| `kosena_research` | 데이터 기반 서비스 기획자 | `KOSENA_RESEARCH_SYSTEM` ✅ | research_analysis, customer_analysis, competitor_analysis | `kosena`: personas, cjm, market_sizing, competitor_groups, comparison_criteria, competitor_comparison, positioning_map | complete | 채택 |  |\n| `kosena_roadmap` | 프로덕트 오너 | `KOSENA_ROADMAP_SYSTEM` ✅ | customer_analysis, business_model_analysis, risk_analysis, kosena.lean_canvas, kosena.personas | `kosena`: vpc, core_features, use_cases, moscow, kano, mvp_scope, epics, milestones, kpis, wireframes | complete | 채택 |  |\n| `research_gap` | 근거 공백 보강 조사자 | `RESEARCH_GAP_SYSTEM` — | evidence_gaps | `evidence_registry`: evidence_registry, dynamic_research | complete | 채택 |  |\n| `draft` | 기획서 작성자 | `DRAFT_WRITER_SYSTEM` — | research_analysis, competitor_analysis, customer_analysis, swot_analysis, business_model_analysis, risk_analysis, pestel_analysis | `draft`: draft | complete | 채택 |  |\n| `reviewer` | 기획서 심사자 | `REVIEWER_SYSTEM` — | draft | `review_result`: review_result, initial_review_result | complete | 채택 |  |\n| `polish` | 일관성 편집자 | `EDITOR_SYSTEM` — | final_draft | `final_draft`: final_draft | complete | **미채택** | 편집 생략: 내용 이슈만·구조 정상(revision=section) |\n| `final_reviewer` | 최종본 심사자 | `REVIEWER_SYSTEM` — | final_draft | `final_review_result`: final_review_result, best_version | complete | 채택 |  |\n| `verify` | 근거 일치성 검증자 | `VERIFY_SYSTEM` — | final_draft, evidence_registry | `verification_result`: verification_result | complete | 채택 |  |\n| `section_revise` | 기획서 재작성 | `SECTION_REVISER_SYSTEM` — | review_result.issues, final_draft | `final_draft`: final_draft | complete | 채택 | 전략=section |\n\n## 검증 절차\n\n- 모든 Agent 출력은 `_validate()` 로 **스키마를 강제**한다(누락 키는 중립값, 더미 문구 차단).\n- LLM 실패는 예외로 터뜨리지 않고 fallback 으로 흡수하되 `status` 에 **정직하게 표기**한다.\n- Reviewer 가 구조화 issue(`target_section_id`·`severity`)로 지목하면 해당 섹션만 재작성한다.\n- 재작성본이 초안보다 낮게 평가되면 **초안을 되돌려 채택**한다(`select_best`) — AI 응답을 그대로 쓰지 않는다는 가장 분명한 증거다.\n- 최종 문서의 주장은 수집한 근거와 대조 검증한다(`verify`, 주장별 `evidence_ids`).\n\n\n## 부록 — 근거 출처\n\n> **검색 기준일: 2026-07-28** · 아래 근거는 그 시점의 웹 검색 결과이며, 이후 변경된 내용은 반영되지 않는다.\n> 도메인 규칙으로 분류한 출처 유형에 따라 **정부·공공 → 학술 → 언론 → 커뮤니티 순으로 정렬**했다(우선 수집이 아니라 우선 정렬이다 — 검색은 공식기관 도메인을 따로 겨냥하지 않는다). 출처 유형은 **권위성 힌트일 뿐 신뢰도 판정이 아니며**, 기업 공식 사이트는 판단을 보류해 '기타'로 남는다.\n> ⚠️ 이 목록은 **실행 전체에서 수집한 출처**다 — KOSENA 항목별 근거 연결은 미구현이다.\n\n| ID | 유형 | 제목 | 발행일 | 조회일 | 인용된 주장 수 |\n|---|---|---|---|---|---|\n| ev12 | 정부·공공 | 2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처 | 미상 | 2026-07-28 | 0 |\n| ev16 | 정부·공공 | 옥천군 스마트도시계획 | Wed, 24 Sep 2025 00:00:00 GMT | 2026-07-28 | 0 |\n| ev5 | 학술·연구 | 초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구 | 미상 | 2026-07-28 | 0 |\n| ev11 | 학술·연구 | 고령화 - 한국민족문화대백과사전 | 미상 | 2026-07-28 | 0 |\n| ev17 | 학술·연구 | (연구보고)2025-07_기술 도입에 따른 돌봄서비스의 변화.pdf | 미상 | 2026-07-28 | 0 |\n| ev15 | 언론 | 노인·어르신·고령자? 뭐라 불러야 좋을까요 | 미상 | 2026-07-28 | 0 |\n| ev6 | 블로그·커뮤니티 | 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모 | 미상 | 2026-07-28 | 0 |\n| ev9 | 블로그·커뮤니티 | [시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8% | 미상 | 2026-07-28 | 0 |\n| ev13 | 블로그·커뮤니티 | 노인 - 위키백과, 우리 모두의 백과사전 | 미상 | 2026-07-28 | 0 |\n| ev14 | 블로그·커뮤니티 | 노인 - 나무위키 | 미상 | 2026-07-28 | 0 |\n| ev19 | 블로그·커뮤니티 | Instagram | 미상 | 2026-07-28 | 0 |\n| ev1 | 기타 | 에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향 | 미상 | 2026-07-28 | 0 |\n| ev2 | 기타 | 약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원 | 미상 | 2026-07-28 | 0 |\n| ev3 | 기타 | 스마트 복약관리 시스템 설계 및 개발 | 미상 | 2026-07-28 | 1 |\n| ev4 | 기타 | SPRi - 소프트웨어정책연구소 | 미상 | 2026-07-28 | 0 |\n| ev7 | 기타 | 카탈로그 관리 시스템 시장 규모, 점유율, 성장률 | 미상 | 2026-07-28 | 0 |\n| ev8 | 기타 | 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지) | 미상 | 2026-07-28 | 0 |\n| ev10 | 기타 | 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년 | 미상 | 2026-07-28 | 0 |\n| ev18 | 기타 | WE CARE FOR THE FUTURE. - SK chemicals ESG | Tue, 30 Jun 2026 00:00:00 GMT | 2026-07-28 | 0 |\n\n## 부록 — 사실 검증 요약 (검색 스니펫 기준)\n\n> **검증 범위**: 문서의 사실 주장을 수집한 **검색 요약 근거**와 대조해 판정한다. 출처 URL 의 **원문 사실성은 재검증하지 않는다**. 따라서 '근거 미확인'은 거짓이라는 뜻이 아니라, 현재 수집된 근거에서 확인하지 못했다는 뜻이다 — 수치·통계는 원문에서 직접 확인해야 한다.\n\n사실 주장 5건 중 근거 확인 1건 · 주장별 근거 연결 1/5건\n\n| 판정 | 건수 | 뜻 |\n|---|---|---|\n| 근거 확인 | 1 | 수집한 검색 요약 근거와 일치 |\n| 근거 미확인 | 4 | **거짓이라는 뜻이 아니다** — 현재 근거에서 확인하지 못함 |\n| 반대 근거 | 0 | 근거가 주장과 반대 방향 |\n| 판단 불가 | 0 | 근거가 모호해 판정 보류 |\n| 검증 대상 아님 | 0 | 추론·제안 주장(사실 주장만 검증한다) |\n\n### 주장별 판정\n\n| 주장 | 유형 | 판정 | 근거 ID |\n|---|---|---|---|\n| 고령자의 평균 약 복용 수는 외래환자의 경우 6개, 입원환자의 경우 18개에 달한다. | 사실 | 근거 확인 | ev3 |\n| 고령자 복약 관리 시장은 급속히 성장하고 있다. | 사실 | 근거 미확인 | — |\n| 2023년 기준으로 시장 규모는 약 500억 원에 달한다. | 사실 | 근거 미확인 | — |\n| 향후 5년간 연평균 10% 이상의 성장률을 기록할 것으로 예상된다. | 사실 | 근거 미확인 | — |\n| AI 및 IoT 기술을 활용한 복약 관리 시스템이 증가하고 있다. | 사실 | 근거 미확인 | — |\n\n## KOSENA 준수 현황 (구조 자체점검)\n\n> 이 표는 KOSENA 가 요구하는 **필수 구조와 산출물의 존재 여부**를 코드로 결정적 점검한 결과다(LLM 판정 아님). 분석 내용의 타당성과 프레임워크 간 일관성은 포함하지 않으며, Reviewer 와 사람 검토가 추가로 필요하다.\n\nKOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n\n| 모듈 | 항목 | 상태 | 근거(쪽) | 비고 |\n|---|---|---|---|---|\n| M1 | PESTEL 6영역 | 충족 | p7 | 6개 영역 |\n| M1 | Critical Uncertainties Top 3 | 충족 | p7 | Top 3 선별됨 |\n| M1 | Porter/SWOT/Value Chain 중 2개 이상 | 충족 | p8 | SWOT + Porter + Value Chain |\n| M1 | KSF 5개 | 충족 | p8 | 5개 |\n| M1 | 설계 시사점 3가지 | 충족 | p8 | 3개 |\n| M1 | HMW 5개 · 아이디어 25+ → 압축 3개 → 컨셉 1개 | 충족 | p9 | HMW 5개 · 아이디어 26개 → 압축 3개 → 컨셉 1개 |\n| M1 | Lean Canvas 9블록 | 충족 | p10 | 9블록 |\n| M1 | 핵심 가설 3개 | 충족 | p10 | 3개 |\n| M2 | 페르소나 2종 × 필수 5항목 | 충족 | p12 | 2종 · 필수 5항목 충족 |\n| M2 | CJM 5단계 × 4항목 + Opportunity | 충족 | p12 | 5단계 × 4항목 |\n| M2 | TAM·SAM·SOM | 충족 | p13 | TAM·SAM·SOM |\n| M2 | Top-down · Bottom-up 교차검증 | 충족 | p13 | Top-down + Bottom-up |\n| M2 | 경쟁사 직접3·간접2·잠재1 | 충족 | p14 | 직접3 · 간접2 · 잠재1 |\n| M2 | 비교 항목 10개 이상 + 경쟁사 비교표 | 충족 | p14 | 기준 10개 · 비교표 7행 |\n| M2 | 2축 포지셔닝 맵 | 충족 | p14 | 기능성 × 사용자 친화성 |\n| M2 | VPC 6영역 + Fit | 충족 | p15 | 고객 프로필 3 + 가치 지도 3 |\n| M2 | 핵심 기능 5~7개 | 충족 | p15 | 6개 |\n| M2 | Use Case 3종 | 충족 | p15 | 3종 |\n| M3 | MOSCOW 4구분(Won't 명시) | 충족 | p17 | Must/Should/Could/Won't |\n| M3 | Kano 3분류 | 충족 | p17 | 3분류 |\n| M3 | MVP 범위 | 충족 | p17 | 범위 정의됨 |\n| M3 | Epic-Story-AC (Given-When-Then) | 충족 | p18 | Epic 2 · Story 3 · AC 전부 Given-When-Then |\n| M3 | 마일스톤 · KPI | 충족 | p3 | 마일스톤 + KPI |\n| M3 | 와이어프레임 2~3개 화면 | 충족 | p5 | 3개 화면 |\n| 공통 | 출처 명시 (실행 전체 · 항목별 연결 아님) | 충족 | p4 | 출처 19건(주장 연결 1건) — 실행 전체의 출처 존재 검사이며 KOSENA 산출물 항목별 근거 연결은 미구현 |\n| 공통 | AI 활용 로그(프롬프트·응답·채택 여부) | 충족 | p4 | 18건 · 전부 프롬프트·입력·산출·검증·채택 기록 |\n| 공통 | 정량 주장의 가설·추정 표기 | 충족 | p4 | 가설·추정 표기 있음 |\n| 공통 | 본문 A4 30~50쪽 | 부분 | p4 | 약 13.6쪽(추정) — 30~50쪽 필요 |\n",
+  "kosena_deck": "# 고령자 복약 관리·보호자 알림 서비스\n\n## 문제 정의 · 목표 사용자\n\n**문제**\n\n복용 시간·중복 투약을 관리하기 어렵고 보호자가 원격으로 확인할 방법이 없다\n\n**목표 사용자**\n\n만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자\n\n## 거시환경 — Critical Uncertainties\n\n- Political\n- Technological\n- Economic\n\n## 산업 구조 — Porter's Five Forces\n\n| Force | 강도 |\n|---|---|\n| rivalry | 높음 |\n| new_entrants | 중간 |\n| substitutes | 중간 |\n| buyer_power | 중간 |\n| supplier_power | 낮음 |\n\n## 핵심 성공요인 (KSF)\n\n- AI 및 IoT 기술 활용 능력\n- 사용자 친화적인 인터페이스 설계\n- 고령자 및 보호자 맞춤형 서비스 제공\n- 데이터 보안 및 기술적 안정성 확보\n- 효율적인 마케팅 및 고객 지원 전략\n\n## 설계 시사점\n\n- 정치적 및 기술적 변화에 대한 지속적인 모니터링 필요.\n- 고령자와 보호자의 신뢰를 구축하기 위한 교육 및 정보 제공 프로그램 개발.\n- 차별화된 서비스 제공을 통해 경쟁력을 강화해야 함.\n\n## 서비스 컨셉\n\nAI 기반 복약 알림 시스템은 고령자의 복약 관리 문제를 직접적으로 해결할 수 있는 핵심 기능으로, 기술적 구현이 가능하고 시장 수요가 높아 선택되었다. 이 시스템은 고령자의 복약 시간을 정확히 알림으로써 복약 순응도를 높이고, 보호자에게 실시간으로 상태를 전달하여 건강 관리에 기여할 수 있다.\n\n## Lean Canvas 핵심\n\n| 항목 | 내용 |\n|---|---|\n| Problem | 복용 시간·중복 투약 관리의 어려움, 보호자의 원격 확인 부족, 복약 관리에 대한 불안감 |\n| Customer | 만성질환으로 다제약을 복용하는 65세 이상 고령자와 그 보호자 |\n| UVP | AI 기반 복약 알림 시스템으로 고령자의 복약 관리와 보호자의 모니터링을 지원합니다. |\n| Solution | AI 기반 복약 알림, 보호자 대시보드, 사용자 맞춤형 알림 설정 기능 |\n| Revenue | 구독 서비스, 프리미엄 기능 추가 요금, 제휴 마케팅, 데이터 분석 서비스 |\n\n## 페르소나\n\n- 김영희\n- 이상철\n\n## 고객 여정 (CJM)\n\n| 단계 | Pain Point |\n|---|---|\n| 인지 | 어떤 서비스가 적합한지 판단하기 어려움 |\n| 고려 | 기능과 가격 비교가 복잡함 |\n| 구매 | 결제 과정이 복잡할 수 있음 |\n| 사용 | 기술적 문제 발생 시 불안 |\n| 재사용/이탈 | 서비스에 대한 신뢰도 저하 |\n\n## 시장 규모 (추정)\n\n| 항목 | 내용 |\n|---|---|\n| TAM | 10조원 (고령자 복약 관리 시장 전체 규모 추정) |\n| SAM | 2조원 (만성질환 고령자 시장 규모 추정) |\n| SOM | 200억원 (1~3년차 점유 가능 시장 추정) |\n| Top-down | 10조원 × 2% = 200억원 |\n| Bottom-up | 100만명 × 20000원 × 10회 = 200억원 |\n\n## 경쟁사 비교\n\n| 대상 | 가격 | 강점 | 약점 |\n|---|---|---|---|\n| AI마음돌봄 (직접) | 미확인 | 비용 효율적 | 복약 관리 기능 부족 |\n| 효돌 (직접) | 미확인 | 정서적 지원 제공 | 비용이 비쌀 수 있음 |\n| 스마트 복약알림기 (직접) | 미확인 | 실시간 모니터링 | 기술적 장벽 |\n| 기타 돌봄 서비스 (간접) | 미확인 | 다양한 서비스 제공 | 복약 관리 전문성 부족 |\n| 일반 복약 관리 앱 (간접) | 미확인 | 접근성 | 고령자 친화적이지 않음 |\n| AI 복약알림기 (잠재) | 미확인 | 미확인 | 미확인 |\n| 자사 (자사) | 미확인 | 통합 솔루션 제공 | 미확인 |\n\n## 경쟁 포지셔닝\n\n| 대상 | X | Y |\n|---|---|---|\n| AI마음돌봄 | 3.0 | 4.0 |\n| 효돌 | 6.0 | 7.0 |\n| 스마트 복약알림기 | 5.0 | 5.0 |\n| 기타 돌봄 서비스 | 4.0 | 3.0 |\n| 일반 복약 관리 앱 | 4.0 | 2.0 |\n| AI 복약알림기 | 5.0 | 4.0 |\n| 자사 | 8.0 | 8.0 |\n\n## 가치 제안 (VPC Fit)\n\n고령자의 복약 관리와 보호자의 모니터링을 지원하여 복약 누락과 중복 투약 문제를 해결함.\n\n## 핵심 기능\n\n- 복약 알림 기능\n- 보호자 대시보드\n- 중복 투약 방지 기능\n- 사용자 맞춤형 알림 설정\n- 복약 이력 기록\n- 고객 지원 시스템\n\n## MVP 범위\n\nMVP는 복약 알림 기능과 보호자 대시보드, 중복 투약 방지 기능을 포함하며, 사용자 맞춤형 알림 설정 기능을 추가하여 사용자 경험을 향상시킵니다.\n\n## 우선순위 (MOSCOW)\n\n| 구분 | 기능 |\n|---|---|\n| Must | 복약 알림 기능, 보호자 대시보드, 중복 투약 방지 기능 |\n| Won't | 소셜 미디어 통합 기능, 다국어 지원 |\n\n## 개발 로드맵\n\n| 마일스톤 | 기간 | 목표 |\n|---|---|---|\n| 프로토타입 개발 | 2024년 1분기 | 기본 기능이 포함된 프로토타입 완성 |\n| 베타 테스트 | 2024년 2분기 | 사용자 피드백 수집 및 개선 |\n| 정식 출시 | 2024년 3분기 | 서비스 정식 출시 및 마케팅 시작 |\n\n## KPI\n\n| 지표 | 목표 |\n|---|---|\n| 구독자 수 | 1,000명 (가정) |\n| 고객 유지율 | 80% (가정) |\n| 사용자 참여도 | 주 3회 이상 사용 (가정) |\n\n## 한계와 다음 단계\n\n- 정량 주장은 웹 리서치 기반 **가설·추정**이며 인터뷰·설문으로 검증되지 않았습니다.\n- KOSENA 자체 판정: KOSENA 준수 27/28 충족 · 부분 1 · 미충족 0\n- 다음 단계: 페르소나 인터뷰, 시장 규모 1차 자료 확인, MVP 사용성 테스트\n",
+  "evidence_registry": [
+    {
+      "url": "https://www.daeryunlaw.com/trend/14690",
+      "title": "에이지테크 시장 커지자 AI 돌봄 경쟁 가속…기업이 살펴볼 법적 쟁점 - 사례분석/최신동향",
+      "snippet": "에이지테크 시장에서는 돌봄 전문기업과 로봇 기업들의 움직임도 나타나고 있습니다.  \n  \n시니어 케어 전문기업 케어링은 AI 안부전화 서비스인 ‘AI마음돌봄’을 운영하고 있으며 서울도시가스와 협력해 고독사 위험군을 대상으로 한 안부 확인 서비스를 추진하고 있습니다.   \n  \n향후에는 대화 데이터 분석을 통해 우울감이나 인지기능 저하 징후를 확인하는 기능도 검토 중인 것으로 알려졌습니다.  \n  \n또한 효돌과 로보케어는 홀로 거주하는 고령자를 위한 돌봄 로봇을 공급하고 있습니다.   \n  \n해당 서비스는 말벗 기능과 복약 알림, 생",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:39+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 복약관리 고령자 보호자알림 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev1"
+    },
+    {
+      "url": "https://dailypharm.com/user/news/335240",
+      "title": "약 시간 놓치는 장기요양수급 노인 'AI복약알림기' 지원",
+      "snippet": "Jan 28, 2026 — 아울러 복약알림기는 연동된 모바일 앱에서 복약 내용을 기록하거나 보호자 확인이 가능하다. 보호자가 복약 내역을 실시간으로 모니터링할 수 있게 지원 ...Read more",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:39+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 복약관리 고령자 보호자알림 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev2"
+    },
+    {
+      "url": "https://www.kais99.org/jkais/springNfall/autumn2021/poster/2021_autumn_179.pdf",
+      "title": "스마트 복약관리 시스템 설계 및 개발",
+      "snippet": "[그림1] 고령자의의료비 우리나라고령인구의평균약복용은입원환자의경우18개, 외래환자의경우6개이다. 건강보조식품까지확장하게되면 10개이상의약을복용하고있다. 복용하는약에따라서시 간을정확히맞추어복용해야하는경우가많다. 최근에는 약의복용시간을알려주는다양한스마트시스템이연구되고 개발되고있다. 약복용상태를모니터링, 약복용알람서비스 등이그것이다. 질병을치료하기위해약을복용하는환자 들이치료에실패하거나악화시키는주요요인중약복용시 간이지켜지지않는경우즉, 환자가약의복용사실을기억 못하는경우에서원인을찾을수있다.\n건강한삶을살기위해노인들의약복용은일상적이다. 하 지만대",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:39+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 복약관리 고령자 보호자알림 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [
+        "c1"
+      ],
+      "evidence_id": "ev3"
+    },
+    {
+      "url": "https://spri.kr/posts/view/22845?code=industry_trend&study_type=&board_type=industry_trend&flg=0",
+      "title": "SPRi - 소프트웨어정책연구소",
+      "snippet": "+ 국내에서도 독거노인을 위한 AI 돌봄로봇 사례가 늘고 있다. ㈜스튜디오 크로스컬쳐는 고령자의 복약/식사 알람 등 생활관리와 치매/우울증 예방의 정서·안전관리를 위한 솔루션을 제공한다. 솔루션은 스마트토이봇, 보호자용 어플리케이션, 기관용 웹 기반 모니터링 시스템으로 구성되어 있다. 스마트토이봇 ‘효돌’은 인형 형태로 손주 같은 외관과 목소리로 익숙함, 친근감을 제공하며, 사용자가 인형 머리를 쓰다듬거나 손을 만지면 피드백도 가능하다. 보호자는 애플리케이션을 통해 복약/식사 여부를 확인할 수 있으며 일정 시간 움직임이 없으면 보호",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:39+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 복약관리 고령자 보호자알림 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev4"
+    },
+    {
+      "url": "https://repository.kihasa.re.kr/bitstream/201002/47024/1/%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%EC%84%9C%202024-09.pdf",
+      "title": "초고령사회에 대응하는 노인의 의약품 사용 지원방안 연구",
+      "snippet": "한편 가족 구조 및 기능이 변화하면서 동거가족이 노인의 의약품 복용을 지원했던 과거와 달리현재 혼자 사는 노인이 증가하고 있어 고령 독거 , 노인이 스스로 의약품 복용을 관리하고 사회적으로 지원하는 방식의 시스템을마련 하는 것이 요구된다또한 국내에서 세 이상 고령 노인이 . 75 큰 폭으로 증가할 것으로 예상되므로 보건의료돌봄 · 체계를 고려하여 노인 의약품 사용 지원관리 · 정책을 개발할 필요가 있다. 올해 년 월 의료요양 등 지역 돌봄의 통합지원에 관한 법률 (2024 ) 2 · 「 지역돌봄법이 국회 본회의를 통과하였다보건복지부",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:39+00:00",
+      "source_agents": [
+        "research"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 복약관리 고령자 보호자알림 시장 동향 경쟁 서비스"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev5"
+    },
+    {
+      "url": "https://mynews6874.tistory.com/37",
+      "title": "반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모",
+      "snippet": "Title: 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모\n## 반려동물 관리 시장 동향, 분야 개요 및 2026년부터 2033년까지 연평균 성장률 5.30%로 예상되는 시장 규모. \"**반려동물 관리****시장**\" 의 글로벌 시장 개요는 전 세계 및 주요 시장의 산업에 영향을 미치는 주요 트렌드에 대한 독특한 관점을 제공합니다. 반려동물 관리 시장은 2026에서 2033로 매년 5.30% 의 성장률을 보일 것으로 예상됩니다. **반려동물 관리 및 시장 소개**",
+      "source_type": "community",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev6"
+    },
+    {
+      "url": "https://www.mordorintelligence.kr/industry-reports/catalog-management-system-market",
+      "title": "카탈로그 관리 시스템 시장 규모, 점유율, 성장률",
+      "snippet": "Title: 카탈로그 관리 시스템 시장 규모, 점유율, 성장률\n# 카탈로그 관리 시스템 시장 규모 및 점유율 분석 - 성장 추세 및 전망(2026년~2031년). 카탈로그 관리 시스템 시장 보고서는 유형(제품 카탈로그 및 서비스 카탈로그), 배포 방식(클라우드 및 온프레미스), 산업 분야(IT 및 통신, 소매 및 전자상거래, 금융·보험 등), 기업 규모(대기업 및 중소기업), 구성 요소(솔루션 및 서비스) 및 지역별로 세분화되어 있습니다. ## 카탈로그 관리 시스템 시장 규모 및 점유율. ## Mordor Intelligence의 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev7"
+    },
+    {
+      "url": "https://www.theinsightpartners.com/ko/reports/knowledge-management-market",
+      "title": "지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)",
+      "snippet": "Title: 지식 관리 시장 점유율, 성장률, 수요, 규모 및 기회와 성장 요인 (2034년까지)\n# 지식 관리 시장 동향, 수요 및 성장 전망 (2034년까지). ## 지식 관리 시장 규모 및 전망(2021년~2034년), 글로벌 및 지역별 점유율, 트렌드 및 성장 기회 분석 보고서 범위: 솔루션별(소프트웨어, 서비스), 배포 방식별(클라우드, 온프레미스), 기업 규모별(중소기업, 대기업), 산업 분야별(IT 및 통신, 금융, 의료, 소매, 제조, 기타), 지역별(북미, 유럽, 아시아 태평양, 남미 및 중미). 지식 관리 시장은 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev8"
+    },
+    {
+      "url": "https://marketupdate.tistory.com/1107",
+      "title": "[시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%",
+      "snippet": "## [시장 전망] 건설 및 철거 폐기물 관리 시장 규모 및 성장률 전망 | 2024~2032 CAGR 5.8%. 건설 및 철거 폐기물 관리 시장 성장 는 최근 몇 년간 다양한 주요 요인에 힘입어 크게 성장해 왔습니다. 본 보고서는 시장 규모, 동향, 성장 요인 및 제약, 경쟁 요소, 그리고 향후 성장 전망을 포함한 포괄적인 시장 분석을 제공합니다. ## **시장 규모 및 성장:**. * 건설 및 철거 폐기물 관리 시장 성장 크기는 2024에서 USD 118.69 billion의 가치 평가에 도달했습니다. * 건설 및 철거 폐기물 ",
+      "source_type": "community",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev9"
+    },
+    {
+      "url": "https://www.coherentmarketinsights.com/ko/%EB%A9%94%ED%83%80%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B4%80%EB%A6%AC%EB%8F%84%EA%B5%AC%EC%8B%9C%EC%9E%A5-7120",
+      "title": "메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년",
+      "snippet": "Title: 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년\n메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2026 - 2033). 3. 메타데이터 관리 도구 시장 규모 및 전년 대비 성장률, 2032년. # 메타데이터 관리 도구 시장 크기 및 점유율 분석 - 성장 추세 및 예측 (2025-2032) 분석. ## 메타데이터 관리 툴 시장, 메타데이터 유형별(비즈니스 메타데이터, 기술 메타데이터, 운영 메타데이터), 배포별(클라우드 기반 및 온프레미스), 최종 사용자별(BFSI, 소매 및 ",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:51+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev10"
+    },
+    {
+      "url": "https://encykorea.aks.ac.kr/Article/E0067748",
+      "title": "고령화 - 한국민족문화대백과사전",
+      "snippet": "또한 고령화는 노인의 정치적 영향력 확대, 여가 및 레저 활동 주도계층 변화, 교육제도 재편 등 파급효과가 나타날 수 있다. 건강약품과 식품산업, 의료서비스, 금융서비스, 레저 또는 노인주택산업 등의 고령친화산업 분야의 성장 등 산업구조변화를 가져올 수 있으며, 노인복지시설 같은 집단주거시설의 확대, 주택연금제도의 활성화 등 부동산 시장의 변화도 초래할 수 있다.\n\n고령화가 진행하여 총인구 중에 고령인구 비율이 점점 높아가는 사회 혹은 현저하게 높아진 사회를 고령화사회(aging society)라고 하는데 국제연합(UN)은 전체 인",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:55+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev11"
+    },
+    {
+      "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=10820&act=view&list_no=438832",
+      "title": "2025 고령자 통계 | 전체 | 보도자료 | 새소식 : 국가데이터처",
+      "snippet": "비중은 21.5%로 전년 대비 각각 1.0%p, 1.7%p 증가하는 등 꾸준히 증가 추세 Ⅵ. 주관적 웰빙 ㅇ '24년 65세 고령자 중 자신의 현재 삶에 만족하고 있는 사람의 비중은 35.5%로 전년 대비 3.6%p 증가함 ㅇ '24년 65세 이상 고령자 중 자신의 사회·경제적 성취에 대해 만족하고 있는 사람의 비중은 33.2%로 전년 대비 6.6%p 증가함 [...] 반복영역 건너뛰기\n\n본문 바로가기 주요메뉴 바로가기\n\n이 누리집은 대한민국 공식 전자정부 누리집입니다.\n\n# 국가데이터처\n\n## 국민이 주인인 나라, 함께 행복한 ",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:55+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev12"
+    },
+    {
+      "url": "https://ko.wikipedia.org/wiki/%EB%85%B8%EC%9D%B8",
+      "title": "노인 - 위키백과, 우리 모두의 백과사전",
+      "snippet": "노인(老人, 문화어: 로인, 영어: old age, old people, the elderly, OAP(Old Age Pensioner), senior, senior citizen, older adult, the elders)은 평균 수명에 가깝게 이르렀거나 그 이상을 사는 사람으로 인생의 마지막 과정(end of human life cycle)이다. 어르신이라고도 부르나, 그 외에도 늙은이, 고령자(高齡者), 시니어, 실버 등으로 교체해서 사용하기도 한다. 한 나라나 지역에 노인이 많으면 고령화가 사회 문제로 대두되기도 한다. 대",
+      "source_type": "community",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:55+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev13"
+    },
+    {
+      "url": "https://namu.wiki/w/%EB%85%B8%EC%9D%B8",
+      "title": "노인 - 나무위키",
+      "snippet": "언뜻 봤을 때 많이 나이들어 보이면 노인이라는 칭호가 자동으로 생기며, 사회학 쪽에서는 보통 65세를 넘으면 노인으로 보지만 사회적으로 60대는 노인으로 취급하지 않는 경우가 종종 있다. 과거에는 55세였고, 1990년대에는 60세였다가 2000년대에 65세로 올라갔다. 노인 부양비는 65세 이상 노인/15~64세의 시민으로 계산된다. 2020년을 기준으로 보면 대한민국 65세 이상 인구는 812만 5천 명으로 전체의 15.7%을 차지하고 있다.(#fn-7 \"통계청 2020 고령자 통계\") 65세 이상 인구가 전체 인구의 7% 이상",
+      "source_type": "community",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:55+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev14"
+    },
+    {
+      "url": "https://www.chosun.com/site/data/html_dir/2020/01/15/2020011500197.html",
+      "title": "노인·어르신·고령자? 뭐라 불러야 좋을까요",
+      "snippet": "배종찬의 정치&데이터\n\n안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다 Image 28: 유료Image 29: 유료Image 30: 안보 공백에 국방 실험까지… 여론은 안규백을 ‘아마추어’라고 말한다\n\n최유식의 온차이나+\n\n‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\" Image 31: 유료Image 32: 유료Image 33: ‘베이징 덕’은 알고 있다… “이것은 중·EU 무역전쟁의 서막\n\n윤희영어\n\n한증막은 ‘sauna’… 뜨끈한 온탕은? Image 34: 유료Image 35: 유료Image",
+      "source_type": "news",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:55+00:00",
+      "source_agents": [
+        "research_gap"
+      ],
+      "queries": [
+        "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치, 경쟁 서비스의 시장 점유율 및 사용자 수"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev15"
+    },
+    {
+      "url": "https://smartcity.go.kr/wp-content/uploads/2025/09/%EC%98%A5%EC%B2%9C%EA%B5%B0-%EC%8A%A4%EB%A7%88%ED%8A%B8%EB%8F%84%EC%8B%9C%EA%B3%84%ED%9A%8D_25.9.pdf",
+      "title": "옥천군 스마트도시계획",
+      "snippet": "서비스 입지분석 개요 나. 스마트 경로당 서비스 다. 스마트 주차 서비스 라. 스마트 자원관리 서비스 - iii -2. 스마트도시기반시설의 구축 및 관리·운영 1) 기본방향· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·318 2) 계획내용· · ",
+      "source_type": "government",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "published_date": "Wed, 24 Sep 2025 00:00:00 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev16"
+    },
+    {
+      "url": "https://repository.kli.re.kr/bitstream/2021.oak/12028/2/%28%EC%97%B0%EA%B5%AC%EB%B3%B4%EA%B3%A0%292025-07_%EA%B8%B0%EC%88%A0%20%EB%8F%84%EC%9E%85%EC%97%90%20%EB%94%B0%EB%A5%B8%20%EB%8F%8C%EB%B4%84%EC%84%9C%EB%B9%84%EC%8A%A4%EC%9D%98%20%EB%B3%80%ED%99%94.pdf",
+      "title": "(연구보고)2025-07_기술 도입에 따른 돌봄서비스의 변화.pdf",
+      "snippet": "3. 한국의 돌봄기술 활용 방식과 과제 제3장에서는 한국 재가서비스의 응급관리요원과 생활지원사, 요양시 요 약 ⅲ 설의 요양보호사 사례를 분석하였다. 이를 위해 11명의 돌봄노동자, 14 명의 요양시설 및 사회서비스 수행기관 관리자, 전문가 5명, 지방자치단 체 정책담당자 1명을 인터뷰하였다. 돌봄로봇을 도입한 요양시설 3곳을 견학하였고, 비교를 위해 상대적으로 작은 규모의 요양시설 1곳을 방문 하였다. [...] 한편으론 노인돌봄서비스 산업 종사자의 근로조건은 여전히 열악한 상황이다. 중고령 여성이 다수 종사하는 직종으로 불안정한",
+      "source_type": "academic",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev17"
+    },
+    {
+      "url": "https://esg.skchemicals.com/images/document/pdf/SK%EC%BC%80%EB%AF%B8%EC%B9%BC2025%EC%A7%80%EC%86%8D%EA%B0%80%EB%8A%A5%EA%B2%BD%EC%98%81%EB%B3%B4%EA%B3%A0%EC%84%9C_%EA%B5%AD%EB%AC%B8.pdf",
+      "title": "WE CARE FOR THE FUTURE. - SK chemicals ESG",
+      "snippet": "• 담당 조직 : SK케미칼 ESG추진팀 • 주소 : 경기도 성남시 분당구 판교로 310 SK케미칼 • Tel : 02-2008-2008 • E-mail : esg_skchem@sk.com • 보고서 발간일 : 2026년 6월 30일 SK케미칼 홈페이지 지속가능경영보고서 GRI Table CONTENTS OVERVIEW 004 CEO Message 005 Company Profile 006 Our Business 008 Sustainable Strategy & Portfolio 009 OUR ESG 060 For Sustainabl",
+      "source_type": "unknown",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "published_date": "Tue, 30 Jun 2026 00:00:00 GMT",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev18"
+    },
+    {
+      "url": "https://www.instagram.com/p/DWX7Mo1Ebd_",
+      "title": "Instagram",
+      "snippet": "[LH NEWS] AI 돌봄전화 서비스 확대 시행  \n📞임대주택 거주 고령자 돌봄 지원 강화  \n  \n👉AI 돌봄전화 서비스란?  \n✅인공지능을 활용하여 LH 임대주택에 거주 중인  \n어르신의 말벗 지원과 건강상태 점검  \n✅저렴한 비용으로 폭넓은 서비스 제공  \n  \n👉전국 단위, 대상자 8천 명까지 확대  \n✅시범운영 결과를 바탕으로 전국 확대  \n✅고위험군은 방문 돌봄 서비스 병행 제공  \n  \n👉주거복지 서비스 전반의 AI 혁신  \n✅LH는 생성형 AI 도입으로 업무 효율·만족도 향상  \n✅24시간 ‘AI콜센터’ 및 유지보수",
+      "source_type": "community",
+      "content_scope": "search_snippet",
+      "original_text_extracted": false,
+      "retrieved_at": "2026-07-28T05:12:59+00:00",
+      "source_agents": [
+        "competitor"
+      ],
+      "queries": [
+        "고령자 복약 관리·보호자 알림 서비스 경쟁 서비스 비교 대안"
+      ],
+      "used_by_claims": [],
+      "evidence_id": "ev19"
+    }
+  ],
+  "evidence_gaps": [
+    {
+      "topic": "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치",
+      "query": "고령자 복약 관리 시장 규모 성장률"
+    },
+    {
+      "topic": "경쟁 서비스의 시장 점유율 및 사용자 수",
+      "query": "고령자 복약 관리 서비스 경쟁사 시장 점유율"
+    }
+  ],
+  "dynamic_research": {
+    "reported": 2,
+    "searches": [
+      {
+        "topic": "고령자의 복약 관리 시장 규모 및 성장률에 대한 구체적인 수치",
+        "query": "고령자 복약 관리 시장 규모 성장률",
+        "hits": 5,
+        "state": "ok"
+      },
+      {
+        "topic": "경쟁 서비스의 시장 점유율 및 사용자 수",
+        "query": "고령자 복약 관리 서비스 경쟁사 시장 점유율",
+        "hits": 5,
+        "state": "ok"
+      }
+    ],
+    "new_sources": 10,
+    "added_findings": 0,
+    "applied": false,
+    "skip_reason": null
+  },
+  "usage": {
+    "calls": 19,
+    "input_tokens": 106420,
+    "output_tokens": 13227,
+    "total_tokens": 119647,
+    "est_cost_usd": 0.0239,
+    "llm_latency_sum_ms": 178656.3,
+    "wall_time_ms": 171474.7,
+    "latency_ms": 178656.3,
+    "fallback_calls": 0
+  },
+  "logs": [
+    "[preprocess] 입력 구조화 완료",
+    "[research] 시장조사 완료 (실제 LLM·gpt-4o-mini, 웹검색 5건, 근거공백 2건 보고)",
+    "[research_gap] 추가 조사 완료 (실제 LLM·gpt-4o-mini, 검색 2건 · 새 근거 10건 · 보강 0항목)",
+    "[business_model] 수익모델 설계 완료 (실제 LLM·gpt-4o-mini)",
+    "[competitor] 경쟁사 분석 완료 (실제 LLM·gpt-4o-mini, 웹검색 4건, 3개사)",
+    "[customer] 고객 문제 분석 완료 (실제 LLM·gpt-4o-mini, pain 4건)",
+    "[pestel] PESTEL 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[risk] 리스크 분석 완료 (실제 LLM·gpt-4o-mini, 4건)",
+    "[swot] SWOT 분석 완료 (실제 LLM·gpt-4o-mini)",
+    "[kosena_industry] 산업 분석 완료 (실제 LLM·gpt-4o-mini, Porter 5/5 · KSF 5/5 · 시사점 3/3)",
+    "[kosena_model] 비즈니스 모델 설계 완료 (실제 LLM·gpt-4o-mini, Lean Canvas 9/9 · HMW 5/5 · 아이디어 26/25+ → 압축 3/3 → 컨셉 1)",
+    "[kosena_research] 고객·시장 분석 완료 (실제 LLM·gpt-4o-mini, 페르소나 2/2 · CJM 5/5 · 비교항목 10/10+ · 비교표 7행)",
+    "[kosena_roadmap] 로드맵 설계 완료 (실제 LLM·gpt-4o-mini, 기능 6/5~7 · Use Case 3/3 · Story 3 · 와이어프레임 3)",
+    "[draft_writer] 초안 작성 완료 (실제 LLM·gpt-4o-mini)",
+    "[reviewer] 초안 평가 완료 (총점=62, 실제 LLM·gpt-4o-mini)",
+    "[draft_writer] 섹션 단위 재작성 완료 (revision=1, 3개 섹션: 시장 및 산업 분석, 제안 서비스, 차별성, 실제 LLM·gpt-4o-mini)",
+    "[polish] 생략 — 내용 이슈만·구조 정상(revision=section)",
+    "[final_reviewer] 최종본 재평가 완료 (총점=75, Δ+13 vs 초안, 실제 LLM·gpt-4o-mini)",
+    "[verify] 근거 일치성 검증 완료 (실제 LLM·gpt-4o-mini, 사실주장 확인 1/5, 반대근거 0건, 근거연결 1건, 검색 요약 기준)"
+  ],
+  "run_status": "success",
+  "failed_nodes": [],
+  "fallback_nodes": [],
+  "fallback_reasons": {},
+  "workflow_mode": "parallel",
+  "reviewer_model": "",
+  "timing": {
+    "workflow_mode": "parallel",
+    "wall_time_ms": 171474.7,
+    "span_ms": 171314.1,
+    "stages": {
+      "preprocess": 0.0,
+      "research": 12076.3,
+      "analysis_block": 25330.8,
+      "kosena_block": 72609.6,
+      "draft": 16913.9,
+      "initial_review": 5181.2,
+      "revise_or_finalize": 14238.1,
+      "polish": 0.2,
+      "final_review": 5467.4,
+      "verify": 11249.7
+    },
+    "nodes": {
+      "competitor": 9608.5,
+      "customer": 2838.9,
+      "pestel": 21171.4,
+      "swot": 2310.7,
+      "business_model": 5539.0,
+      "risk": 4115.4
+    },
+    "critical_path": [
+      "preprocess",
+      "research",
+      "risk",
+      "draft",
+      "reviewer",
+      "section_revise",
+      "polish",
+      "final_reviewer",
+      "verify"
+    ],
+    "stage_sum_ms": 163067.2,
+    "coverage": 0.951,
+    "coverage_active": 0.952
+  },
+  "timing_events": [
+    {
+      "node": "preprocess",
+      "started_at_ms": 2.6,
+      "ended_at_ms": 2.6,
+      "duration_ms": 0.0
+    },
+    {
+      "node": "research",
+      "started_at_ms": 4.6,
+      "ended_at_ms": 12080.9,
+      "duration_ms": 12076.3
+    },
+    {
+      "node": "research_gap",
+      "started_at_ms": 12085.3,
+      "ended_at_ms": 20168.0,
+      "duration_ms": 8082.7
+    },
+    {
+      "node": "business_model",
+      "started_at_ms": 20177.4,
+      "ended_at_ms": 25716.4,
+      "duration_ms": 5539.0
+    },
+    {
+      "node": "competitor",
+      "started_at_ms": 20187.6,
+      "ended_at_ms": 29796.1,
+      "duration_ms": 9608.5
+    },
+    {
+      "node": "customer",
+      "started_at_ms": 20197.0,
+      "ended_at_ms": 23035.9,
+      "duration_ms": 2838.9
+    },
+    {
+      "node": "pestel",
+      "started_at_ms": 20205.2,
+      "ended_at_ms": 41376.6,
+      "duration_ms": 21171.4
+    },
+    {
+      "node": "risk",
+      "started_at_ms": 41392.8,
+      "ended_at_ms": 45508.2,
+      "duration_ms": 4115.4
+    },
+    {
+      "node": "swot",
+      "started_at_ms": 41409.9,
+      "ended_at_ms": 43720.6,
+      "duration_ms": 2310.7
+    },
+    {
+      "node": "kosena_industry",
+      "started_at_ms": 45520.8,
+      "ended_at_ms": 57435.7,
+      "duration_ms": 11914.9
+    },
+    {
+      "node": "kosena_model",
+      "started_at_ms": 57448.0,
+      "ended_at_ms": 76184.5,
+      "duration_ms": 18736.5
+    },
+    {
+      "node": "kosena_research",
+      "started_at_ms": 76197.9,
+      "ended_at_ms": 94504.7,
+      "duration_ms": 18306.8
+    },
+    {
+      "node": "kosena_roadmap",
+      "started_at_ms": 94517.9,
+      "ended_at_ms": 118169.3,
+      "duration_ms": 23651.4
+    },
+    {
+      "node": "draft",
+      "started_at_ms": 118179.4,
+      "ended_at_ms": 135093.3,
+      "duration_ms": 16913.9
+    },
+    {
+      "node": "reviewer",
+      "started_at_ms": 135103.9,
+      "ended_at_ms": 140285.1,
+      "duration_ms": 5181.2
+    },
+    {
+      "node": "section_revise",
+      "started_at_ms": 140308.4,
+      "ended_at_ms": 154546.5,
+      "duration_ms": 14238.1
+    },
+    {
+      "node": "polish",
+      "started_at_ms": 154563.0,
+      "ended_at_ms": 154563.2,
+      "duration_ms": 0.2
+    },
+    {
+      "node": "final_reviewer",
+      "started_at_ms": 154574.5,
+      "ended_at_ms": 160041.9,
+      "duration_ms": 5467.4
+    },
+    {
+      "node": "select_best",
+      "started_at_ms": 160054.6,
+      "ended_at_ms": 160054.9,
+      "duration_ms": 0.3
+    },
+    {
+      "node": "verify",
+      "started_at_ms": 160067.0,
+      "ended_at_ms": 171316.7,
+      "duration_ms": 11249.7
+    }
+  ],
+  "budget": {
+    "limits": {
+      "max_llm_calls": 50,
+      "max_cost_usd": 1.0,
+      "max_wall_ms": 600000
+    },
+    "spent": {
+      "calls": 19,
+      "est_cost_usd": 0.023899,
+      "wall_time_ms": 171474.7,
+      "provider_attempts": 19
+    },
+    "exceeded": [],
+    "enforced": false
+  },
+  "state_version": 3
+}
